@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  rithm-cpython:
+    build:
+      context: .
+      args:
+        - IMAGE_NAME=${CPYTHON_IMAGE_NAME}
+        - IMAGE_VERSION=${CPYTHON_IMAGE_VERSION}
+    image: lycantropos/rithm-cpython:0.0.0
+    volumes:
+      - ./pytest.ini:/opt/rithm/pytest.ini
+      - ./README.md:/opt/rithm/README.md
+      - ./requirements-tests.txt:/opt/rithm/requirements-tests.txt
+      - ./requirements.txt:/opt/rithm/requirements.txt
+      - ./rithm:/opt/rithm/rithm
+      - ./setup.py:/opt/rithm/setup.py
+      - ./tests:/opt/rithm/tests
+    entrypoint: pytest

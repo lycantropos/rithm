@@ -1,0 +1,15 @@
+[package]
+name = "rithm"
+description = "Arbitrary precision arithmetics."
+license = "MIT"
+license_file = "LICENSE"
+version = "0.0.0"
+edition = "2018"
+
+[lib]
+name = "rithm"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies.pyo3]
+version = "0.14.1"
+features = ["extension-module"]

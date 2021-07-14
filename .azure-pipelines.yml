@@ -109,7 +109,7 @@ steps:
     inputs:
       versionSpec: '$(python.version)'
       architecture: '$(python.architecture)'
-  - bash: python -m pip install --upgrade pip setuptools
+  - bash: python -m pip install --upgrade pip setuptools setuptools_rust
     displayName: 'Install packaging tools'
   - bash: python -m pip install -r requirements.txt
     displayName: 'Install dependencies'

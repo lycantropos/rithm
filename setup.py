@@ -4,7 +4,6 @@ from typing import (TYPE_CHECKING,
 
 from setuptools import (find_packages,
                         setup)
-from setuptools_rust import RustExtension
 
 import rithm
 

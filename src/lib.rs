@@ -7,7 +7,7 @@ use num::Zero;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
 use pyo3::prelude::*;
-use pyo3::types::{PyInt, PyList, PyString};
+use pyo3::types::PyString;
 
 mod big_int;
 mod utils;
@@ -271,32 +271,6 @@ impl PyObjectProtocol for Int {
         }
         Ok(characters.chars().rev().collect())
     }
-}
-
-#[pyfunction]
-fn binary_digits_to_binary_base(
-    source_digits: &PyList,
-    source_shift: &PyInt,
-    target_shift: &PyInt,
-) -> PyResult<Vec<u32>> {
-    Ok(big_int::binary_digits_to_binary_base(
-        &source_digits.extract()?,
-        source_shift.extract()?,
-        target_shift.extract()?,
-    ))
-}
-
-#[pyfunction]
-fn binary_digits_to_non_binary_base(
-    source_digits: &PyList,
-    source_shift: &PyInt,
-    target_shift: &PyInt,
-) -> PyResult<Vec<u32>> {
-    Ok(big_int::binary_digits_to_non_binary_base(
-        &source_digits.extract()?,
-        source_shift.extract()?,
-        target_shift.extract()?,
-    ))
 }
 
 #[pymodule]

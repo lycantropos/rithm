@@ -11,6 +11,7 @@ services:
     volumes:
       - ./pytest.ini:/opt/rithm/pytest.ini
       - ./README.md:/opt/rithm/README.md
+      - ./requirements-setup.txt:/opt/cppbuiltins/requirements-setup.txt
       - ./requirements-tests.txt:/opt/rithm/requirements-tests.txt
       - ./requirements.txt:/opt/rithm/requirements.txt
       - ./rithm:/opt/rithm/rithm

@@ -13,6 +13,7 @@ RUN pip install -r requirements.txt
 COPY requirements-tests.txt .
 RUN pip install -r requirements-tests.txt
 
+COPY requirements-setup.txt .
 COPY README.md .
 COPY pytest.ini .
 COPY setup.py .

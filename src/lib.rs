@@ -42,20 +42,23 @@ struct Int {
 }
 
 fn count_digits(mut characters: Peekable<Chars>, base: u8) -> PyResult<usize> {
-    let mut digits_count: usize = 0;
+    let mut result: usize = 0;
     let mut prev: char = SEPARATOR;
     while let Some(character) = characters.next() {
         if character != SEPARATOR {
             if ASCII_CODES_DIGIT_VALUES[character as usize] > base {
-                break;
+                return Err(PyValueError::new_err(format!(
+                    "Invalid digit in base {}: {}.",
+                    base, character
+                )));
             }
-            digits_count += 1;
+            result += 1;
         } else if prev == SEPARATOR {
             return Err(PyValueError::new_err("Consecutive separators found."));
         }
         prev = character;
     }
-    Ok(digits_count)
+    Ok(result)
 }
 
 #[pymethods]
@@ -108,6 +111,29 @@ impl Int {
                     }
                     _ => 10,
                 }
+            };
+        } else if characters.peek() == Some(&'0') {
+            characters.next();
+            match characters.peek() {
+                Some(&'b') | Some(&'B') => {
+                    characters.next();
+                    characters.next_if_eq(&SEPARATOR);
+                }
+                Some(&'o') | Some(&'O') => {
+                    characters.next();
+                    characters.next_if_eq(&SEPARATOR);
+                }
+                Some(&'x') | Some(&'X') => {
+                    characters.next();
+                    characters.next_if_eq(&SEPARATOR);
+                }
+                None => {
+                    return Ok(Int {
+                        sign: 0 as Sign,
+                        digits: vec![0],
+                    });
+                }
+                _ => {}
             };
         };
         if characters.peek() == Some(&SEPARATOR) {

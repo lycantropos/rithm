@@ -16,7 +16,7 @@ pub(crate) fn to_bit_length(mut value: u32) -> usize {
 
 pub(crate) const fn floor_log10(value: usize) -> usize {
     match value {
-        1..=9 => 0,
+        0..=9 => 0,
         _ => floor_log10(value / 10) + 1,
     }
 }

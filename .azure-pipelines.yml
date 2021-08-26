@@ -89,11 +89,11 @@ pool:
   vmImage: $(image)
 
 steps:
+  - bash: rustup default nightly
+    displayName: 'Setup default Rust toolchain'
   - bash: rustup target add i686-pc-windows-msvc
     displayName: 'Complete Rust components'
     condition: eq(variables['python.architecture'], 'x86')
-  - bash: rustup default nightly
-    displayName: 'Setup default Rust toolchain'
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '$(python.version)'

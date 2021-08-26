@@ -1,17 +1,27 @@
 from pathlib import Path
+from typing import (TYPE_CHECKING,
+                    Iterator)
 
 from setuptools import (find_packages,
                         setup)
-from setuptools_rust import RustExtension
 
 import rithm
+
+if TYPE_CHECKING:
+    from setuptools_rust import RustExtension
+
+
+class Extensions:
+    def __iter__(self) -> Iterator['RustExtension']:
+        from setuptools_rust import RustExtension
+        yield RustExtension('rithm._rithm')
+
 
 project_base_url = 'https://github.com/lycantropos/rithm/'
 
 setup(name=rithm.__name__,
       packages=find_packages(exclude=('tests', 'tests.*')),
-      rust_extensions=[RustExtension('rithm._rithm', 'Cargo.toml',
-                                     debug=False)],
+      rust_extensions=Extensions(),
       version=rithm.__version__,
       description=rithm.__doc__,
       long_description=Path('README.md').read_text(encoding='utf-8'),
@@ -32,6 +42,7 @@ setup(name=rithm.__name__,
       url=project_base_url,
       download_url=project_base_url + 'archive/master.zip',
       python_requires='>=3.5',
+      setup_requires=['setuptools_rust'],
       install_requires=Path('requirements.txt').read_text(encoding='utf-8'),
       include_package_data=True,
       zip_safe=False)

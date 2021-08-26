@@ -56,6 +56,9 @@ Cargo.lock
 # rustfmt
 **/*.rs.bk
 
+# profiler
+*.profraw
+
 ### JetBrains
 .idea/
 

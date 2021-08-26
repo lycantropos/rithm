@@ -102,6 +102,9 @@ steps:
     displayName: 'Install packaging tools'
   - bash: python setup.py develop
     displayName: 'Install in editable mode'
+    env:
+      CARGO_INCREMENTAL: 0
+      RUSTFLAGS: -Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort
   - bash: python -m pip install --upgrade coverage codecov
     displayName: 'Install coverage dependencies'
   - bash: coverage run -m doctest README.md
@@ -117,10 +120,12 @@ steps:
     displayName: 'Upload coverage'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
-  - bash: python -m pip install --upgrade gcovr
+  - bash: cargo install grcov
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'))
     displayName: 'Install Rust coverage dependencies'
-  - bash: gcovr --filter src/ --filter include/ --xml -o coverage_rust.xml
+  - bash: |
+      zip -0 coverage.zip `find . \( -name "*.gc*" \) -print`;
+      grcov coverage.zip -s . -t cobertura --llvm --branch --ignore-not-existing --ignore "/*" -o coverage_rust.xml
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'))
     displayName: 'Collect Rust coverage'
   - bash: python -m codecov -f coverage_rust.xml -X gcov --build "$AGENT_JOBNAME"

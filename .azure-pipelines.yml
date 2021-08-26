@@ -109,7 +109,7 @@ steps:
     inputs:
       versionSpec: '$(python.version)'
       architecture: '$(python.architecture)'
-  - bash: python -m pip install --upgrade pip setuptools setuptools_rust
+  - bash: python -m pip install --upgrade pip setuptools
     displayName: 'Install packaging tools'
   - bash: python setup.py develop
     displayName: 'Install in editable mode'
@@ -150,7 +150,6 @@ steps:
     displayName: 'Build source distribution'
   - bash:
       CIBW_BUILD=$(python -c 'import sys; print("cp" + "".join(map(str, sys.version_info[:2])) + "-*")')
-      CIBW_BEFORE_BUILD='python -m pip install setuptools-rust'
       cibuildwheel --output-dir dist
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Build wheels'

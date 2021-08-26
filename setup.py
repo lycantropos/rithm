@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class Extensions:
     def __iter__(self) -> Iterator['RustExtension']:
         from setuptools_rust import RustExtension
-        yield RustExtension('rithm._rithm')
+        yield RustExtension(rithm.__name__ + '._' + rithm.__name__)
 
 
 project_base_url = 'https://github.com/lycantropos/rithm/'

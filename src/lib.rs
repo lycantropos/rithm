@@ -42,6 +42,9 @@ struct Int {
 }
 
 fn count_digits(mut characters: Peekable<Chars>, base: u8) -> PyResult<usize> {
+    if characters.peek() == Some(&SEPARATOR) {
+        return Err(PyValueError::new_err("Should not start with separator."));
+    }
     let mut result: usize = 0;
     let mut prev: char = SEPARATOR;
     while let Some(character) = characters.next() {
@@ -57,6 +60,9 @@ fn count_digits(mut characters: Peekable<Chars>, base: u8) -> PyResult<usize> {
             return Err(PyValueError::new_err("Consecutive separators found."));
         }
         prev = character;
+    }
+    if prev == SEPARATOR {
+        return Err(PyValueError::new_err("Should not end with separator."));
     }
     Ok(result)
 }
@@ -86,59 +92,31 @@ impl Int {
             base = if characters.peek() != Some(&'0') {
                 10
             } else {
-                characters.next();
-                match characters.peek() {
-                    Some(&'b') | Some(&'B') => {
-                        characters.next();
-                        characters.next_if_eq(&SEPARATOR);
-                        2
-                    }
-                    Some(&'o') | Some(&'O') => {
-                        characters.next();
-                        characters.next_if_eq(&SEPARATOR);
-                        8
-                    }
-                    Some(&'x') | Some(&'X') => {
-                        characters.next();
-                        characters.next_if_eq(&SEPARATOR);
-                        16
-                    }
-                    None => {
-                        return Ok(Int {
-                            sign: 0 as Sign,
-                            digits: vec![0],
-                        });
-                    }
+                match characters.clone().nth(1) {
+                    Some('b') | Some('B') => 2,
+                    Some('o') | Some('O') => 8,
+                    Some('x') | Some('X') => 16,
                     _ => 10,
                 }
             };
-        } else if characters.peek() == Some(&'0') {
-            characters.next();
-            match characters.peek() {
-                Some(&'b') | Some(&'B') => {
-                    characters.next();
+        };
+        if characters.peek() == Some(&'0') {
+            match characters.clone().nth(1) {
+                Some('b') | Some('B') => if base == 2 {
+                    characters.nth(1);
                     characters.next_if_eq(&SEPARATOR);
                 }
-                Some(&'o') | Some(&'O') => {
-                    characters.next();
+                Some('o') | Some('O') => if base == 8 {
+                    characters.nth(1);
                     characters.next_if_eq(&SEPARATOR);
                 }
-                Some(&'x') | Some(&'X') => {
-                    characters.next();
+                Some('x') | Some('X') => if base == 16 {
+                    characters.nth(1);
                     characters.next_if_eq(&SEPARATOR);
-                }
-                None => {
-                    return Ok(Int {
-                        sign: 0 as Sign,
-                        digits: vec![0],
-                    });
                 }
                 _ => {}
             };
         };
-        if characters.peek() == Some(&SEPARATOR) {
-            return Err(PyValueError::new_err("Should not start with separator."));
-        }
         let digits_count = count_digits(characters.clone(), base)?;
         let digits = if base & (base - 1) == 0 {
             parse_binary_base_digits(characters, base, digits_count)?

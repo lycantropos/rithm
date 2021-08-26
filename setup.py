@@ -4,6 +4,7 @@ from typing import (TYPE_CHECKING,
 
 from setuptools import (find_packages,
                         setup)
+from setuptools_rust import RustExtension
 
 import rithm
 
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
     from setuptools_rust import RustExtension
 
 
-class Extensions:
+class LazyRustExtensions:
     def __iter__(self) -> Iterator['RustExtension']:
         from setuptools_rust import RustExtension
         yield RustExtension(rithm.__name__ + '._' + rithm.__name__)
@@ -19,9 +20,14 @@ class Extensions:
 
 project_base_url = 'https://github.com/lycantropos/rithm/'
 
+
+def read_file(path_string: str) -> str:
+    return Path(path_string).read_text(encoding='utf-8')
+
+
 setup(name=rithm.__name__,
       packages=find_packages(exclude=('tests', 'tests.*')),
-      rust_extensions=Extensions(),
+      rust_extensions=LazyRustExtensions(),
       version=rithm.__version__,
       description=rithm.__doc__,
       long_description=Path('README.md').read_text(encoding='utf-8'),
@@ -42,7 +48,7 @@ setup(name=rithm.__name__,
       url=project_base_url,
       download_url=project_base_url + 'archive/master.zip',
       python_requires='>=3.5',
-      setup_requires=['setuptools_rust'],
-      install_requires=Path('requirements.txt').read_text(encoding='utf-8'),
+      setup_requires=read_file('requirements-setup.txt'),
+      install_requires=read_file('requirements.txt'),
       include_package_data=True,
       zip_safe=False)

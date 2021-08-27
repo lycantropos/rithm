@@ -2,7 +2,11 @@ use std::convert::TryFrom;
 
 use num::{PrimInt, Unsigned};
 
-pub(crate) fn to_bit_length<T>(value: T) -> usize where T: PrimInt + Unsigned, usize: TryFrom<T> {
+pub(crate) fn to_bit_length<T>(value: T) -> usize
+where
+    T: PrimInt + Unsigned,
+    usize: TryFrom<T>,
+{
     static BIT_LENGTHS_TABLE: [usize; 32] = [
         0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
         5, 5,
@@ -34,8 +38,8 @@ pub(crate) const fn power(base: usize, exponent: usize) -> usize {
 }
 
 pub(crate) fn floor_log2<T>(mut value: T) -> T
-    where
-        T: PrimInt + Unsigned,
+where
+    T: PrimInt + Unsigned,
 {
     let mut result: T = T::zero();
     while !value.is_zero() {

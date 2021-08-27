@@ -103,17 +103,23 @@ impl Int {
         };
         if characters.peek() == Some(&'0') {
             match characters.clone().nth(1) {
-                Some('b') | Some('B') => if base == 2 {
-                    characters.nth(1);
-                    characters.next_if_eq(&SEPARATOR);
+                Some('b') | Some('B') => {
+                    if base == 2 {
+                        characters.nth(1);
+                        characters.next_if_eq(&SEPARATOR);
+                    }
                 }
-                Some('o') | Some('O') => if base == 8 {
-                    characters.nth(1);
-                    characters.next_if_eq(&SEPARATOR);
+                Some('o') | Some('O') => {
+                    if base == 8 {
+                        characters.nth(1);
+                        characters.next_if_eq(&SEPARATOR);
+                    }
                 }
-                Some('x') | Some('X') => if base == 16 {
-                    characters.nth(1);
-                    characters.next_if_eq(&SEPARATOR);
+                Some('x') | Some('X') => {
+                    if base == 16 {
+                        characters.nth(1);
+                        characters.next_if_eq(&SEPARATOR);
+                    }
                 }
                 _ => {}
             };

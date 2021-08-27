@@ -19,6 +19,9 @@ impl DoublePrecision for u32 {
     type Type = u64;
 }
 
+#[cfg(target_arch = "x86")]
+pub(crate) type Digit = u16;
+#[cfg(not(target_arch = "x86"))]
 pub(crate) type Digit = u32;
 pub(crate) type DoubleDigit = <Digit as DoublePrecision>::Type;
 

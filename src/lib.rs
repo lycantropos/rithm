@@ -70,9 +70,8 @@ fn count_digits(mut characters: Peekable<Chars>, base: u8) -> PyResult<usize> {
 #[pymethods]
 impl Int {
     #[new]
-    #[args(base=10)]
-    fn new(py_string: &PyString, mut base: u8) -> PyResult<Self> {
-        let string: String = py_string.extract()?;
+    #[args(string = "\"0\"", base = 10)]
+    fn new(string: &str, mut base: u8) -> PyResult<Self> {
         if (base != 0 && base < 2) || base > MAX_REPRESENTABLE_BASE {
             return Err(PyValueError::new_err(format!(
                 "Base should be zero or in range from 2 to {}.",

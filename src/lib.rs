@@ -281,7 +281,7 @@ impl PyObjectProtocol for Int {
 
 #[pymodule]
 fn _rithm(_py: Python, module: &PyModule) -> PyResult<()> {
-    module.setattr("__version__", "0.0.0")?;
+    module.setattr("__version__", env!("CARGO_PKG_VERSION"))?;
     module.setattr("__doc__", "Arbitrary precision arithmetics.")?;
     module.add_class::<Int>()?;
     Ok(())

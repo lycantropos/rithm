@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 use std::f64;
 
 use crate::utils;
+use crate::utils::BitSized;
 
 pub(crate) trait DoublePrecision {
     type Type;
@@ -112,7 +113,7 @@ fn binary_digits_to_lesser_binary_base(
     type SourceDoubleDigit = <TargetDigit as DoublePrecision>::Type;
     let target_digit_mask: SourceDoubleDigit = (1 << target_shift) - 1;
     let result_digits_bits_count: usize = (source_digits.len() - 1) * source_shift
-        + utils::to_bit_length(source_digits.last().unwrap().clone());
+        + source_digits.last().unwrap().bit_length();
     let result_digits_count: usize = (result_digits_bits_count + (target_shift - 1)) / target_shift;
     let mut result: Vec<TargetDigit> = Vec::with_capacity(result_digits_count);
     let mut accumulator: SourceDoubleDigit = 0;

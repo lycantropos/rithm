@@ -123,9 +123,7 @@ steps:
   - bash: cargo install grcov
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'))
     displayName: 'Install Rust coverage dependencies'
-  - bash: |
-      zip -0 coverage.zip `find . \( -name "*.gc*" \) -print`;
-      grcov coverage.zip -s . -t cobertura --llvm --branch --ignore-not-existing --ignore "/*" -o coverage_rust.xml
+  - bash: grcov target -s . -t cobertura --llvm --branch --ignore-not-existing --ignore "/*" -o coverage_rust.xml
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'))
     displayName: 'Collect Rust coverage'
   - bash: python -m codecov -f coverage_rust.xml -X gcov --build "$AGENT_JOBNAME"

@@ -1,38 +1,22 @@
+use std::convert::TryFrom;
+
 use num::{PrimInt, Unsigned};
 
-pub(crate) trait BitSized {
-    fn bit_length(self) -> usize;
-}
-
-const BIT_LENGTHS_TABLE: [usize; 32] = [
-    0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-    5, 5,
-];
-
-impl BitSized for u32 {
-    fn bit_length(self) -> usize {
-        let mut result: usize = 0;
-        let mut value = self;
-        while value >= 32 {
-            result += 6;
-            value >>= 6;
-        }
-        result += BIT_LENGTHS_TABLE[value as usize];
-        result
+pub(crate) fn to_bit_length<T>(value: T) -> usize where T: PrimInt + Unsigned, usize: TryFrom<T> {
+    static BIT_LENGTHS_TABLE: [usize; 32] = [
+        0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+        5, 5,
+    ];
+    let mut result: usize = 0;
+    let mut value = value;
+    while value >= T::from(32).unwrap() {
+        result += 6;
+        value = value >> 6;
     }
-}
-
-impl BitSized for u16 {
-    fn bit_length(self) -> usize {
-        let mut result: usize = 0;
-        let mut value = self;
-        while value >= 32 {
-            result += 6;
-            value >>= 6;
-        }
-        result += BIT_LENGTHS_TABLE[value as usize];
-        result
+    unsafe {
+        result += BIT_LENGTHS_TABLE[usize::try_from(value).unwrap_unchecked()];
     }
+    result
 }
 
 pub(crate) const fn floor_log10(value: usize) -> usize {

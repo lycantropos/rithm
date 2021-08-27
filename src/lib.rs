@@ -41,32 +41,6 @@ struct Int {
     digits: Vec<big_int::Digit>,
 }
 
-fn count_digits(mut characters: Peekable<Chars>, base: u8) -> PyResult<usize> {
-    if characters.peek() == Some(&SEPARATOR) {
-        return Err(PyValueError::new_err("Should not start with separator."));
-    }
-    let mut result: usize = 0;
-    let mut prev: char = SEPARATOR;
-    while let Some(character) = characters.next() {
-        if character != SEPARATOR {
-            if ASCII_CODES_DIGIT_VALUES[character as usize] >= base {
-                return Err(PyValueError::new_err(format!(
-                    "Invalid digit in base {}: {}.",
-                    base, character
-                )));
-            }
-            result += 1;
-        } else if prev == SEPARATOR {
-            return Err(PyValueError::new_err("Consecutive separators found."));
-        }
-        prev = character;
-    }
-    if prev == SEPARATOR {
-        return Err(PyValueError::new_err("Should not end with separator."));
-    }
-    Ok(result)
-}
-
 #[pymethods]
 impl Int {
     #[new]
@@ -134,6 +108,32 @@ impl Int {
             digits,
         })
     }
+}
+
+fn count_digits(mut characters: Peekable<Chars>, base: u8) -> PyResult<usize> {
+    if characters.peek() == Some(&SEPARATOR) {
+        return Err(PyValueError::new_err("Should not start with separator."));
+    }
+    let mut result: usize = 0;
+    let mut prev: char = SEPARATOR;
+    while let Some(character) = characters.next() {
+        if character != SEPARATOR {
+            if ASCII_CODES_DIGIT_VALUES[character as usize] >= base {
+                return Err(PyValueError::new_err(format!(
+                    "Invalid digit in base {}: {}.",
+                    base, character
+                )));
+            }
+            result += 1;
+        } else if prev == SEPARATOR {
+            return Err(PyValueError::new_err("Consecutive separators found."));
+        }
+        prev = character;
+    }
+    if prev == SEPARATOR {
+        return Err(PyValueError::new_err("Should not end with separator."));
+    }
+    Ok(result)
 }
 
 fn parse_binary_base_digits(

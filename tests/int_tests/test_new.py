@@ -7,6 +7,12 @@ from tests.utils import is_equivalent_to_builtin_int
 from . import strategies
 
 
+def test_no_argument_connection_with_builtin() -> None:
+    result = Int()
+
+    assert is_equivalent_to_builtin_int(result, int())
+
+
 @given(strategies.decimal_int_strings_with_leading_zeros)
 def test_decimal_string_connection_with_builtin(string: str) -> None:
     result = Int(string)

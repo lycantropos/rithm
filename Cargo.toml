@@ -11,7 +11,7 @@ name = "rithm"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies.pyo3]
-version = "=0.14.1"
+version = "=0.14.2"
 features = ["extension-module"]
 
 [dependencies.num]

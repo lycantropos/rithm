@@ -49,7 +49,7 @@ fn count_digits(mut characters: Peekable<Chars>, base: u8) -> PyResult<usize> {
     let mut prev: char = SEPARATOR;
     while let Some(character) = characters.next() {
         if character != SEPARATOR {
-            if ASCII_CODES_DIGIT_VALUES[character as usize] > base {
+            if ASCII_CODES_DIGIT_VALUES[character as usize] >= base {
                 return Err(PyValueError::new_err(format!(
                     "Invalid digit in base {}: {}.",
                     base, character
@@ -70,6 +70,7 @@ fn count_digits(mut characters: Peekable<Chars>, base: u8) -> PyResult<usize> {
 #[pymethods]
 impl Int {
     #[new]
+    #[args(base=10)]
     fn new(py_string: &PyString, mut base: u8) -> PyResult<Self> {
         let string: String = py_string.extract()?;
         if (base != 0 && base < 2) || base > MAX_REPRESENTABLE_BASE {

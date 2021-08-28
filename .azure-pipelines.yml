@@ -134,7 +134,7 @@ steps:
   - bash: python -m pip install --upgrade cibuildwheel
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Install build dependencies'
-  - bash: rm -rf build && rm -f $(python -c 'from importlib.machinery import EXTENSION_SUFFIXES; print(" ".join("*" + suffix for suffix in EXTENSION_SUFFIXES))')
+  - bash: rm $(python -c 'import glob;from importlib.machinery import EXTENSION_SUFFIXES; print(*set(sum([glob.glob("**/*{}".format(suffix)) for suffix in EXTENSION_SUFFIXES], [])), end="")')
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Pre-build'
   - bash: python setup.py sdist
@@ -150,7 +150,12 @@ steps:
     displayName: 'Install deploy dependencies'
   - bash: twine upload --skip-existing dist/*
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
-    displayName: 'Deploy'
+    displayName: 'Deploy Python'
     env:
       TWINE_USERNAME: __token__
       TWINE_PASSWORD: $(TWINE_PASSWORD)
+  - bash: twine upload --skip-existing dist/*
+    condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+    displayName: 'Deploy Rust'
+    env:
+      CARGO_REGISTRY_TOKEN: $(CARGO_REGISTRY_TOKEN)

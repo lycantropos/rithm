@@ -12,18 +12,22 @@ strategy:
       image: 'macos-latest'
       python.version: '3.6'
       python.architecture: 'x64'
+      rust.target: 'x86_64-apple-darwin'
     MacOs CPython3.7:
       image: 'macos-latest'
       python.version: '3.7'
       python.architecture: 'x64'
+      rust.target: 'x86_64-apple-darwin'
     MacOs CPython3.8:
       image: 'macos-latest'
       python.version: '3.8'
       python.architecture: 'x64'
+      rust.target: 'x86_64-apple-darwin'
     MacOs CPython3.9:
       image: 'macos-latest'
       python.version: '3.9'
       python.architecture: 'x64'
+      rust.target: 'x86_64-apple-darwin'
     MacOs PyPy3:
       image: 'macos-latest'
       python.version: 'pypy3'
@@ -32,18 +36,22 @@ strategy:
       image: 'ubuntu-latest'
       python.version: '3.6'
       python.architecture: 'x64'
+      rust.target: 'x86_64-unknown-linux-gnu'
     Ubuntu CPython3.7:
       image: 'ubuntu-latest'
       python.version: '3.7'
       python.architecture: 'x64'
+      rust.target: 'x86_64-unknown-linux-gnu'
     Ubuntu CPython3.8:
       image: 'ubuntu-latest'
       python.version: '3.8'
       python.architecture: 'x64'
+      rust.target: 'x86_64-unknown-linux-gnu'
     Ubuntu CPython3.9:
       image: 'ubuntu-latest'
       python.version: '3.9'
       python.architecture: 'x64'
+      rust.target: 'x86_64-unknown-linux-gnu'
     Ubuntu PyPy3:
       image: 'ubuntu-latest'
       python.version: 'pypy3'
@@ -52,34 +60,42 @@ strategy:
       image: 'windows-latest'
       python.version: '3.6'
       python.architecture: 'x86'
+      rust.target: 'i686-pc-windows-msvc'
     Windows CPython3.6 (x64):
       image: 'windows-latest'
       python.version: '3.6'
       python.architecture: 'x64'
+      rust.target: 'x86_64-pc-windows-msvc'
     Windows CPython3.7 (x86):
       image: 'windows-latest'
       python.version: '3.7'
       python.architecture: 'x86'
+      rust.target: 'i686-pc-windows-msvc'
     Windows CPython3.7 (x64):
       image: 'windows-latest'
       python.version: '3.7'
       python.architecture: 'x64'
+      rust.target: 'x86_64-pc-windows-msvc'
     Windows CPython3.8 (x86):
       image: 'windows-latest'
       python.version: '3.8'
       python.architecture: 'x86'
+      rust.target: 'i686-pc-windows-msvc'
     Windows CPython3.8 (x64):
       image: 'windows-latest'
       python.version: '3.8'
       python.architecture: 'x64'
+      rust.target: 'x86_64-pc-windows-msvc'
     Windows CPython3.9 (x86):
       image: 'windows-latest'
       python.version: '3.9'
       python.architecture: 'x86'
+      rust.target: 'i686-pc-windows-msvc'
     Windows CPython3.9 (x64):
       image: 'windows-latest'
       python.version: '3.9'
       python.architecture: 'x64'
+      rust.target: 'x86_64-pc-windows-msvc'
     Windows PyPy3:
       image: 'windows-latest'
       python.version: 'pypy3'
@@ -89,13 +105,12 @@ pool:
   vmImage: $(image)
 
 steps:
-  - bash: printenv
-    displayName: 'Show environment variables'
   - bash: rustup default nightly
     displayName: 'Setup default Rust toolchain'
-  - bash: rustup target install i686-pc-windows-msvc
-    displayName: 'Complete Rust compilation targets'
-    condition: eq(variables['python.architecture'], 'x86')
+    condition: and(succeeded(), startsWith(variables['python.version'], '3.'))
+  - bash: rustup target install $RUST_TARGET
+    displayName: 'Install Rust compilation target'
+    condition: and(succeeded(), startsWith(variables['python.version'], '3.'))
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '$(python.version)'
@@ -144,7 +159,7 @@ steps:
     displayName: 'Build source distribution'
   - bash:
       CIBW_BUILD=$(python -c 'import sys; print("cp" + "".join(map(str, sys.version_info[:2])) + "-*")')
-      CIBW_BEFORE_BUILD='curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y'
+      CIBW_BEFORE_BUILD="curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y && source $HOME/.cargo/env && rustup target install $RUST_TARGET"
       cibuildwheel --output-dir dist
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Build wheels'

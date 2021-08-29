@@ -89,6 +89,8 @@ pool:
   vmImage: $(image)
 
 steps:
+  - bash: printenv
+    displayName: 'Show environment variables'
   - bash: rustup default nightly
     displayName: 'Setup default Rust toolchain'
   - bash: rustup target install i686-pc-windows-msvc

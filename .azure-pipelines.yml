@@ -105,9 +105,6 @@ pool:
   vmImage: $(image)
 
 steps:
-  - bash: rustup default nightly
-    displayName: 'Setup default Rust toolchain'
-    condition: and(succeeded(), startsWith(variables['python.version'], '3.'))
   - bash: rustup target install $RUST_TARGET
     displayName: 'Install Rust compilation target'
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'))

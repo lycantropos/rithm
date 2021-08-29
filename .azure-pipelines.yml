@@ -154,7 +154,7 @@ steps:
     env:
       TWINE_USERNAME: __token__
       TWINE_PASSWORD: $(TWINE_PASSWORD)
-  - bash: twine upload --skip-existing dist/*
+  - bash: cargo publish
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Deploy Rust'
     env:

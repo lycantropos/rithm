@@ -91,8 +91,8 @@ pool:
 steps:
   - bash: rustup default nightly
     displayName: 'Setup default Rust toolchain'
-  - bash: rustup target add i686-pc-windows-msvc
-    displayName: 'Complete Rust components'
+  - bash: rustup target install i686-pc-windows-msvc
+    displayName: 'Complete Rust compilation targets'
     condition: eq(variables['python.architecture'], 'x86')
   - task: UsePythonVersion@0
     inputs:

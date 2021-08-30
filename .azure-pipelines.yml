@@ -160,7 +160,7 @@ steps:
     env:
       CIBW_BUILD: "cp$(python.version)-*"
       CIBW_ENVIRONMENT: 'PATH="$HOME/.cargo/bin:$PATH"'
-      CIBW_BEFORE_ALL: "curl https://sh.rustup.rs -sSf | sh -s -- -y && source \$HOME/.cargo/env && rustup target install $(rust.target)"
+      CIBW_BEFORE_ALL: "curl https://sh.rustup.rs -sSf | sh -s -- -y && source $$HOME/.cargo/env && rustup target install $(rust.target)"
   - bash: python -m pip install --upgrade twine
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Install deploy dependencies'

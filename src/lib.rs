@@ -44,15 +44,15 @@ struct Int {
 #[pymethods]
 impl Int {
     #[new]
-    #[args(string = "\"0\"", base = 10)]
-    fn new(string: &str, mut base: u8) -> PyResult<Self> {
+    #[args(_string = "\"0\"", base = 10)]
+    fn new(_string: &str, mut base: u8) -> PyResult<Self> {
         if (base != 0 && base < 2) || base > MAX_REPRESENTABLE_BASE {
             return Err(PyValueError::new_err(format!(
                 "Base should be zero or in range from 2 to {}.",
                 MAX_REPRESENTABLE_BASE
             )));
         }
-        let mut characters = string.trim().chars().peekable();
+        let mut characters = _string.trim().chars().peekable();
         let sign: Sign = if characters.peek() == Some(&'-') {
             characters.next();
             -1

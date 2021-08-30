@@ -160,8 +160,8 @@ steps:
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Build wheels'
     env:
-      CIBW_ENVIRONMENT: PATH="$$HOME/.cargo/bin$$(python -c 'import os; print(os.pathsep, end="")')$$PATH"
-      CIBW_BEFORE_ALL: curl https://sh.rustup.rs -sSf | sh -s -- -y && source $$HOME/.cargo/env && rustup target install $(rust.target)
+      CIBW_ENVIRONMENT: PATH="$HOME/.cargo/bin$(python -c 'import os; print(os.pathsep, end="")')$PATH"
+      CIBW_BEFORE_ALL: curl https://sh.rustup.rs -sSf | sh -s -- -y && source $HOME/.cargo/env && rustup target install $(rust.target)
   - bash: python -m pip install --upgrade twine
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Install deploy dependencies'
@@ -171,7 +171,7 @@ steps:
     env:
       TWINE_USERNAME: __token__
       TWINE_PASSWORD: $(TWINE_PASSWORD)
-  - bash: cargo publish
+  - bash: cargo publish --no-verify
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Deploy Rust'
     env:

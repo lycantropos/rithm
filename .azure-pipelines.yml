@@ -154,11 +154,12 @@ steps:
   - bash: python setup.py sdist
     condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Build source distribution'
-  - bash: cibuildwheel --output-dir dist
+  - bash:
+      CIBW_BUILD=$(python -c 'import sys; print("cp" + "".join(map(str, sys.version_info[:2])) + "-*")')
+      cibuildwheel --output-dir dist
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Build wheels'
     env:
-      CIBW_BUILD: cp$(python.version)-*
       CIBW_ENVIRONMENT: PATH="$$HOME/.cargo/bin$$(python -c 'import os; print(os.pathsep, end="")')$$PATH"
       CIBW_BEFORE_ALL: curl https://sh.rustup.rs -sSf | sh -s -- -y && source $$HOME/.cargo/env && rustup target install $(rust.target)
   - bash: python -m pip install --upgrade twine

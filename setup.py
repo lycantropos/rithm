@@ -1,15 +1,10 @@
 import platform
 from pathlib import Path
-from typing import (TYPE_CHECKING,
-                    Iterator)
 
 from setuptools import (find_packages,
                         setup)
 
 import rithm
-
-if TYPE_CHECKING:
-    from setuptools_rust import RustExtension
 
 project_base_url = 'https://github.com/lycantropos/rithm/'
 
@@ -43,6 +38,13 @@ parameters = dict(
     setup_requires=read_file('requirements-setup.txt'),
     install_requires=read_file('requirements.txt'))
 if platform.python_implementation() == 'CPython':
+    from typing import (TYPE_CHECKING,
+                        Iterator)
+
+    if TYPE_CHECKING:
+        from setuptools_rust import RustExtension
+
+
     class LazyRustExtensions:
         def __iter__(self) -> Iterator['RustExtension']:
             from setuptools_rust import RustExtension

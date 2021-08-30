@@ -160,8 +160,9 @@ steps:
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Build wheels'
     env:
+      CIBW_ARCHS: native
+      CIBW_BEFORE_ALL: curl https://sh.rustup.rs -sSf | sh -s -- -y && export PATH="$HOME/.cargo/bin$(python -c 'import os; print(os.pathsep, end="")')$PATH" && rustup target install $(rust.target)
       CIBW_ENVIRONMENT: PATH="$HOME/.cargo/bin$(python -c 'import os; print(os.pathsep, end="")')$PATH"
-      CIBW_BEFORE_ALL: curl https://sh.rustup.rs -sSf | sh -s -- -y && export PATH="$HOME/.cargo/bin$(python -c 'import os; print(os.pathsep, end="")')$PATH" && rustup target install $(rust.target) && rustup target list
   - bash: python -m pip install --upgrade twine
     condition: and(succeeded(), startsWith(variables['python.version'], '3.'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Install deploy dependencies'

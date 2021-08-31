@@ -250,7 +250,7 @@ fn parse_non_binary_base_digits(
 }
 
 #[cfg(target_arch = "x86")]
-const _PyHASH_BITS: usize = 31;
+const HASH_BITS: usize = 31;
 #[cfg(not(target_arch = "x86"))]
 const HASH_BITS: usize = 61;
 const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;

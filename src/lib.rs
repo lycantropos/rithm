@@ -255,7 +255,6 @@ const HASH_BITS: usize = 31;
 const HASH_BITS: usize = 61;
 const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
 
-
 #[pyproto]
 impl PyObjectProtocol for Int {
     fn __hash__(&self) -> PyResult<Py_hash_t> {
@@ -270,12 +269,16 @@ impl PyObjectProtocol for Int {
         }
         let mut result: Py_uhash_t = 0;
         for position in digits.iter().rev() {
-            result = ((result << BINARY_SHIFT) & HASH_MODULUS) |
-                (result >> (HASH_BITS - BINARY_SHIFT));
+            result =
+                ((result << BINARY_SHIFT) & HASH_MODULUS) | (result >> (HASH_BITS - BINARY_SHIFT));
             result += *position as Py_uhash_t;
-            if result >= HASH_MODULUS { result -= HASH_MODULUS; }
+            if result >= HASH_MODULUS {
+                result -= HASH_MODULUS;
+            }
         }
-        if sign < 0 { result = Py_uhash_t::MAX - result + 1 };
+        if sign < 0 {
+            result = Py_uhash_t::MAX - result + 1
+        };
         result -= (result == Py_uhash_t::MAX) as Py_uhash_t;
         Ok(result as Py_hash_t)
     }

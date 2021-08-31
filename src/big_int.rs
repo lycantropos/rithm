@@ -257,8 +257,7 @@ where
         if bases_logs[source_base] == 0.0 {
             let mut infimum_base_power = source_base;
             let mut infimum_base_exponent: usize = 1;
-            bases_logs[source_base as usize] =
-                (source_base as f64).ln() / (target_base as f64).ln();
+            bases_logs[source_base] = (source_base as f64).ln() / (target_base as f64).ln();
             loop {
                 let candidate: usize = infimum_base_power * source_base;
                 if candidate > target_base {

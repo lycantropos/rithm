@@ -4,7 +4,7 @@ use num::{PrimInt, Unsigned};
 
 pub(crate) fn to_bit_length<T>(value: T) -> usize
 where
-    T: PrimInt + Unsigned,
+    T: PrimInt,
     usize: TryFrom<T>,
 {
     static BIT_LENGTHS_TABLE: [usize; 32] = [

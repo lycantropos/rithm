@@ -1,6 +1,7 @@
 #![feature(associated_type_defaults)]
 #![feature(option_result_unwrap_unchecked)]
 
+use std::f64;
 use std::iter::Peekable;
 use std::str::Chars;
 
@@ -284,8 +285,10 @@ impl PyObjectProtocol for Int {
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        let base_digits: Vec<big_int::Digit> =
-            big_int::binary_digits_to_non_binary_base(&self.digits, BINARY_SHIFT, DECIMAL_BASE);
+        let base_digits: Vec<big_int::Digit> = big_int::binary_digits_to_non_binary_base::<
+            big_int::Digit,
+            big_int::Digit,
+        >(&self.digits, BINARY_SHIFT, DECIMAL_BASE);
         let characters_count: usize = ((self.sign < 0) as usize)
             + (base_digits.len() - 1) * DECIMAL_SHIFT
             + utils::floor_log10(*base_digits.last().unwrap() as usize)

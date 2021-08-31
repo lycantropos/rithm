@@ -103,20 +103,11 @@ impl Int {
                 _ => {}
             };
         };
-        let source_digits = parse_digits(characters, base)?;
-        let digits = if base & (base - 1) == 0 {
-            big_int::binary_digits_to_binary_base::<u8, Digit>(
-                &source_digits,
-                utils::floor_log2(base),
-                BINARY_SHIFT,
-            )
-        } else {
-            big_int::non_binary_digits_to_binary_base::<u8, Digit>(
-                &source_digits,
-                base as usize,
-                BINARY_SHIFT,
-            )
-        };
+        let digits = big_int::digits_to_binary_base::<u8, Digit>(
+            &parse_digits(characters, base)?,
+            base as usize,
+            BINARY_SHIFT,
+        );
         Ok(Int {
             sign: sign * ((digits.len() > 1 || digits[0] != 0) as Sign),
             digits,
@@ -187,7 +178,7 @@ impl PyObjectProtocol for Int {
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        let base_digits: Vec<Digit> = big_int::binary_digits_to_non_binary_base::<Digit, Digit>(
+        let base_digits: Vec<Digit> = big_int::binary_digits_to_base::<Digit, Digit>(
             &self.digits,
             BINARY_SHIFT,
             DECIMAL_BASE,

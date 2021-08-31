@@ -24,13 +24,71 @@ impl DoublePrecisiony for u32 {
 
 pub(crate) type DoublePrecision<T> = <T as DoublePrecisiony>::Type;
 
-pub(crate) fn binary_digits_to_binary_base<SourceDigit, TargetDigit>(
+pub(crate) fn binary_digits_to_base<SourceDigit, TargetDigit>(
+    source_digits: &Vec<SourceDigit>,
+    source_shift: usize,
+    target_base: usize,
+) -> Vec<TargetDigit>
+where
+    SourceDigit: Copy + DoublePrecisiony + PrimInt,
+    TargetDigit: Copy
+        + DoublePrecisiony
+        + TryFrom<SourceDigit>
+        + TryFrom<DoublePrecision<SourceDigit>>
+        + TryFrom<DoublePrecision<TargetDigit>>
+        + Zero,
+    DoublePrecision<SourceDigit>: From<SourceDigit> + PrimInt,
+    DoublePrecision<TargetDigit>: From<SourceDigit> + From<TargetDigit> + PrimInt + TryFrom<usize>,
+    <DoublePrecision<TargetDigit> as TryFrom<usize>>::Error: fmt::Debug,
+    <TargetDigit as TryFrom<DoublePrecision<TargetDigit>>>::Error: fmt::Debug,
+    usize: TryFrom<SourceDigit>,
+{
+    if target_base & (target_base - 1) == 0 {
+        binary_digits_to_binary_base(
+            source_digits,
+            source_shift,
+            utils::floor_log2::<usize>(target_base),
+        )
+    } else {
+        binary_digits_to_non_binary_base(source_digits, source_shift, target_base)
+    }
+}
+
+pub(crate) fn digits_to_binary_base<SourceDigit, TargetDigit>(
+    source_digits: &Vec<SourceDigit>,
+    source_base: usize,
+    target_shift: usize,
+) -> Vec<TargetDigit>
+where
+    SourceDigit: Copy + DoublePrecisiony + PrimInt,
+    TargetDigit: Copy
+        + DoublePrecisiony
+        + TryFrom<DoublePrecision<TargetDigit>>
+        + TryFrom<SourceDigit>
+        + TryFrom<DoublePrecision<SourceDigit>>
+        + TryFrom<DoublePrecision<TargetDigit>>
+        + Zero,
+    DoublePrecision<SourceDigit>: From<SourceDigit> + PrimInt,
+    DoublePrecision<TargetDigit>: From<SourceDigit> + From<TargetDigit> + PrimInt + TryFrom<usize>,
+    usize: TryFrom<SourceDigit>,
+{
+    if source_base & (source_base - 1) == 0 {
+        binary_digits_to_binary_base(
+            source_digits,
+            utils::floor_log2::<usize>(source_base),
+            target_shift,
+        )
+    } else {
+        non_binary_digits_to_binary_base(source_digits, source_base, target_shift)
+    }
+}
+
+fn binary_digits_to_binary_base<SourceDigit, TargetDigit>(
     source_digits: &Vec<SourceDigit>,
     source_shift: usize,
     target_shift: usize,
 ) -> Vec<TargetDigit>
 where
-    usize: From<SourceDigit>,
     SourceDigit: DoublePrecisiony + PrimInt,
     TargetDigit: DoublePrecisiony
         + TryFrom<SourceDigit>
@@ -38,6 +96,7 @@ where
         + TryFrom<DoublePrecision<TargetDigit>>,
     DoublePrecision<SourceDigit>: From<SourceDigit> + PrimInt,
     DoublePrecision<TargetDigit>: From<SourceDigit> + PrimInt,
+    usize: TryFrom<SourceDigit>,
 {
     match target_shift.cmp(&source_shift) {
         Ordering::Equal => source_digits
@@ -57,7 +116,7 @@ where
     }
 }
 
-pub(crate) fn binary_digits_to_non_binary_base<SourceDigit, TargetDigit>(
+fn binary_digits_to_non_binary_base<SourceDigit, TargetDigit>(
     source_digits: &Vec<SourceDigit>,
     source_shift: usize,
     target_base: usize,

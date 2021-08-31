@@ -7,6 +7,7 @@ use std::str::Chars;
 use num::Zero;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
+use pyo3::ffi::{Py_hash_t, Py_uhash_t};
 use pyo3::prelude::*;
 
 mod big_int;
@@ -248,8 +249,37 @@ fn parse_non_binary_base_digits(
     Ok(digits)
 }
 
+#[cfg(target_arch = "x86")]
+const _PyHASH_BITS: usize = 31;
+#[cfg(not(target_arch = "x86"))]
+const HASH_BITS: usize = 61;
+const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
+
+
 #[pyproto]
 impl PyObjectProtocol for Int {
+    fn __hash__(&self) -> PyResult<Py_hash_t> {
+        let sign = self.sign;
+        let digits = &self.digits;
+        if digits.len() == 1 {
+            return if sign < 0 {
+                Ok(-((digits[0] + ((digits[0] == 1) as big_int::Digit)) as Py_hash_t))
+            } else {
+                Ok(digits[0] as Py_hash_t)
+            };
+        }
+        let mut result: Py_uhash_t = 0;
+        for position in digits.iter().rev() {
+            result = ((result << BINARY_SHIFT) & HASH_MODULUS) |
+                (result >> (HASH_BITS - BINARY_SHIFT));
+            result += *position as Py_uhash_t;
+            if result >= HASH_MODULUS { result -= HASH_MODULUS; }
+        }
+        if sign < 0 { result = Py_uhash_t::MAX - result + 1 };
+        result -= (result == Py_uhash_t::MAX) as Py_uhash_t;
+        Ok(result as Py_hash_t)
+    }
+
     fn __repr__(&self) -> PyResult<String> {
         let base_digits: Vec<big_int::Digit> =
             big_int::binary_digits_to_non_binary_base(&self.digits, BINARY_SHIFT, DECIMAL_BASE);

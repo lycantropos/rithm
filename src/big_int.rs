@@ -22,6 +22,8 @@ impl DoublePrecisiony for u32 {
     type Type = u64;
 }
 
+pub(crate) type DoublePrecision<T> = <T as DoublePrecisiony>::Type;
+
 pub(crate) fn binary_digits_to_binary_base<SourceDigit, TargetDigit>(
     source_digits: &Vec<SourceDigit>,
     source_shift: usize,
@@ -54,8 +56,6 @@ where
         ),
     }
 }
-
-pub(crate) type DoublePrecision<T> = <T as DoublePrecisiony>::Type;
 
 pub(crate) fn binary_digits_to_non_binary_base<SourceDigit, TargetDigit>(
     source_digits: &Vec<SourceDigit>,

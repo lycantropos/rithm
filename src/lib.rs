@@ -15,10 +15,14 @@ mod big_int;
 mod utils;
 
 type Sign = i8;
+#[cfg(target_arch = "x86")]
+type Digit = u16;
+#[cfg(not(target_arch = "x86"))]
+type Digit = u32;
+type DoubleDigit = big_int::DoublePrecision<Digit>;
 
-const BINARY_SHIFT: usize = (big_int::Digit::BITS - 1) as usize;
-const BINARY_BASE: big_int::DoubleDigit = 1 << BINARY_SHIFT;
-const BINARY_DIGIT_MASK: big_int::DoubleDigit = BINARY_BASE - 1;
+const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
+const BINARY_BASE: DoubleDigit = 1 << BINARY_SHIFT;
 const DECIMAL_SHIFT: usize = utils::floor_log10(BINARY_BASE as usize);
 const DECIMAL_BASE: usize = utils::power(10, DECIMAL_SHIFT);
 const SEPARATOR: char = '_';
@@ -40,7 +44,7 @@ const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
 #[pyclass(module = "rithm", subclass)]
 struct Int {
     sign: Sign,
-    digits: Vec<big_int::Digit>,
+    digits: Vec<Digit>,
 }
 
 #[pymethods]
@@ -99,11 +103,19 @@ impl Int {
                 _ => {}
             };
         };
-        let digits_count = count_digits(characters.clone(), base)?;
+        let source_digits = parse_digits(characters, base)?;
         let digits = if base & (base - 1) == 0 {
-            parse_binary_base_digits(characters, base, digits_count)?
+            big_int::binary_digits_to_binary_base::<u8, Digit>(
+                &source_digits,
+                utils::to_bit_length(base) - 1,
+                BINARY_SHIFT,
+            )
         } else {
-            parse_non_binary_base_digits(characters, base, digits_count)?
+            big_int::non_binary_digits_to_binary_base::<u8, Digit>(
+                &source_digits,
+                base as usize,
+                BINARY_SHIFT,
+            )
         };
         Ok(Int {
             sign: sign * ((digits.len() > 1 || digits[0] != 0) as Sign),
@@ -138,116 +150,32 @@ fn count_digits(mut characters: Peekable<Chars>, base: u8) -> PyResult<usize> {
     Ok(result)
 }
 
-fn parse_binary_base_digits(
-    characters: Peekable<Chars>,
-    base: u8,
-    digits_count: usize,
-) -> PyResult<Vec<big_int::Digit>> {
-    let bits_per_character = utils::floor_log2(base) as usize;
-    if digits_count > (usize::MAX - (BINARY_SHIFT - 1)) / bits_per_character {
-        return Err(PyValueError::new_err("Too many digits."));
+fn parse_digits(mut characters: Peekable<Chars>, base: u8) -> PyResult<Vec<u8>> {
+    if characters.peek() == Some(&SEPARATOR) {
+        return Err(PyValueError::new_err("Should not start with separator."));
     }
-    let result_digits_count =
-        (digits_count * bits_per_character + (BINARY_SHIFT - 1)) / BINARY_SHIFT;
-    let mut digits: Vec<big_int::Digit> = Vec::with_capacity(result_digits_count);
-    let mut accumulator: big_int::DoubleDigit = 0;
-    let mut bits_in_accumulator: usize = 0;
-    let mut reversed_characters = characters.rev();
-    while let Some(character) = reversed_characters.next() {
-        if character == SEPARATOR {
-            continue;
-        }
-        accumulator |= (ASCII_CODES_DIGIT_VALUES[character as usize] as big_int::DoubleDigit)
-            << bits_in_accumulator;
-        bits_in_accumulator += bits_per_character;
-        if bits_in_accumulator >= BINARY_SHIFT {
-            digits.push((accumulator & BINARY_DIGIT_MASK) as big_int::Digit);
-            accumulator >>= BINARY_SHIFT;
-            bits_in_accumulator -= BINARY_SHIFT;
-        }
-    }
-    if bits_in_accumulator != 0 {
-        digits.push(accumulator as big_int::Digit);
-    }
-    Ok(digits)
-}
-
-fn parse_non_binary_base_digits(
-    mut characters: Peekable<Chars>,
-    base: u8,
-    digits_count: usize,
-) -> PyResult<Vec<big_int::Digit>> {
-    static mut bases_logs: [f64; 37] = [0.0; 37];
-    static mut infimum_bases_exponents: [usize; 37] = [0; 37];
-    static mut infimum_bases_powers: [usize; 37] = [0; 37];
-    unsafe {
-        if bases_logs[base as usize] == 0.0 {
-            let mut infimum_base_power: usize = base as usize;
-            let mut infimum_base_exponent: usize = 1;
-            bases_logs[base as usize] = (base as f64).ln() / (BINARY_BASE as f64).ln();
-            loop {
-                let candidate: usize = infimum_base_power * (base as usize);
-                if candidate > (BINARY_BASE as usize) {
-                    break;
-                }
-                infimum_base_power = candidate;
-                infimum_base_exponent += 1;
-            }
-            infimum_bases_powers[base as usize] = infimum_base_power;
-            infimum_bases_exponents[base as usize] = infimum_base_exponent;
-        }
-    }
-    let digits_count_upper_bound: f64;
-    unsafe {
-        digits_count_upper_bound = (digits_count as f64) * bases_logs[base as usize] + 1.0;
-    }
-    if digits_count_upper_bound > (usize::MAX as f64) / (big_int::Digit::BITS as f64) {
-        return Err(PyOverflowError::new_err("Too many digits."));
-    }
-    let mut digits: Vec<big_int::Digit> = Vec::with_capacity(digits_count_upper_bound as usize);
-    let infimum_base_exponent: usize;
-    let infimum_base_power: usize;
-    unsafe {
-        infimum_base_exponent = infimum_bases_exponents[base as usize];
-        infimum_base_power = infimum_bases_powers[base as usize];
-    }
+    let mut result: Vec<u8> = Vec::new();
+    let mut prev: char = SEPARATOR;
     while let Some(character) = characters.next() {
-        if character == SEPARATOR {
-            continue;
-        }
-        let mut digit: big_int::DoubleDigit =
-            ASCII_CODES_DIGIT_VALUES[character as usize] as big_int::DoubleDigit;
-        let mut base_exponent: usize = 1;
-        while base_exponent < infimum_base_exponent {
-            if let Some(character) = characters.next() {
-                if character == SEPARATOR {
-                    continue;
-                }
-                base_exponent += 1;
-                digit = digit * (base as big_int::DoubleDigit)
-                    + (ASCII_CODES_DIGIT_VALUES[character as usize] as big_int::DoubleDigit);
-            } else {
-                break;
+        if character != SEPARATOR {
+            let digit = ASCII_CODES_DIGIT_VALUES[character as usize];
+            if digit >= base {
+                return Err(PyValueError::new_err(format!(
+                    "Invalid digit in base {}: {}.",
+                    base, character
+                )));
             }
+            result.push(digit);
+        } else if prev == SEPARATOR {
+            return Err(PyValueError::new_err("Consecutive separators found."));
         }
-        let base_power: usize = if base_exponent == infimum_base_exponent {
-            infimum_base_power
-        } else {
-            (base as usize).pow(base_exponent as u32)
-        };
-        for index in 0..digits.len() {
-            digit += (digits[index] as big_int::DoubleDigit) * (base_power as big_int::DoubleDigit);
-            digits[index] = (digit & BINARY_DIGIT_MASK) as big_int::Digit;
-            digit >>= BINARY_SHIFT;
-        }
-        if !digit.is_zero() {
-            digits.push(digit as big_int::Digit);
-        }
+        prev = character;
     }
-    if digits.is_empty() {
-        digits.push(0);
+    if prev == SEPARATOR {
+        return Err(PyValueError::new_err("Should not end with separator."));
     }
-    Ok(digits)
+    result.reverse();
+    Ok(result)
 }
 
 #[cfg(target_arch = "x86")]
@@ -263,7 +191,7 @@ impl PyObjectProtocol for Int {
         let digits = &self.digits;
         if digits.len() == 1 {
             return if sign < 0 {
-                Ok(-((digits[0] + ((digits[0] == 1) as big_int::Digit)) as Py_hash_t))
+                Ok(-((digits[0] + ((digits[0] == 1) as Digit)) as Py_hash_t))
             } else {
                 Ok(digits[0] as Py_hash_t)
             };
@@ -285,9 +213,9 @@ impl PyObjectProtocol for Int {
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        let base_digits: Vec<big_int::Digit> = big_int::binary_digits_to_non_binary_base::<
-            big_int::Digit,
-            big_int::Digit,
+        let base_digits: Vec<Digit> = big_int::binary_digits_to_non_binary_base::<
+            Digit,
+            Digit,
         >(&self.digits, BINARY_SHIFT, DECIMAL_BASE);
         let characters_count: usize = ((self.sign < 0) as usize)
             + (base_digits.len() - 1) * DECIMAL_SHIFT

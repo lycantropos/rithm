@@ -22,12 +22,6 @@ impl DoublePrecisiony for u32 {
     type Type = u64;
 }
 
-#[cfg(target_arch = "x86")]
-pub(crate) type Digit = u16;
-#[cfg(not(target_arch = "x86"))]
-pub(crate) type Digit = u32;
-pub(crate) type DoubleDigit = DoublePrecision<Digit>;
-
 pub(crate) fn binary_digits_to_binary_base<SourceDigit, TargetDigit>(
     source_digits: &Vec<SourceDigit>,
     source_shift: usize,
@@ -61,7 +55,7 @@ where
     }
 }
 
-type DoublePrecision<T> = <T as DoublePrecisiony>::Type;
+pub(crate) type DoublePrecision<T> = <T as DoublePrecisiony>::Type;
 
 pub(crate) fn binary_digits_to_non_binary_base<SourceDigit, TargetDigit>(
     source_digits: &Vec<SourceDigit>,
@@ -179,4 +173,96 @@ where
         }
     }
     result
+}
+
+pub(crate) fn non_binary_digits_to_binary_base<SourceDigit, TargetDigit>(
+    source_digits: &Vec<SourceDigit>,
+    source_base: usize,
+    target_shift: usize,
+) -> Vec<TargetDigit>
+where
+    SourceDigit: Copy,
+    TargetDigit: Copy + DoublePrecisiony + TryFrom<DoublePrecision<TargetDigit>> + Zero,
+    DoublePrecision<TargetDigit>: PrimInt + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
+{
+    let target_base = 1usize << target_shift;
+    let target_digit_mask: DoublePrecision<TargetDigit>;
+    unsafe {
+        target_digit_mask =
+            DoublePrecision::<TargetDigit>::try_from(target_base - 1).unwrap_unchecked();
+    }
+    static mut bases_logs: [f64; 37] = [0.0; 37];
+    static mut infimum_bases_exponents: [usize; 37] = [0; 37];
+    static mut infimum_bases_powers: [usize; 37] = [0; 37];
+    unsafe {
+        if bases_logs[source_base] == 0.0 {
+            let mut infimum_base_power = source_base;
+            let mut infimum_base_exponent: usize = 1;
+            bases_logs[source_base as usize] =
+                (source_base as f64).ln() / (target_base as f64).ln();
+            loop {
+                let candidate: usize = infimum_base_power * source_base;
+                if candidate > target_base {
+                    break;
+                }
+                infimum_base_power = candidate;
+                infimum_base_exponent += 1;
+            }
+            infimum_bases_powers[source_base] = infimum_base_power;
+            infimum_bases_exponents[source_base] = infimum_base_exponent;
+        }
+    }
+    let digits_count_upper_bound: f64;
+    unsafe {
+        digits_count_upper_bound = (source_digits.len() as f64) * bases_logs[source_base] + 1.0;
+    }
+    let mut digits: Vec<TargetDigit> = Vec::with_capacity(digits_count_upper_bound as usize);
+    let infimum_base_exponent: usize;
+    let infimum_base_power: usize;
+    unsafe {
+        infimum_base_exponent = infimum_bases_exponents[source_base];
+        infimum_base_power = infimum_bases_powers[source_base];
+    }
+    let mut reversed_source_digits = source_digits.iter().rev();
+    while let Some(&source_digit) = reversed_source_digits.next() {
+        let mut digit = DoublePrecision::<TargetDigit>::from(source_digit);
+        let mut base_exponent: usize = 1;
+        while base_exponent < infimum_base_exponent {
+            if let Some(&source_digit) = reversed_source_digits.next() {
+                base_exponent += 1;
+                unsafe {
+                    digit = digit
+                        * DoublePrecision::<TargetDigit>::try_from(source_base).unwrap_unchecked()
+                        + DoublePrecision::<TargetDigit>::from(source_digit);
+                }
+            } else {
+                break;
+            }
+        }
+        let base_power = if base_exponent == infimum_base_exponent {
+            infimum_base_power
+        } else {
+            source_base.pow(base_exponent as u32)
+        };
+        for index in 0..digits.len() {
+            unsafe {
+                digit = digit
+                    + DoublePrecision::<TargetDigit>::from(digits[index])
+                        * DoublePrecision::<TargetDigit>::try_from(base_power).unwrap_unchecked();
+            }
+            unsafe {
+                digits[index] = TargetDigit::try_from(digit & target_digit_mask).unwrap_unchecked();
+            }
+            digit = digit >> target_shift;
+        }
+        if !digit.is_zero() {
+            unsafe {
+                digits.push(TargetDigit::try_from(digit).unwrap_unchecked());
+            }
+        }
+    }
+    if digits.is_empty() {
+        digits.push(TargetDigit::zero());
+    }
+    digits
 }

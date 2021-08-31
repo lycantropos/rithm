@@ -13,11 +13,11 @@ where
     ];
     let mut result: usize = 0;
     let mut value = value;
-    while value >= T::from(32).unwrap() {
-        result += 6;
-        value = value >> 6;
-    }
     unsafe {
+        while value >= T::from(32).unwrap_unchecked() {
+            result += 6;
+            value = value >> 6;
+        }
         result += BIT_LENGTHS_TABLE[usize::try_from(value).unwrap_unchecked()];
     }
     result
@@ -37,14 +37,10 @@ pub(crate) const fn power(base: usize, exponent: usize) -> usize {
     }
 }
 
-pub(crate) fn floor_log2<T>(mut value: T) -> T
+pub(crate) fn floor_log2<T>(mut value: T) -> usize
 where
-    T: PrimInt + Unsigned,
+    T: PrimInt,
+    usize: TryFrom<T>,
 {
-    let mut result: T = T::zero();
-    while !value.is_zero() {
-        result = result + T::one();
-        value = value >> 1;
-    }
-    result - T::one()
+    to_bit_length(value) - 1
 }

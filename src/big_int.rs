@@ -55,7 +55,7 @@ impl<Digit: PartialOrd, const SHIFT: usize> PartialOrd for BigInt<Digit, SHIFT> 
     }
 
     fn gt(&self, other: &Self) -> bool {
-        self.sign < other.sign
+        self.sign > other.sign
             || self.sign == other.sign
                 && if self.sign > 0 {
                     digits_lesser_than(&other.digits, &self.digits)
@@ -65,7 +65,7 @@ impl<Digit: PartialOrd, const SHIFT: usize> PartialOrd for BigInt<Digit, SHIFT> 
     }
 
     fn ge(&self, other: &Self) -> bool {
-        self.sign < other.sign
+        self.sign > other.sign
             || self.sign == other.sign
                 && !{
                     if self.sign > 0 {

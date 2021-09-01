@@ -6,17 +6,131 @@ use std::f64;
 use num::{One, PrimInt, Zero};
 
 use crate::utils;
+use std::iter::Peekable;
+use std::str::Chars;
 
 pub(crate) struct BigInt<Digit, const SHIFT: usize> {
     sign: Sign,
     digits: Vec<Digit>,
 }
 
-impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT> {
-    const SHIFT: usize = SHIFT;
+const MAX_REPRESENTABLE_BASE: u8 = 36;
 
-    pub(crate) fn new(sign: Sign, digits: Vec<Digit>) -> Self {
-        BigInt::<Digit, SHIFT> { sign, digits }
+impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT>
+where
+    u8: DoublePrecisiony + PrimInt,
+    Digit: Copy
+        + DoublePrecisiony
+        + TryFrom<DoublePrecision<Digit>>
+        + TryFrom<u8>
+        + TryFrom<DoublePrecision<u8>>
+        + TryFrom<DoublePrecision<Digit>>
+        + Zero,
+    DoublePrecision<u8>: From<u8> + PrimInt,
+    DoublePrecision<Digit>: From<u8> + From<Digit> + PrimInt + TryFrom<usize>,
+{
+    const SEPARATOR: char = '_';
+    const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 37, 37, 37, 37, 37, 37, 37, 10, 11, 12, 13, 14, 15,
+        16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 37, 37, 37,
+        37, 37, 37, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+        30, 31, 32, 33, 34, 35, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37,
+    ];
+
+    pub(crate) fn new(_string: &str, mut base: u8) -> Result<Self, String> {
+        if (base != 0 && base < 2) || base > MAX_REPRESENTABLE_BASE {
+            return Err(format!(
+                "Base should be zero or in range from 2 to {}.",
+                MAX_REPRESENTABLE_BASE
+            ));
+        }
+        let mut characters = _string.trim().chars().peekable();
+        let sign: Sign = if characters.peek() == Some(&'-') {
+            characters.next();
+            -1
+        } else if characters.peek() == Some(&'+') {
+            characters.next();
+            1
+        } else {
+            1
+        };
+        if base == 0 {
+            base = if characters.peek() != Some(&'0') {
+                10
+            } else {
+                match characters.clone().nth(1) {
+                    Some('b') | Some('B') => 2,
+                    Some('o') | Some('O') => 8,
+                    Some('x') | Some('X') => 16,
+                    _ => 10,
+                }
+            };
+        };
+        if characters.peek() == Some(&'0') {
+            match characters.clone().nth(1) {
+                Some('b') | Some('B') => {
+                    if base == 2 {
+                        characters.nth(1);
+                        characters.next_if_eq(&Self::SEPARATOR);
+                    }
+                }
+                Some('o') | Some('O') => {
+                    if base == 8 {
+                        characters.nth(1);
+                        characters.next_if_eq(&Self::SEPARATOR);
+                    }
+                }
+                Some('x') | Some('X') => {
+                    if base == 16 {
+                        characters.nth(1);
+                        characters.next_if_eq(&Self::SEPARATOR);
+                    }
+                }
+                _ => {}
+            };
+        };
+        let digits = digits_to_binary_base::<u8, Digit>(
+            &Self::parse_digits(characters, base)?,
+            base as usize,
+            SHIFT,
+        );
+        Ok(BigInt::<Digit, SHIFT> {
+            sign: sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+            digits,
+        })
+    }
+
+    fn parse_digits(mut characters: Peekable<Chars>, base: u8) -> Result<Vec<u8>, String> {
+        if characters.peek() == Some(&Self::SEPARATOR) {
+            return Err(String::from("Should not start with separator."));
+        }
+        let mut result: Vec<u8> = Vec::new();
+        let mut prev: char = Self::SEPARATOR;
+        while let Some(character) = characters.next() {
+            if character != Self::SEPARATOR {
+                let digit = Self::ASCII_CODES_DIGIT_VALUES[character as usize];
+                if digit >= base {
+                    return Err(format!("Invalid digit in base {}: {}.", base, character));
+                }
+                result.push(digit);
+            } else if prev == Self::SEPARATOR {
+                return Err(String::from("Consecutive separators found."));
+            }
+            prev = character;
+        }
+        if prev == Self::SEPARATOR {
+            return Err(String::from("Should not end with separator."));
+        }
+        result.reverse();
+        Ok(result)
     }
 }
 
@@ -29,11 +143,15 @@ where
     usize: TryFrom<Digit>,
     u8: TryFrom<Digit>,
 {
+    const DIGIT_VALUES_ASCII_CODES: [char; MAX_REPRESENTABLE_BASE as usize] = [
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
+        'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    ];
     pub(crate) fn to_string(&self, target_base: usize) -> String {
-        let target_shift = utils::floor_log(1 << Self::SHIFT, target_base);
+        let target_shift = utils::floor_log(1 << SHIFT, target_base);
         let target_digits: Vec<Digit> = binary_digits_to_base::<Digit, Digit>(
             &self.digits,
-            Self::SHIFT,
+            SHIFT,
             utils::power(target_base, target_shift),
         );
         let characters_count = ((self.sign < 0) as usize)
@@ -49,9 +167,8 @@ where
             let mut remainder = target_digits[index];
             for _ in 0..target_shift {
                 characters.push(
-                    (('0' as u8)
-                        + unsafe { u8::try_from(remainder % target_base).unwrap_unchecked() })
-                        as char,
+                    Self::DIGIT_VALUES_ASCII_CODES
+                        [unsafe { usize::try_from(remainder % target_base).unwrap_unchecked() }],
                 );
                 remainder = remainder / target_base;
             }
@@ -59,8 +176,8 @@ where
         let mut remainder = *target_digits.last().unwrap();
         while !remainder.is_zero() {
             characters.push(
-                (('0' as u8) + unsafe { u8::try_from(remainder % target_base).unwrap_unchecked() })
-                    as char,
+                Self::DIGIT_VALUES_ASCII_CODES
+                    [unsafe { usize::try_from(remainder % target_base).unwrap_unchecked() }],
             );
             remainder = remainder / target_base;
         }
@@ -90,7 +207,7 @@ where
                 usize::MAX
                     - unsafe {
                         usize::try_from(
-                            (self.digits[0] + <Digit as From<bool>>::from(self.digits[0].is_one())),
+                            self.digits[0] + <Digit as From<bool>>::from(self.digits[0].is_one()),
                         )
                         .unwrap_unchecked()
                     }
@@ -101,8 +218,7 @@ where
         };
         let mut result = 0;
         for &position in self.digits.iter().rev() {
-            result =
-                ((result << Self::SHIFT) & HASH_MODULUS) | (result >> (HASH_BITS - Self::SHIFT));
+            result = ((result << SHIFT) & HASH_MODULUS) | (result >> (HASH_BITS - SHIFT));
             result += unsafe { usize::try_from(position).unwrap_unchecked() };
             if result >= HASH_MODULUS {
                 result -= HASH_MODULUS;
@@ -170,7 +286,7 @@ pub(crate) fn digits_to_binary_base<SourceDigit, TargetDigit>(
     target_shift: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: Copy + DoublePrecisiony + PrimInt,
+    SourceDigit: DoublePrecisiony + PrimInt,
     TargetDigit: Copy
         + DoublePrecisiony
         + TryFrom<DoublePrecision<TargetDigit>>

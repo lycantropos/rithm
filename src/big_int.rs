@@ -271,17 +271,11 @@ where
             infimum_bases_exponents[source_base] = infimum_base_exponent;
         }
     }
-    let digits_count_upper_bound: f64;
-    unsafe {
-        digits_count_upper_bound = (source_digits.len() as f64) * bases_logs[source_base] + 1.0;
-    }
+    let digits_count_upper_bound =
+        (source_digits.len() as f64) * unsafe { bases_logs[source_base] } + 1.0;
     let mut digits: Vec<TargetDigit> = Vec::with_capacity(digits_count_upper_bound as usize);
-    let infimum_base_exponent: usize;
-    let infimum_base_power: usize;
-    unsafe {
-        infimum_base_exponent = infimum_bases_exponents[source_base];
-        infimum_base_power = infimum_bases_powers[source_base];
-    }
+    let infimum_base_exponent = unsafe { infimum_bases_exponents[source_base] };
+    let infimum_base_power = unsafe { infimum_bases_powers[source_base] };
     let mut reversed_source_digits = source_digits.iter().rev();
     while let Some(&source_digit) = reversed_source_digits.next() {
         let mut digit = DoublePrecision::<TargetDigit>::from(source_digit);
@@ -304,20 +298,17 @@ where
             source_base.pow(base_exponent as u32)
         };
         for index in 0..digits.len() {
-            unsafe {
-                digit = digit
-                    + DoublePrecision::<TargetDigit>::from(digits[index])
-                        * DoublePrecision::<TargetDigit>::try_from(base_power).unwrap_unchecked();
-            }
-            unsafe {
-                digits[index] = TargetDigit::try_from(digit & target_digit_mask).unwrap_unchecked();
-            }
+            digit = digit
+                + DoublePrecision::<TargetDigit>::from(digits[index])
+                    * unsafe {
+                        DoublePrecision::<TargetDigit>::try_from(base_power).unwrap_unchecked()
+                    };
+            digits[index] =
+                unsafe { TargetDigit::try_from(digit & target_digit_mask).unwrap_unchecked() };
             digit = digit >> target_shift;
         }
         if !digit.is_zero() {
-            unsafe {
-                digits.push(TargetDigit::try_from(digit).unwrap_unchecked());
-            }
+            digits.push(unsafe { TargetDigit::try_from(digit).unwrap_unchecked() });
         }
     }
     if digits.is_empty() {

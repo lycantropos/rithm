@@ -7,6 +7,8 @@ use pyo3::exceptions::*;
 use pyo3::ffi::Py_hash_t;
 use pyo3::prelude::*;
 
+pub use crate::big_int::*;
+
 mod big_int;
 mod utils;
 

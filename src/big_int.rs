@@ -10,7 +10,7 @@ use num::{One, PrimInt, Zero};
 use crate::utils;
 
 #[derive(Clone, PartialEq, Eq, Ord)]
-pub(crate) struct BigInt<Digit, const SHIFT: usize> {
+pub struct BigInt<Digit, const SHIFT: usize> {
     sign: Sign,
     digits: Vec<Digit>,
 }
@@ -293,7 +293,7 @@ where
     }
 }
 
-pub(crate) trait DoublePrecisiony {
+pub trait DoublePrecisiony {
     type Type;
 }
 
@@ -309,7 +309,7 @@ impl DoublePrecisiony for u32 {
     type Type = u64;
 }
 
-pub(crate) type DoublePrecision<T> = <T as DoublePrecisiony>::Type;
+pub type DoublePrecision<T> = <T as DoublePrecisiony>::Type;
 pub(crate) type Sign = i8;
 
 pub(crate) fn binary_digits_to_base<SourceDigit, TargetDigit>(

@@ -86,16 +86,19 @@ where
 {
     pub(crate) fn hash(&self) -> usize {
         if self.digits.len() == 1 {
-            return unsafe {
-                usize::try_from(if self.sign < 0 {
-                    Digit::max_value()
-                        - (self.digits[0] + <Digit as From<bool>>::from(self.digits[0].is_one()))
-                } else {
-                    self.digits[0]
-                })
-                .unwrap_unchecked()
+            return if self.sign < 0 {
+                usize::MAX
+                    - unsafe {
+                        usize::try_from(
+                            (self.digits[0] + <Digit as From<bool>>::from(self.digits[0].is_one())),
+                        )
+                        .unwrap_unchecked()
+                    }
+                    + 1
+            } else {
+                unsafe { usize::try_from(self.digits[0]).unwrap_unchecked() }
             };
-        }
+        };
         let mut result = 0;
         for &position in self.digits.iter().rev() {
             result =

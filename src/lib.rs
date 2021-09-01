@@ -13,7 +13,9 @@ mod utils;
 type Digit = u16;
 #[cfg(not(target_arch = "x86"))]
 type Digit = u32;
+
 const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
+
 type BigInt = big_int::BigInt<Digit, BINARY_SHIFT>;
 
 #[pyclass(module = "rithm", subclass)]
@@ -40,6 +42,10 @@ impl PyObjectProtocol for Int {
     }
 
     fn __repr__(&self) -> PyResult<String> {
+        Ok(format!("rithm.Int('{}')", self.0.to_string(10)))
+    }
+
+    fn __str__(&self) -> PyResult<String> {
         Ok(self.0.to_string(10))
     }
 }

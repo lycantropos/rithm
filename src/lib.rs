@@ -1,6 +1,7 @@
 #![feature(associated_type_defaults)]
 #![feature(option_result_unwrap_unchecked)]
 
+use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
 use pyo3::ffi::Py_hash_t;
@@ -19,6 +20,7 @@ const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
 type BigInt = big_int::BigInt<Digit, BINARY_SHIFT>;
 
 #[pyclass(module = "rithm", subclass)]
+#[derive(Clone)]
 struct Int(BigInt);
 
 #[pymethods]
@@ -37,6 +39,17 @@ impl Int {
 
 #[pyproto]
 impl PyObjectProtocol for Int {
+    fn __richcmp__(&self, other: Int, op: CompareOp) -> PyResult<bool> {
+        Ok(match op {
+            CompareOp::Eq => self.0 == other.0,
+            CompareOp::Ge => self.0 >= other.0,
+            CompareOp::Gt => self.0 > other.0,
+            CompareOp::Le => self.0 <= other.0,
+            CompareOp::Lt => self.0 < other.0,
+            CompareOp::Ne => self.0 != other.0,
+        })
+    }
+
     fn __hash__(&self) -> PyResult<Py_hash_t> {
         Ok(self.0.hash() as Py_hash_t)
     }

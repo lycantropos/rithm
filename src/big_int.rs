@@ -2,16 +2,79 @@ use core::fmt;
 use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::f64;
+use std::iter::Peekable;
+use std::str::Chars;
 
 use num::{One, PrimInt, Zero};
 
 use crate::utils;
-use std::iter::Peekable;
-use std::str::Chars;
 
+#[derive(Clone, PartialEq, Eq, Ord)]
 pub(crate) struct BigInt<Digit, const SHIFT: usize> {
     sign: Sign,
     digits: Vec<Digit>,
+}
+
+#[inline]
+fn digits_lesser_than<Digit: PartialOrd>(left: &Vec<Digit>, right: &Vec<Digit>) -> bool {
+    left.len() < right.len()
+        || left.len() == right.len() && left.iter().rev().lt(right.iter().rev())
+}
+
+impl<Digit: PartialOrd, const SHIFT: usize> PartialOrd for BigInt<Digit, SHIFT> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(if self.lt(other) {
+            Ordering::Less
+        } else if other.lt(self) {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
+        })
+    }
+
+    fn lt(&self, other: &Self) -> bool {
+        self.sign < other.sign
+            || self.sign == other.sign
+                && if self.sign > 0 {
+                    digits_lesser_than(&self.digits, &other.digits)
+                } else {
+                    digits_lesser_than(&other.digits, &self.digits)
+                }
+    }
+
+    fn le(&self, other: &Self) -> bool {
+        self.sign < other.sign
+            || self.sign == other.sign
+                && !{
+                    if self.sign > 0 {
+                        digits_lesser_than(&other.digits, &self.digits)
+                    } else {
+                        digits_lesser_than(&self.digits, &other.digits)
+                    }
+                }
+    }
+
+    fn gt(&self, other: &Self) -> bool {
+        self.sign < other.sign
+            || self.sign == other.sign
+                && if self.sign > 0 {
+                    digits_lesser_than(&other.digits, &self.digits)
+                } else {
+                    digits_lesser_than(&self.digits, &other.digits)
+                }
+    }
+
+    fn ge(&self, other: &Self) -> bool {
+        self.sign < other.sign
+            || self.sign == other.sign
+                && !{
+                    if self.sign > 0 {
+                        digits_lesser_than(&self.digits, &other.digits)
+                    } else {
+                        digits_lesser_than(&other.digits, &self.digits)
+                    }
+                }
+    }
 }
 
 const MAX_REPRESENTABLE_BASE: u8 = 36;

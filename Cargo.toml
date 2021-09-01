@@ -3,7 +3,7 @@ name = "rithm"
 description = "Arbitrary precision arithmetics."
 license = "MIT"
 license_file = "LICENSE"
-version = "0.0.1"
+version = "0.1.0-alpha"
 edition = "2018"
 
 [lib]

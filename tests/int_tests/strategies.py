@@ -1,6 +1,6 @@
 from hypothesis import strategies
-from rithm._rithm import Int
 
+from rithm import Int
 from tests.strategies import (decimal_int_strings_with_leading_zeros,
                               int_strings_with_bases)
 from tests.utils import to_int_with_builtin_int

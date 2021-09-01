@@ -1,8 +1,9 @@
 use core::fmt;
 use std::cmp::Ordering;
 use std::convert::TryFrom;
+use std::f64;
 
-use num::{One, PrimInt, Unsigned, Zero};
+use num::{One, PrimInt, Zero};
 
 use crate::utils;
 

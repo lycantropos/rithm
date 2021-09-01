@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-use num::{PrimInt, Unsigned};
+use num::PrimInt;
 
 pub(crate) fn to_bit_length<T>(value: T) -> usize
 where

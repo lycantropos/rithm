@@ -7,6 +7,111 @@ use num::{One, PrimInt, Zero};
 
 use crate::utils;
 
+pub(crate) struct BigInt<Digit, const SHIFT: usize> {
+    sign: Sign,
+    digits: Vec<Digit>,
+}
+
+impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT> {
+    const SHIFT: usize = SHIFT;
+
+    pub(crate) fn new(sign: Sign, digits: Vec<Digit>) -> Self {
+        BigInt::<Digit, SHIFT> { sign, digits }
+    }
+}
+
+impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT>
+where
+    Digit: DoublePrecisiony + PrimInt + TryFrom<DoublePrecision<Digit>> + TryFrom<usize>,
+    DoublePrecision<Digit>: From<Digit> + PrimInt + TryFrom<usize>,
+    <DoublePrecision<Digit> as TryFrom<usize>>::Error: fmt::Debug,
+    <Digit as TryFrom<DoublePrecision<Digit>>>::Error: fmt::Debug,
+    usize: TryFrom<Digit>,
+    u8: TryFrom<Digit>,
+{
+    pub(crate) fn to_string(&self, target_base: usize) -> String {
+        let target_shift = utils::floor_log(1 << Self::SHIFT, target_base);
+        let target_digits: Vec<Digit> = binary_digits_to_base::<Digit, Digit>(
+            &self.digits,
+            Self::SHIFT,
+            utils::power(target_base, target_shift),
+        );
+        let characters_count = ((self.sign < 0) as usize)
+            + (target_digits.len() - 1) * target_shift
+            + utils::floor_log(
+                unsafe { usize::try_from(*target_digits.last().unwrap()).unwrap_unchecked() },
+                target_base,
+            )
+            + 1;
+        let mut characters: String = String::with_capacity(characters_count);
+        let target_base = unsafe { Digit::try_from(target_base).unwrap_unchecked() };
+        for index in 0..target_digits.len() - 1 {
+            let mut remainder = target_digits[index];
+            for _ in 0..target_shift {
+                characters.push(
+                    (('0' as u8)
+                        + unsafe { u8::try_from(remainder % target_base).unwrap_unchecked() })
+                        as char,
+                );
+                remainder = remainder / target_base;
+            }
+        }
+        let mut remainder = *target_digits.last().unwrap();
+        while !remainder.is_zero() {
+            characters.push(
+                (('0' as u8) + unsafe { u8::try_from(remainder % target_base).unwrap_unchecked() })
+                    as char,
+            );
+            remainder = remainder / target_base;
+        }
+        if self.sign == 0 {
+            characters.push('0');
+        } else if self.sign < 0 {
+            characters.push('-');
+        }
+        characters.chars().rev().collect()
+    }
+}
+
+#[cfg(target_arch = "x86")]
+const HASH_BITS: usize = 31;
+#[cfg(not(target_arch = "x86"))]
+const HASH_BITS: usize = 61;
+const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
+
+impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT>
+where
+    Digit: From<bool> + PrimInt,
+    usize: TryFrom<Digit>,
+{
+    pub(crate) fn hash(&self) -> usize {
+        if self.digits.len() == 1 {
+            return unsafe {
+                usize::try_from(if self.sign < 0 {
+                    Digit::max_value()
+                        - (self.digits[0] + <Digit as From<bool>>::from(self.digits[0].is_one()))
+                } else {
+                    self.digits[0]
+                })
+                .unwrap_unchecked()
+            };
+        }
+        let mut result = 0;
+        for &position in self.digits.iter().rev() {
+            result =
+                ((result << Self::SHIFT) & HASH_MODULUS) | (result >> (HASH_BITS - Self::SHIFT));
+            result += unsafe { usize::try_from(position).unwrap_unchecked() };
+            if result >= HASH_MODULUS {
+                result -= HASH_MODULUS;
+            }
+        }
+        if self.sign < 0 {
+            result = usize::MAX - result + 1
+        };
+        result - ((result == usize::MAX) as usize)
+    }
+}
+
 pub(crate) trait DoublePrecisiony {
     type Type;
 }
@@ -24,6 +129,7 @@ impl DoublePrecisiony for u32 {
 }
 
 pub(crate) type DoublePrecision<T> = <T as DoublePrecisiony>::Type;
+pub(crate) type Sign = i8;
 
 pub(crate) fn binary_digits_to_base<SourceDigit, TargetDigit>(
     source_digits: &Vec<SourceDigit>,

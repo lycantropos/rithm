@@ -23,10 +23,11 @@ where
     result
 }
 
-pub(crate) const fn floor_log10(value: usize) -> usize {
-    match value {
-        0..=9 => 0,
-        _ => floor_log10(value / 10) + 1,
+pub(crate) const fn floor_log(value: usize, base: usize) -> usize {
+    if value < base {
+        0
+    } else {
+        floor_log(value / base, base) + 1
     }
 }
 

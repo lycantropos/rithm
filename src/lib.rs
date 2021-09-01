@@ -4,26 +4,20 @@
 use std::iter::Peekable;
 use std::str::Chars;
 
-use num::Zero;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
-use pyo3::ffi::{Py_hash_t, Py_uhash_t};
+use pyo3::ffi::Py_hash_t;
 use pyo3::prelude::*;
 
 mod big_int;
 mod utils;
 
-type Sign = i8;
 #[cfg(target_arch = "x86")]
 type Digit = u16;
 #[cfg(not(target_arch = "x86"))]
 type Digit = u32;
-type DoubleDigit = big_int::DoublePrecision<Digit>;
 
 const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
-const BINARY_BASE: DoubleDigit = 1 << BINARY_SHIFT;
-const DECIMAL_SHIFT: usize = utils::floor_log10(BINARY_BASE as usize);
-const DECIMAL_BASE: usize = utils::power(10, DECIMAL_SHIFT);
 const SEPARATOR: char = '_';
 const MAX_REPRESENTABLE_BASE: u8 = 36;
 const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
@@ -40,11 +34,10 @@ const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
     37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
 ];
 
+type BigInt = big_int::BigInt<Digit, BINARY_SHIFT>;
+
 #[pyclass(module = "rithm", subclass)]
-struct Int {
-    sign: Sign,
-    digits: Vec<Digit>,
-}
+struct Int(BigInt);
 
 #[pymethods]
 impl Int {
@@ -58,7 +51,7 @@ impl Int {
             )));
         }
         let mut characters = _string.trim().chars().peekable();
-        let sign: Sign = if characters.peek() == Some(&'-') {
+        let sign: big_int::Sign = if characters.peek() == Some(&'-') {
             characters.next();
             -1
         } else if characters.peek() == Some(&'+') {
@@ -108,8 +101,10 @@ impl Int {
             BINARY_SHIFT,
         );
         Ok(Int {
-            sign: sign * ((digits.len() > 1 || digits[0] != 0) as Sign),
-            digits,
+            0: BigInt::new(
+                sign * ((digits.len() > 1 || digits[0] != 0) as big_int::Sign),
+                digits,
+            ),
         })
     }
 }
@@ -142,69 +137,14 @@ fn parse_digits(mut characters: Peekable<Chars>, base: u8) -> PyResult<Vec<u8>> 
     Ok(result)
 }
 
-#[cfg(target_arch = "x86")]
-const HASH_BITS: usize = 31;
-#[cfg(not(target_arch = "x86"))]
-const HASH_BITS: usize = 61;
-const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
-
 #[pyproto]
 impl PyObjectProtocol for Int {
     fn __hash__(&self) -> PyResult<Py_hash_t> {
-        let sign = self.sign;
-        let digits = &self.digits;
-        if digits.len() == 1 {
-            return if sign < 0 {
-                Ok(-((digits[0] + ((digits[0] == 1) as Digit)) as Py_hash_t))
-            } else {
-                Ok(digits[0] as Py_hash_t)
-            };
-        }
-        let mut result: Py_uhash_t = 0;
-        for position in digits.iter().rev() {
-            result =
-                ((result << BINARY_SHIFT) & HASH_MODULUS) | (result >> (HASH_BITS - BINARY_SHIFT));
-            result += *position as Py_uhash_t;
-            if result >= HASH_MODULUS {
-                result -= HASH_MODULUS;
-            }
-        }
-        if sign < 0 {
-            result = Py_uhash_t::MAX - result + 1
-        };
-        result -= (result == Py_uhash_t::MAX) as Py_uhash_t;
-        Ok(result as Py_hash_t)
+        Ok(self.0.hash() as Py_hash_t)
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        let base_digits: Vec<Digit> = big_int::binary_digits_to_base::<Digit, Digit>(
-            &self.digits,
-            BINARY_SHIFT,
-            DECIMAL_BASE,
-        );
-        let characters_count: usize = ((self.sign < 0) as usize)
-            + (base_digits.len() - 1) * DECIMAL_SHIFT
-            + utils::floor_log10(*base_digits.last().unwrap() as usize)
-            + 1;
-        let mut characters: String = String::with_capacity(characters_count);
-        for index in 0..base_digits.len() - 1 {
-            let mut remainder = base_digits[index];
-            for _ in 0..DECIMAL_SHIFT {
-                characters.push((('0' as u8) + ((remainder % 10) as u8)) as char);
-                remainder /= 10;
-            }
-        }
-        let mut remainder = *base_digits.last().unwrap();
-        while !remainder.is_zero() {
-            characters.push((('0' as u8) + ((remainder % 10) as u8)) as char);
-            remainder /= 10;
-        }
-        if self.sign == 0 {
-            characters.push('0');
-        } else if self.sign < 0 {
-            characters.push('-');
-        }
-        Ok(characters.chars().rev().collect())
+        Ok(self.0.to_string(10))
     }
 }
 

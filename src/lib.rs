@@ -1,4 +1,3 @@
-#![feature(associated_type_defaults)]
 #![feature(option_result_unwrap_unchecked)]
 
 use pyo3::basic::CompareOp;

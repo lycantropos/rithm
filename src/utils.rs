@@ -37,7 +37,7 @@ pub(crate) const fn power(base: usize, exponent: usize) -> usize {
     }
 }
 
-pub(crate) fn floor_log2<T>(mut value: T) -> usize
+pub(crate) fn floor_log2<T>(value: T) -> usize
 where
     T: PrimInt,
     usize: TryFrom<T>,

@@ -39,6 +39,14 @@ impl Int {
 
 #[pyproto]
 impl PyObjectProtocol for Int {
+    fn __hash__(&self) -> PyResult<Py_hash_t> {
+        Ok(self.0.hash() as Py_hash_t)
+    }
+
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!("rithm.Int('{}')", self.0.to_string(10)))
+    }
+
     fn __richcmp__(&self, other: Int, op: CompareOp) -> PyResult<bool> {
         Ok(match op {
             CompareOp::Eq => self.0 == other.0,
@@ -48,14 +56,6 @@ impl PyObjectProtocol for Int {
             CompareOp::Lt => self.0 < other.0,
             CompareOp::Ne => self.0 != other.0,
         })
-    }
-
-    fn __hash__(&self) -> PyResult<Py_hash_t> {
-        Ok(self.0.hash() as Py_hash_t)
-    }
-
-    fn __repr__(&self) -> PyResult<String> {
-        Ok(format!("rithm.Int('{}')", self.0.to_string(10)))
     }
 
     fn __str__(&self) -> PyResult<String> {

@@ -141,7 +141,6 @@ where
     <DoublePrecision<Digit> as TryFrom<usize>>::Error: fmt::Debug,
     <Digit as TryFrom<DoublePrecision<Digit>>>::Error: fmt::Debug,
     usize: TryFrom<Digit>,
-    u8: TryFrom<Digit>,
 {
     const DIGIT_VALUES_ASCII_CODES: [char; MAX_REPRESENTABLE_BASE as usize] = [
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',

@@ -3,6 +3,10 @@ from typing import Tuple
 from rithm import Int
 
 
+def equivalence(left: bool, right: bool) -> bool:
+    return left is right
+
+
 def is_equivalent_to_builtin_int(value: Int, builtin: int) -> bool:
     return str(value) == str(builtin)
 

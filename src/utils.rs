@@ -4,7 +4,7 @@ use num::PrimInt;
 
 pub(crate) fn to_bit_length<T>(value: T) -> usize
 where
-    T: PrimInt,
+    T: PrimInt + From<u8>,
     usize: TryFrom<T>,
 {
     static BIT_LENGTHS_TABLE: [usize; 32] = [
@@ -13,13 +13,11 @@ where
     ];
     let mut result: usize = 0;
     let mut value = value;
-    unsafe {
-        while value >= T::from(32).unwrap_unchecked() {
-            result += 6;
-            value = value >> 6;
-        }
-        result += BIT_LENGTHS_TABLE[usize::try_from(value).unwrap_unchecked()];
+    while value >= <T as From<u8>>::from(32u8) {
+        result += 6;
+        value = value >> 6;
     }
+    result += BIT_LENGTHS_TABLE[unsafe { usize::try_from(value).unwrap_unchecked() }];
     result
 }
 
@@ -40,7 +38,7 @@ pub(crate) const fn power(base: usize, exponent: usize) -> usize {
 
 pub(crate) fn floor_log2<T>(value: T) -> usize
 where
-    T: PrimInt,
+    T: PrimInt + From<u8>,
     usize: TryFrom<T>,
 {
     to_bit_length(value) - 1

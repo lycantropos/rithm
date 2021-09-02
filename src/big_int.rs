@@ -202,7 +202,7 @@ where
 
 impl<Digit, const SHIFT: usize> Display for BigInt<Digit, SHIFT>
 where
-    Digit: DoublePrecisiony + PrimInt + TryFrom<DoublePrecision<Digit>> + TryFrom<usize>,
+    Digit: DoublePrecisiony + From<u8> + PrimInt + TryFrom<DoublePrecision<Digit>> + TryFrom<usize>,
     DoublePrecision<Digit>: From<Digit> + PrimInt + TryFrom<usize>,
     <DoublePrecision<Digit> as TryFrom<usize>>::Error: fmt::Debug,
     <Digit as TryFrom<DoublePrecision<Digit>>>::Error: fmt::Debug,
@@ -215,7 +215,7 @@ where
 
 impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT>
 where
-    Digit: DoublePrecisiony + PrimInt + TryFrom<DoublePrecision<Digit>> + TryFrom<usize>,
+    Digit: DoublePrecisiony + From<u8> + PrimInt + TryFrom<DoublePrecision<Digit>> + TryFrom<usize>,
     DoublePrecision<Digit>: From<Digit> + PrimInt + TryFrom<usize>,
     <DoublePrecision<Digit> as TryFrom<usize>>::Error: fmt::Debug,
     <Digit as TryFrom<DoublePrecision<Digit>>>::Error: fmt::Debug,
@@ -449,7 +449,7 @@ pub(crate) fn binary_digits_to_base<SourceDigit, TargetDigit>(
     target_base: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: Copy + DoublePrecisiony + PrimInt,
+    SourceDigit: Copy + DoublePrecisiony + From<u8> + PrimInt,
     TargetDigit: Copy
         + DoublePrecisiony
         + TryFrom<SourceDigit>
@@ -479,7 +479,7 @@ pub(crate) fn digits_to_binary_base<SourceDigit, TargetDigit>(
     target_shift: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: DoublePrecisiony + PrimInt,
+    SourceDigit: DoublePrecisiony + From<u8> + PrimInt,
     TargetDigit: Copy
         + DoublePrecisiony
         + TryFrom<DoublePrecision<TargetDigit>>
@@ -508,7 +508,7 @@ fn binary_digits_to_binary_base<SourceDigit, TargetDigit>(
     target_shift: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: DoublePrecisiony + PrimInt,
+    SourceDigit: DoublePrecisiony + From<u8> + PrimInt,
     TargetDigit: DoublePrecisiony
         + TryFrom<SourceDigit>
         + TryFrom<DoublePrecision<SourceDigit>>
@@ -616,7 +616,7 @@ fn binary_digits_to_lesser_binary_base<SourceDigit, TargetDigit>(
     target_shift: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: DoublePrecisiony + PrimInt,
+    SourceDigit: DoublePrecisiony + From<u8> + PrimInt,
     TargetDigit: TryFrom<DoublePrecision<SourceDigit>>,
     DoublePrecision<SourceDigit>: PrimInt + From<SourceDigit>,
     usize: TryFrom<SourceDigit>,

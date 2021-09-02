@@ -3,9 +3,11 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::f64;
 use std::iter::Peekable;
+use std::ops::Add;
 use std::str::Chars;
 
 use num::{One, PrimInt, Zero};
+use num::traits::WrappingSub;
 
 use crate::utils;
 
@@ -602,4 +604,132 @@ where
         digits.push(TargetDigit::zero());
     }
     digits
+}
+
+impl<Digit, const SHIFT: usize> Add for BigInt<Digit, SHIFT>
+where
+    Digit: PrimInt + TryFrom<usize> + WrappingSub,
+{
+    type Output = Self;
+    fn add(self, other: Self) -> Self::Output {
+        return if self.sign < 0 {
+            if other.sign < 0 {
+                BigInt {
+                    sign: -1,
+                    digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
+                }
+            } else {
+                let mut sign: Sign = 1;
+                let digits =
+                    subtract_digits::<Digit, SHIFT>(&other.digits, &self.digits, &mut sign);
+                BigInt { sign, digits }
+            }
+        } else if other.sign < 0 {
+            let mut sign: Sign = 1;
+            let digits = subtract_digits::<Digit, SHIFT>(&self.digits, &other.digits, &mut sign);
+            BigInt { sign, digits }
+        } else {
+            BigInt {
+                sign: self.sign | other.sign,
+                digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
+            }
+        };
+    }
+}
+
+fn subtract_digits<Digit, const SHIFT: usize>(
+    first: &Vec<Digit>,
+    second: &Vec<Digit>,
+    sign: &mut Sign,
+) -> Vec<Digit>
+where
+    Digit: PrimInt + TryFrom<usize> + WrappingSub,
+{
+    let mut longest = &first;
+    let mut shortest = &second;
+    let mut size_longest = longest.len();
+    let mut size_shortest = shortest.len();
+    let mut accumulator = Digit::zero();
+    if size_longest < size_shortest {
+        (longest, shortest) = (shortest, longest);
+        (size_longest, size_shortest) = (size_shortest, size_longest);
+        *sign = -*sign;
+    } else if size_longest == size_shortest {
+        let mut index = size_shortest;
+        loop {
+            index -= 1;
+            if index == 0 || longest[index] != shortest[index] {
+                break;
+            }
+        }
+        if index == 0 && longest[0] == shortest[0] {
+            *sign = 0 as Sign;
+            return vec![Digit::zero()];
+        }
+        if longest[index] < shortest[index] {
+            (longest, shortest) = (shortest, longest);
+            *sign = -*sign;
+        }
+        size_longest = index + 1;
+        size_shortest = index + 1;
+    }
+    let mut result: Vec<Digit> = Vec::with_capacity(size_longest);
+    let digit_mask = (Digit::one() << SHIFT) - Digit::one();
+    for index in 0..size_shortest {
+        accumulator = longest[index].wrapping_sub(&shortest[index]) - accumulator;
+        result.push(accumulator & digit_mask);
+        accumulator = accumulator >> SHIFT;
+        accumulator = accumulator & Digit::one();
+    }
+    for index in size_shortest..size_longest {
+        accumulator = longest[index] - accumulator;
+        result.push(accumulator & digit_mask);
+        accumulator = accumulator >> SHIFT;
+        accumulator = accumulator & Digit::one();
+    }
+    normalize_digits(&mut result);
+    result
+}
+
+fn sum_digits<Digit, const SHIFT: usize>(first: &Vec<Digit>, second: &Vec<Digit>) -> Vec<Digit>
+where
+    Digit: PrimInt + TryFrom<usize>,
+{
+    let mut longest = &first;
+    let mut shortest = &second;
+    let mut size_longest = longest.len();
+    let mut size_shortest = shortest.len();
+    if size_longest < size_shortest {
+        (size_longest, size_shortest) = (size_shortest, size_longest);
+        (longest, shortest) = (shortest, longest);
+    }
+    let mut result: Vec<Digit> = Vec::with_capacity(size_longest + 1);
+    let mut accumulator: Digit = Digit::zero();
+    let digit_mask = (Digit::one() << SHIFT) - Digit::one();
+    for index in 0..size_shortest {
+        accumulator = accumulator + longest[index] + shortest[index];
+        result.push(accumulator & digit_mask);
+        accumulator = accumulator >> SHIFT;
+    }
+    for index in size_shortest..size_longest {
+        accumulator = accumulator + longest[index];
+        result.push(accumulator & digit_mask);
+        accumulator = accumulator >> SHIFT;
+    }
+    result.push(accumulator);
+    normalize_digits(&mut result);
+    result
+}
+
+fn normalize_digits<Digit>(digits: &mut Vec<Digit>) -> ()
+where
+    Digit: Clone + Zero,
+{
+    let mut digits_count = digits.len();
+    while digits_count > 1 && digits[digits_count - 1].is_zero() {
+        digits_count -= 1;
+    }
+    if digits_count != digits.len() {
+        digits.resize(digits_count, Digit::zero());
+    }
 }

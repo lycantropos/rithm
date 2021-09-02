@@ -1,3 +1,4 @@
+#![feature(destructuring_assignment)]
 #![feature(option_result_unwrap_unchecked)]
 
 use pyo3::basic::CompareOp;
@@ -7,6 +8,7 @@ use pyo3::ffi::Py_hash_t;
 use pyo3::prelude::*;
 
 pub use crate::big_int::*;
+use pyo3::PyNumberProtocol;
 
 mod big_int;
 mod utils;
@@ -35,6 +37,13 @@ impl Int {
                 Err(reason) => Err(PyValueError::new_err(reason)),
             }?,
         })
+    }
+}
+
+#[pyproto]
+impl PyNumberProtocol for Int {
+    fn __add__(lhs: Int, rhs: Int) -> Int {
+        Int { 0: lhs.0 + rhs.0 }
     }
 }
 

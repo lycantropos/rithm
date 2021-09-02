@@ -674,9 +674,10 @@ where
     static mut infimum_bases_exponents: [usize; 37] = [0; 37];
     static mut infimum_bases_powers: [usize; 37] = [0; 37];
     if unsafe { bases_logs[source_base] } == 0.0 {
+        let bases_log = (source_base as f64).ln() / (target_base as f64).ln();
+        unsafe { bases_logs[source_base] = bases_log };
         let mut infimum_base_power = source_base;
         let mut infimum_base_exponent: usize = 1;
-        unsafe { bases_logs[source_base] = (source_base as f64).ln() / (target_base as f64).ln() };
         loop {
             let candidate: usize = infimum_base_power * source_base;
             if candidate > target_base {

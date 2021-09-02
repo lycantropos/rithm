@@ -295,6 +295,64 @@ where
     }
 }
 
+impl<Digit, const SHIFT: usize> Add for BigInt<Digit, SHIFT>
+where
+    Digit: PrimInt + TryFrom<usize> + WrappingSub,
+{
+    type Output = Self;
+    fn add(self, other: Self) -> Self::Output {
+        return if self.sign < 0 {
+            if other.sign < 0 {
+                Self {
+                    sign: -1,
+                    digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
+                }
+            } else {
+                let mut sign: Sign = 1;
+                let digits =
+                    subtract_digits::<Digit, SHIFT>(&other.digits, &self.digits, &mut sign);
+                Self { sign, digits }
+            }
+        } else if other.sign < 0 {
+            let mut sign: Sign = 1;
+            let digits = subtract_digits::<Digit, SHIFT>(&self.digits, &other.digits, &mut sign);
+            Self { sign, digits }
+        } else {
+            Self {
+                sign: self.sign | other.sign,
+                digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
+            }
+        };
+    }
+}
+
+impl<Digit, const SHIFT: usize> Neg for BigInt<Digit, SHIFT> {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self {
+            sign: -self.sign,
+            digits: self.digits,
+        }
+    }
+}
+
+impl<Digit, const SHIFT: usize> Zero for BigInt<Digit, SHIFT>
+where
+    Digit: PrimInt + TryFrom<usize> + WrappingSub,
+{
+    fn zero() -> Self {
+        Self {
+            sign: 0,
+            digits: vec![Digit::zero()],
+        }
+    }
+
+    fn is_zero(&self) -> bool {
+        self.sign.is_zero()
+    }
+}
+
 pub trait DoublePrecisiony {
     type Type;
 }
@@ -604,64 +662,6 @@ where
         digits.push(TargetDigit::zero());
     }
     digits
-}
-
-impl<Digit, const SHIFT: usize> Add for BigInt<Digit, SHIFT>
-where
-    Digit: PrimInt + TryFrom<usize> + WrappingSub,
-{
-    type Output = Self;
-    fn add(self, other: Self) -> Self::Output {
-        return if self.sign < 0 {
-            if other.sign < 0 {
-                Self {
-                    sign: -1,
-                    digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
-                }
-            } else {
-                let mut sign: Sign = 1;
-                let digits =
-                    subtract_digits::<Digit, SHIFT>(&other.digits, &self.digits, &mut sign);
-                Self { sign, digits }
-            }
-        } else if other.sign < 0 {
-            let mut sign: Sign = 1;
-            let digits = subtract_digits::<Digit, SHIFT>(&self.digits, &other.digits, &mut sign);
-            Self { sign, digits }
-        } else {
-            Self {
-                sign: self.sign | other.sign,
-                digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
-            }
-        };
-    }
-}
-
-impl<Digit, const SHIFT: usize> Neg for BigInt<Digit, SHIFT> {
-    type Output = Self;
-
-    fn neg(self) -> Self::Output {
-        Self {
-            sign: -self.sign,
-            digits: self.digits,
-        }
-    }
-}
-
-impl<Digit, const SHIFT: usize> Zero for BigInt<Digit, SHIFT>
-where
-    Digit: PrimInt + TryFrom<usize> + WrappingSub,
-{
-    fn zero() -> Self {
-        Self {
-            sign: 0,
-            digits: vec![Digit::zero()],
-        }
-    }
-
-    fn is_zero(&self) -> bool {
-        self.sign.is_zero()
-    }
 }
 
 fn subtract_digits<Digit, const SHIFT: usize>(

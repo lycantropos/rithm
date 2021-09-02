@@ -6,7 +6,7 @@ use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
 use pyo3::ffi::Py_hash_t;
-use pyo3::prelude::*;
+use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, Python};
 use pyo3::PyNumberProtocol;
 
 pub use crate::big_int::*;

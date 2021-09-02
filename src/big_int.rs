@@ -234,7 +234,8 @@ where
             + utils::floor_log(
                 unsafe { usize::try_from(*digits.last().unwrap()).unwrap_unchecked() },
                 base,
-            ).unwrap()
+            )
+            .unwrap_or(0usize)
             + 1;
         let mut characters: String = String::with_capacity(characters_count);
         let target_base = unsafe { Digit::try_from(base).unwrap_unchecked() };

@@ -227,16 +227,13 @@ where
     ];
     pub(crate) fn to_base_string(&self, base: usize) -> String {
         let shift = utils::floor_log(1 << SHIFT, base);
-        let digits: Vec<Digit> = binary_digits_to_base::<Digit, Digit>(
-            &self.digits,
-            SHIFT,
-            utils::power(base, shift),
-        );
+        let digits: Vec<Digit> =
+            binary_digits_to_base::<Digit, Digit>(&self.digits, SHIFT, utils::power(base, shift));
         let characters_count = ((self.sign < 0) as usize)
             + (digits.len() - 1) * shift
             + utils::floor_log(
-            unsafe { usize::try_from(*digits.last().unwrap()).unwrap_unchecked() },
-            base,
+                unsafe { usize::try_from(*digits.last().unwrap()).unwrap_unchecked() },
+                base,
             )
             + 1;
         let mut characters: String = String::with_capacity(characters_count);

@@ -7,6 +7,11 @@ from tests.utils import is_equivalent_to_builtin_int
 from . import strategies
 
 
+@given(strategies.ints, strategies.ints)
+def test_alternatives(first: Int, second: Int) -> None:
+    assert first + second == first - (-second)
+
+
 @given(strategies.ints_with_builtin_ints, strategies.ints_with_builtin_ints)
 def test_connection_with_builtin(first_int_with_builtin_int: Tuple[Int, int],
                                  second_int_with_builtin_int: Tuple[Int, int]

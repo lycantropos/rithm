@@ -73,7 +73,7 @@ impl PyObjectProtocol for Int {
     }
 
     fn __repr__(&self) -> String {
-        format!("rithm.Int('{}')", self.0.to_string())
+        format!("rithm.Int('{}')", self.0)
     }
 
     fn __richcmp__(&self, other: Int, op: CompareOp) -> bool {

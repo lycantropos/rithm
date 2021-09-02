@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::f64;
 use std::iter::Peekable;
-use std::ops::{Add, Neg};
+use std::ops::{Add, Neg, Sub};
 use std::str::Chars;
 
 use num::traits::WrappingSub;
@@ -343,6 +343,37 @@ impl<Digit, const SHIFT: usize> Neg for BigInt<Digit, SHIFT> {
             sign: -self.sign,
             digits: self.digits,
         }
+    }
+}
+
+impl<Digit, const SHIFT: usize> Sub for BigInt<Digit, SHIFT>
+where
+    Digit: PrimInt + TryFrom<usize> + WrappingSub,
+{
+    type Output = Self;
+    fn sub(self, other: Self) -> Self::Output {
+        return if self.sign < 0 {
+            if other.sign < 0 {
+                let mut sign: Sign = 1;
+                let digits =
+                    subtract_digits::<Digit, SHIFT>(&other.digits, &self.digits, &mut sign);
+                Self { sign, digits }
+            } else {
+                Self {
+                    sign: -1,
+                    digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
+                }
+            }
+        } else if other.sign < 0 {
+            Self {
+                sign: 1,
+                digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
+            }
+        } else {
+            let mut sign: Sign = 1;
+            let digits = subtract_digits::<Digit, SHIFT>(&self.digits, &other.digits, &mut sign);
+            Self { sign, digits }
+        };
     }
 }
 

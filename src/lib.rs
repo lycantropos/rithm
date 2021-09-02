@@ -54,6 +54,10 @@ impl PyNumberProtocol for Int {
     fn __neg__(&self) -> Int {
         Int { 0: -self.0.clone() }
     }
+
+    fn __sub__(lhs: Int, rhs: Int) -> Int {
+        Int { 0: lhs.0 - rhs.0 }
+    }
 }
 
 #[pyproto]

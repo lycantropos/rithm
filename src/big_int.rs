@@ -226,7 +226,7 @@ where
         'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
     ];
     pub(crate) fn to_base_string(&self, base: usize) -> String {
-        let shift = utils::floor_log(1 << SHIFT, base);
+        let shift = utils::floor_log(1 << SHIFT, base).unwrap();
         let digits: Vec<Digit> =
             binary_digits_to_base::<Digit, Digit>(&self.digits, SHIFT, utils::power(base, shift));
         let characters_count = ((self.sign < 0) as usize)
@@ -234,7 +234,7 @@ where
             + utils::floor_log(
                 unsafe { usize::try_from(*digits.last().unwrap()).unwrap_unchecked() },
                 base,
-            )
+            ).unwrap()
             + 1;
         let mut characters: String = String::with_capacity(characters_count);
         let target_base = unsafe { Digit::try_from(base).unwrap_unchecked() };

@@ -7,8 +7,8 @@ rithm
 [![](https://badge.fury.io/py/rithm.svg)](https://badge.fury.io/py/rithm "PyPI")
 [![](https://img.shields.io/crates/v/rithm.svg)](https://crates.io/crates/rithm "crates.io")
 
-In what follows `python` is an alias for `python3.5` or `pypy3.5`
-or any later version (`python3.6`, `pypy3.6` and so on).
+In what follows `python` is an alias for `python3.6` or `pypy3.6`
+or any later version (`python3.7`, `pypy3.7` and so on).
 
 Installation
 ------------

@@ -673,22 +673,20 @@ where
     static mut bases_logs: [f64; 37] = [0.0; 37];
     static mut infimum_bases_exponents: [usize; 37] = [0; 37];
     static mut infimum_bases_powers: [usize; 37] = [0; 37];
-    unsafe {
-        if bases_logs[source_base] == 0.0 {
-            let mut infimum_base_power = source_base;
-            let mut infimum_base_exponent: usize = 1;
-            bases_logs[source_base] = (source_base as f64).ln() / (target_base as f64).ln();
-            loop {
-                let candidate: usize = infimum_base_power * source_base;
-                if candidate > target_base {
-                    break;
-                }
-                infimum_base_power = candidate;
-                infimum_base_exponent += 1;
+    if unsafe { bases_logs[source_base] } == 0.0 {
+        let mut infimum_base_power = source_base;
+        let mut infimum_base_exponent: usize = 1;
+        unsafe { bases_logs[source_base] = (source_base as f64).ln() / (target_base as f64).ln() };
+        loop {
+            let candidate: usize = infimum_base_power * source_base;
+            if candidate > target_base {
+                break;
             }
-            infimum_bases_powers[source_base] = infimum_base_power;
-            infimum_bases_exponents[source_base] = infimum_base_exponent;
+            infimum_base_power = candidate;
+            infimum_base_exponent += 1;
         }
+        unsafe { infimum_bases_powers[source_base] = infimum_base_power };
+        unsafe { infimum_bases_exponents[source_base] = infimum_base_exponent };
     }
     let digits_count_upper_bound =
         (source_digits.len() as f64) * unsafe { bases_logs[source_base] } + 1.0;

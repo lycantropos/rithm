@@ -6,7 +6,7 @@ use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
 use pyo3::ffi::Py_hash_t;
-use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, Python};
+use pyo3::prelude::{pyclass, pymethods, pymodule, PyModule, pyproto, PyResult, Python};
 use pyo3::PyNumberProtocol;
 
 pub use crate::big_int::*;
@@ -21,11 +21,11 @@ type Digit = u32;
 
 const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
 
-type BigInt = big_int::BigInt<Digit, BINARY_SHIFT>;
+type _BigInt = BigInt<Digit, BINARY_SHIFT>;
 
 #[pyclass(module = "rithm", subclass)]
 #[derive(Clone)]
-struct Int(BigInt);
+struct Int(_BigInt);
 
 #[pymethods]
 impl Int {
@@ -33,7 +33,7 @@ impl Int {
     #[args(_string = "\"0\"", base = 10)]
     fn new(_string: &str, base: u8) -> PyResult<Self> {
         Ok(Int {
-            0: match BigInt::new(_string, base) {
+            0: match _BigInt::new(_string, base) {
                 Ok(value) => Ok(value),
                 Err(reason) => Err(PyValueError::new_err(reason)),
             }?,

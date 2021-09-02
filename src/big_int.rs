@@ -260,12 +260,12 @@ const HASH_BITS: usize = 31;
 const HASH_BITS: usize = 61;
 const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
 
-impl<Digit: Clone, const SHIFT: usize> BigInt<Digit, SHIFT>
+impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT>
 {
-    pub fn abs(&self) -> Self {
+    pub fn abs(self) -> Self {
         Self {
             sign: self.sign.abs(),
-            digits: self.digits.clone(),
+            digits: self.digits,
         }
     }
 }

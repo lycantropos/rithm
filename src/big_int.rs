@@ -167,7 +167,7 @@ where
             base as usize,
             SHIFT,
         );
-        Ok(BigInt::<Digit, SHIFT> {
+        Ok(Self {
             sign: sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
             digits,
         })
@@ -614,7 +614,7 @@ where
     fn add(self, other: Self) -> Self::Output {
         return if self.sign < 0 {
             if other.sign < 0 {
-                BigInt {
+                Self {
                     sign: -1,
                     digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
                 }
@@ -622,14 +622,14 @@ where
                 let mut sign: Sign = 1;
                 let digits =
                     subtract_digits::<Digit, SHIFT>(&other.digits, &self.digits, &mut sign);
-                BigInt { sign, digits }
+                Self { sign, digits }
             }
         } else if other.sign < 0 {
             let mut sign: Sign = 1;
             let digits = subtract_digits::<Digit, SHIFT>(&self.digits, &other.digits, &mut sign);
-            BigInt { sign, digits }
+            Self { sign, digits }
         } else {
-            BigInt {
+            Self {
                 sign: self.sign | other.sign,
                 digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
             }
@@ -642,7 +642,7 @@ where
     Digit: PrimInt + TryFrom<usize> + WrappingSub,
 {
     fn zero() -> Self {
-        BigInt {
+        Self {
             sign: 0,
             digits: vec![Digit::zero()],
         }

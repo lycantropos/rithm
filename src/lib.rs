@@ -44,7 +44,9 @@ impl Int {
 #[pyproto]
 impl PyNumberProtocol for Int {
     fn __abs__(&self) -> Int {
-        Int { 0: self.0.clone().abs() }
+        Int {
+            0: self.0.clone().abs(),
+        }
     }
 
     fn __add__(lhs: Int, rhs: Int) -> Int {

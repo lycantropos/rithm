@@ -260,8 +260,7 @@ const HASH_BITS: usize = 31;
 const HASH_BITS: usize = 61;
 const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
 
-impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT>
-{
+impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT> {
     pub fn abs(self) -> Self {
         Self {
             sign: self.sign.abs(),
@@ -311,7 +310,7 @@ where
 {
     type Output = Self;
     fn add(self, other: Self) -> Self::Output {
-        return if self.sign < 0 {
+        if self.sign < 0 {
             if other.sign < 0 {
                 Self {
                     sign: -1,
@@ -332,7 +331,7 @@ where
                 sign: self.sign | other.sign,
                 digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
             }
-        };
+        }
     }
 }
 

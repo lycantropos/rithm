@@ -5,6 +5,7 @@ rithm
 [![](https://codecov.io/gh/lycantropos/rithm/branch/master/graph/badge.svg)](https://codecov.io/gh/lycantropos/rithm "Codecov")
 [![](https://img.shields.io/github/license/lycantropos/rithm.svg)](https://github.com/lycantropos/rithm/blob/master/LICENSE "License")
 [![](https://badge.fury.io/py/rithm.svg)](https://badge.fury.io/py/rithm "PyPI")
+[![](https://img.shields.io/crates/v/rithm.svg)](https://crates.io/crates/rithm "crates.io")
 
 In what follows `python` is an alias for `python3.5` or `pypy3.5`
 or any later version (`python3.6`, `pypy3.6` and so on).

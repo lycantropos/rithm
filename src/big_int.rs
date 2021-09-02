@@ -335,6 +335,26 @@ where
     }
 }
 
+impl<Digit, const SHIFT: usize> TryFrom<&str> for BigInt<Digit, SHIFT>
+where
+    u8: DoublePrecisiony + PrimInt,
+    Digit: Copy
+        + DoublePrecisiony
+        + TryFrom<DoublePrecision<Digit>>
+        + TryFrom<u8>
+        + TryFrom<DoublePrecision<u8>>
+        + TryFrom<DoublePrecision<Digit>>
+        + Zero,
+    DoublePrecision<u8>: From<u8> + PrimInt,
+    DoublePrecision<Digit>: From<u8> + From<Digit> + PrimInt + TryFrom<usize>,
+{
+    type Error = String;
+
+    fn try_from(string: &str) -> Result<Self, Self::Error> {
+        Self::new(string, 0)
+    }
+}
+
 impl<Digit, const SHIFT: usize> Neg for BigInt<Digit, SHIFT> {
     type Output = Self;
 

@@ -6,8 +6,8 @@ use std::iter::Peekable;
 use std::ops::Add;
 use std::str::Chars;
 
-use num::{One, PrimInt, Zero};
 use num::traits::WrappingSub;
+use num::{One, PrimInt, Zero};
 
 use crate::utils;
 
@@ -634,6 +634,22 @@ where
                 digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
             }
         };
+    }
+}
+
+impl<Digit, const SHIFT: usize> Zero for BigInt<Digit, SHIFT>
+where
+    Digit: PrimInt + TryFrom<usize> + WrappingSub,
+{
+    fn zero() -> Self {
+        BigInt {
+            sign: 0,
+            digits: vec![Digit::zero()],
+        }
+    }
+
+    fn is_zero(&self) -> bool {
+        self.sign.is_zero()
     }
 }
 

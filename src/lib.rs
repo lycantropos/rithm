@@ -1,6 +1,7 @@
 #![feature(destructuring_assignment)]
 #![feature(option_result_unwrap_unchecked)]
 
+use num::Zero;
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
@@ -49,6 +50,10 @@ impl PyNumberProtocol for Int {
 
 #[pyproto]
 impl PyObjectProtocol for Int {
+    fn __bool__(self) -> bool {
+        !self.0.is_zero()
+    }
+
     fn __hash__(&self) -> Py_hash_t {
         self.0.hash() as Py_hash_t
     }

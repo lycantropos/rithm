@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::f64;
 use std::iter::Peekable;
-use std::ops::Add;
+use std::ops::{Add, Neg};
 use std::str::Chars;
 
 use num::traits::WrappingSub;
@@ -634,6 +634,17 @@ where
                 digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
             }
         };
+    }
+}
+
+impl<Digit, const SHIFT: usize> Neg for BigInt<Digit, SHIFT> {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self {
+            sign: -self.sign,
+            digits: self.digits,
+        }
     }
 }
 

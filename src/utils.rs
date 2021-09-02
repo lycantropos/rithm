@@ -7,18 +7,17 @@ where
     T: PrimInt + From<u8>,
     usize: TryFrom<T>,
 {
-    static BIT_LENGTHS_TABLE: [usize; 32] = [
-        0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-        5, 5,
-    ];
     let mut result: usize = 0;
     let mut value = value;
     while value >= <T as From<u8>>::from(32u8) {
         result += 6;
         value = value >> 6;
     }
-    result += BIT_LENGTHS_TABLE[unsafe { usize::try_from(value).unwrap_unchecked() }];
-    result
+    const BIT_LENGTHS_TABLE: [usize; 32] = [
+        0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+        5, 5,
+    ];
+    result + BIT_LENGTHS_TABLE[unsafe { usize::try_from(value).unwrap_unchecked() }]
 }
 
 pub(crate) const fn floor_log(value: usize, base: usize) -> Result<usize, &'static str> {
@@ -41,10 +40,14 @@ pub(crate) const fn power(base: usize, exponent: usize) -> usize {
     }
 }
 
-pub(crate) fn floor_log2<T>(value: T) -> usize
+pub(crate) fn floor_log2<T>(value: T) -> Result<usize, &'static str>
 where
-    T: PrimInt + From<u8>,
+    T: From<u8> + PrimInt,
     usize: TryFrom<T>,
 {
-    to_bit_length(value) - 1
+    if value.is_zero() {
+        Err("Logarithm of zero is undefined.")
+    } else {
+        Ok(to_bit_length(value) - 1)
+    }
 }

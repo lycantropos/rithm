@@ -467,7 +467,7 @@ where
         binary_digits_to_binary_base(
             source_digits,
             source_shift,
-            utils::floor_log2::<usize>(target_base),
+            utils::floor_log2::<usize>(target_base).unwrap(),
         )
     } else {
         binary_digits_to_non_binary_base(source_digits, source_shift, target_base)
@@ -495,7 +495,7 @@ where
     if source_base & (source_base - 1) == 0 {
         binary_digits_to_binary_base(
             source_digits,
-            utils::floor_log2::<usize>(source_base),
+            utils::floor_log2::<usize>(source_base).unwrap(),
             target_shift,
         )
     } else {

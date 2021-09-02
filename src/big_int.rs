@@ -10,6 +10,7 @@ use num::traits::WrappingSub;
 use num::{One, PrimInt, Zero};
 
 use crate::utils;
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, PartialEq, Eq, Ord)]
 pub struct BigInt<Digit, const SHIFT: usize> {
@@ -199,6 +200,19 @@ where
     }
 }
 
+impl<Digit, const SHIFT: usize> Display for BigInt<Digit, SHIFT>
+where
+    Digit: DoublePrecisiony + PrimInt + TryFrom<DoublePrecision<Digit>> + TryFrom<usize>,
+    DoublePrecision<Digit>: From<Digit> + PrimInt + TryFrom<usize>,
+    <DoublePrecision<Digit> as TryFrom<usize>>::Error: fmt::Debug,
+    <Digit as TryFrom<DoublePrecision<Digit>>>::Error: fmt::Debug,
+    usize: TryFrom<Digit>,
+{
+    fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
+        formatter.write_str(self.to_base_string(10).as_str())
+    }
+}
+
 impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT>
 where
     Digit: DoublePrecisiony + PrimInt + TryFrom<DoublePrecision<Digit>> + TryFrom<usize>,
@@ -211,25 +225,25 @@ where
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
         'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
     ];
-    pub(crate) fn to_string(&self, target_base: usize) -> String {
-        let target_shift = utils::floor_log(1 << SHIFT, target_base);
-        let target_digits: Vec<Digit> = binary_digits_to_base::<Digit, Digit>(
+    pub(crate) fn to_base_string(&self, base: usize) -> String {
+        let shift = utils::floor_log(1 << SHIFT, base);
+        let digits: Vec<Digit> = binary_digits_to_base::<Digit, Digit>(
             &self.digits,
             SHIFT,
-            utils::power(target_base, target_shift),
+            utils::power(base, shift),
         );
         let characters_count = ((self.sign < 0) as usize)
-            + (target_digits.len() - 1) * target_shift
+            + (digits.len() - 1) * shift
             + utils::floor_log(
-                unsafe { usize::try_from(*target_digits.last().unwrap()).unwrap_unchecked() },
-                target_base,
+            unsafe { usize::try_from(*digits.last().unwrap()).unwrap_unchecked() },
+            base,
             )
             + 1;
         let mut characters: String = String::with_capacity(characters_count);
-        let target_base = unsafe { Digit::try_from(target_base).unwrap_unchecked() };
-        for index in 0..target_digits.len() - 1 {
-            let mut remainder = target_digits[index];
-            for _ in 0..target_shift {
+        let target_base = unsafe { Digit::try_from(base).unwrap_unchecked() };
+        for index in 0..digits.len() - 1 {
+            let mut remainder = digits[index];
+            for _ in 0..shift {
                 characters.push(
                     Self::DIGIT_VALUES_ASCII_CODES
                         [unsafe { usize::try_from(remainder % target_base).unwrap_unchecked() }],
@@ -237,7 +251,7 @@ where
                 remainder = remainder / target_base;
             }
         }
-        let mut remainder = *target_digits.last().unwrap();
+        let mut remainder = *digits.last().unwrap();
         while !remainder.is_zero() {
             characters.push(
                 Self::DIGIT_VALUES_ASCII_CODES

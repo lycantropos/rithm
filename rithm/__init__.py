@@ -1,4 +1,4 @@
-"""Arbitrary precision arithmetics."""
+"""Arbitrary precision arithmetic."""
 
 __version__ = '0.1.0-alpha'
 

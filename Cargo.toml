@@ -1,6 +1,6 @@
 [package]
 name = "rithm"
-description = "Arbitrary precision arithmetics."
+description = "Arbitrary precision arithmetic."
 license = "MIT"
 license_file = "LICENSE"
 version = "0.1.0-alpha"

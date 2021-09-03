@@ -2,6 +2,7 @@ use core::fmt;
 use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::f64;
+use std::fmt::{Display, Formatter};
 use std::iter::Peekable;
 use std::ops::{Add, Neg, Sub};
 use std::str::Chars;
@@ -10,7 +11,6 @@ use num::traits::WrappingSub;
 use num::{One, PrimInt, Zero};
 
 use crate::utils;
-use std::fmt::{Display, Formatter};
 
 #[derive(Clone, PartialEq, Eq, Ord)]
 pub struct BigInt<Digit, const SHIFT: usize> {
@@ -84,16 +84,16 @@ const MAX_REPRESENTABLE_BASE: u8 = 36;
 
 impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT>
 where
-    u8: DoublePrecisiony + PrimInt,
+    u8: DoublePrecision + PrimInt,
     Digit: Copy
-        + DoublePrecisiony
-        + TryFrom<DoublePrecision<Digit>>
+        + DoublePrecision
+        + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<u8>
-        + TryFrom<DoublePrecision<u8>>
-        + TryFrom<DoublePrecision<Digit>>
+        + TryFrom<DoublePrecisionOf<u8>>
+        + TryFrom<DoublePrecisionOf<Digit>>
         + Zero,
-    DoublePrecision<u8>: From<u8> + PrimInt,
-    DoublePrecision<Digit>: From<u8> + From<Digit> + PrimInt + TryFrom<usize>,
+    DoublePrecisionOf<u8>: From<u8> + PrimInt,
+    DoublePrecisionOf<Digit>: From<u8> + From<Digit> + PrimInt + TryFrom<usize>,
 {
     const SEPARATOR: char = '_';
     const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
@@ -202,10 +202,11 @@ where
 
 impl<Digit, const SHIFT: usize> Display for BigInt<Digit, SHIFT>
 where
-    Digit: DoublePrecisiony + From<u8> + PrimInt + TryFrom<DoublePrecision<Digit>> + TryFrom<usize>,
-    DoublePrecision<Digit>: From<Digit> + PrimInt + TryFrom<usize>,
-    <DoublePrecision<Digit> as TryFrom<usize>>::Error: fmt::Debug,
-    <Digit as TryFrom<DoublePrecision<Digit>>>::Error: fmt::Debug,
+    Digit:
+        DoublePrecision + From<u8> + PrimInt + TryFrom<DoublePrecisionOf<Digit>> + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: From<Digit> + PrimInt + TryFrom<usize>,
+    <DoublePrecisionOf<Digit> as TryFrom<usize>>::Error: fmt::Debug,
+    <Digit as TryFrom<DoublePrecisionOf<Digit>>>::Error: fmt::Debug,
     usize: TryFrom<Digit>,
 {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
@@ -215,10 +216,11 @@ where
 
 impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT>
 where
-    Digit: DoublePrecisiony + From<u8> + PrimInt + TryFrom<DoublePrecision<Digit>> + TryFrom<usize>,
-    DoublePrecision<Digit>: From<Digit> + PrimInt + TryFrom<usize>,
-    <DoublePrecision<Digit> as TryFrom<usize>>::Error: fmt::Debug,
-    <Digit as TryFrom<DoublePrecision<Digit>>>::Error: fmt::Debug,
+    Digit:
+        DoublePrecision + From<u8> + PrimInt + TryFrom<DoublePrecisionOf<Digit>> + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: From<Digit> + PrimInt + TryFrom<usize>,
+    <DoublePrecisionOf<Digit> as TryFrom<usize>>::Error: fmt::Debug,
+    <Digit as TryFrom<DoublePrecisionOf<Digit>>>::Error: fmt::Debug,
     usize: TryFrom<Digit>,
 {
     const DIGIT_VALUES_ASCII_CODES: [char; MAX_REPRESENTABLE_BASE as usize] = [
@@ -349,16 +351,16 @@ where
 
 impl<Digit, const SHIFT: usize> TryFrom<&str> for BigInt<Digit, SHIFT>
 where
-    u8: DoublePrecisiony + PrimInt,
+    u8: DoublePrecision + PrimInt,
     Digit: Copy
-        + DoublePrecisiony
-        + TryFrom<DoublePrecision<Digit>>
+        + DoublePrecision
+        + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<u8>
-        + TryFrom<DoublePrecision<u8>>
-        + TryFrom<DoublePrecision<Digit>>
+        + TryFrom<DoublePrecisionOf<u8>>
+        + TryFrom<DoublePrecisionOf<Digit>>
         + Zero,
-    DoublePrecision<u8>: From<u8> + PrimInt,
-    DoublePrecision<Digit>: From<u8> + From<Digit> + PrimInt + TryFrom<usize>,
+    DoublePrecisionOf<u8>: From<u8> + PrimInt,
+    DoublePrecisionOf<Digit>: From<u8> + From<Digit> + PrimInt + TryFrom<usize>,
 {
     type Error = String;
 
@@ -425,23 +427,88 @@ where
     }
 }
 
-pub trait DoublePrecisiony {
+pub trait DoublePrecision {
     type Type;
 }
 
-impl DoublePrecisiony for u8 {
+impl DoublePrecision for i8 {
+    type Type = i16;
+}
+
+impl DoublePrecision for i16 {
+    type Type = i32;
+}
+
+impl DoublePrecision for i32 {
+    type Type = i64;
+}
+
+impl DoublePrecision for i64 {
+    type Type = i128;
+}
+
+impl DoublePrecision for u8 {
     type Type = u16;
 }
 
-impl DoublePrecisiony for u16 {
+impl DoublePrecision for u16 {
     type Type = u32;
 }
 
-impl DoublePrecisiony for u32 {
+impl DoublePrecision for u32 {
     type Type = u64;
 }
 
-pub type DoublePrecision<T> = <T as DoublePrecisiony>::Type;
+impl DoublePrecision for u64 {
+    type Type = u128;
+}
+
+pub trait Signed {
+    type Type;
+}
+
+impl Signed for u8 {
+    type Type = i8;
+}
+
+impl Signed for u16 {
+    type Type = i16;
+}
+
+impl Signed for u32 {
+    type Type = i32;
+}
+
+impl Signed for u64 {
+    type Type = i64;
+}
+
+impl Signed for u128 {
+    type Type = i128;
+}
+
+impl Signed for i8 {
+    type Type = i8;
+}
+
+impl Signed for i16 {
+    type Type = i16;
+}
+
+impl Signed for i32 {
+    type Type = i32;
+}
+
+impl Signed for i64 {
+    type Type = i64;
+}
+
+impl Signed for i128 {
+    type Type = i128;
+}
+
+pub type DoublePrecisionOf<T> = <T as DoublePrecision>::Type;
+pub type SignedOf<T> = <T as Signed>::Type;
 pub(crate) type Sign = i8;
 
 pub(crate) fn binary_digits_to_base<SourceDigit, TargetDigit>(
@@ -450,17 +517,18 @@ pub(crate) fn binary_digits_to_base<SourceDigit, TargetDigit>(
     target_base: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: Copy + DoublePrecisiony + From<u8> + PrimInt,
+    SourceDigit: Copy + DoublePrecision + From<u8> + PrimInt,
     TargetDigit: Copy
-        + DoublePrecisiony
+        + DoublePrecision
         + TryFrom<SourceDigit>
-        + TryFrom<DoublePrecision<SourceDigit>>
-        + TryFrom<DoublePrecision<TargetDigit>>
+        + TryFrom<DoublePrecisionOf<SourceDigit>>
+        + TryFrom<DoublePrecisionOf<TargetDigit>>
         + Zero,
-    DoublePrecision<SourceDigit>: From<SourceDigit> + PrimInt,
-    DoublePrecision<TargetDigit>: From<SourceDigit> + From<TargetDigit> + PrimInt + TryFrom<usize>,
-    <DoublePrecision<TargetDigit> as TryFrom<usize>>::Error: fmt::Debug,
-    <TargetDigit as TryFrom<DoublePrecision<TargetDigit>>>::Error: fmt::Debug,
+    DoublePrecisionOf<SourceDigit>: From<SourceDigit> + PrimInt,
+    DoublePrecisionOf<TargetDigit>:
+        From<SourceDigit> + From<TargetDigit> + PrimInt + TryFrom<usize>,
+    <DoublePrecisionOf<TargetDigit> as TryFrom<usize>>::Error: fmt::Debug,
+    <TargetDigit as TryFrom<DoublePrecisionOf<TargetDigit>>>::Error: fmt::Debug,
     usize: TryFrom<SourceDigit>,
 {
     if target_base & (target_base - 1) == 0 {
@@ -480,16 +548,17 @@ pub(crate) fn digits_to_binary_base<SourceDigit, TargetDigit>(
     target_shift: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: DoublePrecisiony + From<u8> + PrimInt,
+    SourceDigit: DoublePrecision + From<u8> + PrimInt,
     TargetDigit: Copy
-        + DoublePrecisiony
-        + TryFrom<DoublePrecision<TargetDigit>>
+        + DoublePrecision
+        + TryFrom<DoublePrecisionOf<TargetDigit>>
         + TryFrom<SourceDigit>
-        + TryFrom<DoublePrecision<SourceDigit>>
-        + TryFrom<DoublePrecision<TargetDigit>>
+        + TryFrom<DoublePrecisionOf<SourceDigit>>
+        + TryFrom<DoublePrecisionOf<TargetDigit>>
         + Zero,
-    DoublePrecision<SourceDigit>: From<SourceDigit> + PrimInt,
-    DoublePrecision<TargetDigit>: From<SourceDigit> + From<TargetDigit> + PrimInt + TryFrom<usize>,
+    DoublePrecisionOf<SourceDigit>: From<SourceDigit> + PrimInt,
+    DoublePrecisionOf<TargetDigit>:
+        From<SourceDigit> + From<TargetDigit> + PrimInt + TryFrom<usize>,
     usize: TryFrom<SourceDigit>,
 {
     if source_base & (source_base - 1) == 0 {
@@ -509,13 +578,13 @@ fn binary_digits_to_binary_base<SourceDigit, TargetDigit>(
     target_shift: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: DoublePrecisiony + From<u8> + PrimInt,
-    TargetDigit: DoublePrecisiony
+    SourceDigit: DoublePrecision + From<u8> + PrimInt,
+    TargetDigit: DoublePrecision
         + TryFrom<SourceDigit>
-        + TryFrom<DoublePrecision<SourceDigit>>
-        + TryFrom<DoublePrecision<TargetDigit>>,
-    DoublePrecision<SourceDigit>: From<SourceDigit> + PrimInt,
-    DoublePrecision<TargetDigit>: From<SourceDigit> + PrimInt,
+        + TryFrom<DoublePrecisionOf<SourceDigit>>
+        + TryFrom<DoublePrecisionOf<TargetDigit>>,
+    DoublePrecisionOf<SourceDigit>: From<SourceDigit> + PrimInt,
+    DoublePrecisionOf<TargetDigit>: From<SourceDigit> + PrimInt,
     usize: TryFrom<SourceDigit>,
 {
     match target_shift.cmp(&source_shift) {
@@ -542,22 +611,23 @@ fn binary_digits_to_non_binary_base<SourceDigit, TargetDigit>(
     target_base: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: Copy + DoublePrecisiony,
-    TargetDigit: Copy + DoublePrecisiony + TryFrom<DoublePrecision<TargetDigit>> + Zero,
-    DoublePrecision<TargetDigit>: From<SourceDigit> + From<TargetDigit> + PrimInt + TryFrom<usize>,
-    <DoublePrecision<TargetDigit> as TryFrom<usize>>::Error: fmt::Debug,
-    <TargetDigit as TryFrom<DoublePrecision<TargetDigit>>>::Error: fmt::Debug,
+    SourceDigit: Copy + DoublePrecision,
+    TargetDigit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>> + Zero,
+    DoublePrecisionOf<TargetDigit>:
+        From<SourceDigit> + From<TargetDigit> + PrimInt + TryFrom<usize>,
+    <DoublePrecisionOf<TargetDigit> as TryFrom<usize>>::Error: fmt::Debug,
+    <TargetDigit as TryFrom<DoublePrecisionOf<TargetDigit>>>::Error: fmt::Debug,
 {
     let result_max_digits_count: usize = 1
         + ((((source_digits.len() * source_shift) as f64) / (target_base as f64).log2()) as usize);
     let mut result: Vec<TargetDigit> = Vec::with_capacity(result_max_digits_count);
-    let target_base = DoublePrecision::<TargetDigit>::try_from(target_base).unwrap();
+    let target_base = DoublePrecisionOf::<TargetDigit>::try_from(target_base).unwrap();
     for source_digit in source_digits.iter().rev() {
-        let mut digit: DoublePrecision<TargetDigit> =
-            DoublePrecision::<TargetDigit>::from(*source_digit);
+        let mut digit: DoublePrecisionOf<TargetDigit> =
+            DoublePrecisionOf::<TargetDigit>::from(*source_digit);
         for index in 0..result.len() {
-            let step: DoublePrecision<TargetDigit> =
-                (DoublePrecision::<TargetDigit>::from(result[index]) << source_shift) | digit;
+            let step: DoublePrecisionOf<TargetDigit> =
+                (DoublePrecisionOf::<TargetDigit>::from(result[index]) << source_shift) | digit;
             digit = step / target_base;
             result[index] = TargetDigit::try_from(step - digit * target_base).unwrap();
         }
@@ -579,19 +649,19 @@ fn binary_digits_to_greater_binary_base<SourceDigit, TargetDigit>(
 ) -> Vec<TargetDigit>
 where
     SourceDigit: PrimInt,
-    TargetDigit: DoublePrecisiony + TryFrom<DoublePrecision<TargetDigit>>,
-    DoublePrecision<TargetDigit>: From<SourceDigit> + PrimInt,
+    TargetDigit: DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>>,
+    DoublePrecisionOf<TargetDigit>: From<SourceDigit> + PrimInt,
 {
-    let target_digit_mask = (DoublePrecision::<TargetDigit>::one() << target_shift)
-        - DoublePrecision::<TargetDigit>::one();
+    let target_digit_mask = (DoublePrecisionOf::<TargetDigit>::one() << target_shift)
+        - DoublePrecisionOf::<TargetDigit>::one();
     let result_capacity: usize =
         (source_digits.len() * target_shift + (target_shift - 1)) / target_shift;
     let mut result: Vec<TargetDigit> = Vec::with_capacity(result_capacity);
-    let mut accumulator = DoublePrecision::<TargetDigit>::zero();
+    let mut accumulator = DoublePrecisionOf::<TargetDigit>::zero();
     let mut accumulator_bits_count: usize = 0;
     for digit in source_digits {
-        accumulator =
-            accumulator | (DoublePrecision::<TargetDigit>::from(*digit) << accumulator_bits_count);
+        accumulator = accumulator
+            | (DoublePrecisionOf::<TargetDigit>::from(*digit) << accumulator_bits_count);
         accumulator_bits_count += source_shift;
         if accumulator_bits_count >= target_shift {
             unsafe {
@@ -617,22 +687,24 @@ fn binary_digits_to_lesser_binary_base<SourceDigit, TargetDigit>(
     target_shift: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: DoublePrecisiony + From<u8> + PrimInt,
-    TargetDigit: TryFrom<DoublePrecision<SourceDigit>>,
-    DoublePrecision<SourceDigit>: PrimInt + From<SourceDigit>,
+    SourceDigit: DoublePrecision + From<u8> + PrimInt,
+    TargetDigit: TryFrom<DoublePrecisionOf<SourceDigit>>,
+    DoublePrecisionOf<SourceDigit>: PrimInt + From<SourceDigit>,
     usize: TryFrom<SourceDigit>,
 {
-    let target_digit_mask = (DoublePrecision::<SourceDigit>::one() << target_shift)
-        - DoublePrecision::<SourceDigit>::one();
+    let target_digit_mask = (DoublePrecisionOf::<SourceDigit>::one() << target_shift)
+        - DoublePrecisionOf::<SourceDigit>::one();
     let result_digits_bits_count: usize = (source_digits.len() - 1) * source_shift
         + utils::to_bit_length(*source_digits.last().unwrap());
     let result_digits_count: usize = (result_digits_bits_count + (target_shift - 1)) / target_shift;
     let mut result: Vec<TargetDigit> = Vec::with_capacity(result_digits_count);
-    let mut accumulator = DoublePrecision::<SourceDigit>::zero();
+    let mut accumulator = DoublePrecisionOf::<SourceDigit>::zero();
     let mut accumulator_bits_count: usize = 0;
     for index in 0..source_digits.len() {
         accumulator = accumulator
-            | DoublePrecision::<SourceDigit>::from(source_digits[index] << accumulator_bits_count);
+            | DoublePrecisionOf::<SourceDigit>::from(
+                source_digits[index] << accumulator_bits_count,
+            );
         accumulator_bits_count += source_shift;
         loop {
             unsafe {
@@ -661,14 +733,15 @@ pub(crate) fn non_binary_digits_to_binary_base<SourceDigit, TargetDigit>(
 ) -> Vec<TargetDigit>
 where
     SourceDigit: Copy,
-    TargetDigit: Copy + DoublePrecisiony + TryFrom<DoublePrecision<TargetDigit>> + Zero,
-    DoublePrecision<TargetDigit>: PrimInt + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
+    TargetDigit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>> + Zero,
+    DoublePrecisionOf<TargetDigit>:
+        PrimInt + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
 {
     let target_base = 1usize << target_shift;
-    let target_digit_mask: DoublePrecision<TargetDigit>;
+    let target_digit_mask: DoublePrecisionOf<TargetDigit>;
     unsafe {
         target_digit_mask =
-            DoublePrecision::<TargetDigit>::try_from(target_base - 1).unwrap_unchecked();
+            DoublePrecisionOf::<TargetDigit>::try_from(target_base - 1).unwrap_unchecked();
     }
     static mut bases_logs: [f64; 37] = [0.0; 37];
     static mut infimum_bases_exponents: [usize; 37] = [0; 37];
@@ -696,15 +769,16 @@ where
     let infimum_base_power = unsafe { infimum_bases_powers[source_base] };
     let mut reversed_source_digits = source_digits.iter().rev();
     while let Some(&source_digit) = reversed_source_digits.next() {
-        let mut digit = DoublePrecision::<TargetDigit>::from(source_digit);
+        let mut digit = DoublePrecisionOf::<TargetDigit>::from(source_digit);
         let mut base_exponent: usize = 1;
         while base_exponent < infimum_base_exponent {
             if let Some(&source_digit) = reversed_source_digits.next() {
                 base_exponent += 1;
                 unsafe {
                     digit = digit
-                        * DoublePrecision::<TargetDigit>::try_from(source_base).unwrap_unchecked()
-                        + DoublePrecision::<TargetDigit>::from(source_digit);
+                        * DoublePrecisionOf::<TargetDigit>::try_from(source_base)
+                            .unwrap_unchecked()
+                        + DoublePrecisionOf::<TargetDigit>::from(source_digit);
                 }
             } else {
                 break;
@@ -717,9 +791,9 @@ where
         };
         for index in 0..digits.len() {
             digit = digit
-                + DoublePrecision::<TargetDigit>::from(digits[index])
+                + DoublePrecisionOf::<TargetDigit>::from(digits[index])
                     * unsafe {
-                        DoublePrecision::<TargetDigit>::try_from(base_power).unwrap_unchecked()
+                        DoublePrecisionOf::<TargetDigit>::try_from(base_power).unwrap_unchecked()
                     };
             digits[index] =
                 unsafe { TargetDigit::try_from(digit & target_digit_mask).unwrap_unchecked() };

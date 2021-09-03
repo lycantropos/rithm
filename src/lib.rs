@@ -19,7 +19,7 @@ type Digit = u16;
 #[cfg(not(target_arch = "x86"))]
 type Digit = u32;
 
-const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
+const BINARY_SHIFT: usize = (SignedOf::<Digit>::BITS - 2) as usize;
 
 type _BigInt = BigInt<Digit, BINARY_SHIFT>;
 

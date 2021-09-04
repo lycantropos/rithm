@@ -4,7 +4,7 @@ use std::convert::TryFrom;
 use std::f64;
 use std::fmt::{Display, Formatter};
 use std::iter::Peekable;
-use std::ops::{Add, Neg, Sub};
+use std::ops::{Add, Mul, Neg, Sub};
 use std::str::Chars;
 
 use num::traits::WrappingSub;
@@ -323,6 +323,7 @@ where
     Digit: PrimInt + TryFrom<usize> + WrappingSub,
 {
     type Output = Self;
+
     fn add(self, other: Self) -> Self::Output {
         if self.sign < 0 {
             if other.sign < 0 {
@@ -366,6 +367,25 @@ where
 
     fn try_from(string: &str) -> Result<Self, Self::Error> {
         Self::new(string, 0)
+    }
+}
+
+impl<Digit, const SHIFT: usize> Mul for BigInt<Digit, SHIFT>
+where
+    Digit: DoublePrecision
+        + PrimInt
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<usize>
+        + WrappingSub,
+    DoublePrecisionOf<Digit>: From<Digit> + PrimInt,
+{
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self::Output {
+        Self::Output {
+            sign: self.sign * other.sign,
+            digits: multiply_digits::<Digit, SHIFT>(&self.digits, &other.digits),
+        }
     }
 }
 
@@ -809,6 +829,192 @@ where
     digits
 }
 
+fn multiply_digits<Digit, const SHIFT: usize>(first: &Vec<Digit>, second: &Vec<Digit>) -> Vec<Digit>
+where
+    Digit: DoublePrecision
+        + PrimInt
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<usize>
+        + WrappingSub,
+    DoublePrecisionOf<Digit>: From<Digit> + PrimInt,
+{
+    let mut shortest = &first;
+    let mut longest = &second;
+    let mut size_shortest = shortest.len();
+    let mut size_longest = longest.len();
+    if size_longest < size_shortest {
+        (shortest, longest) = (longest, shortest);
+        (size_shortest, size_longest) = (size_longest, size_shortest);
+    }
+    const KARATSUBA_CUTOFF: usize = 70;
+    const KARATSUBA_SQUARE_CUTOFF: usize = KARATSUBA_CUTOFF * 2;
+    if size_shortest
+        <= if shortest.as_ptr() == longest.as_ptr() {
+            KARATSUBA_SQUARE_CUTOFF
+        } else {
+            KARATSUBA_CUTOFF
+        }
+    {
+        return if size_shortest == 0 {
+            vec![Digit::zero()]
+        } else {
+            multiply_digits_plain::<Digit, SHIFT>(*shortest, *longest)
+        };
+    };
+    if 2 * size_shortest <= size_longest {
+        return multiply_digits_lopsided::<Digit, SHIFT>(*shortest, *longest);
+    }
+    let shift = size_longest >> 1;
+    let (shortest_high, shortest_low) = split_digits(*shortest, shift);
+    let (longest_high, longest_low) = if shortest.as_ptr() == longest.as_ptr() {
+        (shortest_high.clone(), shortest_low.clone())
+    } else {
+        split_digits(*longest, shift)
+    };
+    let mut result = vec![Digit::zero(); size_shortest + size_longest];
+    let highs_product = multiply_digits::<Digit, SHIFT>(&shortest_high, &longest_high);
+    for (index, &digit) in highs_product.iter().enumerate() {
+        result[index + 2 * shift] = digit;
+    }
+    let lows_product = multiply_digits::<Digit, SHIFT>(&shortest_low, &longest_low);
+    for (index, &digit) in lows_product.iter().enumerate() {
+        result[index] = digit;
+    }
+    subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &lows_product);
+    subtract_digits_in_place::<Digit, SHIFT>(
+        &mut result[shift..],
+        &highs_product,
+    );
+    let shortest_components_sum = sum_digits::<Digit, SHIFT>(&shortest_high, &shortest_low);
+    let longest_components_sum = if shortest.as_ptr() == longest.as_ptr() {
+        shortest_components_sum.clone()
+    } else {
+        sum_digits::<Digit, SHIFT>(&longest_high, &longest_low)
+    };
+    let components_sums_product =
+        multiply_digits::<Digit, SHIFT>(&shortest_components_sum, &longest_components_sum);
+    sum_digits_in_place::<Digit, SHIFT>(
+        &mut result[shift..],
+        &components_sums_product,
+    );
+    normalize_digits(&mut result);
+    result
+}
+
+fn multiply_digits_lopsided<Digit, const SHIFT: usize>(
+    shortest: &Vec<Digit>,
+    longest: &Vec<Digit>,
+) -> Vec<Digit>
+where
+    Digit: DoublePrecision
+        + PrimInt
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<usize>
+        + WrappingSub,
+    DoublePrecisionOf<Digit>: From<Digit> + PrimInt,
+{
+    let size_shortest = shortest.len();
+    let mut size_longest = longest.len();
+    let mut result = vec![Digit::zero(); size_shortest + size_longest];
+    let mut processed_digits_count = 0;
+    while size_longest > 0 {
+        let step_digits_count = size_longest.min(size_shortest);
+        let product = multiply_digits::<Digit, SHIFT>(
+            shortest,
+            &longest[processed_digits_count..processed_digits_count + step_digits_count].to_vec(),
+        );
+        sum_digits_in_place::<Digit, SHIFT>(
+            &mut result[processed_digits_count..],
+            &product,
+        );
+        size_longest -= step_digits_count;
+        processed_digits_count += step_digits_count;
+    }
+    normalize_digits(&mut result);
+    result
+}
+
+fn multiply_digits_plain<Digit, const SHIFT: usize>(
+    shortest: &Vec<Digit>,
+    longest: &Vec<Digit>,
+) -> Vec<Digit>
+where
+    Digit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>> + Zero,
+    DoublePrecisionOf<Digit>: From<Digit> + PrimInt,
+{
+    let size_shortest = shortest.len();
+    let size_longest = longest.len();
+    let mut result: Vec<Digit> = vec![Digit::zero(); size_shortest + size_longest];
+    let digit_mask =
+        (DoublePrecisionOf::<Digit>::one() << SHIFT) - DoublePrecisionOf::<Digit>::one();
+    if shortest.as_ptr() == longest.as_ptr() {
+        for index in 0..size_shortest {
+            let mut digit = DoublePrecisionOf::<Digit>::from(shortest[index]);
+            let mut result_position = index << 1;
+            let mut accumulator =
+                DoublePrecisionOf::<Digit>::from(result[result_position]) + digit * digit;
+            result[result_position] =
+                unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+            result_position += 1;
+            accumulator = accumulator >> SHIFT;
+            digit = digit << 1;
+            for first_position in index + 1..shortest.len() {
+                accumulator = accumulator
+                    + DoublePrecisionOf::<Digit>::from(result[result_position])
+                    + DoublePrecisionOf::<Digit>::from(shortest[first_position]) * digit;
+                result[result_position] =
+                    unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+                result_position += 1;
+                accumulator = accumulator >> SHIFT;
+            }
+            if !accumulator.is_zero() {
+                accumulator =
+                    accumulator + DoublePrecisionOf::<Digit>::from(result[result_position]);
+                result[result_position] =
+                    unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+                result_position += 1;
+                accumulator = accumulator >> SHIFT;
+            }
+            if !accumulator.is_zero() {
+                result[result_position] = result[result_position]
+                    + unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+            }
+        }
+    } else {
+        for index in 0..size_shortest {
+            let mut accumulator = DoublePrecisionOf::<Digit>::zero();
+            let digit = DoublePrecisionOf::<Digit>::from(shortest[index]);
+            let mut result_position = index;
+            for &second_digit in longest {
+                accumulator = accumulator
+                    + DoublePrecisionOf::<Digit>::from(result[result_position])
+                    + DoublePrecisionOf::<Digit>::from(second_digit) * digit;
+                result[result_position] =
+                    unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+                result_position += 1;
+                accumulator = accumulator >> SHIFT;
+            }
+            if !accumulator.is_zero() {
+                result[result_position] = result[result_position]
+                    + unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+            }
+        }
+    }
+    normalize_digits(&mut result);
+    result
+}
+
+fn split_digits<Digit>(digits: &Vec<Digit>, size: usize) -> (Vec<Digit>, Vec<Digit>)
+where
+    Digit: Clone + Zero,
+{
+    let (low, high) = digits.split_at(digits.len().min(size));
+    let (mut low, mut high) = (low.to_vec(), high.to_vec());
+    normalize_digits(&mut high);
+    normalize_digits(&mut low);
+    (high, low)
+}
+
 fn subtract_digits<Digit, const SHIFT: usize>(
     first: &Vec<Digit>,
     second: &Vec<Digit>,
@@ -863,6 +1069,31 @@ where
     result
 }
 
+fn subtract_digits_in_place<Digit, const SHIFT: usize>(
+    longest: &mut [Digit],
+    shortest: &Vec<Digit>,
+) -> Digit
+where
+    Digit: PrimInt + WrappingSub,
+{
+    let mut accumulator = Digit::zero();
+    let digit_mask = (Digit::one() << SHIFT) - Digit::one();
+    for index in 0..shortest.len() {
+        accumulator = longest[index].wrapping_sub(&shortest[index]) - accumulator;
+        longest[index] = accumulator & digit_mask;
+        accumulator = (accumulator >> SHIFT) & Digit::one();
+    }
+    for index in shortest.len()..longest.len() {
+        if accumulator.is_zero() {
+            break;
+        }
+        accumulator = longest[index].wrapping_sub(&accumulator);
+        longest[index] = accumulator & digit_mask;
+        accumulator = (accumulator >> SHIFT) & Digit::one();
+    }
+    accumulator
+}
+
 fn sum_digits<Digit, const SHIFT: usize>(first: &Vec<Digit>, second: &Vec<Digit>) -> Vec<Digit>
 where
     Digit: PrimInt + TryFrom<usize>,
@@ -891,6 +1122,31 @@ where
     result.push(accumulator);
     normalize_digits(&mut result);
     result
+}
+
+fn sum_digits_in_place<Digit, const SHIFT: usize>(
+    longest: &mut [Digit],
+    shortest: &Vec<Digit>,
+) -> Digit
+where
+    Digit: PrimInt,
+{
+    let mut accumulator = Digit::zero();
+    let digit_mask = (Digit::one() << SHIFT) - Digit::one();
+    for index in 0..shortest.len() {
+        accumulator = longest[index] + shortest[index] + accumulator;
+        longest[index] = accumulator & digit_mask;
+        accumulator = accumulator >> SHIFT;
+    }
+    for index in shortest.len()..longest.len() {
+        if accumulator.is_zero() {
+            break;
+        }
+        accumulator = accumulator + longest[index];
+        longest[index] = accumulator & digit_mask;
+        accumulator = accumulator >> SHIFT;
+    }
+    accumulator
 }
 
 fn normalize_digits<Digit>(digits: &mut Vec<Digit>) -> ()

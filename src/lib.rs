@@ -7,9 +7,10 @@ use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
 use pyo3::ffi::Py_hash_t;
 use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, Python};
-use pyo3::PyNumberProtocol;
+use pyo3::{PyNumberProtocol, PyRef};
 
 pub use crate::big_int::*;
+use std::ops::Deref;
 
 mod big_int;
 mod utils;
@@ -51,6 +52,10 @@ impl PyNumberProtocol for Int {
 
     fn __add__(lhs: Int, rhs: Int) -> Int {
         Int { 0: lhs.0 + rhs.0 }
+    }
+
+    fn __mul__(lhs: Int, rhs: Int) -> Int {
+        Int { 0: lhs.0 * rhs.0 }
     }
 
     fn __neg__(&self) -> Int {

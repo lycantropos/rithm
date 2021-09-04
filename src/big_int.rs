@@ -855,7 +855,7 @@ where
             KARATSUBA_CUTOFF
         }
     {
-        return if size_shortest == 0 {
+        return if size_shortest == 1 && shortest[0].is_zero() {
             vec![Digit::zero()]
         } else {
             multiply_digits_plain::<Digit, SHIFT>(*shortest, *longest)

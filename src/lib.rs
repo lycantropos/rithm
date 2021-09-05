@@ -44,25 +44,23 @@ impl Int {
 #[pyproto]
 impl PyNumberProtocol for Int {
     fn __abs__(&self) -> Int {
-        Int {
-            0: self.0.clone().abs(),
-        }
+        Int(self.0.clone().abs())
     }
 
     fn __add__(lhs: Int, rhs: Int) -> Int {
-        Int { 0: lhs.0 + rhs.0 }
+        Int(lhs.0 + rhs.0)
     }
 
     fn __mul__(lhs: Int, rhs: Int) -> Int {
-        Int { 0: lhs.0 * rhs.0 }
+        Int(lhs.0 * rhs.0)
     }
 
     fn __neg__(&self) -> Int {
-        Int { 0: -self.0.clone() }
+        Int(-self.0.clone())
     }
 
     fn __sub__(lhs: Int, rhs: Int) -> Int {
-        Int { 0: lhs.0 - rhs.0 }
+        Int(lhs.0 - rhs.0)
     }
 }
 

@@ -8,7 +8,7 @@ use std::ops::{Add, Mul, Neg, Sub};
 use std::str::Chars;
 
 use num::traits::WrappingSub;
-use num::{One, PrimInt, Zero};
+use num::{PrimInt, Zero};
 
 use crate::utils;
 
@@ -722,7 +722,7 @@ where
     DoublePrecisionOf<SourceDigit>: PrimInt + From<SourceDigit>,
     usize: TryFrom<SourceDigit>,
 {
-    let target_digit_mask = to_digit_mask::<DoublePrecisionOf::<SourceDigit>>(target_shift);
+    let target_digit_mask = to_digit_mask::<DoublePrecisionOf<SourceDigit>>(target_shift);
     let result_digits_bits_count: usize = (source_digits.len() - 1) * source_shift
         + utils::to_bit_length(*source_digits.last().unwrap());
     let result_digits_count: usize = (result_digits_bits_count + (target_shift - 1)) / target_shift;

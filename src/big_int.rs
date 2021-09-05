@@ -683,8 +683,7 @@ where
     TargetDigit: DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>>,
     DoublePrecisionOf<TargetDigit>: From<SourceDigit> + PrimInt,
 {
-    let target_digit_mask = (DoublePrecisionOf::<TargetDigit>::one() << target_shift)
-        - DoublePrecisionOf::<TargetDigit>::one();
+    let target_digit_mask = to_digit_mask::<DoublePrecisionOf<TargetDigit>>(target_shift);
     let result_capacity: usize =
         (source_digits.len() * target_shift + (target_shift - 1)) / target_shift;
     let mut result: Vec<TargetDigit> = Vec::with_capacity(result_capacity);
@@ -723,8 +722,7 @@ where
     DoublePrecisionOf<SourceDigit>: PrimInt + From<SourceDigit>,
     usize: TryFrom<SourceDigit>,
 {
-    let target_digit_mask = (DoublePrecisionOf::<SourceDigit>::one() << target_shift)
-        - DoublePrecisionOf::<SourceDigit>::one();
+    let target_digit_mask = to_digit_mask::<DoublePrecisionOf::<SourceDigit>>(target_shift);
     let result_digits_bits_count: usize = (source_digits.len() - 1) * source_shift
         + utils::to_bit_length(*source_digits.last().unwrap());
     let result_digits_count: usize = (result_digits_bits_count + (target_shift - 1)) / target_shift;
@@ -769,11 +767,7 @@ where
         PrimInt + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
 {
     let target_base = 1usize << target_shift;
-    let target_digit_mask: DoublePrecisionOf<TargetDigit>;
-    unsafe {
-        target_digit_mask =
-            DoublePrecisionOf::<TargetDigit>::try_from(target_base - 1).unwrap_unchecked();
-    }
+    let target_digit_mask = to_digit_mask::<DoublePrecisionOf<TargetDigit>>(target_shift);
     static mut bases_logs: [f64; 37] = [0.0; 37];
     static mut infimum_bases_exponents: [usize; 37] = [0; 37];
     static mut infimum_bases_powers: [usize; 37] = [0; 37];
@@ -1063,7 +1057,7 @@ where
         size_shortest = index + 1;
     }
     let mut result: Vec<Digit> = Vec::with_capacity(size_longest);
-    let digit_mask = (Digit::one() << SHIFT) - Digit::one();
+    let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for index in 0..size_shortest {
         accumulator = longest[index].wrapping_sub(&shortest[index]) - accumulator;
         result.push(accumulator & digit_mask);
@@ -1088,7 +1082,7 @@ where
     Digit: PrimInt + WrappingSub,
 {
     let mut accumulator = Digit::zero();
-    let digit_mask = (Digit::one() << SHIFT) - Digit::one();
+    let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for index in 0..shortest.len() {
         accumulator = longest[index].wrapping_sub(&shortest[index]) - accumulator;
         longest[index] = accumulator & digit_mask;
@@ -1122,7 +1116,7 @@ where
     }
     let mut result: Vec<Digit> = Vec::with_capacity(size_longest + 1);
     let mut accumulator: Digit = Digit::zero();
-    let digit_mask = (Digit::one() << SHIFT) - Digit::one();
+    let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for index in 0..size_shortest {
         accumulator = accumulator + longest[index] + shortest[index];
         result.push(accumulator & digit_mask);
@@ -1146,7 +1140,7 @@ where
     Digit: PrimInt,
 {
     let mut accumulator = Digit::zero();
-    let digit_mask = (Digit::one() << SHIFT) - Digit::one();
+    let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for index in 0..shortest.len() {
         accumulator = longest[index] + shortest[index] + accumulator;
         longest[index] = accumulator & digit_mask;
@@ -1174,4 +1168,12 @@ where
     if digits_count != digits.len() {
         digits.resize(digits_count, Digit::zero());
     }
+}
+
+#[inline]
+fn to_digit_mask<Digit>(shift: usize) -> Digit
+where
+    Digit: PrimInt,
+{
+    (Digit::one() << shift) - Digit::one()
 }

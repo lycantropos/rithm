@@ -227,7 +227,8 @@ where
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
         'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
     ];
-    pub(crate) fn to_base_string(&self, base: usize) -> String {
+
+    fn to_base_string(&self, base: usize) -> String {
         let shift = utils::floor_log(1 << SHIFT, base).unwrap();
         let digits: Vec<Digit> =
             binary_digits_to_base::<Digit, Digit>(&self.digits, SHIFT, utils::power(base, shift));
@@ -531,7 +532,7 @@ pub type DoublePrecisionOf<T> = <T as DoublePrecision>::Type;
 pub type SignedOf<T> = <T as Signed>::Type;
 pub(crate) type Sign = i8;
 
-pub(crate) fn binary_digits_to_base<SourceDigit, TargetDigit>(
+fn binary_digits_to_base<SourceDigit, TargetDigit>(
     source_digits: &Vec<SourceDigit>,
     source_shift: usize,
     target_base: usize,
@@ -562,7 +563,7 @@ where
     }
 }
 
-pub(crate) fn digits_to_binary_base<SourceDigit, TargetDigit>(
+fn digits_to_binary_base<SourceDigit, TargetDigit>(
     source_digits: &Vec<SourceDigit>,
     source_base: usize,
     target_shift: usize,
@@ -746,7 +747,7 @@ where
     result
 }
 
-pub(crate) fn non_binary_digits_to_binary_base<SourceDigit, TargetDigit>(
+fn non_binary_digits_to_binary_base<SourceDigit, TargetDigit>(
     source_digits: &Vec<SourceDigit>,
     source_base: usize,
     target_shift: usize,
@@ -881,10 +882,7 @@ where
         result[index] = digit;
     }
     subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &lows_product);
-    subtract_digits_in_place::<Digit, SHIFT>(
-        &mut result[shift..],
-        &highs_product,
-    );
+    subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &highs_product);
     let shortest_components_sum = sum_digits::<Digit, SHIFT>(&shortest_high, &shortest_low);
     let longest_components_sum = if shortest.as_ptr() == longest.as_ptr() {
         shortest_components_sum.clone()
@@ -893,10 +891,7 @@ where
     };
     let components_sums_product =
         multiply_digits::<Digit, SHIFT>(&shortest_components_sum, &longest_components_sum);
-    sum_digits_in_place::<Digit, SHIFT>(
-        &mut result[shift..],
-        &components_sums_product,
-    );
+    sum_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &components_sums_product);
     normalize_digits(&mut result);
     result
 }
@@ -923,10 +918,7 @@ where
             shortest,
             &longest[processed_digits_count..processed_digits_count + step_digits_count].to_vec(),
         );
-        sum_digits_in_place::<Digit, SHIFT>(
-            &mut result[processed_digits_count..],
-            &product,
-        );
+        sum_digits_in_place::<Digit, SHIFT>(&mut result[processed_digits_count..], &product);
         size_longest -= step_digits_count;
         processed_digits_count += step_digits_count;
     }

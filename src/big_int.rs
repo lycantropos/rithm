@@ -13,7 +13,7 @@ use num::{One, PrimInt, Zero};
 use crate::utils;
 
 #[derive(Clone, PartialEq, Eq, Ord)]
-pub struct BigInt<Digit, const SHIFT: usize> {
+pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
     sign: Sign,
     digits: Vec<Digit>,
 }
@@ -24,7 +24,9 @@ fn digits_lesser_than<Digit: PartialOrd>(left: &Vec<Digit>, right: &Vec<Digit>) 
         || left.len() == right.len() && left.iter().rev().lt(right.iter().rev())
 }
 
-impl<Digit: PartialOrd, const SHIFT: usize> PartialOrd for BigInt<Digit, SHIFT> {
+impl<Digit: PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(if self.lt(other) {
             Ordering::Less
@@ -82,7 +84,7 @@ impl<Digit: PartialOrd, const SHIFT: usize> PartialOrd for BigInt<Digit, SHIFT> 
 
 const MAX_REPRESENTABLE_BASE: u8 = 36;
 
-impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
     u8: DoublePrecision + PrimInt,
     Digit: Copy
@@ -95,7 +97,6 @@ where
     DoublePrecisionOf<u8>: From<u8> + PrimInt,
     DoublePrecisionOf<Digit>: From<u8> + From<Digit> + PrimInt + TryFrom<usize>,
 {
-    const SEPARATOR: char = '_';
     const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
         37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
         37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
@@ -145,19 +146,19 @@ where
                 Some('b') | Some('B') => {
                     if base == 2 {
                         characters.nth(1);
-                        characters.next_if_eq(&Self::SEPARATOR);
+                        characters.next_if_eq(&SEPARATOR);
                     }
                 }
                 Some('o') | Some('O') => {
                     if base == 8 {
                         characters.nth(1);
-                        characters.next_if_eq(&Self::SEPARATOR);
+                        characters.next_if_eq(&SEPARATOR);
                     }
                 }
                 Some('x') | Some('X') => {
                     if base == 16 {
                         characters.nth(1);
-                        characters.next_if_eq(&Self::SEPARATOR);
+                        characters.next_if_eq(&SEPARATOR);
                     }
                 }
                 _ => {}
@@ -175,24 +176,24 @@ where
     }
 
     fn parse_digits(mut characters: Peekable<Chars>, base: u8) -> Result<Vec<u8>, String> {
-        if characters.peek() == Some(&Self::SEPARATOR) {
+        if characters.peek() == Some(&SEPARATOR) {
             return Err(String::from("Should not start with separator."));
         }
         let mut result: Vec<u8> = Vec::new();
-        let mut prev: char = Self::SEPARATOR;
+        let mut prev: char = SEPARATOR;
         while let Some(character) = characters.next() {
-            if character != Self::SEPARATOR {
+            if character != SEPARATOR {
                 let digit = Self::ASCII_CODES_DIGIT_VALUES[character as usize];
                 if digit >= base {
                     return Err(format!("Invalid digit in base {}: {}.", base, character));
                 }
                 result.push(digit);
-            } else if prev == Self::SEPARATOR {
+            } else if prev == SEPARATOR {
                 return Err(String::from("Consecutive separators found."));
             }
             prev = character;
         }
-        if prev == Self::SEPARATOR {
+        if prev == SEPARATOR {
             return Err(String::from("Should not end with separator."));
         }
         result.reverse();
@@ -200,7 +201,7 @@ where
     }
 }
 
-impl<Digit, const SHIFT: usize> Display for BigInt<Digit, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Display for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit:
         DoublePrecision + From<u8> + PrimInt + TryFrom<DoublePrecisionOf<Digit>> + TryFrom<usize>,
@@ -214,7 +215,7 @@ where
     }
 }
 
-impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit:
         DoublePrecision + From<u8> + PrimInt + TryFrom<DoublePrecisionOf<Digit>> + TryFrom<usize>,
@@ -275,7 +276,7 @@ const HASH_BITS: usize = 31;
 const HASH_BITS: usize = 61;
 const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
 
-impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT> {
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT> {
     pub fn abs(self) -> Self {
         Self {
             sign: self.sign.abs(),
@@ -284,7 +285,7 @@ impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT> {
     }
 }
 
-impl<Digit, const SHIFT: usize> BigInt<Digit, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: From<bool> + PrimInt,
     usize: TryFrom<Digit>,
@@ -319,7 +320,7 @@ where
     }
 }
 
-impl<Digit, const SHIFT: usize> Add for BigInt<Digit, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Add for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: PrimInt + TryFrom<usize> + WrappingSub,
 {
@@ -330,28 +331,33 @@ where
             if other.sign < 0 {
                 Self {
                     sign: -1,
-                    digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
+                    digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
                 }
             } else {
                 let mut sign: Sign = 1;
-                let digits =
-                    subtract_digits::<Digit, SHIFT>(&other.digits, &self.digits, &mut sign);
+                let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
+                    &other.digits,
+                    &self.digits,
+                    &mut sign,
+                );
                 Self { sign, digits }
             }
         } else if other.sign < 0 {
             let mut sign: Sign = 1;
-            let digits = subtract_digits::<Digit, SHIFT>(&self.digits, &other.digits, &mut sign);
+            let digits =
+                subtract_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits, &mut sign);
             Self { sign, digits }
         } else {
             Self {
                 sign: self.sign | other.sign,
-                digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
+                digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
             }
         }
     }
 }
 
-impl<Digit, const SHIFT: usize> TryFrom<&str> for BigInt<Digit, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&str>
+    for BigInt<Digit, SEPARATOR, SHIFT>
 where
     u8: DoublePrecision + PrimInt,
     Digit: Copy
@@ -371,7 +377,7 @@ where
     }
 }
 
-impl<Digit, const SHIFT: usize> Mul for BigInt<Digit, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Mul for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: DoublePrecision
         + PrimInt
@@ -385,12 +391,12 @@ where
     fn mul(self, other: Self) -> Self::Output {
         Self::Output {
             sign: self.sign * other.sign,
-            digits: multiply_digits::<Digit, SHIFT>(&self.digits, &other.digits),
+            digits: multiply_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
         }
     }
 }
 
-impl<Digit, const SHIFT: usize> Neg for BigInt<Digit, SHIFT> {
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Neg for BigInt<Digit, SEPARATOR, SHIFT> {
     type Output = Self;
 
     fn neg(self) -> Self::Output {
@@ -401,7 +407,7 @@ impl<Digit, const SHIFT: usize> Neg for BigInt<Digit, SHIFT> {
     }
 }
 
-impl<Digit, const SHIFT: usize> Sub for BigInt<Digit, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Sub for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: PrimInt + TryFrom<usize> + WrappingSub,
 {
@@ -410,29 +416,33 @@ where
         return if self.sign < 0 {
             if other.sign < 0 {
                 let mut sign: Sign = 1;
-                let digits =
-                    subtract_digits::<Digit, SHIFT>(&other.digits, &self.digits, &mut sign);
+                let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
+                    &other.digits,
+                    &self.digits,
+                    &mut sign,
+                );
                 Self { sign, digits }
             } else {
                 Self {
                     sign: -1,
-                    digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
+                    digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
                 }
             }
         } else if other.sign < 0 {
             Self {
                 sign: 1,
-                digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
+                digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
             }
         } else {
             let mut sign: Sign = 1;
-            let digits = subtract_digits::<Digit, SHIFT>(&self.digits, &other.digits, &mut sign);
+            let digits =
+                subtract_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits, &mut sign);
             Self { sign, digits }
         };
     }
 }
 
-impl<Digit, const SHIFT: usize> Zero for BigInt<Digit, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Zero for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: PrimInt + TryFrom<usize> + WrappingSub,
 {
@@ -830,7 +840,10 @@ where
     digits
 }
 
-fn multiply_digits<Digit, const SHIFT: usize>(first: &Vec<Digit>, second: &Vec<Digit>) -> Vec<Digit>
+fn multiply_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
+    first: &Vec<Digit>,
+    second: &Vec<Digit>,
+) -> Vec<Digit>
 where
     Digit: DoublePrecision
         + PrimInt
@@ -859,11 +872,11 @@ where
         return if size_shortest == 1 && shortest[0].is_zero() {
             vec![Digit::zero()]
         } else {
-            multiply_digits_plain::<Digit, SHIFT>(*shortest, *longest)
+            multiply_digits_plain::<Digit, SEPARATOR, SHIFT>(*shortest, *longest)
         };
     };
     if 2 * size_shortest <= size_longest {
-        return multiply_digits_lopsided::<Digit, SHIFT>(*shortest, *longest);
+        return multiply_digits_lopsided::<Digit, SEPARATOR, SHIFT>(*shortest, *longest);
     }
     let shift = size_longest >> 1;
     let (shortest_high, shortest_low) = split_digits(*shortest, shift);
@@ -873,30 +886,33 @@ where
         split_digits(*longest, shift)
     };
     let mut result = vec![Digit::zero(); size_shortest + size_longest];
-    let highs_product = multiply_digits::<Digit, SHIFT>(&shortest_high, &longest_high);
+    let highs_product = multiply_digits::<Digit, SEPARATOR, SHIFT>(&shortest_high, &longest_high);
     for (index, &digit) in highs_product.iter().enumerate() {
         result[index + 2 * shift] = digit;
     }
-    let lows_product = multiply_digits::<Digit, SHIFT>(&shortest_low, &longest_low);
+    let lows_product = multiply_digits::<Digit, SEPARATOR, SHIFT>(&shortest_low, &longest_low);
     for (index, &digit) in lows_product.iter().enumerate() {
         result[index] = digit;
     }
-    subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &lows_product);
-    subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &highs_product);
-    let shortest_components_sum = sum_digits::<Digit, SHIFT>(&shortest_high, &shortest_low);
+    subtract_digits_in_place::<Digit, SEPARATOR, SHIFT>(&mut result[shift..], &lows_product);
+    subtract_digits_in_place::<Digit, SEPARATOR, SHIFT>(&mut result[shift..], &highs_product);
+    let shortest_components_sum =
+        sum_digits::<Digit, SEPARATOR, SHIFT>(&shortest_high, &shortest_low);
     let longest_components_sum = if shortest.as_ptr() == longest.as_ptr() {
         shortest_components_sum.clone()
     } else {
-        sum_digits::<Digit, SHIFT>(&longest_high, &longest_low)
+        sum_digits::<Digit, SEPARATOR, SHIFT>(&longest_high, &longest_low)
     };
-    let components_sums_product =
-        multiply_digits::<Digit, SHIFT>(&shortest_components_sum, &longest_components_sum);
-    sum_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &components_sums_product);
+    let components_sums_product = multiply_digits::<Digit, SEPARATOR, SHIFT>(
+        &shortest_components_sum,
+        &longest_components_sum,
+    );
+    sum_digits_in_place::<Digit, SEPARATOR, SHIFT>(&mut result[shift..], &components_sums_product);
     normalize_digits(&mut result);
     result
 }
 
-fn multiply_digits_lopsided<Digit, const SHIFT: usize>(
+fn multiply_digits_lopsided<Digit, const SEPARATOR: char, const SHIFT: usize>(
     shortest: &Vec<Digit>,
     longest: &Vec<Digit>,
 ) -> Vec<Digit>
@@ -914,11 +930,14 @@ where
     let mut processed_digits_count = 0;
     while size_longest > 0 {
         let step_digits_count = size_longest.min(size_shortest);
-        let product = multiply_digits::<Digit, SHIFT>(
+        let product = multiply_digits::<Digit, SEPARATOR, SHIFT>(
             shortest,
             &longest[processed_digits_count..processed_digits_count + step_digits_count].to_vec(),
         );
-        sum_digits_in_place::<Digit, SHIFT>(&mut result[processed_digits_count..], &product);
+        sum_digits_in_place::<Digit, SEPARATOR, SHIFT>(
+            &mut result[processed_digits_count..],
+            &product,
+        );
         size_longest -= step_digits_count;
         processed_digits_count += step_digits_count;
     }
@@ -926,7 +945,7 @@ where
     result
 }
 
-fn multiply_digits_plain<Digit, const SHIFT: usize>(
+fn multiply_digits_plain<Digit, const SEPARATOR: char, const SHIFT: usize>(
     shortest: &Vec<Digit>,
     longest: &Vec<Digit>,
 ) -> Vec<Digit>
@@ -1007,7 +1026,7 @@ where
     (high, low)
 }
 
-fn subtract_digits<Digit, const SHIFT: usize>(
+fn subtract_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
     first: &Vec<Digit>,
     second: &Vec<Digit>,
     sign: &mut Sign,
@@ -1061,7 +1080,7 @@ where
     result
 }
 
-fn subtract_digits_in_place<Digit, const SHIFT: usize>(
+fn subtract_digits_in_place<Digit, const SEPARATOR: char, const SHIFT: usize>(
     longest: &mut [Digit],
     shortest: &Vec<Digit>,
 ) -> Digit
@@ -1086,7 +1105,10 @@ where
     accumulator
 }
 
-fn sum_digits<Digit, const SHIFT: usize>(first: &Vec<Digit>, second: &Vec<Digit>) -> Vec<Digit>
+fn sum_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
+    first: &Vec<Digit>,
+    second: &Vec<Digit>,
+) -> Vec<Digit>
 where
     Digit: PrimInt + TryFrom<usize>,
 {
@@ -1116,7 +1138,7 @@ where
     result
 }
 
-fn sum_digits_in_place<Digit, const SHIFT: usize>(
+fn sum_digits_in_place<Digit, const SEPARATOR: char, const SHIFT: usize>(
     longest: &mut [Digit],
     shortest: &Vec<Digit>,
 ) -> Digit

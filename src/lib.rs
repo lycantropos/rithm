@@ -21,7 +21,7 @@ type Digit = u32;
 
 const BINARY_SHIFT: usize = (SignedOf::<Digit>::BITS - 2) as usize;
 
-type _BigInt = BigInt<Digit, BINARY_SHIFT>;
+type _BigInt = BigInt<Digit, '_', BINARY_SHIFT>;
 
 #[pyclass(module = "rithm", subclass)]
 #[derive(Clone)]

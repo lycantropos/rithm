@@ -562,6 +562,23 @@ where
     }
 }
 
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> One for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: DoublePrecision
+        + PrimInt
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<usize>
+        + WrappingSub,
+    DoublePrecisionOf<Digit>: From<Digit> + PrimInt,
+{
+    fn one() -> Self {
+        Self {
+            sign: 1,
+            digits: vec![Digit::one()],
+        }
+    }
+}
+
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Zero for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: PrimInt + TryFrom<usize> + WrappingSub,

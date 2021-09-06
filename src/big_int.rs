@@ -453,9 +453,9 @@ where
 }
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> SignedNumber
-for BigInt<Digit, SEPARATOR, SHIFT>
-    where
-        Digit: DoublePrecision
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: DoublePrecision
         + From<u8>
         + PrimInt
         + Signed
@@ -465,11 +465,11 @@ for BigInt<Digit, SEPARATOR, SHIFT>
         + TryFrom<u8>
         + TryFrom<usize>
         + WrappingSub,
-        DoublePrecisionOf<Digit>: From<Digit> + From<u8> + PrimInt + Signed + TryFrom<usize>,
-        DoublePrecisionOf<u8>: From<u8> + PrimInt,
-        SignedOf<Digit>: PrimInt + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-        SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + PrimInt,
-        usize: TryFrom<Digit>,
+    DoublePrecisionOf<Digit>: From<Digit> + From<u8> + PrimInt + Signed + TryFrom<usize>,
+    DoublePrecisionOf<u8>: From<u8> + PrimInt,
+    SignedOf<Digit>: PrimInt + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + PrimInt,
+    usize: TryFrom<Digit>,
 {
     fn abs(&self) -> Self {
         Self {

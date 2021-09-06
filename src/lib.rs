@@ -63,6 +63,13 @@ impl PyNumberProtocol for Int {
         }
     }
 
+    fn __mod__(lhs: Int, rhs: Int) -> PyResult<Int> {
+        match divmod(lhs.0, rhs.0) {
+            Ok((_, result)) => Ok(Int(result)),
+            Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
+        }
+    }
+
     fn __mul__(lhs: Int, rhs: Int) -> Int {
         Int(lhs.0 * rhs.0)
     }

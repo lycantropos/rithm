@@ -30,35 +30,35 @@ impl<Digit: PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
     fn ge(&self, other: &Self) -> bool {
         self.sign > other.sign
             || self.sign == other.sign
-            && !{
-            if self.sign > 0 {
-                digits_lesser_than(&self.digits, &other.digits)
-            } else {
-                digits_lesser_than(&other.digits, &self.digits)
-            }
-        }
+                && !{
+                    if self.sign > 0 {
+                        digits_lesser_than(&self.digits, &other.digits)
+                    } else {
+                        digits_lesser_than(&other.digits, &self.digits)
+                    }
+                }
     }
 
     fn gt(&self, other: &Self) -> bool {
         self.sign > other.sign
             || self.sign == other.sign
-            && if self.sign > 0 {
-            digits_lesser_than(&other.digits, &self.digits)
-        } else {
-            digits_lesser_than(&self.digits, &other.digits)
-        }
+                && if self.sign > 0 {
+                    digits_lesser_than(&other.digits, &self.digits)
+                } else {
+                    digits_lesser_than(&self.digits, &other.digits)
+                }
     }
 
     fn le(&self, other: &Self) -> bool {
         self.sign < other.sign
             || self.sign == other.sign
-            && !{
-            if self.sign > 0 {
-                digits_lesser_than(&other.digits, &self.digits)
-            } else {
-                digits_lesser_than(&self.digits, &other.digits)
-            }
-        }
+                && !{
+                    if self.sign > 0 {
+                        digits_lesser_than(&other.digits, &self.digits)
+                    } else {
+                        digits_lesser_than(&self.digits, &other.digits)
+                    }
+                }
     }
 
     fn lt(&self, other: &Self) -> bool {

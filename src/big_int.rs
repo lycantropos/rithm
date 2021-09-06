@@ -479,7 +479,7 @@ for BigInt<Digit, SEPARATOR, SHIFT>
     }
 
     fn abs_sub(&self, other: &Self) -> Self {
-        if self < other {
+        if self <= other {
             Self::zero()
         } else {
             self.clone() - other.clone()

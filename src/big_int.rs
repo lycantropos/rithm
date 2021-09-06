@@ -4,7 +4,7 @@ use std::convert::TryFrom;
 use std::f64;
 use std::fmt::{Display, Formatter};
 use std::iter::Peekable;
-use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 use std::str::Chars;
 
 use num::traits::WrappingSub;
@@ -234,6 +234,28 @@ where
 
     fn div(self, divisor: Self) -> Self::Output {
         Ok(self.divrem(&divisor)?.0)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Rem for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: DoublePrecision
+        + From<u8>
+        + PrimInt
+        + Signed
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>
+        + WrappingSub,
+    DoublePrecisionOf<Digit>: From<Digit> + PrimInt + Signed,
+    SignedOf<Digit>: PrimInt + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + PrimInt,
+    usize: TryFrom<Digit>,
+{
+    type Output = Result<Self, &'static str>;
+
+    fn rem(self, divisor: Self) -> Self::Output {
+        Ok(self.divrem(&divisor)?.1)
     }
 }
 

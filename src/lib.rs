@@ -1,7 +1,7 @@
 #![feature(destructuring_assignment)]
 #![feature(option_result_unwrap_unchecked)]
 
-use num::Zero;
+use num::{Zero, Num};
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
@@ -31,8 +31,8 @@ struct Int(_BigInt);
 impl Int {
     #[new]
     #[args(_string = "\"0\"", base = 10)]
-    fn new(_string: &str, base: u8) -> PyResult<Self> {
-        match _BigInt::new(_string, base) {
+    fn new(_string: &str, base: u32) -> PyResult<Self> {
+        match _BigInt::from_str_radix(_string, base) {
             Ok(value) => Ok(Int(value)),
             Err(reason) => Err(PyValueError::new_err(reason)),
         }

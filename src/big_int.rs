@@ -8,7 +8,7 @@ use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 use std::str::Chars;
 
 use num::traits::WrappingSub;
-use num::{One, PrimInt, Zero};
+use num::{Num, One, PrimInt, Zero};
 
 use crate::utils;
 
@@ -110,14 +110,14 @@ where
         37,
     ];
 
-    pub(crate) fn new(_string: &str, mut base: u8) -> Result<Self, String> {
+    pub fn new(string: &str, mut base: u8) -> Result<Self, String> {
         if (base != 0 && base < 2) || base > MAX_REPRESENTABLE_BASE {
             return Err(format!(
                 "Base should be zero or in range from 2 to {}.",
                 MAX_REPRESENTABLE_BASE
             ));
         }
-        let mut characters = _string.trim().chars().peekable();
+        let mut characters = string.trim().chars().peekable();
         let sign: Sign = if characters.peek() == Some(&'-') {
             characters.next();
             -1
@@ -232,6 +232,31 @@ where
 
     fn div(self, divisor: Self) -> Self::Output {
         self.divrem(&divisor).unwrap().0
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Num for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: DoublePrecision
+        + From<u8>
+        + PrimInt
+        + Signed
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<DoublePrecisionOf<u8>>
+        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<u8>
+        + TryFrom<usize>
+        + WrappingSub,
+    DoublePrecisionOf<Digit>: From<Digit> + From<u8> + PrimInt + Signed + TryFrom<usize>,
+    DoublePrecisionOf<u8>: From<u8> + PrimInt,
+    SignedOf<Digit>: PrimInt + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + PrimInt,
+    usize: TryFrom<Digit>,
+{
+    type FromStrRadixErr = String;
+
+    fn from_str_radix(string: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
+        Self::new(string, radix as u8)
     }
 }
 

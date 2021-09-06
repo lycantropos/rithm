@@ -4,7 +4,7 @@ use num::PrimInt;
 
 pub(crate) fn to_bit_length<T>(value: T) -> usize
 where
-    T: PrimInt + From<u8>,
+    T: From<u8> + PrimInt,
     usize: TryFrom<T>,
 {
     let mut result: usize = 0;

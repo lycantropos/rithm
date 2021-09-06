@@ -230,10 +230,10 @@ where
     SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + PrimInt,
     usize: TryFrom<Digit>,
 {
-    type Output = Result<Self, &'static str>;
+    type Output = Self;
 
     fn div(self, divisor: Self) -> Self::Output {
-        Ok(self.divrem(&divisor)?.0)
+        self.divrem(&divisor).unwrap().0
     }
 }
 

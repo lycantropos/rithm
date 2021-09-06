@@ -51,6 +51,13 @@ impl PyNumberProtocol for Int {
         Int(lhs.0 + rhs.0)
     }
 
+    fn __divmod__(lhs: Int, rhs: Int) -> PyResult<(Int, Int)> {
+        match lhs.0.divmod(rhs.0) {
+            Ok((quotient, remainder)) => Ok((Int(quotient), Int(remainder))),
+            Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
+        }
+    }
+
     fn __mul__(lhs: Int, rhs: Int) -> Int {
         Int(lhs.0 * rhs.0)
     }

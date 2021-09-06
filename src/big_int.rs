@@ -407,6 +407,90 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> Neg for BigInt<Digit, SEP
     }
 }
 
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: DoublePrecision
+        + From<u8>
+        + PrimInt
+        + Signed
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>
+        + WrappingSub,
+    DoublePrecisionOf<Digit>: From<Digit> + PrimInt + Signed,
+    SignedOf<Digit>: PrimInt + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + PrimInt,
+    usize: TryFrom<Digit>,
+{
+    pub(crate) fn divmod(self, divisor: Self) -> Result<(Self, Self), &'static str> {
+        let digits_count = self.digits.len();
+        let divisor_digits_count = divisor.digits.len();
+        if divisor.sign == 0 {
+            Err("Division by zero is undefined.")
+        } else if self.sign == 0 {
+            Ok((Self::zero(), self))
+        } else if digits_count < divisor_digits_count
+            || (digits_count == divisor_digits_count
+                && self.digits[self.digits.len() - 1] < divisor.digits[divisor.digits.len() - 1])
+        {
+            if self.sign != divisor.sign {
+                Ok((
+                    Self {
+                        sign: -1,
+                        digits: vec![Digit::one()],
+                    },
+                    self + divisor,
+                ))
+            } else {
+                Ok((Self::zero(), self))
+            }
+        } else {
+            let (mut quotient, mut remainder) = if divisor_digits_count == 1 {
+                let (quotient_digits, remainder_digit) =
+                    divmod_digits_by_digit::<Digit, SHIFT>(&self.digits, divisor.digits[0]);
+                (
+                    Self {
+                        sign: self.sign * divisor.sign,
+                        digits: quotient_digits,
+                    },
+                    Self {
+                        sign: self.sign * ((!remainder_digit.is_zero()) as Sign),
+                        digits: vec![remainder_digit],
+                    },
+                )
+            } else {
+                let (quotient_digits, remainder_digits) =
+                    divmod_two_or_more_digits::<Digit, SHIFT>(&self.digits, &divisor.digits);
+                (
+                    Self {
+                        sign: self.sign
+                            * divisor.sign
+                            * ((quotient_digits.len() > 1 || !quotient_digits[0].is_zero())
+                                as Sign),
+                        digits: quotient_digits,
+                    },
+                    Self {
+                        sign: self.sign
+                            * ((remainder_digits.len() > 1 || !remainder_digits[0].is_zero())
+                                as Sign),
+                        digits: remainder_digits,
+                    },
+                )
+            };
+            if (divisor.sign < 0 && remainder.sign > 0) || (divisor.sign > 0 && remainder.sign < 0)
+            {
+                quotient = quotient
+                    - Self {
+                        sign: 1,
+                        digits: vec![Digit::one()],
+                    };
+                remainder = remainder + divisor;
+            }
+            Ok((quotient, remainder))
+        }
+    }
+}
+
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Sub for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: PrimInt + TryFrom<usize> + WrappingSub,
@@ -755,6 +839,146 @@ where
     result
 }
 
+fn divmod_digits_by_digit<Digit, const SHIFT: usize>(
+    dividend: &Vec<Digit>,
+    divisor: Digit,
+) -> (Vec<Digit>, Digit)
+where
+    Digit: DoublePrecision + PrimInt + TryFrom<DoublePrecisionOf<Digit>>,
+    DoublePrecisionOf<Digit>: PrimInt + From<Digit>,
+{
+    let mut quotient = vec![Digit::zero(); dividend.len()];
+    let mut remainder = DoublePrecisionOf::<Digit>::zero();
+    let digits_count = dividend.len();
+    let divisor = DoublePrecisionOf::<Digit>::from(divisor);
+    for offset in 1..=digits_count {
+        remainder = (remainder << SHIFT)
+            | DoublePrecisionOf::<Digit>::from(dividend[digits_count - offset]);
+        let quotient_digit = unsafe { Digit::try_from(remainder / divisor).unwrap_unchecked() };
+        quotient[digits_count - offset] = quotient_digit;
+        remainder = remainder - DoublePrecisionOf::<Digit>::from(quotient_digit) * divisor;
+    }
+    normalize_digits(&mut quotient);
+    (quotient, unsafe {
+        Digit::try_from(remainder).unwrap_unchecked()
+    })
+}
+
+fn divmod_two_or_more_digits<Digit, const SHIFT: usize>(
+    dividend: &Vec<Digit>,
+    divisor: &Vec<Digit>,
+) -> (Vec<Digit>, Vec<Digit>)
+where
+    Digit: DoublePrecision
+        + From<u8>
+        + PrimInt
+        + Signed
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>,
+    DoublePrecisionOf<Digit>: From<Digit> + PrimInt + Signed,
+    SignedOf<Digit>: PrimInt + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + PrimInt,
+    usize: TryFrom<Digit>,
+{
+    let dividend_digits_count = dividend.len();
+    let divisor_digits_count = divisor.len();
+    let mut dividend_normalized = vec![Digit::zero(); dividend_digits_count];
+    let mut divisor_normalized = vec![Digit::zero(); divisor_digits_count];
+    let shift = SHIFT - utils::to_bit_length(divisor[divisor.len() - 1]);
+    shift_digits_left::<Digit, SHIFT>(divisor.as_slice(), shift, divisor_normalized.as_mut_slice());
+    let accumulator = shift_digits_left::<Digit, SHIFT>(
+        dividend.as_slice(),
+        shift,
+        dividend_normalized.as_mut_slice(),
+    );
+    let last_divisor_digit_normalized = divisor_normalized[divisor_normalized.len() - 1];
+    if !accumulator.is_zero()
+        || dividend_normalized[dividend_normalized.len() - 1] >= last_divisor_digit_normalized
+    {
+        dividend_normalized.push(accumulator);
+    }
+    let quotient_size = dividend_normalized.len() - divisor_normalized.len();
+    let mut quotient = vec![Digit::zero(); quotient_size];
+    let penult_divisor_digit_normalized = divisor_normalized[divisor_digits_count - 2];
+    let mut quotient_position = quotient_size;
+    let base = Digit::one() << SHIFT;
+    let digit_mask = to_digit_mask::<Digit>(SHIFT);
+    for offset in (0..quotient_size).rev() {
+        let step =
+            (DoublePrecisionOf::<Digit>::from(dividend_normalized[offset + divisor_digits_count])
+                << SHIFT)
+                | DoublePrecisionOf::<Digit>::from(
+                    dividend_normalized[offset + divisor_digits_count - 1],
+                );
+        let mut quotient_digit = unsafe {
+            Digit::try_from(step / DoublePrecisionOf::<Digit>::from(last_divisor_digit_normalized))
+                .unwrap_unchecked()
+        };
+        let mut step_remainder = unsafe {
+            Digit::try_from(
+                step - DoublePrecisionOf::<Digit>::from(last_divisor_digit_normalized)
+                    * DoublePrecisionOf::<Digit>::from(quotient_digit),
+            )
+            .unwrap_unchecked()
+        };
+        while DoublePrecisionOf::<Digit>::from(penult_divisor_digit_normalized)
+            * DoublePrecisionOf::<Digit>::from(quotient_digit)
+            > ((DoublePrecisionOf::<Digit>::from(step_remainder) << SHIFT)
+                | DoublePrecisionOf::<Digit>::from(
+                    dividend_normalized[offset + divisor_digits_count - 2],
+                ))
+        {
+            quotient_digit = quotient_digit - Digit::one();
+            step_remainder = step_remainder + last_divisor_digit_normalized;
+            if step_remainder >= base {
+                break;
+            }
+        }
+        let mut accumulator = SignedOf::<Digit>::zero();
+        for index in 0..divisor_digits_count {
+            let step =
+                SignedOf::<DoublePrecisionOf<Digit>>::from(dividend_normalized[offset + index])
+                    + SignedOf::<DoublePrecisionOf<Digit>>::from(accumulator)
+                    - SignedOf::<DoublePrecisionOf<Digit>>::from(quotient_digit)
+                        * SignedOf::<DoublePrecisionOf<Digit>>::from(divisor_normalized[index]);
+            dividend_normalized[offset + index] = unsafe {
+                Digit::try_from(step & SignedOf::<DoublePrecisionOf<Digit>>::from(digit_mask))
+                    .unwrap_unchecked()
+            };
+            accumulator = unsafe { SignedOf::<Digit>::try_from(step >> SHIFT).unwrap_unchecked() };
+        }
+        if unsafe {
+            SignedOf::<Digit>::try_from(dividend_normalized[offset + divisor_digits_count])
+                .unwrap_unchecked()
+        } + accumulator
+            < SignedOf::<Digit>::zero()
+        {
+            let mut accumulator = Digit::zero();
+            for index in 0..divisor_digits_count {
+                accumulator =
+                    accumulator + dividend_normalized[offset + index] + divisor_normalized[index];
+                dividend_normalized[offset + index] = accumulator & digit_mask;
+                accumulator = accumulator >> SHIFT;
+            }
+            quotient_digit = quotient_digit - Digit::one();
+        }
+        quotient_position -= 1;
+        quotient[quotient_position] = quotient_digit;
+    }
+    if quotient_size.is_zero() {
+        quotient = vec![Digit::zero()];
+    }
+    normalize_digits(&mut quotient);
+    let mut remainder = divisor_normalized;
+    shift_digits_right::<Digit, SHIFT>(
+        &dividend_normalized[..divisor_digits_count],
+        shift,
+        remainder.as_mut_slice(),
+    );
+    normalize_digits(&mut remainder);
+    (quotient, remainder)
+}
+
 fn non_binary_digits_to_binary_base<SourceDigit, TargetDigit>(
     source_digits: &Vec<SourceDigit>,
     source_base: usize,
@@ -1006,6 +1230,46 @@ where
     }
     normalize_digits(&mut result);
     result
+}
+
+fn shift_digits_left<Digit, const SHIFT: usize>(
+    input_digits: &[Digit],
+    shift: usize,
+    output_digits: &mut [Digit],
+) -> Digit
+where
+    Digit: DoublePrecision + PrimInt + TryFrom<DoublePrecisionOf<Digit>>,
+    DoublePrecisionOf<Digit>: From<Digit> + PrimInt,
+{
+    let mut accumulator: Digit = Digit::zero();
+    let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
+    for index in 0..input_digits.len() {
+        let step = (DoublePrecisionOf::<Digit>::from(input_digits[index]) << shift)
+            | DoublePrecisionOf::<Digit>::from(accumulator);
+        output_digits[index] = unsafe { Digit::try_from(step & digit_mask).unwrap_unchecked() };
+        accumulator = unsafe { Digit::try_from(step >> SHIFT).unwrap_unchecked() };
+    }
+    accumulator
+}
+
+fn shift_digits_right<Digit, const SHIFT: usize>(
+    input_digits: &[Digit],
+    shift: usize,
+    output_digits: &mut [Digit],
+) -> Digit
+where
+    Digit: DoublePrecision + PrimInt + TryFrom<DoublePrecisionOf<Digit>>,
+    DoublePrecisionOf<Digit>: From<Digit> + PrimInt,
+{
+    let mut accumulator = Digit::zero();
+    let mask = to_digit_mask::<DoublePrecisionOf<Digit>>(shift);
+    for index in (0..input_digits.len()).rev() {
+        let step = (DoublePrecisionOf::<Digit>::from(accumulator) << SHIFT)
+            | DoublePrecisionOf::<Digit>::from(input_digits[index]);
+        accumulator = unsafe { Digit::try_from(step & mask).unwrap_unchecked() };
+        output_digits[index] = unsafe { Digit::try_from(step >> shift).unwrap_unchecked() };
+    }
+    accumulator
 }
 
 fn split_digits<Digit>(digits: &Vec<Digit>, size: usize) -> (Vec<Digit>, Vec<Digit>)

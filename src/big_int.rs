@@ -252,10 +252,10 @@ where
     SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + PrimInt,
     usize: TryFrom<Digit>,
 {
-    type Output = Result<Self, &'static str>;
+    type Output = Self;
 
     fn rem(self, divisor: Self) -> Self::Output {
-        Ok(self.divrem(&divisor)?.1)
+        self.divrem(&divisor).unwrap().1
     }
 }
 

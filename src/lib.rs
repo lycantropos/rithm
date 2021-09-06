@@ -1,7 +1,7 @@
 #![feature(destructuring_assignment)]
 #![feature(option_result_unwrap_unchecked)]
 
-use num::{Zero, Num};
+use num::{Num, Signed as SignedNumber, Zero};
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
@@ -42,7 +42,7 @@ impl Int {
 #[pyproto]
 impl PyNumberProtocol for Int {
     fn __abs__(&self) -> Int {
-        Int(self.0.clone().abs())
+        Int(self.0.abs())
     }
 
     fn __add__(lhs: Int, rhs: Int) -> Int {

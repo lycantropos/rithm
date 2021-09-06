@@ -8,7 +8,7 @@ use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 use std::str::Chars;
 
 use num::traits::WrappingSub;
-use num::{Num, One, PrimInt, Zero};
+use num::{Num, One, PrimInt, Signed as SignedNumber, Zero};
 
 use crate::utils;
 
@@ -343,15 +343,6 @@ const HASH_BITS: usize = 31;
 const HASH_BITS: usize = 61;
 const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT> {
-    pub fn abs(self) -> Self {
-        Self {
-            sign: self.sign.abs(),
-            digits: self.digits,
-        }
-    }
-}
-
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: From<bool> + PrimInt,
@@ -458,6 +449,62 @@ where
             sign: self.sign * other.sign,
             digits: multiply_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
         }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> SignedNumber
+for BigInt<Digit, SEPARATOR, SHIFT>
+    where
+        Digit: DoublePrecision
+        + From<u8>
+        + PrimInt
+        + Signed
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<DoublePrecisionOf<u8>>
+        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<u8>
+        + TryFrom<usize>
+        + WrappingSub,
+        DoublePrecisionOf<Digit>: From<Digit> + From<u8> + PrimInt + Signed + TryFrom<usize>,
+        DoublePrecisionOf<u8>: From<u8> + PrimInt,
+        SignedOf<Digit>: PrimInt + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+        SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + PrimInt,
+        usize: TryFrom<Digit>,
+{
+    fn abs(&self) -> Self {
+        Self {
+            sign: self.sign.abs(),
+            digits: self.digits.clone(),
+        }
+    }
+
+    fn abs_sub(&self, other: &Self) -> Self {
+        if self < other {
+            Self::zero()
+        } else {
+            self.clone() - other.clone()
+        }
+    }
+
+    fn signum(&self) -> Self {
+        if self.sign.is_zero() {
+            Self::zero()
+        } else if self.sign.is_positive() {
+            Self::one()
+        } else {
+            Self {
+                sign: -1,
+                digits: vec![Digit::one()],
+            }
+        }
+    }
+
+    fn is_positive(&self) -> bool {
+        self.sign.is_positive()
+    }
+
+    fn is_negative(&self) -> bool {
+        self.sign.is_negative()
     }
 }
 

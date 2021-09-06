@@ -57,8 +57,8 @@ impl PyNumberProtocol for Int {
     }
 
     fn __floordiv__(lhs: Int, rhs: Int) -> PyResult<Int> {
-        match lhs.0 / rhs.0 {
-            Ok(result) => Ok(Int(result)),
+        match lhs.0.divmod(rhs.0) {
+            Ok((result, _)) => Ok(Int(result)),
             Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
         }
     }

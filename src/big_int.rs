@@ -27,14 +27,38 @@ fn digits_lesser_than<Digit: PartialOrd>(left: &Vec<Digit>, right: &Vec<Digit>) 
 impl<Digit: PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(if self.lt(other) {
-            Ordering::Less
-        } else if other.lt(self) {
-            Ordering::Greater
+    fn ge(&self, other: &Self) -> bool {
+        self.sign > other.sign
+            || self.sign == other.sign
+            && !{
+            if self.sign > 0 {
+                digits_lesser_than(&self.digits, &other.digits)
+            } else {
+                digits_lesser_than(&other.digits, &self.digits)
+            }
+        }
+    }
+
+    fn gt(&self, other: &Self) -> bool {
+        self.sign > other.sign
+            || self.sign == other.sign
+            && if self.sign > 0 {
+            digits_lesser_than(&other.digits, &self.digits)
         } else {
-            Ordering::Equal
-        })
+            digits_lesser_than(&self.digits, &other.digits)
+        }
+    }
+
+    fn le(&self, other: &Self) -> bool {
+        self.sign < other.sign
+            || self.sign == other.sign
+            && !{
+            if self.sign > 0 {
+                digits_lesser_than(&other.digits, &self.digits)
+            } else {
+                digits_lesser_than(&self.digits, &other.digits)
+            }
+        }
     }
 
     fn lt(&self, other: &Self) -> bool {
@@ -47,38 +71,14 @@ impl<Digit: PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
                 }
     }
 
-    fn le(&self, other: &Self) -> bool {
-        self.sign < other.sign
-            || self.sign == other.sign
-                && !{
-                    if self.sign > 0 {
-                        digits_lesser_than(&other.digits, &self.digits)
-                    } else {
-                        digits_lesser_than(&self.digits, &other.digits)
-                    }
-                }
-    }
-
-    fn gt(&self, other: &Self) -> bool {
-        self.sign > other.sign
-            || self.sign == other.sign
-                && if self.sign > 0 {
-                    digits_lesser_than(&other.digits, &self.digits)
-                } else {
-                    digits_lesser_than(&self.digits, &other.digits)
-                }
-    }
-
-    fn ge(&self, other: &Self) -> bool {
-        self.sign > other.sign
-            || self.sign == other.sign
-                && !{
-                    if self.sign > 0 {
-                        digits_lesser_than(&self.digits, &other.digits)
-                    } else {
-                        digits_lesser_than(&other.digits, &self.digits)
-                    }
-                }
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(if self.lt(other) {
+            Ordering::Less
+        } else if other.lt(self) {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
+        })
     }
 }
 

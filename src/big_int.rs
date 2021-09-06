@@ -111,6 +111,7 @@ where
     ];
 
     pub fn new(string: &str, mut base: u8) -> Result<Self, String> {
+        debug_assert!(Self::ASCII_CODES_DIGIT_VALUES[SEPARATOR as usize] >= MAX_REPRESENTABLE_BASE);
         if (base != 0 && base < 2) || base > MAX_REPRESENTABLE_BASE {
             return Err(format!(
                 "Base should be zero or in range from 2 to {}.",

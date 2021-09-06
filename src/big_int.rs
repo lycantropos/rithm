@@ -546,39 +546,35 @@ where
                 && self.digits[self.digits.len() - 1] < divisor.digits[divisor.digits.len() - 1])
         {
             Ok((Self::zero(), self))
+        } else if divisor_digits_count == 1 {
+            let (quotient_digits, remainder_digit) =
+                divrem_digits_by_digit::<Digit, SHIFT>(&self.digits, divisor.digits[0]);
+            Ok((
+                Self {
+                    sign: self.sign * divisor.sign,
+                    digits: quotient_digits,
+                },
+                Self {
+                    sign: self.sign * ((!remainder_digit.is_zero()) as Sign),
+                    digits: vec![remainder_digit],
+                },
+            ))
         } else {
-            if divisor_digits_count == 1 {
-                let (quotient_digits, remainder_digit) =
-                    divrem_digits_by_digit::<Digit, SHIFT>(&self.digits, divisor.digits[0]);
-                Ok((
-                    Self {
-                        sign: self.sign * divisor.sign,
-                        digits: quotient_digits,
-                    },
-                    Self {
-                        sign: self.sign * ((!remainder_digit.is_zero()) as Sign),
-                        digits: vec![remainder_digit],
-                    },
-                ))
-            } else {
-                let (quotient_digits, remainder_digits) =
-                    divrem_two_or_more_digits::<Digit, SHIFT>(&self.digits, &divisor.digits);
-                Ok((
-                    Self {
-                        sign: self.sign
-                            * divisor.sign
-                            * ((quotient_digits.len() > 1 || !quotient_digits[0].is_zero())
-                                as Sign),
-                        digits: quotient_digits,
-                    },
-                    Self {
-                        sign: self.sign
-                            * ((remainder_digits.len() > 1 || !remainder_digits[0].is_zero())
-                                as Sign),
-                        digits: remainder_digits,
-                    },
-                ))
-            }
+            let (quotient_digits, remainder_digits) =
+                divrem_two_or_more_digits::<Digit, SHIFT>(&self.digits, &divisor.digits);
+            Ok((
+                Self {
+                    sign: self.sign
+                        * divisor.sign
+                        * ((quotient_digits.len() > 1 || !quotient_digits[0].is_zero()) as Sign),
+                    digits: quotient_digits,
+                },
+                Self {
+                    sign: self.sign
+                        * ((remainder_digits.len() > 1 || !remainder_digits[0].is_zero()) as Sign),
+                    digits: remainder_digits,
+                },
+            ))
         }
     }
 }

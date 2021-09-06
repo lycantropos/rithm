@@ -534,20 +534,7 @@ where
     SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + PrimInt,
     usize: TryFrom<Digit>,
 {
-    pub(crate) fn divmod(self, divisor: Self) -> Result<(Self, Self), &'static str> {
-        let (mut quotient, mut modulo) = self.divrem(&divisor)?;
-        if (divisor.sign < 0 && modulo.sign > 0) || (divisor.sign > 0 && modulo.sign < 0) {
-            quotient = quotient
-                - Self {
-                    sign: 1,
-                    digits: vec![Digit::one()],
-                };
-            modulo = modulo + divisor;
-        }
-        Ok((quotient, modulo))
-    }
-
-    fn divrem(self, divisor: &Self) -> Result<(Self, Self), &'static str> {
+    pub(crate) fn divrem(self, divisor: &Self) -> Result<(Self, Self), &'static str> {
         let digits_count = self.digits.len();
         let divisor_digits_count = divisor.digits.len();
         if divisor.sign == 0 {

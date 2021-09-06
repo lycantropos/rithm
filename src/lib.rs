@@ -1,7 +1,7 @@
 #![feature(destructuring_assignment)]
 #![feature(option_result_unwrap_unchecked)]
 
-use num::{Num, Signed as SignedNumber, Zero};
+use num::{Num, One, Signed as SignedNumber, Zero};
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
@@ -50,14 +50,14 @@ impl PyNumberProtocol for Int {
     }
 
     fn __divmod__(lhs: Int, rhs: Int) -> PyResult<(Int, Int)> {
-        match lhs.0.divmod(rhs.0) {
+        match divmod(lhs.0, rhs.0) {
             Ok((quotient, remainder)) => Ok((Int(quotient), Int(remainder))),
             Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
         }
     }
 
     fn __floordiv__(lhs: Int, rhs: Int) -> PyResult<Int> {
-        match lhs.0.divmod(rhs.0) {
+        match divmod(lhs.0, rhs.0) {
             Ok((result, _)) => Ok(Int(result)),
             Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
         }
@@ -74,6 +74,17 @@ impl PyNumberProtocol for Int {
     fn __sub__(lhs: Int, rhs: Int) -> Int {
         Int(lhs.0 - rhs.0)
     }
+}
+
+fn divmod(dividend: _BigInt, divisor: _BigInt) -> Result<(_BigInt, _BigInt), &'static str> {
+    let (mut quotient, mut modulo) = dividend.divrem(&divisor)?;
+    if (divisor.is_negative() && modulo.is_positive())
+        || (divisor.is_positive() && modulo.is_negative())
+    {
+        quotient = quotient - _BigInt::one();
+        modulo = modulo + divisor;
+    }
+    Ok((quotient, modulo))
 }
 
 #[pyproto]

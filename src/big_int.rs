@@ -8,7 +8,7 @@ use std::ops::{Add, Mul, Neg, Sub};
 use std::str::Chars;
 
 use num::traits::WrappingSub;
-use num::{PrimInt, Zero};
+use num::{One, PrimInt, Zero};
 
 use crate::utils;
 

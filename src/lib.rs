@@ -32,12 +32,10 @@ impl Int {
     #[new]
     #[args(_string = "\"0\"", base = 10)]
     fn new(_string: &str, base: u8) -> PyResult<Self> {
-        Ok(Int {
-            0: match _BigInt::new(_string, base) {
-                Ok(value) => Ok(value),
-                Err(reason) => Err(PyValueError::new_err(reason)),
-            }?,
-        })
+        match _BigInt::new(_string, base) {
+            Ok(value) => Ok(Int(value)),
+            Err(reason) => Err(PyValueError::new_err(reason)),
+        }
     }
 }
 

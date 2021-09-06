@@ -4,7 +4,7 @@ use std::convert::TryFrom;
 use std::f64;
 use std::fmt::{Display, Formatter};
 use std::iter::Peekable;
-use std::ops::{Add, Mul, Neg, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 use std::str::Chars;
 
 use num::traits::WrappingSub;
@@ -212,6 +212,28 @@ where
 {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
         formatter.write_str(self.to_base_string(10).as_str())
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Div for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: DoublePrecision
+        + From<u8>
+        + PrimInt
+        + Signed
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>
+        + WrappingSub,
+    DoublePrecisionOf<Digit>: From<Digit> + PrimInt + Signed,
+    SignedOf<Digit>: PrimInt + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + PrimInt,
+    usize: TryFrom<Digit>,
+{
+    type Output = Result<Self, &'static str>;
+
+    fn div(self, divisor: Self) -> Self::Output {
+        Ok(self.divrem(&divisor)?.0)
     }
 }
 
@@ -423,32 +445,34 @@ where
     usize: TryFrom<Digit>,
 {
     pub(crate) fn divmod(self, divisor: Self) -> Result<(Self, Self), &'static str> {
+        let (mut quotient, mut modulo) = self.divrem(&divisor)?;
+        if (divisor.sign < 0 && modulo.sign > 0) || (divisor.sign > 0 && modulo.sign < 0) {
+            quotient = quotient
+                - Self {
+                    sign: 1,
+                    digits: vec![Digit::one()],
+                };
+            modulo = modulo + divisor;
+        }
+        Ok((quotient, modulo))
+    }
+
+    fn divrem(self, divisor: &Self) -> Result<(Self, Self), &'static str> {
         let digits_count = self.digits.len();
         let divisor_digits_count = divisor.digits.len();
         if divisor.sign == 0 {
             Err("Division by zero is undefined.")
-        } else if self.sign == 0 {
-            Ok((Self::zero(), self))
-        } else if digits_count < divisor_digits_count
+        } else if self.sign == 0
+            || digits_count < divisor_digits_count
             || (digits_count == divisor_digits_count
                 && self.digits[self.digits.len() - 1] < divisor.digits[divisor.digits.len() - 1])
         {
-            if self.sign != divisor.sign {
-                Ok((
-                    Self {
-                        sign: -1,
-                        digits: vec![Digit::one()],
-                    },
-                    self + divisor,
-                ))
-            } else {
-                Ok((Self::zero(), self))
-            }
+            Ok((Self::zero(), self))
         } else {
-            let (mut quotient, mut remainder) = if divisor_digits_count == 1 {
+            if divisor_digits_count == 1 {
                 let (quotient_digits, remainder_digit) =
-                    divmod_digits_by_digit::<Digit, SHIFT>(&self.digits, divisor.digits[0]);
-                (
+                    divrem_digits_by_digit::<Digit, SHIFT>(&self.digits, divisor.digits[0]);
+                Ok((
                     Self {
                         sign: self.sign * divisor.sign,
                         digits: quotient_digits,
@@ -457,11 +481,11 @@ where
                         sign: self.sign * ((!remainder_digit.is_zero()) as Sign),
                         digits: vec![remainder_digit],
                     },
-                )
+                ))
             } else {
                 let (quotient_digits, remainder_digits) =
-                    divmod_two_or_more_digits::<Digit, SHIFT>(&self.digits, &divisor.digits);
-                (
+                    divrem_two_or_more_digits::<Digit, SHIFT>(&self.digits, &divisor.digits);
+                Ok((
                     Self {
                         sign: self.sign
                             * divisor.sign
@@ -475,18 +499,8 @@ where
                                 as Sign),
                         digits: remainder_digits,
                     },
-                )
-            };
-            if (divisor.sign < 0 && remainder.sign > 0) || (divisor.sign > 0 && remainder.sign < 0)
-            {
-                quotient = quotient
-                    - Self {
-                        sign: 1,
-                        digits: vec![Digit::one()],
-                    };
-                remainder = remainder + divisor;
+                ))
             }
-            Ok((quotient, remainder))
         }
     }
 }
@@ -839,7 +853,7 @@ where
     result
 }
 
-fn divmod_digits_by_digit<Digit, const SHIFT: usize>(
+fn divrem_digits_by_digit<Digit, const SHIFT: usize>(
     dividend: &Vec<Digit>,
     divisor: Digit,
 ) -> (Vec<Digit>, Digit)
@@ -864,7 +878,7 @@ where
     })
 }
 
-fn divmod_two_or_more_digits<Digit, const SHIFT: usize>(
+fn divrem_two_or_more_digits<Digit, const SHIFT: usize>(
     dividend: &Vec<Digit>,
     divisor: &Vec<Digit>,
 ) -> (Vec<Digit>, Vec<Digit>)

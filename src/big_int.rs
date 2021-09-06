@@ -86,7 +86,6 @@ const MAX_REPRESENTABLE_BASE: u8 = 36;
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
-    u8: DoublePrecision + PrimInt,
     Digit: Copy
         + DoublePrecision
         + TryFrom<DoublePrecisionOf<Digit>>
@@ -94,7 +93,6 @@ where
         + TryFrom<DoublePrecisionOf<u8>>
         + TryFrom<DoublePrecisionOf<Digit>>
         + Zero,
-    DoublePrecisionOf<u8>: From<u8> + PrimInt,
     DoublePrecisionOf<Digit>: From<u8> + From<Digit> + PrimInt + TryFrom<usize>,
 {
     const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
@@ -403,7 +401,6 @@ where
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&str>
     for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    u8: DoublePrecision + PrimInt,
     Digit: Copy
         + DoublePrecision
         + TryFrom<DoublePrecisionOf<Digit>>
@@ -411,7 +408,6 @@ where
         + TryFrom<DoublePrecisionOf<u8>>
         + TryFrom<DoublePrecisionOf<Digit>>
         + Zero,
-    DoublePrecisionOf<u8>: From<u8> + PrimInt,
     DoublePrecisionOf<Digit>: From<u8> + From<Digit> + PrimInt + TryFrom<usize>,
 {
     type Error = String;

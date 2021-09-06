@@ -16,3 +16,6 @@ version = "^0.4"
 [dependencies.pyo3]
 version = "^0.14"
 features = ["extension-module"]
+
+[build-dependencies]
+pyo3-build-config = "^0.14"

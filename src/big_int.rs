@@ -1597,29 +1597,33 @@ where
     let mut size_longest = longest.len();
     let mut size_shortest = shortest.len();
     let mut accumulator = Digit::zero();
-    if size_longest < size_shortest {
-        (longest, shortest) = (shortest, longest);
-        (size_longest, size_shortest) = (size_shortest, size_longest);
-        *sign = -*sign;
-    } else if size_longest == size_shortest {
-        let mut index = size_shortest;
-        loop {
-            index -= 1;
-            if index == 0 || longest[index] != shortest[index] {
-                break;
-            }
-        }
-        if index == 0 && longest[0] == shortest[0] {
-            *sign = 0 as Sign;
-            return vec![Digit::zero()];
-        }
-        if longest[index] < shortest[index] {
+    match size_longest.cmp(&size_shortest) {
+        Ordering::Less => {
             (longest, shortest) = (shortest, longest);
+            (size_longest, size_shortest) = (size_shortest, size_longest);
             *sign = -*sign;
         }
-        size_longest = index + 1;
-        size_shortest = index + 1;
-    }
+        Ordering::Equal => {
+            let mut index = size_shortest;
+            loop {
+                index -= 1;
+                if index == 0 || longest[index] != shortest[index] {
+                    break;
+                }
+            }
+            if index == 0 && longest[0] == shortest[0] {
+                *sign = Sign::zero();
+                return vec![Digit::zero()];
+            }
+            if longest[index] < shortest[index] {
+                (longest, shortest) = (shortest, longest);
+                *sign = -*sign;
+            }
+            size_longest = index + 1;
+            size_shortest = index + 1;
+        }
+        _ => {}
+    };
     let mut result: Vec<Digit> = Vec::with_capacity(size_longest);
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for index in 0..size_shortest {

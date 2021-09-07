@@ -37,6 +37,10 @@ impl Int {
             Err(reason) => Err(PyValueError::new_err(reason)),
         }
     }
+
+    fn gcd(&self, other: Self) -> Int {
+        Int(self.0.gcd(&other.0))
+    }
 }
 
 #[pyproto]

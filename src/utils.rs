@@ -20,6 +20,16 @@ where
     result + BIT_LENGTHS_TABLE[unsafe { usize::try_from(value).unwrap_unchecked() }]
 }
 
+pub(crate) fn to_gcd<T>(mut first: T, mut second: T) -> T
+where
+    T: PrimInt,
+{
+    while !second.is_zero() {
+        (first, second) = (second, first % second);
+    }
+    first
+}
+
 pub(crate) const fn floor_log(value: usize, base: usize) -> Result<usize, &'static str> {
     if value == 0usize {
         Err("Logarithm of zero is undefined.")

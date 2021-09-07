@@ -82,6 +82,168 @@ impl<Digit: PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
     }
 }
 
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: DoublePrecision
+        + From<u8>
+        + PrimInt
+        + Signed
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>
+        + WrappingSub,
+    DoublePrecisionOf<Digit>: PrimInt + Signed,
+    SignedOf<Digit>: PrimInt + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + PrimInt,
+    usize: TryFrom<Digit>,
+{
+    pub(crate) fn gcd(&self, other: &Self) -> Self {
+        let mut largest_digits = self.digits.clone();
+        let mut smallest_digits = other.digits.clone();
+        if digits_lesser_than(&largest_digits, &smallest_digits) {
+            (largest_digits, smallest_digits) = (smallest_digits, largest_digits);
+        }
+        loop {
+            let largest_digits_count = largest_digits.len();
+            if largest_digits_count <= 2 {
+                break;
+            }
+            let smallest_digits_count = smallest_digits.len();
+            if smallest_digits_count == 1 && smallest_digits[0].is_zero() {
+                return Self {
+                    sign: 1,
+                    digits: largest_digits,
+                };
+            }
+            let highest_digit_bit_length =
+                utils::to_bit_length(largest_digits[largest_digits.len() - 1]);
+            let mut largest_leading_bits = (SignedOf::<DoublePrecisionOf<Digit>>::from(
+                largest_digits[largest_digits_count - 1],
+            ) << (2 * SHIFT - highest_digit_bit_length))
+                | (SignedOf::<DoublePrecisionOf<Digit>>::from(
+                    largest_digits[largest_digits_count - 2],
+                ) << (SHIFT - highest_digit_bit_length))
+                | SignedOf::<DoublePrecisionOf<Digit>>::from(
+                    largest_digits[largest_digits_count - 3] >> highest_digit_bit_length,
+                );
+            let mut smallest_leading_bits = if smallest_digits_count >= largest_digits_count - 2 {
+                SignedOf::<DoublePrecisionOf<Digit>>::from(
+                    smallest_digits[largest_digits_count - 3] >> highest_digit_bit_length,
+                )
+            } else {
+                SignedOf::<DoublePrecisionOf<Digit>>::zero()
+            } | if smallest_digits_count >= largest_digits_count - 1
+            {
+                SignedOf::<DoublePrecisionOf<Digit>>::from(
+                    smallest_digits[largest_digits_count - 2],
+                ) << (SHIFT - highest_digit_bit_length)
+            } else {
+                SignedOf::<DoublePrecisionOf<Digit>>::zero()
+            } | if smallest_digits_count >= largest_digits_count {
+                SignedOf::<DoublePrecisionOf<Digit>>::from(
+                    smallest_digits[largest_digits_count - 1],
+                ) << (2 * SHIFT - highest_digit_bit_length)
+            } else {
+                SignedOf::<DoublePrecisionOf<Digit>>::zero()
+            };
+            let mut first_coefficient = SignedOf::<DoublePrecisionOf<Digit>>::one();
+            let mut second_coefficient = SignedOf::<DoublePrecisionOf<Digit>>::zero();
+            let mut third_coefficient = SignedOf::<DoublePrecisionOf<Digit>>::zero();
+            let mut fourth_coefficient = SignedOf::<DoublePrecisionOf<Digit>>::one();
+            let mut iterations_count = 0usize;
+            loop {
+                if third_coefficient == smallest_leading_bits {
+                    break;
+                }
+                let scale = (largest_leading_bits
+                    + (first_coefficient - SignedOf::<DoublePrecisionOf<Digit>>::one()))
+                    / (smallest_leading_bits - third_coefficient);
+                let next_third_coefficient = second_coefficient + scale * fourth_coefficient;
+                let next_smallest_leading_bits =
+                    largest_leading_bits - scale * smallest_leading_bits;
+                if next_third_coefficient > next_smallest_leading_bits {
+                    break;
+                }
+                largest_leading_bits = smallest_leading_bits;
+                smallest_leading_bits = next_smallest_leading_bits;
+                let next_fourth_coefficient = first_coefficient + scale * third_coefficient;
+                first_coefficient = fourth_coefficient;
+                second_coefficient = third_coefficient;
+                third_coefficient = next_third_coefficient;
+                fourth_coefficient = next_fourth_coefficient;
+                iterations_count += 1;
+            }
+            if iterations_count == 0 {
+                (largest_digits, smallest_digits) = if smallest_digits_count == 1 {
+                    let (_, remainder) =
+                        divrem_digits_by_digit::<Digit, SHIFT>(&largest_digits, smallest_digits[0]);
+                    (smallest_digits, vec![remainder])
+                } else {
+                    let (_, remainder) = divrem_two_or_more_digits::<Digit, SHIFT>(
+                        &largest_digits,
+                        &smallest_digits,
+                    );
+                    (smallest_digits, remainder)
+                };
+                continue;
+            }
+            if iterations_count % 2 != 0 {
+                (first_coefficient, second_coefficient) = (-second_coefficient, -first_coefficient);
+                (third_coefficient, fourth_coefficient) = (-fourth_coefficient, -third_coefficient);
+            }
+            let digit_mask = to_digit_mask::<SignedOf<DoublePrecisionOf<Digit>>>(SHIFT);
+            let mut next_largest_accumulator = SignedOf::<DoublePrecisionOf<Digit>>::zero();
+            let mut next_smallest_accumulator = SignedOf::<DoublePrecisionOf<Digit>>::zero();
+            let mut next_largest_digits = Vec::<Digit>::with_capacity(largest_digits_count);
+            let mut next_smallest_digits = Vec::<Digit>::with_capacity(largest_digits_count);
+            for index in 0..smallest_digits_count {
+                next_largest_accumulator = next_largest_accumulator
+                    + (first_coefficient
+                        * SignedOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]))
+                    - (second_coefficient
+                        * SignedOf::<DoublePrecisionOf<Digit>>::from(smallest_digits[index]));
+                next_smallest_accumulator = next_smallest_accumulator
+                    + (fourth_coefficient
+                        * SignedOf::<DoublePrecisionOf<Digit>>::from(smallest_digits[index]))
+                    - (third_coefficient
+                        * SignedOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]));
+                next_largest_digits.push(unsafe {
+                    Digit::try_from(next_largest_accumulator & digit_mask).unwrap_unchecked()
+                });
+                next_smallest_digits.push(unsafe {
+                    Digit::try_from(next_smallest_accumulator & digit_mask).unwrap_unchecked()
+                });
+                next_largest_accumulator = next_largest_accumulator >> SHIFT;
+                next_smallest_accumulator = next_smallest_accumulator >> SHIFT;
+            }
+            for index in smallest_digits_count..largest_digits_count {
+                next_largest_accumulator = next_largest_accumulator
+                    + first_coefficient
+                        * SignedOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]);
+                next_smallest_accumulator = next_smallest_accumulator
+                    - third_coefficient
+                        * SignedOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]);
+                next_largest_digits.push(unsafe {
+                    Digit::try_from(next_largest_accumulator & digit_mask).unwrap_unchecked()
+                });
+                next_smallest_digits.push(unsafe {
+                    Digit::try_from(next_smallest_accumulator & digit_mask).unwrap_unchecked()
+                });
+                next_largest_accumulator = next_largest_accumulator >> SHIFT;
+                next_smallest_accumulator = next_smallest_accumulator >> SHIFT;
+            }
+            normalize_digits(&mut next_largest_digits);
+            normalize_digits(&mut next_smallest_digits);
+            largest_digits = next_largest_digits;
+            smallest_digits = next_smallest_digits;
+        }
+        Self::from(utils::to_gcd::<DoublePrecisionOf<Digit>>(
+            reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&largest_digits),
+            reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&smallest_digits),
+        ))
+    }
+}
+
 const MAX_REPRESENTABLE_BASE: u8 = 36;
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
@@ -414,6 +576,31 @@ where
     }
 }
 
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: DoublePrecision
+        + PrimInt
+        + TryFrom<usize>
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + WrappingSub,
+    DoublePrecisionOf<Digit>: PrimInt,
+{
+    fn from(mut value: DoublePrecisionOf<Digit>) -> Self {
+        if value.is_zero() {
+            Self::zero()
+        } else {
+            let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
+            let sign = Sign::one();
+            let mut digits: Vec<Digit> = Vec::new();
+            while !value.is_zero() {
+                digits.push(unsafe { Digit::try_from(value & digit_mask).unwrap_unchecked() });
+                value = value >> SHIFT;
+            }
+            Self { sign, digits }
+        }
+    }
+}
+
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&str>
     for BigInt<Digit, SEPARATOR, SHIFT>
 where
@@ -683,7 +870,7 @@ impl DoublePrecision for u64 {
 }
 
 pub trait Signed {
-    type Type;
+    type Type: Neg<Output = Self::Type>;
 }
 
 impl Signed for u8 {
@@ -1535,6 +1722,18 @@ where
     if digits_count != digits.len() {
         digits.resize(digits_count, Digit::zero());
     }
+}
+
+fn reduce_digits<Digit, Output, const SHIFT: usize>(digits: &Vec<Digit>) -> Output
+where
+    Digit: Copy,
+    Output: PrimInt + From<Digit>,
+{
+    let mut result = Output::zero();
+    for &digit in digits.iter().rev() {
+        result = (result << SHIFT) | <Output as From<Digit>>::from(digit);
+    }
+    result
 }
 
 #[inline]

@@ -9,9 +9,13 @@ use pyo3::ffi::Py_hash_t;
 use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, Python};
 use pyo3::PyNumberProtocol;
 
+use traits::SignedOf;
+
 pub use crate::big_int::*;
+pub use crate::traits::*;
 
 mod big_int;
+mod traits;
 mod utils;
 
 #[cfg(target_arch = "x86")]

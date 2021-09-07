@@ -10,6 +10,7 @@ use std::str::Chars;
 use num::traits::WrappingSub;
 use num::{Num, One, PrimInt, Signed as SignedNumber, Zero};
 
+use crate::traits::{DoublePrecision, DoublePrecisionOf, Signed, SignedOf};
 use crate::utils;
 
 #[derive(Clone, PartialEq, Eq)]
@@ -846,88 +847,6 @@ where
     }
 }
 
-pub trait DoublePrecision: Sized {
-    type Type: From<Self>;
-}
-
-impl DoublePrecision for i8 {
-    type Type = i16;
-}
-
-impl DoublePrecision for i16 {
-    type Type = i32;
-}
-
-impl DoublePrecision for i32 {
-    type Type = i64;
-}
-
-impl DoublePrecision for i64 {
-    type Type = i128;
-}
-
-impl DoublePrecision for u8 {
-    type Type = u16;
-}
-
-impl DoublePrecision for u16 {
-    type Type = u32;
-}
-
-impl DoublePrecision for u32 {
-    type Type = u64;
-}
-
-impl DoublePrecision for u64 {
-    type Type = u128;
-}
-
-pub trait Signed {
-    type Type: Neg<Output = Self::Type>;
-}
-
-impl Signed for u8 {
-    type Type = i8;
-}
-
-impl Signed for u16 {
-    type Type = i16;
-}
-
-impl Signed for u32 {
-    type Type = i32;
-}
-
-impl Signed for u64 {
-    type Type = i64;
-}
-
-impl Signed for u128 {
-    type Type = i128;
-}
-
-impl Signed for i8 {
-    type Type = i8;
-}
-
-impl Signed for i16 {
-    type Type = i16;
-}
-
-impl Signed for i32 {
-    type Type = i32;
-}
-
-impl Signed for i64 {
-    type Type = i64;
-}
-
-impl Signed for i128 {
-    type Type = i128;
-}
-
-pub type DoublePrecisionOf<T> = <T as DoublePrecision>::Type;
-pub type SignedOf<T> = <T as Signed>::Type;
 pub(crate) type Sign = i8;
 
 fn binary_digits_to_base<SourceDigit, TargetDigit>(

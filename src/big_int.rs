@@ -1487,10 +1487,10 @@ where
             result_position += 1;
             accumulator = accumulator >> SHIFT;
             digit = digit << 1;
-            for first_position in index + 1..shortest.len() {
+            for next_index in index + 1..shortest.len() {
                 accumulator = accumulator
                     + DoublePrecisionOf::<Digit>::from(result[result_position])
-                    + DoublePrecisionOf::<Digit>::from(shortest[first_position]) * digit;
+                    + DoublePrecisionOf::<Digit>::from(shortest[next_index]) * digit;
                 result[result_position] =
                     unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
                 result_position += 1;

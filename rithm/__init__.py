@@ -9,8 +9,8 @@ except ImportError:
 
 
     class Int(int):
-        def gcd(self, other: 'Int') -> 'Int':
-            return Int(_gcd(self, other))
-
         def __repr__(self) -> str:
             return f'rithm.Int(\'{self}\')'
+
+        def gcd(self, other: 'Int') -> 'Int':
+            return Int(_gcd(self, other))

@@ -784,7 +784,7 @@ where
 {
     type Output = Self;
     fn sub(self, other: Self) -> Self::Output {
-        return if self.sign < 0 {
+        if self.sign < 0 {
             if other.sign < 0 {
                 let mut sign: Sign = 1;
                 let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
@@ -809,7 +809,7 @@ where
             let digits =
                 subtract_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits, &mut sign);
             Self { sign, digits }
-        };
+        }
     }
 }
 

@@ -12,7 +12,7 @@ use num::{Num, One, PrimInt, Signed as SignedNumber, Zero};
 
 use crate::utils;
 
-#[derive(Clone, PartialEq, Eq, Ord)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
     sign: Sign,
     digits: Vec<Digit>,
@@ -82,6 +82,19 @@ impl<Digit: PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
     }
 }
 
+impl<Digit: Eq + PartialOrd, const SEPARATOR: char, const SHIFT: usize> Ord
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.lt(other) {
+            Ordering::Less
+        } else if other.lt(self) {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
+        }
+    }
+}
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: DoublePrecision

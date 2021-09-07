@@ -1044,11 +1044,11 @@ where
     for source_digit in source_digits.iter().rev() {
         let mut digit: DoublePrecisionOf<TargetDigit> =
             DoublePrecisionOf::<TargetDigit>::from(*source_digit);
-        for index in 0..result.len() {
+        for result_position in result.iter_mut() {
             let step: DoublePrecisionOf<TargetDigit> =
-                (DoublePrecisionOf::<TargetDigit>::from(result[index]) << source_shift) | digit;
+                (DoublePrecisionOf::<TargetDigit>::from(*result_position) << source_shift) | digit;
             digit = step / target_base;
-            result[index] = TargetDigit::try_from(step - digit * target_base).unwrap();
+            *result_position = TargetDigit::try_from(step - digit * target_base).unwrap();
         }
         while !digit.is_zero() {
             result.push(TargetDigit::try_from(digit % target_base).unwrap());

@@ -1293,12 +1293,12 @@ where
 {
     let target_base = 1usize << target_shift;
     let target_digit_mask = to_digit_mask::<DoublePrecisionOf<TargetDigit>>(target_shift);
-    static mut bases_logs: [f64; 37] = [0.0; 37];
-    static mut infimum_bases_exponents: [usize; 37] = [0; 37];
-    static mut infimum_bases_powers: [usize; 37] = [0; 37];
-    if unsafe { bases_logs[source_base] } == 0.0 {
+    static mut BASES_LOGS: [f64; 37] = [0.0; 37];
+    static mut INFIMUM_BASES_EXPONENTS: [usize; 37] = [0; 37];
+    static mut INFIMUM_BASES_POWERS: [usize; 37] = [0; 37];
+    if unsafe { BASES_LOGS[source_base] } == 0.0 {
         let bases_log = (source_base as f64).ln() / (target_base as f64).ln();
-        unsafe { bases_logs[source_base] = bases_log };
+        unsafe { BASES_LOGS[source_base] = bases_log };
         let mut infimum_base_power = source_base;
         let mut infimum_base_exponent: usize = 1;
         loop {
@@ -1309,14 +1309,14 @@ where
             infimum_base_power = candidate;
             infimum_base_exponent += 1;
         }
-        unsafe { infimum_bases_powers[source_base] = infimum_base_power };
-        unsafe { infimum_bases_exponents[source_base] = infimum_base_exponent };
+        unsafe { INFIMUM_BASES_POWERS[source_base] = infimum_base_power };
+        unsafe { INFIMUM_BASES_EXPONENTS[source_base] = infimum_base_exponent };
     }
     let digits_count_upper_bound =
-        (source_digits.len() as f64) * unsafe { bases_logs[source_base] } + 1.0;
+        (source_digits.len() as f64) * unsafe { BASES_LOGS[source_base] } + 1.0;
     let mut result = Vec::<TargetDigit>::with_capacity(digits_count_upper_bound as usize);
-    let infimum_base_exponent = unsafe { infimum_bases_exponents[source_base] };
-    let infimum_base_power = unsafe { infimum_bases_powers[source_base] };
+    let infimum_base_exponent = unsafe { INFIMUM_BASES_EXPONENTS[source_base] };
+    let infimum_base_power = unsafe { INFIMUM_BASES_POWERS[source_base] };
     let mut reversed_source_digits = source_digits.iter().rev();
     while let Some(&source_digit) = reversed_source_digits.next() {
         let mut digit = DoublePrecisionOf::<TargetDigit>::from(source_digit);

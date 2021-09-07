@@ -1734,7 +1734,7 @@ where
     }
 }
 
-fn reduce_digits<Digit, Output, const SHIFT: usize>(digits: &Vec<Digit>) -> Output
+fn reduce_digits<Digit, Output, const SHIFT: usize>(digits: &[Digit]) -> Output
 where
     Digit: Copy,
     Output: PrimInt + From<Digit>,

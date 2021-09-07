@@ -23,67 +23,67 @@ const BINARY_SHIFT: usize = (SignedOf::<Digit>::BITS - 2) as usize;
 
 type _BigInt = BigInt<Digit, '_', BINARY_SHIFT>;
 
-#[pyclass(module = "rithm", subclass)]
+#[pyclass(name = "Int", module = "rithm", subclass)]
 #[derive(Clone)]
-struct Int(_BigInt);
+struct PyInt(_BigInt);
 
 #[pymethods]
-impl Int {
+impl PyInt {
     #[new]
     #[args(_string = "\"0\"", base = 10)]
     fn new(_string: &str, base: u32) -> PyResult<Self> {
         match _BigInt::from_str_radix(_string, base) {
-            Ok(value) => Ok(Int(value)),
+            Ok(value) => Ok(PyInt(value)),
             Err(reason) => Err(PyValueError::new_err(reason)),
         }
     }
 
-    fn gcd(&self, other: Self) -> Int {
-        Int(self.0.gcd(&other.0))
+    fn gcd(&self, other: Self) -> PyInt {
+        PyInt(self.0.gcd(&other.0))
     }
 }
 
 #[pyproto]
-impl PyNumberProtocol for Int {
-    fn __abs__(&self) -> Int {
-        Int(self.0.abs())
+impl PyNumberProtocol for PyInt {
+    fn __abs__(&self) -> PyInt {
+        PyInt(self.0.abs())
     }
 
-    fn __add__(lhs: Int, rhs: Int) -> Int {
-        Int(lhs.0 + rhs.0)
+    fn __add__(lhs: PyInt, rhs: PyInt) -> PyInt {
+        PyInt(lhs.0 + rhs.0)
     }
 
-    fn __divmod__(lhs: Int, rhs: Int) -> PyResult<(Int, Int)> {
+    fn __divmod__(lhs: PyInt, rhs: PyInt) -> PyResult<(PyInt, PyInt)> {
         match divmod(lhs.0, rhs.0) {
-            Ok((quotient, remainder)) => Ok((Int(quotient), Int(remainder))),
+            Ok((quotient, remainder)) => Ok((PyInt(quotient), PyInt(remainder))),
             Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
         }
     }
 
-    fn __floordiv__(lhs: Int, rhs: Int) -> PyResult<Int> {
+    fn __floordiv__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {
         match divmod(lhs.0, rhs.0) {
-            Ok((result, _)) => Ok(Int(result)),
+            Ok((result, _)) => Ok(PyInt(result)),
             Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
         }
     }
 
-    fn __mod__(lhs: Int, rhs: Int) -> PyResult<Int> {
+    fn __mod__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {
         match divmod(lhs.0, rhs.0) {
-            Ok((_, result)) => Ok(Int(result)),
+            Ok((_, result)) => Ok(PyInt(result)),
             Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
         }
     }
 
-    fn __mul__(lhs: Int, rhs: Int) -> Int {
-        Int(lhs.0 * rhs.0)
+    fn __mul__(lhs: PyInt, rhs: PyInt) -> PyInt {
+        PyInt(lhs.0 * rhs.0)
     }
 
-    fn __neg__(&self) -> Int {
-        Int(-self.0.clone())
+    fn __neg__(&self) -> PyInt {
+        PyInt(-self.0.clone())
     }
 
-    fn __sub__(lhs: Int, rhs: Int) -> Int {
-        Int(lhs.0 - rhs.0)
+    fn __sub__(lhs: PyInt, rhs: PyInt) -> PyInt {
+        PyInt(lhs.0 - rhs.0)
     }
 }
 
@@ -99,7 +99,7 @@ fn divmod(dividend: _BigInt, divisor: _BigInt) -> Result<(_BigInt, _BigInt), &'s
 }
 
 #[pyproto]
-impl PyObjectProtocol for Int {
+impl PyObjectProtocol for PyInt {
     fn __bool__(self) -> bool {
         !self.0.is_zero()
     }
@@ -112,7 +112,7 @@ impl PyObjectProtocol for Int {
         format!("rithm.Int('{}')", self.0)
     }
 
-    fn __richcmp__(&self, other: Int, op: CompareOp) -> bool {
+    fn __richcmp__(&self, other: PyInt, op: CompareOp) -> bool {
         match op {
             CompareOp::Eq => self.0 == other.0,
             CompareOp::Ge => self.0 >= other.0,
@@ -132,6 +132,6 @@ impl PyObjectProtocol for Int {
 fn _rithm(_py: Python, module: &PyModule) -> PyResult<()> {
     module.setattr("__doc__", env!("CARGO_PKG_DESCRIPTION"))?;
     module.setattr("__version__", env!("CARGO_PKG_VERSION"))?;
-    module.add_class::<Int>()?;
+    module.add_class::<PyInt>()?;
     Ok(())
 }

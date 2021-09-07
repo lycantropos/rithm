@@ -355,7 +355,7 @@ where
         }
         let mut result: Vec<u8> = Vec::new();
         let mut prev: char = SEPARATOR;
-        while let Some(character) = characters.next() {
+        for character in characters {
             if character != SEPARATOR {
                 let digit = Self::ASCII_CODES_DIGIT_VALUES[character as usize];
                 if digit >= base {

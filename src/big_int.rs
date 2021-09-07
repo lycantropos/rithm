@@ -1039,7 +1039,7 @@ where
 {
     let result_max_digits_count: usize = 1
         + ((((source_digits.len() * source_shift) as f64) / (target_base as f64).log2()) as usize);
-    let mut result: Vec<TargetDigit> = Vec::with_capacity(result_max_digits_count);
+    let mut result = Vec::<TargetDigit>::with_capacity(result_max_digits_count);
     let target_base = DoublePrecisionOf::<TargetDigit>::try_from(target_base).unwrap();
     for source_digit in source_digits.iter().rev() {
         let mut digit: DoublePrecisionOf<TargetDigit> =
@@ -1074,7 +1074,7 @@ where
     let target_digit_mask = to_digit_mask::<DoublePrecisionOf<TargetDigit>>(target_shift);
     let result_capacity: usize =
         (source_digits.len() * target_shift + (target_shift - 1)) / target_shift;
-    let mut result: Vec<TargetDigit> = Vec::with_capacity(result_capacity);
+    let mut result = Vec::<TargetDigit>::with_capacity(result_capacity);
     let mut accumulator = DoublePrecisionOf::<TargetDigit>::zero();
     let mut accumulator_bits_count: usize = 0;
     for digit in source_digits {
@@ -1114,7 +1114,7 @@ where
     let result_digits_bits_count: usize = (source_digits.len() - 1) * source_shift
         + utils::to_bit_length(*source_digits.last().unwrap());
     let result_digits_count: usize = (result_digits_bits_count + (target_shift - 1)) / target_shift;
-    let mut result: Vec<TargetDigit> = Vec::with_capacity(result_digits_count);
+    let mut result = Vec::<TargetDigit>::with_capacity(result_digits_count);
     let mut accumulator = DoublePrecisionOf::<SourceDigit>::zero();
     let mut accumulator_bits_count: usize = 0;
     for index in 0..source_digits.len() {
@@ -1624,7 +1624,7 @@ where
         }
         _ => {}
     };
-    let mut result: Vec<Digit> = Vec::with_capacity(size_longest);
+    let mut result = Vec::<Digit>::with_capacity(size_longest);
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for index in 0..size_shortest {
         accumulator = longest[index].wrapping_sub(&shortest[index]) - accumulator;
@@ -1682,7 +1682,7 @@ where
         (size_longest, size_shortest) = (size_shortest, size_longest);
         (longest, shortest) = (shortest, longest);
     }
-    let mut result: Vec<Digit> = Vec::with_capacity(size_longest + 1);
+    let mut result = Vec::<Digit>::with_capacity(size_longest + 1);
     let mut accumulator: Digit = Digit::zero();
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for index in 0..size_shortest {

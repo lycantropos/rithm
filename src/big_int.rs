@@ -1314,7 +1314,7 @@ where
     }
     let digits_count_upper_bound =
         (source_digits.len() as f64) * unsafe { bases_logs[source_base] } + 1.0;
-    let mut digits: Vec<TargetDigit> = Vec::with_capacity(digits_count_upper_bound as usize);
+    let mut result = Vec::<TargetDigit>::with_capacity(digits_count_upper_bound as usize);
     let infimum_base_exponent = unsafe { infimum_bases_exponents[source_base] };
     let infimum_base_power = unsafe { infimum_bases_powers[source_base] };
     let mut reversed_source_digits = source_digits.iter().rev();
@@ -1339,24 +1339,24 @@ where
         } else {
             source_base.pow(base_exponent as u32)
         };
-        for index in 0..digits.len() {
+        for result_position in result.iter_mut() {
             digit = digit
-                + DoublePrecisionOf::<TargetDigit>::from(digits[index])
+                + DoublePrecisionOf::<TargetDigit>::from(*result_position)
                     * unsafe {
                         DoublePrecisionOf::<TargetDigit>::try_from(base_power).unwrap_unchecked()
                     };
-            digits[index] =
+            *result_position =
                 unsafe { TargetDigit::try_from(digit & target_digit_mask).unwrap_unchecked() };
             digit = digit >> target_shift;
         }
         if !digit.is_zero() {
-            digits.push(unsafe { TargetDigit::try_from(digit).unwrap_unchecked() });
+            result.push(unsafe { TargetDigit::try_from(digit).unwrap_unchecked() });
         }
     }
-    if digits.is_empty() {
-        digits.push(TargetDigit::zero());
+    if result.is_empty() {
+        result.push(TargetDigit::zero());
     }
-    digits
+    result
 }
 
 fn multiply_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(

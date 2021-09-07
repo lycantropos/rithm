@@ -19,7 +19,7 @@ pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
 }
 
 #[inline]
-fn digits_lesser_than<Digit: PartialOrd>(left: &Vec<Digit>, right: &Vec<Digit>) -> bool {
+fn digits_lesser_than<Digit: PartialOrd>(left: &[Digit], right: &[Digit]) -> bool {
     left.len() < right.len()
         || left.len() == right.len() && left.iter().rev().lt(right.iter().rev())
 }
@@ -918,7 +918,7 @@ pub type SignedOf<T> = <T as Signed>::Type;
 pub(crate) type Sign = i8;
 
 fn binary_digits_to_base<SourceDigit, TargetDigit>(
-    source_digits: &Vec<SourceDigit>,
+    source_digits: &[SourceDigit],
     source_shift: usize,
     target_base: usize,
 ) -> Vec<TargetDigit>
@@ -949,7 +949,7 @@ where
 }
 
 fn digits_to_binary_base<SourceDigit, TargetDigit>(
-    source_digits: &Vec<SourceDigit>,
+    source_digits: &[SourceDigit],
     source_base: usize,
     target_shift: usize,
 ) -> Vec<TargetDigit>
@@ -979,7 +979,7 @@ where
 }
 
 fn binary_digits_to_binary_base<SourceDigit, TargetDigit>(
-    source_digits: &Vec<SourceDigit>,
+    source_digits: &[SourceDigit],
     source_shift: usize,
     target_shift: usize,
 ) -> Vec<TargetDigit>
@@ -1012,7 +1012,7 @@ where
 }
 
 fn binary_digits_to_non_binary_base<SourceDigit, TargetDigit>(
-    source_digits: &Vec<SourceDigit>,
+    source_digits: &[SourceDigit],
     source_shift: usize,
     target_base: usize,
 ) -> Vec<TargetDigit>
@@ -1049,7 +1049,7 @@ where
 }
 
 fn binary_digits_to_greater_binary_base<SourceDigit, TargetDigit>(
-    source_digits: &Vec<SourceDigit>,
+    source_digits: &[SourceDigit],
     source_shift: usize,
     target_shift: usize,
 ) -> Vec<TargetDigit>
@@ -1087,7 +1087,7 @@ where
 }
 
 fn binary_digits_to_lesser_binary_base<SourceDigit, TargetDigit>(
-    source_digits: &Vec<SourceDigit>,
+    source_digits: &[SourceDigit],
     source_shift: usize,
     target_shift: usize,
 ) -> Vec<TargetDigit>
@@ -1131,7 +1131,7 @@ where
 }
 
 fn divrem_digits_by_digit<Digit, const SHIFT: usize>(
-    dividend: &Vec<Digit>,
+    dividend: &[Digit],
     divisor: Digit,
 ) -> (Vec<Digit>, Digit)
 where
@@ -1156,8 +1156,8 @@ where
 }
 
 fn divrem_two_or_more_digits<Digit, const SHIFT: usize>(
-    dividend: &Vec<Digit>,
-    divisor: &Vec<Digit>,
+    dividend: &[Digit],
+    divisor: &[Digit],
 ) -> (Vec<Digit>, Vec<Digit>)
 where
     Digit: DoublePrecision
@@ -1176,12 +1176,9 @@ where
     let mut dividend_normalized = vec![Digit::zero(); dividend_digits_count];
     let mut divisor_normalized = vec![Digit::zero(); divisor_digits_count];
     let shift = SHIFT - utils::to_bit_length(divisor[divisor.len() - 1]);
-    shift_digits_left::<Digit, SHIFT>(divisor.as_slice(), shift, divisor_normalized.as_mut_slice());
-    let accumulator = shift_digits_left::<Digit, SHIFT>(
-        dividend.as_slice(),
-        shift,
-        dividend_normalized.as_mut_slice(),
-    );
+    shift_digits_left::<Digit, SHIFT>(divisor, shift, divisor_normalized.as_mut_slice());
+    let accumulator =
+        shift_digits_left::<Digit, SHIFT>(dividend, shift, dividend_normalized.as_mut_slice());
     let last_divisor_digit_normalized = divisor_normalized[divisor_normalized.len() - 1];
     if !accumulator.is_zero()
         || dividend_normalized[dividend_normalized.len() - 1] >= last_divisor_digit_normalized
@@ -1271,7 +1268,7 @@ where
 }
 
 fn non_binary_digits_to_binary_base<SourceDigit, TargetDigit>(
-    source_digits: &Vec<SourceDigit>,
+    source_digits: &[SourceDigit],
     source_base: usize,
     target_shift: usize,
 ) -> Vec<TargetDigit>
@@ -1350,8 +1347,8 @@ where
 }
 
 fn multiply_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
-    first: &Vec<Digit>,
-    second: &Vec<Digit>,
+    first: &[Digit],
+    second: &[Digit],
 ) -> Vec<Digit>
 where
     Digit: DoublePrecision
@@ -1422,8 +1419,8 @@ where
 }
 
 fn multiply_digits_lopsided<Digit, const SEPARATOR: char, const SHIFT: usize>(
-    shortest: &Vec<Digit>,
-    longest: &Vec<Digit>,
+    shortest: &[Digit],
+    longest: &[Digit],
 ) -> Vec<Digit>
 where
     Digit: DoublePrecision
@@ -1455,8 +1452,8 @@ where
 }
 
 fn multiply_digits_plain<Digit, const SEPARATOR: char, const SHIFT: usize>(
-    shortest: &Vec<Digit>,
-    longest: &Vec<Digit>,
+    shortest: &[Digit],
+    longest: &[Digit],
 ) -> Vec<Digit>
 where
     Digit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>> + Zero,
@@ -1563,7 +1560,7 @@ where
     accumulator
 }
 
-fn split_digits<Digit>(digits: &Vec<Digit>, size: usize) -> (Vec<Digit>, Vec<Digit>)
+fn split_digits<Digit>(digits: &[Digit], size: usize) -> (Vec<Digit>, Vec<Digit>)
 where
     Digit: Clone + Zero,
 {
@@ -1575,8 +1572,8 @@ where
 }
 
 fn subtract_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
-    first: &Vec<Digit>,
-    second: &Vec<Digit>,
+    first: &[Digit],
+    second: &[Digit],
     sign: &mut Sign,
 ) -> Vec<Digit>
 where
@@ -1630,7 +1627,7 @@ where
 
 fn subtract_digits_in_place<Digit, const SEPARATOR: char, const SHIFT: usize>(
     longest: &mut [Digit],
-    shortest: &Vec<Digit>,
+    shortest: &[Digit],
 ) -> Digit
 where
     Digit: PrimInt + WrappingSub,
@@ -1654,8 +1651,8 @@ where
 }
 
 fn sum_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
-    first: &Vec<Digit>,
-    second: &Vec<Digit>,
+    first: &[Digit],
+    second: &[Digit],
 ) -> Vec<Digit>
 where
     Digit: PrimInt + TryFrom<usize>,
@@ -1688,7 +1685,7 @@ where
 
 fn sum_digits_in_place<Digit, const SEPARATOR: char, const SHIFT: usize>(
     longest: &mut [Digit],
-    shortest: &Vec<Digit>,
+    shortest: &[Digit],
 ) -> Digit
 where
     Digit: PrimInt,
@@ -1711,7 +1708,7 @@ where
     accumulator
 }
 
-fn normalize_digits<Digit>(digits: &mut Vec<Digit>) -> ()
+fn normalize_digits<Digit>(digits: &mut Vec<Digit>)
 where
     Digit: Clone + Zero,
 {

@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 
 use num::PrimInt;
 
-pub(crate) fn to_bit_length<T>(value: T) -> usize
+pub(crate) fn bit_length<T>(value: T) -> usize
 where
     T: From<u8> + PrimInt,
     usize: TryFrom<T>,
@@ -20,7 +20,7 @@ where
     result + BIT_LENGTHS_TABLE[unsafe { usize::try_from(value).unwrap_unchecked() }]
 }
 
-pub(crate) fn to_gcd<T>(mut first: T, mut second: T) -> T
+pub(crate) fn gcd<T>(mut first: T, mut second: T) -> T
 where
     T: PrimInt,
 {
@@ -58,6 +58,6 @@ where
     if value.is_zero() {
         Err("Logarithm of zero is undefined.")
     } else {
-        Ok(to_bit_length(value) - 1)
+        Ok(bit_length(value) - 1)
     }
 }

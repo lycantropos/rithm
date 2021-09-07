@@ -129,7 +129,7 @@ where
                 };
             }
             let highest_digit_bit_length =
-                utils::to_bit_length(largest_digits[largest_digits.len() - 1]);
+                utils::bit_length(largest_digits[largest_digits.len() - 1]);
             let mut largest_leading_bits = (SignedOf::<DoublePrecisionOf<Digit>>::from(
                 largest_digits[largest_digits_count - 1],
             ) << (2 * SHIFT - highest_digit_bit_length))
@@ -250,7 +250,7 @@ where
             largest_digits = next_largest_digits;
             smallest_digits = next_smallest_digits;
         }
-        Self::from(utils::to_gcd::<DoublePrecisionOf<Digit>>(
+        Self::from(utils::gcd::<DoublePrecisionOf<Digit>>(
             reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&largest_digits),
             reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&smallest_digits),
         ))
@@ -1112,7 +1112,7 @@ where
 {
     let target_digit_mask = to_digit_mask::<DoublePrecisionOf<SourceDigit>>(target_shift);
     let result_digits_bits_count: usize = (source_digits.len() - 1) * source_shift
-        + utils::to_bit_length(*source_digits.last().unwrap());
+        + utils::bit_length(*source_digits.last().unwrap());
     let result_digits_count: usize = (result_digits_bits_count + (target_shift - 1)) / target_shift;
     let mut result = Vec::<TargetDigit>::with_capacity(result_digits_count);
     let mut accumulator = DoublePrecisionOf::<SourceDigit>::zero();
@@ -1188,7 +1188,7 @@ where
     let divisor_digits_count = divisor.len();
     let mut dividend_normalized = vec![Digit::zero(); dividend_digits_count];
     let mut divisor_normalized = vec![Digit::zero(); divisor_digits_count];
-    let shift = SHIFT - utils::to_bit_length(divisor[divisor.len() - 1]);
+    let shift = SHIFT - utils::bit_length(divisor[divisor.len() - 1]);
     shift_digits_left::<Digit, SHIFT>(divisor, shift, divisor_normalized.as_mut_slice());
     let accumulator =
         shift_digits_left::<Digit, SHIFT>(dividend, shift, dividend_normalized.as_mut_slice());

@@ -26,10 +26,15 @@ type Digit = u32;
 const BINARY_SHIFT: usize = (SignedOf::<Digit>::BITS - 2) as usize;
 
 type _BigInt = BigInt<Digit, '_', BINARY_SHIFT>;
+type _Fraction = Fraction<_BigInt>;
 
 #[pyclass(name = "Int", module = "rithm", subclass)]
 #[derive(Clone)]
 struct PyInt(_BigInt);
+
+#[pyclass(name = "Fraction", module = "rithm", subclass)]
+#[derive(Clone)]
+struct PyFraction(_Fraction);
 
 #[pymethods]
 impl PyInt {
@@ -44,6 +49,30 @@ impl PyInt {
 
     fn gcd(&self, other: Self) -> PyInt {
         PyInt(self.0.clone().gcd(other.0))
+    }
+}
+
+#[pymethods]
+impl PyFraction {
+    #[new]
+    fn new(_numerator: Option<PyInt>, _denominator: Option<PyInt>) -> PyResult<Self> {
+        match _Fraction::new(
+            _numerator.map(|value| value.0).unwrap_or(_BigInt::zero()),
+            _denominator.map(|value| value.0).unwrap_or(_BigInt::one()),
+        ) {
+            Ok(value) => Ok(PyFraction(value)),
+            Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
+        }
+    }
+
+    #[getter]
+    fn denominator(&self) -> PyInt {
+        PyInt(self.0.denominator().clone())
+    }
+
+    #[getter]
+    fn numerator(&self) -> PyInt {
+        PyInt(self.0.numerator().clone())
     }
 }
 
@@ -132,10 +161,26 @@ impl PyObjectProtocol for PyInt {
     }
 }
 
+#[pyproto]
+impl PyObjectProtocol for PyFraction {
+    fn __bool__(self) -> bool {
+        self.numerator().__bool__()
+    }
+
+    fn __repr__(&self) -> String {
+        format!("rithm.Fraction({}, {})", self.numerator().__repr__(), self.denominator().__repr__())
+    }
+
+    fn __str__(&self) -> String {
+        self.0.to_string()
+    }
+}
+
 #[pymodule]
 fn _rithm(_py: Python, module: &PyModule) -> PyResult<()> {
     module.setattr("__doc__", env!("CARGO_PKG_DESCRIPTION"))?;
     module.setattr("__version__", env!("CARGO_PKG_VERSION"))?;
     module.add_class::<PyInt>()?;
+    module.add_class::<PyFraction>()?;
     Ok(())
 }

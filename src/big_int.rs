@@ -10,13 +10,54 @@ use std::str::Chars;
 use num::traits::WrappingSub;
 use num::{Num, One, PrimInt, Signed as SignedNumber, Zero};
 
-use crate::traits::{DoublePrecision, DoublePrecisionOf, Signed, SignedOf};
+use crate::traits::{DoublePrecision, DoublePrecisionOf, Gcd, Signed, SignedOf};
 use crate::utils;
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
     sign: Sign,
     digits: Vec<Digit>,
+}
+
+#[derive(Clone, PartialEq, Eq)]
+pub struct Fraction<Component: Clone + PartialEq + Eq> {
+    numerator: Component,
+    denominator: Component,
+}
+
+impl<
+        Component: Clone
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Neg<Output = Component>
+            + PartialEq
+            + PartialOrd
+            + Eq
+            + Zero,
+    > Fraction<Component>
+{
+    pub fn new(mut numerator: Component, mut denominator: Component) -> Result<Self, &'static str> {
+        if denominator.is_zero() {
+            Err("Denominator should not be zero.")
+        } else {
+            if denominator.lt(&Component::zero()) {
+                (numerator, denominator) = (-numerator, -denominator);
+            };
+            let gcd = numerator.clone().gcd(denominator.clone());
+            Ok(Self {
+                numerator: numerator / gcd.clone(),
+                denominator: denominator / gcd,
+            })
+        }
+    }
+
+    pub fn denominator(&self) -> &Component {
+        &self.denominator
+    }
+
+    pub fn numerator(&self) -> &Component {
+        &self.numerator
+    }
 }
 
 #[inline]
@@ -389,6 +430,16 @@ where
 {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
         formatter.write_str(self.to_base_string(10).as_str())
+    }
+}
+
+impl<Component: Clone + Display + PartialEq + Eq + One> Display for Fraction<Component> {
+    fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
+        if self.denominator.is_one() {
+            write!(formatter, "{}", self.numerator)
+        } else {
+            write!(formatter, "{}/{}", self.numerator, self.denominator)
+        }
     }
 }
 

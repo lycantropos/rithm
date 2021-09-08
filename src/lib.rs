@@ -43,7 +43,7 @@ impl PyInt {
     }
 
     fn gcd(&self, other: Self) -> PyInt {
-        PyInt(self.0.gcd(&other.0))
+        PyInt(self.0.clone().gcd(other.0))
     }
 }
 

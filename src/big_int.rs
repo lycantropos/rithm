@@ -96,7 +96,7 @@ impl<Digit: Eq + PartialOrd, const SEPARATOR: char, const SHIFT: usize> Ord
         }
     }
 }
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Gcd for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: DoublePrecision
         + From<u8>
@@ -111,9 +111,11 @@ where
     SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + PrimInt,
     usize: TryFrom<Digit>,
 {
-    pub(crate) fn gcd(&self, other: &Self) -> Self {
-        let mut largest_digits = self.digits.clone();
-        let mut smallest_digits = other.digits.clone();
+    type Output = Self;
+
+    fn gcd(self, other: Self) -> Self {
+        let mut largest_digits = self.digits;
+        let mut smallest_digits = other.digits;
         if digits_lesser_than(&largest_digits, &smallest_digits) {
             (largest_digits, smallest_digits) = (smallest_digits, largest_digits);
         }

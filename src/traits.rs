@@ -1,4 +1,36 @@
+use crate::utils;
 use std::ops::Neg;
+
+pub trait Gcd<Rhs = Self> {
+    type Output;
+
+    fn gcd(self, other: Rhs) -> Self::Output;
+}
+
+macro_rules! plain_gcd_impl {
+    ($t:ty) => {
+        impl Gcd for $t {
+            type Output = Self;
+
+            #[inline]
+            fn gcd(self, other: Self) -> Self::Output {
+                utils::gcd::<$t>(self, other)
+            }
+        }
+    };
+}
+
+plain_gcd_impl!(i8);
+plain_gcd_impl!(i16);
+plain_gcd_impl!(i32);
+plain_gcd_impl!(i64);
+plain_gcd_impl!(i128);
+plain_gcd_impl!(u8);
+plain_gcd_impl!(u16);
+plain_gcd_impl!(u32);
+plain_gcd_impl!(u64);
+plain_gcd_impl!(u128);
+plain_gcd_impl!(usize);
 
 pub trait DoublePrecision: Sized {
     type Type: From<Self>;

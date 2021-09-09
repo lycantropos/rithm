@@ -143,7 +143,7 @@ except ImportError:
                 raise TypeError(f'Denominator should be of type {Int}, '
                                 f'but found: {type(denominator)}.')
             if not denominator:
-                raise ValueError('Denominator should not be zero.')
+                raise ZeroDivisionError('Denominator should not be zero.')
             if denominator < _ZERO:
                 numerator, denominator = -numerator, -denominator
             gcd = numerator.gcd(denominator)

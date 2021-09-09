@@ -7,8 +7,7 @@ try:
                          Int)
 except ImportError:
     from math import gcd as _gcd
-    from typing import (Optional as _Optional,
-                        Tuple as _Tuple,
+    from typing import (Tuple as _Tuple,
                         Union as _Union)
 
 

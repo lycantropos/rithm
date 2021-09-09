@@ -6,8 +6,8 @@ use num::{One, Zero};
 use crate::Gcd;
 use std::cmp::Ordering;
 
-#[derive(Clone, PartialEq, Eq)]
-pub struct Fraction<Component: Clone + PartialEq + Eq> {
+#[derive(Clone, Eq, PartialEq)]
+pub struct Fraction<Component: Clone + Eq> {
     numerator: Component,
     denominator: Component,
 }
@@ -17,7 +17,6 @@ impl<
             + Div<Output = Component>
             + Gcd<Output = Component>
             + Neg<Output = Component>
-            + PartialEq
             + PartialOrd
             + Eq
             + Zero,
@@ -47,7 +46,7 @@ impl<
     }
 }
 
-impl<Component: Clone + Display + PartialEq + Eq + One> Display for Fraction<Component> {
+impl<Component: Clone + Display + Eq + One> Display for Fraction<Component> {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
         if self.denominator.is_one() {
             write!(formatter, "{}", self.numerator)

@@ -132,9 +132,6 @@ except ImportError:
 
         __slots__ = '_denominator', '_numerator'
 
-        def __bool__(self) -> bool:
-            return bool(self._numerator)
-
         def __new__(cls,
                     numerator: Int = _ZERO,
                     denominator: _Optional[Int] = _ONE) -> 'Fraction':
@@ -147,6 +144,39 @@ except ImportError:
             self._numerator, self._denominator = (numerator // gcd,
                                                   denominator // gcd)
             return self
+
+        def __bool__(self) -> bool:
+            return bool(self._numerator)
+
+        def __eq__(self, other: 'Fraction') -> bool:
+            return (self.numerator == other.numerator
+                    and self.denominator == other.denominator
+                    if isinstance(other, Fraction)
+                    else NotImplemented)
+
+        def __ge__(self, other: 'Fraction') -> bool:
+            return (self.numerator * other.denominator
+                    >= other.numerator * self.denominator
+                    if isinstance(other, Fraction)
+                    else NotImplemented)
+
+        def __gt__(self, other: 'Fraction') -> bool:
+            return (self.numerator * other.denominator
+                    > other.numerator * self.denominator
+                    if isinstance(other, Fraction)
+                    else NotImplemented)
+
+        def __le__(self, other: 'Fraction') -> bool:
+            return (self.numerator * other.denominator
+                    <= other.numerator * self.denominator
+                    if isinstance(other, Fraction)
+                    else NotImplemented)
+
+        def __lt__(self, other: 'Fraction') -> bool:
+            return (self.numerator * other.denominator
+                    < other.numerator * self.denominator
+                    if isinstance(other, Fraction)
+                    else NotImplemented)
 
         def __repr__(self) -> str:
             return f'rithm.Fraction({self.numerator}, {self.denominator})'

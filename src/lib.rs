@@ -183,6 +183,17 @@ impl PyObjectProtocol for PyFraction {
         )
     }
 
+    fn __richcmp__(&self, other: PyFraction, op: CompareOp) -> bool {
+        match op {
+            CompareOp::Eq => self.0 == other.0,
+            CompareOp::Ge => self.0 >= other.0,
+            CompareOp::Gt => self.0 > other.0,
+            CompareOp::Le => self.0 <= other.0,
+            CompareOp::Lt => self.0 < other.0,
+            CompareOp::Ne => self.0 != other.0,
+        }
+    }
+
     fn __str__(&self) -> String {
         self.0.to_string()
     }

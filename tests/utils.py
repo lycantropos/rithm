@@ -22,3 +22,12 @@ def is_equivalent_to_builtin_int(value: Int, builtin: int) -> bool:
 
 def to_int_with_builtin_int(decimal_string: str) -> Tuple[Int, int]:
     return Int(decimal_string), int(decimal_string)
+
+
+def to_fraction_with_builtin_fraction(numerators_pair: Tuple[Int, int],
+                                      denominators_pair: Tuple[Int, int]
+                                      ) -> Tuple[Fraction, fractions.Fraction]:
+    numerator, builtin_numerator = numerators_pair
+    denominator, builtin_denominator = denominators_pair
+    return (Fraction(numerator, denominator),
+            fractions.Fraction(builtin_numerator, builtin_denominator))

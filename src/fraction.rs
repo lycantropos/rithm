@@ -1,9 +1,10 @@
 use std::fmt::{Display, Formatter};
-use std::ops::{Div, Neg};
+use std::ops::{Div, Mul, Neg};
 
 use num::{One, Zero};
 
 use crate::Gcd;
+use std::cmp::Ordering;
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct Fraction<Component: Clone + PartialEq + Eq> {
@@ -53,5 +54,39 @@ impl<Component: Clone + Display + PartialEq + Eq + One> Display for Fraction<Com
         } else {
             write!(formatter, "{}/{}", self.numerator, self.denominator)
         }
+    }
+}
+
+impl<Component: Clone + Eq + Mul<Output = Component> + PartialOrd> PartialOrd
+    for Fraction<Component>
+{
+    fn ge(&self, other: &Self) -> bool {
+        self.numerator.clone() * other.denominator.clone()
+            >= other.numerator.clone() * self.denominator.clone()
+    }
+
+    fn gt(&self, other: &Self) -> bool {
+        self.numerator.clone() * other.denominator.clone()
+            > other.numerator.clone() * self.denominator.clone()
+    }
+
+    fn le(&self, other: &Self) -> bool {
+        self.numerator.clone() * other.denominator.clone()
+            <= other.numerator.clone() * self.denominator.clone()
+    }
+
+    fn lt(&self, other: &Self) -> bool {
+        self.numerator.clone() * other.denominator.clone()
+            < other.numerator.clone() * self.denominator.clone()
+    }
+
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(if self.lt(other) {
+            Ordering::Less
+        } else if other.lt(self) {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
+        })
     }
 }

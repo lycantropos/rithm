@@ -12,9 +12,11 @@ use pyo3::PyNumberProtocol;
 use traits::SignedOf;
 
 pub use crate::big_int::*;
+pub use crate::fraction::*;
 pub use crate::traits::*;
 
 mod big_int;
+mod fraction;
 mod traits;
 mod utils;
 

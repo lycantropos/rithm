@@ -189,4 +189,4 @@ except ImportError:
         def __str__(self) -> str:
             return (str(self.numerator)
                     if self.denominator == _ONE
-                    else f'{self.numerator}/{self.denominator})')
+                    else f'{self.numerator}/{self.denominator}')

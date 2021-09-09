@@ -99,7 +99,6 @@ impl PyNumberProtocol for PyInt {
             Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
         }
     }
-
     fn __mod__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {
         match divmod(lhs.0, rhs.0) {
             Ok((_, result)) => Ok(PyInt(result)),
@@ -117,6 +116,13 @@ impl PyNumberProtocol for PyInt {
 
     fn __sub__(lhs: PyInt, rhs: PyInt) -> PyInt {
         PyInt(lhs.0 - rhs.0)
+    }
+
+    fn __truediv__(lhs: PyInt, rhs: PyInt) -> PyResult<PyFraction> {
+        match _Fraction::new(lhs.0, rhs.0) {
+            Ok(result) => Ok(PyFraction(result)),
+            Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
+        }
     }
 }
 

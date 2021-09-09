@@ -111,6 +111,11 @@ except ImportError:
                     if isinstance(other, Int)
                     else NotImplemented)
 
+        def __truediv__(self, other: 'Int') -> 'Fraction':
+            return (Fraction(self, other)
+                    if isinstance(other, Int)
+                    else NotImplemented)
+
 
     _ONE = Int('1')
     _ZERO = Int()

@@ -25,7 +25,7 @@ except ImportError:
             self = super().__new__(cls)
             if _parse and not isinstance(_value, str):
                 raise TypeError(f'First argument should be of type {str}, '
-                                f'got {type(_value)}.')
+                                f'but found {type(_value)}.')
             self._value = int(_value, _base) if _parse else _value
             return self
 
@@ -134,8 +134,14 @@ except ImportError:
 
         def __new__(cls,
                     numerator: Int = _ZERO,
-                    denominator: _Optional[Int] = _ONE) -> 'Fraction':
+                    denominator: Int = _ONE) -> 'Fraction':
             self = super().__new__(cls)
+            if not isinstance(numerator, Int):
+                raise TypeError(f'First argument should be of type {Int}, '
+                                f'but found: {type(denominator)}.')
+            if not isinstance(denominator, Int):
+                raise TypeError(f'Denominator should be of type {Int}, '
+                                f'but found: {type(denominator)}.')
             if not denominator:
                 raise ValueError('Denominator should not be zero.')
             if denominator < _ZERO:

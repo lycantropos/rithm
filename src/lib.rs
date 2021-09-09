@@ -1,7 +1,8 @@
 #![feature(destructuring_assignment)]
 #![feature(option_result_unwrap_unchecked)]
 
-use num::{Num, One, Signed as SignedNumber, Zero};
+use crate::traits::Gcd;
+use num::{Num, One, Signed, Zero};
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
@@ -9,15 +10,9 @@ use pyo3::ffi::Py_hash_t;
 use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, Python};
 use pyo3::PyNumberProtocol;
 
-use traits::SignedOf;
-
-pub use crate::big_int::*;
-pub use crate::fraction::*;
-pub use crate::traits::*;
-
-mod big_int;
-mod fraction;
-mod traits;
+pub mod big_int;
+pub mod fraction;
+pub mod traits;
 mod utils;
 
 #[cfg(target_arch = "x86")]
@@ -25,10 +20,10 @@ type Digit = u16;
 #[cfg(not(target_arch = "x86"))]
 type Digit = u32;
 
-const BINARY_SHIFT: usize = (SignedOf::<Digit>::BITS - 2) as usize;
+const BINARY_SHIFT: usize = (traits::SignedOf::<Digit>::BITS - 2) as usize;
 
-type _BigInt = BigInt<Digit, '_', BINARY_SHIFT>;
-type _Fraction = Fraction<_BigInt>;
+type _BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
+type _Fraction = fraction::Fraction<_BigInt>;
 
 #[pyclass(name = "Int", module = "rithm", subclass)]
 #[derive(Clone)]

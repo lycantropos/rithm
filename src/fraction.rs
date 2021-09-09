@@ -3,7 +3,7 @@ use std::ops::{Div, Mul, Neg};
 
 use num::{One, Zero};
 
-use crate::Gcd;
+use crate::traits::Gcd;
 use std::cmp::Ordering;
 
 #[derive(Clone, Eq, PartialEq)]

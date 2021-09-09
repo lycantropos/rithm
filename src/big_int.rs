@@ -124,19 +124,6 @@ impl<Digit: PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
     }
 }
 
-impl<Digit: Eq + PartialOrd, const SEPARATOR: char, const SHIFT: usize> Ord
-    for BigInt<Digit, SEPARATOR, SHIFT>
-{
-    fn cmp(&self, other: &Self) -> Ordering {
-        if self.lt(other) {
-            Ordering::Less
-        } else if other.lt(self) {
-            Ordering::Greater
-        } else {
-            Ordering::Equal
-        }
-    }
-}
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Gcd for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: DoublePrecision
@@ -298,6 +285,20 @@ where
             reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&largest_digits),
             reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&smallest_digits),
         ))
+    }
+}
+
+impl<Digit: Eq + PartialOrd, const SEPARATOR: char, const SHIFT: usize> Ord
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.lt(other) {
+            Ordering::Less
+        } else if other.lt(self) {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
+        }
     }
 }
 

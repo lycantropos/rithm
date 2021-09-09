@@ -174,7 +174,11 @@ impl PyObjectProtocol for PyFraction {
     }
 
     fn __repr__(&self) -> String {
-        format!("rithm.Fraction({}, {})", self.numerator().__repr__(), self.denominator().__repr__())
+        format!(
+            "rithm.Fraction({}, {})",
+            self.numerator().__repr__(),
+            self.denominator().__repr__()
+        )
     }
 
     fn __str__(&self) -> String {

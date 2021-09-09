@@ -186,3 +186,8 @@ except ImportError:
 
         def __repr__(self) -> str:
             return f'rithm.Fraction({self.numerator}, {self.denominator})'
+
+        def __str__(self) -> str:
+            return (str(self.numerator)
+                    if self.denominator == _ONE
+                    else f'{self.numerator}/{self.denominator})')

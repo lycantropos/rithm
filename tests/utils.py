@@ -1,8 +1,11 @@
 import fractions
 from typing import Tuple
 
-from rithm import (Int,
-                   Fraction)
+from rithm import (Fraction,
+                   Int)
+
+FractionsWithBuiltin = Tuple[Fraction, fractions.Fraction]
+IntWithBuiltin = Tuple[Int, int]
 
 
 def equivalence(left: bool, right: bool) -> bool:

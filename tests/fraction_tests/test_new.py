@@ -1,11 +1,10 @@
 import fractions
-from typing import Tuple
 
 from hypothesis import given
-from rithm import (Fraction,
-                   Int)
-from tests.utils import is_equivalent_to_builtin_fraction
 
+from rithm import Fraction
+from tests.utils import (IntWithBuiltin,
+                         is_equivalent_to_builtin_fraction)
 from . import strategies
 
 
@@ -17,10 +16,10 @@ def test_no_argument_connection_with_builtin() -> None:
 
 @given(strategies.ints_with_builtin_ints,
        strategies.non_zero_ints_with_non_zero_builtin_ints)
-def test_connection_with_builtin(numerators_pair: Tuple[Int, int],
-                                 denominators_pair: Tuple[Int, int]) -> None:
-    numerator, builtin_numerator = numerators_pair
-    denominator, builtin_denominator = denominators_pair
+def test_connection_with_builtin(numerators: IntWithBuiltin,
+                                 denominators: IntWithBuiltin) -> None:
+    numerator, builtin_numerator = numerators
+    denominator, builtin_denominator = denominators
 
     result = Fraction(numerator, denominator)
 
@@ -29,9 +28,9 @@ def test_connection_with_builtin(numerators_pair: Tuple[Int, int],
 
 
 @given(strategies.ints_with_builtin_ints)
-def test_numerator_only_connection_with_builtin(numerators_pair
-                                                : Tuple[Int, int]) -> None:
-    numerator, builtin_numerator = numerators_pair
+def test_numerator_only_connection_with_builtin(numerators: IntWithBuiltin
+                                                ) -> None:
+    numerator, builtin_numerator = numerators
 
     result = Fraction(numerator)
 

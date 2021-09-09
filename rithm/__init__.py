@@ -185,7 +185,7 @@ except ImportError:
                     else NotImplemented)
 
         def __repr__(self) -> str:
-            return f'rithm.Fraction({self.numerator}, {self.denominator})'
+            return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'
 
         def __str__(self) -> str:
             return (str(self.numerator)

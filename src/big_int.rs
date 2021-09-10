@@ -4,7 +4,7 @@ use std::convert::TryFrom;
 use std::f64;
 use std::fmt::{Display, Formatter};
 use std::iter::Peekable;
-use std::ops::{Add, BitAnd, Div, Mul, Neg, Rem, Sub};
+use std::ops::{Add, BitAnd, Div, Mul, Neg, Rem, Sub, SubAssign};
 use std::str::Chars;
 
 use crate::traits::{
@@ -26,6 +26,7 @@ pub trait BinaryDigit = AssigningAdditiveMonoid
     + PartialOrd
     + Rem<Output = Self>
     + Sub<Output = Self>
+    + SubAssign
     + Sized;
 
 #[derive(Clone, PartialEq, Eq)]
@@ -231,8 +232,8 @@ where
                 next_smallest_digits.push(unsafe {
                     Digit::try_from(next_smallest_accumulator & digit_mask).unwrap_unchecked()
                 });
-                next_largest_accumulator = next_largest_accumulator >> SHIFT;
-                next_smallest_accumulator = next_smallest_accumulator >> SHIFT;
+                next_largest_accumulator >>= SHIFT;
+                next_smallest_accumulator >>= SHIFT;
             }
             for index in smallest_digits_count..largest_digits_count {
                 next_largest_accumulator = next_largest_accumulator
@@ -247,8 +248,8 @@ where
                 next_smallest_digits.push(unsafe {
                     Digit::try_from(next_smallest_accumulator & digit_mask).unwrap_unchecked()
                 });
-                next_largest_accumulator = next_largest_accumulator >> SHIFT;
-                next_smallest_accumulator = next_smallest_accumulator >> SHIFT;
+                next_largest_accumulator >>= SHIFT;
+                next_smallest_accumulator >>= SHIFT;
             }
             normalize_digits(&mut next_largest_digits);
             normalize_digits(&mut next_smallest_digits);
@@ -615,10 +616,9 @@ where
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: DoublePrecision
-        + BinaryDigit
         + TryFrom<usize>
         + TryFrom<DoublePrecisionOf<Digit>>
-        + ModularSub<Output = Digit>,
+        + Zero,
     DoublePrecisionOf<Digit>: BinaryDigit,
 {
     fn from(mut value: DoublePrecisionOf<Digit>) -> Self {
@@ -630,7 +630,7 @@ where
             let mut digits: Vec<Digit> = Vec::new();
             while !value.is_zero() {
                 digits.push(unsafe { Digit::try_from(value & digit_mask).unwrap_unchecked() });
-                value = value >> SHIFT;
+                value >>= SHIFT;
             }
             Self { sign, digits }
         }
@@ -836,11 +836,11 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Zero for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: BinaryDigit + TryFrom<usize> + ModularSub<Output = Digit>,
+    Digit: Zero,
 {
     fn zero() -> Self {
         Self {
-            sign: 0,
+            sign: Sign::zero(),
             digits: vec![Digit::zero()],
         }
     }
@@ -1009,7 +1009,7 @@ where
                     TargetDigit::try_from(accumulator & target_digit_mask).unwrap_unchecked(),
                 );
             }
-            accumulator = accumulator >> target_shift;
+            accumulator >>= target_shift;
             accumulator_bits_count -= target_shift;
         }
     }
@@ -1052,7 +1052,7 @@ where
                 );
             }
             accumulator_bits_count -= target_shift;
-            accumulator = accumulator >> target_shift;
+            accumulator >>= target_shift;
             if if index == source_digits.len() - 1 {
                 accumulator.is_zero()
             } else {
@@ -1082,7 +1082,7 @@ where
             | DoublePrecisionOf::<Digit>::from(dividend[digits_count - offset]);
         let quotient_digit = unsafe { Digit::try_from(remainder / divisor).unwrap_unchecked() };
         quotient[digits_count - offset] = quotient_digit;
-        remainder = remainder - DoublePrecisionOf::<Digit>::from(quotient_digit) * divisor;
+        remainder -= DoublePrecisionOf::<Digit>::from(quotient_digit) * divisor;
     }
     normalize_digits(&mut quotient);
     (quotient, unsafe {
@@ -1151,8 +1151,8 @@ where
                     dividend_normalized[offset + divisor_digits_count - 2],
                 ))
         {
-            quotient_digit = quotient_digit - Digit::one();
-            step_remainder = step_remainder + last_divisor_digit_normalized;
+            quotient_digit -= Digit::one();
+            step_remainder += last_divisor_digit_normalized;
             if step_remainder >= base {
                 break;
             }
@@ -1181,9 +1181,9 @@ where
                 accumulator =
                     accumulator + dividend_normalized[offset + index] + divisor_normalized[index];
                 dividend_normalized[offset + index] = accumulator & digit_mask;
-                accumulator = accumulator >> SHIFT;
+                accumulator >>= SHIFT;
             }
-            quotient_digit = quotient_digit - Digit::one();
+            quotient_digit -= Digit::one();
         }
         quotient_position -= 1;
         quotient[quotient_position] = quotient_digit;
@@ -1269,7 +1269,7 @@ where
                     };
             *result_position =
                 unsafe { TargetDigit::try_from(digit & target_digit_mask).unwrap_unchecked() };
-            digit = digit >> target_shift;
+            digit >>= target_shift;
         }
         if !digit.is_zero() {
             result.push(unsafe { TargetDigit::try_from(digit).unwrap_unchecked() });
@@ -1407,8 +1407,8 @@ where
             result[result_position] =
                 unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
             result_position += 1;
-            accumulator = accumulator >> SHIFT;
-            digit = digit << 1;
+            accumulator >>= SHIFT;
+            digit <<= 1;
             for next_index in index + 1..shortest.len() {
                 accumulator = accumulator
                     + DoublePrecisionOf::<Digit>::from(result[result_position])
@@ -1416,7 +1416,7 @@ where
                 result[result_position] =
                     unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
                 result_position += 1;
-                accumulator = accumulator >> SHIFT;
+                accumulator >>= SHIFT;
             }
             if !accumulator.is_zero() {
                 accumulator =
@@ -1424,7 +1424,7 @@ where
                 result[result_position] =
                     unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
                 result_position += 1;
-                accumulator = accumulator >> SHIFT;
+                accumulator >>= SHIFT;
             }
             if !accumulator.is_zero() {
                 result[result_position] = result[result_position]
@@ -1443,7 +1443,7 @@ where
                 result[result_position] =
                     unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
                 result_position += 1;
-                accumulator = accumulator >> SHIFT;
+                accumulator >>= SHIFT;
             }
             if !accumulator.is_zero() {
                 result[result_position] = result[result_position]
@@ -1551,13 +1551,13 @@ where
     for index in 0..size_shortest {
         accumulator = longest[index].wrapping_sub(shortest[index]) - accumulator;
         result.push(accumulator & digit_mask);
-        accumulator = accumulator >> SHIFT;
+        accumulator >>= SHIFT;
         accumulator = accumulator & Digit::one();
     }
     for index in size_shortest..size_longest {
         accumulator = longest[index] - accumulator;
         result.push(accumulator & digit_mask);
-        accumulator = accumulator >> SHIFT;
+        accumulator >>= SHIFT;
         accumulator = accumulator & Digit::one();
     }
     normalize_digits(&mut result);
@@ -1608,14 +1608,14 @@ where
     let mut accumulator: Digit = Digit::zero();
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for index in 0..size_shortest {
-        accumulator = accumulator + longest[index] + shortest[index];
+        accumulator += longest[index] + shortest[index];
         result.push(accumulator & digit_mask);
-        accumulator = accumulator >> SHIFT;
+        accumulator >>= SHIFT;
     }
     for index in size_shortest..size_longest {
-        accumulator = accumulator + longest[index];
+        accumulator += longest[index];
         result.push(accumulator & digit_mask);
-        accumulator = accumulator >> SHIFT;
+        accumulator >>= SHIFT;
     }
     result.push(accumulator);
     normalize_digits(&mut result);
@@ -1634,15 +1634,15 @@ where
     for index in 0..shortest.len() {
         accumulator = longest[index] + shortest[index] + accumulator;
         longest[index] = accumulator & digit_mask;
-        accumulator = accumulator >> SHIFT;
+        accumulator >>= SHIFT;
     }
     for index in shortest.len()..longest.len() {
         if accumulator.is_zero() {
             break;
         }
-        accumulator = accumulator + longest[index];
+        accumulator += longest[index];
         longest[index] = accumulator & digit_mask;
-        accumulator = accumulator >> SHIFT;
+        accumulator >>= SHIFT;
     }
     accumulator
 }

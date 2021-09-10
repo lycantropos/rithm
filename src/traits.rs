@@ -82,7 +82,6 @@ pub trait ModularSub<Rhs = Self> {
     fn wrapping_sub(self, rhs: Rhs) -> Self::Output;
 }
 
-
 macro_rules! plain_modular_sub_impl {
     ($($t:ty)*) => ($(
         impl ModularSub for $t {

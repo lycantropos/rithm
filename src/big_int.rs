@@ -474,7 +474,7 @@ where
 
     fn to_base_string(&self, base: usize) -> String {
         let shift = utils::floor_log(1 << SHIFT, base).unwrap();
-        let digits: Vec<Digit> =
+        let digits =
             binary_digits_to_base::<Digit, Digit>(&self.digits, SHIFT, utils::power(base, shift));
         let characters_count = ((self.sign < 0) as usize)
             + (digits.len() - 1) * shift
@@ -599,9 +599,9 @@ where
         if value.is_zero() {
             Self::zero()
         } else {
-            let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
             let sign = Sign::one();
-            let mut digits: Vec<Digit> = Vec::new();
+            let mut digits = Vec::<Digit>::new();
+            let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
             while !value.is_zero() {
                 digits.push(unsafe { Digit::try_from(value & digit_mask).unwrap_unchecked() });
                 value >>= SHIFT;

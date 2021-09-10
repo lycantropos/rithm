@@ -6,7 +6,7 @@ use std::{f64, fmt};
 use crate::traits::{
     AssigningAdditiveMonoid, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
     AssigningShiftingRightMonoid, BitwiseOrMonoid, DoublePrecision, DoublePrecisionOf, ModularSub,
-    One, Signed, SignedOf, Zero,
+    One, Signify, SignedOf, Zero,
 };
 use crate::utils;
 
@@ -278,10 +278,10 @@ where
     Digit: BinaryDigit
         + DoublePrecision
         + From<u8>
-        + Signed
+        + Signify
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>,
-    DoublePrecisionOf<Digit>: BinaryDigit + Signed,
+    DoublePrecisionOf<Digit>: BinaryDigit + Signify,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
     SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,

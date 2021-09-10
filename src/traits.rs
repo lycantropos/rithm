@@ -19,39 +19,39 @@ pub trait ShiftingLeftMonoid<Rhs = Self> = Shl<Rhs, Output = Self> + Zero;
 pub trait ShiftingRightMonoid<Rhs = Self> = Shr<Rhs, Output = Self> + Zero;
 
 pub trait DoublePrecision: Sized {
-    type Type: From<Self>;
+    type Result: From<Self>;
 }
 
 impl DoublePrecision for i8 {
-    type Type = i16;
+    type Result = i16;
 }
 
 impl DoublePrecision for i16 {
-    type Type = i32;
+    type Result = i32;
 }
 
 impl DoublePrecision for i32 {
-    type Type = i64;
+    type Result = i64;
 }
 
 impl DoublePrecision for i64 {
-    type Type = i128;
+    type Result = i128;
 }
 
 impl DoublePrecision for u8 {
-    type Type = u16;
+    type Result = u16;
 }
 
 impl DoublePrecision for u16 {
-    type Type = u32;
+    type Result = u32;
 }
 
 impl DoublePrecision for u32 {
-    type Type = u64;
+    type Result = u64;
 }
 
 impl DoublePrecision for u64 {
-    type Type = u128;
+    type Result = u128;
 }
 
 pub trait Gcd<Rhs = Self> {
@@ -118,48 +118,30 @@ macro_rules! plain_one_impl {
 
 plain_one_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait Signed {
-    type Type: Neg<Output = Self::Type>;
+pub trait Signed = Neg<Output = Self>;
+
+pub trait Signify {
+    type Result: Signed;
 }
 
-impl Signed for u8 {
-    type Type = i8;
+impl Signify for u8 {
+    type Result = i8;
 }
 
-impl Signed for u16 {
-    type Type = i16;
+impl Signify for u16 {
+    type Result = i16;
 }
 
-impl Signed for u32 {
-    type Type = i32;
+impl Signify for u32 {
+    type Result = i32;
 }
 
-impl Signed for u64 {
-    type Type = i64;
+impl Signify for u64 {
+    type Result = i64;
 }
 
-impl Signed for u128 {
-    type Type = i128;
-}
-
-impl Signed for i8 {
-    type Type = i8;
-}
-
-impl Signed for i16 {
-    type Type = i16;
-}
-
-impl Signed for i32 {
-    type Type = i32;
-}
-
-impl Signed for i64 {
-    type Type = i64;
-}
-
-impl Signed for i128 {
-    type Type = i128;
+impl Signify for u128 {
+    type Result = i128;
 }
 
 pub trait Zero {
@@ -183,5 +165,5 @@ macro_rules! plain_zero_impl {
 
 plain_zero_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub type DoublePrecisionOf<T> = <T as DoublePrecision>::Type;
-pub type SignedOf<T> = <T as Signed>::Type;
+pub type DoublePrecisionOf<T> = <T as DoublePrecision>::Result;
+pub type SignedOf<T> = <T as Signify>::Result;

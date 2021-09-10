@@ -8,7 +8,7 @@ use std::str::Chars;
 
 use crate::digits::*;
 use crate::traits::{
-    DoublePrecision, DoublePrecisionOf, Gcd, ModularSub, One, Signed, SignedOf, Zero,
+    DoublePrecision, DoublePrecisionOf, Gcd, ModularSub, One, SignedOf, Signify, Zero,
 };
 use crate::utils;
 
@@ -25,7 +25,7 @@ impl<Digit: PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
         self.sign > other.sign
             || self.sign == other.sign
                 && !{
-                    if self.sign > 0 {
+                    if self.is_positive() {
                         digits_lesser_than(&self.digits, &other.digits)
                     } else {
                         digits_lesser_than(&other.digits, &self.digits)
@@ -36,7 +36,7 @@ impl<Digit: PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
     fn gt(&self, other: &Self) -> bool {
         self.sign > other.sign
             || self.sign == other.sign
-                && if self.sign > 0 {
+                && if self.is_positive() {
                     digits_lesser_than(&other.digits, &self.digits)
                 } else {
                     digits_lesser_than(&self.digits, &other.digits)
@@ -47,7 +47,7 @@ impl<Digit: PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
         self.sign < other.sign
             || self.sign == other.sign
                 && !{
-                    if self.sign > 0 {
+                    if self.is_positive() {
                         digits_lesser_than(&other.digits, &self.digits)
                     } else {
                         digits_lesser_than(&self.digits, &other.digits)
@@ -58,7 +58,7 @@ impl<Digit: PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
     fn lt(&self, other: &Self) -> bool {
         self.sign < other.sign
             || self.sign == other.sign
-                && if self.sign > 0 {
+                && if self.is_positive() {
                     digits_lesser_than(&self.digits, &other.digits)
                 } else {
                     digits_lesser_than(&other.digits, &self.digits)
@@ -82,11 +82,11 @@ where
         + DoublePrecision
         + From<u8>
         + ModularSub<Output = Digit>
-        + Signed
+        + Signify
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + Signed,
+    DoublePrecisionOf<Digit>: BinaryDigit + Signify,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
     SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
@@ -395,11 +395,11 @@ where
         + DoublePrecision
         + From<u8>
         + ModularSub<Output = Digit>
-        + Signed
+        + Signify
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + Signed,
+    DoublePrecisionOf<Digit>: BinaryDigit + Signify,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
     SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
@@ -417,13 +417,13 @@ where
         + DoublePrecision
         + From<u8>
         + ModularSub<Output = Digit>
-        + Signed
+        + Signify
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<DoublePrecisionOf<u8>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
         + TryFrom<u8>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + Signed + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + Signify + TryFrom<usize>,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
     SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
@@ -439,11 +439,11 @@ where
         + DoublePrecision
         + From<u8>
         + ModularSub<Output = Digit>
-        + Signed
+        + Signify
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + Signed,
+    DoublePrecisionOf<Digit>: BinaryDigit + Signify,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
     SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
@@ -476,7 +476,7 @@ where
         let shift = utils::floor_log(1 << SHIFT, base).unwrap();
         let digits =
             binary_digits_to_base::<Digit, Digit>(&self.digits, SHIFT, utils::power(base, shift));
-        let characters_count = ((self.sign < 0) as usize)
+        let characters_count = (self.is_negative() as usize)
             + (digits.len() - 1) * shift
             + utils::floor_log(
                 unsafe { usize::try_from(*digits.last().unwrap()).unwrap_unchecked() },
@@ -504,9 +504,9 @@ where
             );
             remainder = remainder / target_base;
         }
-        if self.sign == 0 {
+        if self.is_zero() {
             characters.push('0');
-        } else if self.sign < 0 {
+        } else if self.is_negative() {
             characters.push('-');
         }
         characters.chars().rev().collect()
@@ -526,7 +526,7 @@ where
 {
     pub(crate) fn hash(&self) -> usize {
         if self.digits.len() == 1 {
-            return if self.sign < 0 {
+            return if self.is_negative() {
                 usize::MAX
                     - unsafe {
                         usize::try_from(
@@ -547,7 +547,7 @@ where
                 result -= HASH_MODULUS;
             }
         }
-        if self.sign < 0 {
+        if self.is_negative() {
             result = usize::MAX - result + 1
         };
         result - ((result == usize::MAX) as usize)
@@ -561,10 +561,10 @@ where
     type Output = Self;
 
     fn add(self, other: Self) -> Self::Output {
-        if self.sign < 0 {
-            if other.sign < 0 {
+        if self.is_negative() {
+            if other.is_negative() {
                 Self {
-                    sign: -1,
+                    sign: -Sign::one(),
                     digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
                 }
             } else {
@@ -576,14 +576,14 @@ where
                 );
                 Self { sign, digits }
             }
-        } else if other.sign < 0 {
-            let mut sign: Sign = 1;
+        } else if other.is_negative() {
+            let mut sign = Sign::one();
             let digits =
                 subtract_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits, &mut sign);
             Self { sign, digits }
         } else {
             Self {
-                sign: self.sign | other.sign,
+                sign: self.sign.max(other.sign),
                 digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
             }
         }
@@ -651,20 +651,7 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSub<Output = Digit>
-        + Signed
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<DoublePrecisionOf<u8>>
-        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<u8>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + Signed + TryFrom<usize>,
-    SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
-    usize: TryFrom<Digit>,
+    Digit: Clone,
 {
     pub fn abs(&self) -> Self {
         Self {
@@ -698,11 +685,11 @@ where
     Digit: BinaryDigit
         + DoublePrecision
         + From<u8>
-        + Signed
+        + Signify
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + Signed,
+    DoublePrecisionOf<Digit>: BinaryDigit + Signify,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
     SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
@@ -710,9 +697,9 @@ where
     pub(crate) fn divrem(self, divisor: &Self) -> Result<(Self, Self), &'static str> {
         let digits_count = self.digits.len();
         let divisor_digits_count = divisor.digits.len();
-        if divisor.sign == 0 {
+        if divisor.is_zero() {
             Err("Division by zero is undefined.")
-        } else if self.sign == 0
+        } else if self.is_zero()
             || digits_count < divisor_digits_count
             || (digits_count == divisor_digits_count
                 && self.digits[self.digits.len() - 1] < divisor.digits[divisor.digits.len() - 1])
@@ -757,9 +744,9 @@ where
 {
     type Output = Self;
     fn sub(self, other: Self) -> Self::Output {
-        if self.sign < 0 {
-            if other.sign < 0 {
-                let mut sign: Sign = 1;
+        if self.is_negative() {
+            if other.is_negative() {
+                let mut sign = Sign::one();
                 let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
                     &other.digits,
                     &self.digits,
@@ -772,13 +759,13 @@ where
                     digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
                 }
             }
-        } else if other.sign < 0 {
+        } else if other.is_negative() {
             Self {
                 sign: 1,
                 digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
             }
         } else {
-            let mut sign: Sign = 1;
+            let mut sign = Sign::one();
             let digits =
                 subtract_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits, &mut sign);
             Self { sign, digits }
@@ -803,7 +790,7 @@ where
     }
 
     fn is_one(&self) -> bool {
-        self.sign.is_positive() && self.digits.len() == 1 && self.digits[0].is_one()
+        self.is_positive() && self.digits.len() == 1 && self.digits[0].is_one()
     }
 }
 

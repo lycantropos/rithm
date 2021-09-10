@@ -104,11 +104,11 @@ where
     Digit: BinaryDigit
         + DoublePrecision
         + From<u8>
+        + ModularSub<Output = Digit>
         + Signed
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>
-        + ModularSub<Output = Digit>,
+        + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit + Signed,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
     SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
@@ -288,7 +288,7 @@ where
         + TryFrom<DoublePrecisionOf<u8>>
         + TryFrom<DoublePrecisionOf<Digit>>
         + Zero,
-    DoublePrecisionOf<Digit>: From<u8> + BinaryDigit + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + TryFrom<usize>,
 {
     const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
         37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
@@ -397,9 +397,9 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Display for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision
+    Digit: BinaryDigit
+        + DoublePrecision
         + From<u8>
-        + BinaryDigit
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit + TryFrom<usize>,
@@ -414,17 +414,17 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Div for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision
+    Digit: BinaryDigit
+        + DoublePrecision
         + From<u8>
-        + BinaryDigit
+        + ModularSub<Output = Digit>
         + Signed
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>
-        + ModularSub<Output = Digit>,
+        + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit + Signed,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + BinaryDigit,
+    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
 {
     type Output = Self;
@@ -436,19 +436,19 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision
+    Digit: BinaryDigit
+        + DoublePrecision
         + From<u8>
-        + BinaryDigit
+        + ModularSub<Output = Digit>
         + Signed
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<DoublePrecisionOf<u8>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
         + TryFrom<u8>
-        + TryFrom<usize>
-        + ModularSub<Output = Digit>,
-    DoublePrecisionOf<Digit>: From<u8> + BinaryDigit + Signed + TryFrom<usize>,
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + Signed + TryFrom<usize>,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + BinaryDigit,
+    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
 {
     pub fn from_str_radix(string: &str, radix: u32) -> Result<Self, String> {
@@ -458,17 +458,17 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Rem for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision
+    Digit: BinaryDigit
+        + DoublePrecision
         + From<u8>
-        + BinaryDigit
+        + ModularSub<Output = Digit>
         + Signed
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>
-        + ModularSub<Output = Digit>,
+        + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit + Signed,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + BinaryDigit,
+    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
 {
     type Output = Self;
@@ -480,9 +480,9 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision
+    Digit: BinaryDigit
+        + DoublePrecision
         + From<u8>
-        + BinaryDigit
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit + TryFrom<usize>,
@@ -544,7 +544,7 @@ const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: From<bool> + BinaryDigit,
+    Digit: BinaryDigit + From<bool>,
     usize: TryFrom<Digit>,
 {
     pub(crate) fn hash(&self) -> usize {
@@ -579,7 +579,7 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Add for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: BinaryDigit + TryFrom<usize> + ModularSub<Output = Digit>,
+    Digit: BinaryDigit + ModularSub<Output = Digit> + TryFrom<usize>,
 {
     type Output = Self;
 
@@ -615,10 +615,7 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision
-        + TryFrom<usize>
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + Zero,
+    Digit: DoublePrecision + TryFrom<usize> + TryFrom<DoublePrecisionOf<Digit>> + Zero,
     DoublePrecisionOf<Digit>: BinaryDigit,
 {
     fn from(mut value: DoublePrecisionOf<Digit>) -> Self {
@@ -647,7 +644,7 @@ where
         + TryFrom<DoublePrecisionOf<u8>>
         + TryFrom<DoublePrecisionOf<Digit>>
         + Zero,
-    DoublePrecisionOf<Digit>: From<u8> + BinaryDigit + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + TryFrom<usize>,
 {
     type Error = String;
 
@@ -658,11 +655,11 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Mul for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision
-        + BinaryDigit
+    Digit: BinaryDigit
+        + DoublePrecision
+        + ModularSub<Output = Digit>
         + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>
-        + ModularSub<Output = Digit>,
+        + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit,
 {
     type Output = Self;
@@ -677,19 +674,19 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision
+    Digit: BinaryDigit
+        + DoublePrecision
         + From<u8>
-        + BinaryDigit
+        + ModularSub<Output = Digit>
         + Signed
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<DoublePrecisionOf<u8>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
         + TryFrom<u8>
-        + TryFrom<usize>
-        + ModularSub<Output = Digit>,
-    DoublePrecisionOf<Digit>: From<u8> + BinaryDigit + Signed + TryFrom<usize>,
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + Signed + TryFrom<usize>,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + BinaryDigit,
+    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
 {
     pub fn abs(&self) -> Self {
@@ -721,17 +718,17 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> Neg for BigInt<Digit, SEP
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision
+    Digit: BinaryDigit
+        + DoublePrecision
         + From<u8>
-        + BinaryDigit
+        + ModularSub<Output = Digit>
         + Signed
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>
-        + ModularSub<Output = Digit>,
+        + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit + Signed,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + BinaryDigit,
+    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
 {
     pub(crate) fn divrem(self, divisor: &Self) -> Result<(Self, Self), &'static str> {
@@ -780,7 +777,7 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Sub for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: BinaryDigit + TryFrom<usize> + ModularSub<Output = Digit>,
+    Digit: BinaryDigit + ModularSub<Output = Digit> + TryFrom<usize>,
 {
     type Output = Self;
     fn sub(self, other: Self) -> Self::Output {
@@ -815,11 +812,11 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> One for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision
-        + BinaryDigit
+    Digit: BinaryDigit
+        + DoublePrecision
+        + ModularSub<Output = Digit>
         + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>
-        + ModularSub<Output = Digit>,
+        + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit,
 {
     fn one() -> Self {
@@ -858,7 +855,7 @@ fn binary_digits_to_base<SourceDigit, TargetDigit>(
     target_base: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: Copy + DoublePrecision + From<u8> + BinaryDigit,
+    SourceDigit: BinaryDigit + DoublePrecision + From<u8>,
     TargetDigit: Copy
         + DoublePrecision
         + TryFrom<SourceDigit>
@@ -867,7 +864,7 @@ where
         + Zero,
     DoublePrecisionOf<SourceDigit>: BinaryDigit,
     DoublePrecisionOf<TargetDigit>:
-        From<SourceDigit> + From<TargetDigit> + BinaryDigit + TryFrom<usize>,
+        BinaryDigit + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
     <DoublePrecisionOf<TargetDigit> as TryFrom<usize>>::Error: fmt::Debug,
     <TargetDigit as TryFrom<DoublePrecisionOf<TargetDigit>>>::Error: fmt::Debug,
     usize: TryFrom<SourceDigit>,
@@ -889,7 +886,7 @@ fn digits_to_binary_base<SourceDigit, TargetDigit>(
     target_shift: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: DoublePrecision + From<u8> + BinaryDigit,
+    SourceDigit: BinaryDigit + DoublePrecision + From<u8>,
     TargetDigit: Copy
         + DoublePrecision
         + TryFrom<DoublePrecisionOf<TargetDigit>>
@@ -899,7 +896,7 @@ where
         + Zero,
     DoublePrecisionOf<SourceDigit>: BinaryDigit,
     DoublePrecisionOf<TargetDigit>:
-        From<SourceDigit> + From<TargetDigit> + BinaryDigit + TryFrom<usize>,
+        BinaryDigit + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
     usize: TryFrom<SourceDigit>,
 {
     if source_base & (source_base - 1) == 0 {
@@ -919,13 +916,13 @@ fn binary_digits_to_binary_base<SourceDigit, TargetDigit>(
     target_shift: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: DoublePrecision + From<u8> + BinaryDigit,
+    SourceDigit: BinaryDigit + DoublePrecision + From<u8>,
     TargetDigit: DoublePrecision
         + TryFrom<SourceDigit>
         + TryFrom<DoublePrecisionOf<SourceDigit>>
         + TryFrom<DoublePrecisionOf<TargetDigit>>,
     DoublePrecisionOf<SourceDigit>: BinaryDigit,
-    DoublePrecisionOf<TargetDigit>: From<SourceDigit> + BinaryDigit,
+    DoublePrecisionOf<TargetDigit>: BinaryDigit + From<SourceDigit>,
     usize: TryFrom<SourceDigit>,
 {
     match target_shift.cmp(&source_shift) {
@@ -955,7 +952,7 @@ where
     SourceDigit: Copy + DoublePrecision,
     TargetDigit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>> + Zero,
     DoublePrecisionOf<TargetDigit>:
-        From<SourceDigit> + From<TargetDigit> + BinaryDigit + TryFrom<usize>,
+        BinaryDigit + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
     <DoublePrecisionOf<TargetDigit> as TryFrom<usize>>::Error: fmt::Debug,
     <TargetDigit as TryFrom<DoublePrecisionOf<TargetDigit>>>::Error: fmt::Debug,
 {
@@ -991,7 +988,7 @@ fn binary_digits_to_greater_binary_base<SourceDigit, TargetDigit>(
 where
     SourceDigit: BinaryDigit,
     TargetDigit: DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>>,
-    DoublePrecisionOf<TargetDigit>: From<SourceDigit> + BinaryDigit,
+    DoublePrecisionOf<TargetDigit>: BinaryDigit + From<SourceDigit>,
 {
     let target_digit_mask = to_digit_mask::<DoublePrecisionOf<TargetDigit>>(target_shift);
     let result_capacity: usize =
@@ -1027,7 +1024,7 @@ fn binary_digits_to_lesser_binary_base<SourceDigit, TargetDigit>(
     target_shift: usize,
 ) -> Vec<TargetDigit>
 where
-    SourceDigit: DoublePrecision + From<u8> + BinaryDigit,
+    SourceDigit: BinaryDigit + DoublePrecision + From<u8>,
     TargetDigit: TryFrom<DoublePrecisionOf<SourceDigit>>,
     DoublePrecisionOf<SourceDigit>: BinaryDigit,
     usize: TryFrom<SourceDigit>,
@@ -1070,7 +1067,7 @@ fn divrem_digits_by_digit<Digit, const SHIFT: usize>(
     divisor: Digit,
 ) -> (Vec<Digit>, Digit)
 where
-    Digit: DoublePrecision + BinaryDigit + TryFrom<DoublePrecisionOf<Digit>>,
+    Digit: BinaryDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>>,
     DoublePrecisionOf<Digit>: BinaryDigit,
 {
     let mut quotient = vec![Digit::zero(); dividend.len()];
@@ -1095,15 +1092,15 @@ fn divrem_two_or_more_digits<Digit, const SHIFT: usize>(
     divisor: &[Digit],
 ) -> (Vec<Digit>, Vec<Digit>)
 where
-    Digit: DoublePrecision
+    Digit: BinaryDigit
+        + DoublePrecision
         + From<u8>
-        + BinaryDigit
         + Signed
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>,
     DoublePrecisionOf<Digit>: BinaryDigit + Signed,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: From<Digit> + From<SignedOf<Digit>> + BinaryDigit,
+    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
 {
     let dividend_digits_count = dividend.len();
@@ -1286,11 +1283,11 @@ fn multiply_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
     second: &[Digit],
 ) -> Vec<Digit>
 where
-    Digit: DoublePrecision
-        + BinaryDigit
+    Digit: BinaryDigit
+        + DoublePrecision
+        + ModularSub<Output = Digit>
         + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>
-        + ModularSub<Output = Digit>,
+        + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit,
 {
     let mut shortest = &first;
@@ -1358,11 +1355,11 @@ fn multiply_digits_lopsided<Digit, const SEPARATOR: char, const SHIFT: usize>(
     longest: &[Digit],
 ) -> Vec<Digit>
 where
-    Digit: DoublePrecision
-        + BinaryDigit
+    Digit: BinaryDigit
+        + DoublePrecision
+        + ModularSub<Output = Digit>
         + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>
-        + ModularSub<Output = Digit>,
+        + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit,
 {
     let size_shortest = shortest.len();
@@ -1461,7 +1458,7 @@ fn shift_digits_left<Digit, const SHIFT: usize>(
     output_digits: &mut [Digit],
 ) -> Digit
 where
-    Digit: DoublePrecision + BinaryDigit + TryFrom<DoublePrecisionOf<Digit>>,
+    Digit: BinaryDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>>,
     DoublePrecisionOf<Digit>: BinaryDigit,
 {
     let mut accumulator: Digit = Digit::zero();
@@ -1481,7 +1478,7 @@ fn shift_digits_right<Digit, const SHIFT: usize>(
     output_digits: &mut [Digit],
 ) -> Digit
 where
-    Digit: DoublePrecision + BinaryDigit + TryFrom<DoublePrecisionOf<Digit>>,
+    Digit: BinaryDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>>,
     DoublePrecisionOf<Digit>: BinaryDigit,
 {
     let mut accumulator = Digit::zero();
@@ -1512,7 +1509,7 @@ fn subtract_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
     sign: &mut Sign,
 ) -> Vec<Digit>
 where
-    Digit: BinaryDigit + TryFrom<usize> + ModularSub<Output = Digit>,
+    Digit: BinaryDigit + ModularSub<Output = Digit> + TryFrom<usize>,
 {
     let mut longest = &first;
     let mut shortest = &second;

@@ -1,17 +1,18 @@
 use std::convert::TryFrom;
 
-use num::PrimInt;
+use crate::traits::{AssigningShiftingRightMonoid, Zero};
+use std::ops::Rem;
 
 pub(crate) fn bit_length<T>(value: T) -> usize
 where
-    T: From<u8> + PrimInt,
+    T: From<u8> + AssigningShiftingRightMonoid<usize> + PartialOrd,
     usize: TryFrom<T>,
 {
     let mut result: usize = 0;
     let mut value = value;
     while value >= <T as From<u8>>::from(32u8) {
         result += 6;
-        value = value >> 6;
+        value >>= 6;
     }
     const BIT_LENGTHS_TABLE: [usize; 32] = [
         0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
@@ -22,7 +23,7 @@ where
 
 pub(crate) fn gcd<T>(mut first: T, mut second: T) -> T
 where
-    T: PrimInt,
+    T: Copy + Rem<Output = T> + Zero,
 {
     while !second.is_zero() {
         (first, second) = (second, first % second);
@@ -52,7 +53,7 @@ pub(crate) const fn power(base: usize, exponent: usize) -> usize {
 
 pub(crate) fn floor_log2<T>(value: T) -> Result<usize, &'static str>
 where
-    T: From<u8> + PrimInt,
+    T: From<u8> + AssigningShiftingRightMonoid<usize> + PartialOrd,
     usize: TryFrom<T>,
 {
     if value.is_zero() {

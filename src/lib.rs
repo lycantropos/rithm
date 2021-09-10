@@ -1,8 +1,8 @@
 #![feature(destructuring_assignment)]
 #![feature(option_result_unwrap_unchecked)]
+#![feature(trait_alias)]
 
-use crate::traits::Gcd;
-use num::{Num, One, Signed, Zero};
+use crate::traits::{Gcd, One, Zero};
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;

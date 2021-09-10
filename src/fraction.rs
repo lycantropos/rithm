@@ -1,9 +1,7 @@
 use std::fmt::{Display, Formatter};
 use std::ops::{Div, Mul, Neg};
 
-use num::{One, Zero};
-
-use crate::traits::Gcd;
+use crate::traits::{Gcd, One, Zero};
 use std::cmp::Ordering;
 
 #[derive(Clone, Eq, PartialEq)]

@@ -1,4 +1,3 @@
-use crate::utils;
 use std::ops::{Add, AddAssign, BitOr, Mul, MulAssign, Neg, Shl, ShlAssign, Shr, ShrAssign};
 
 pub trait AdditiveMonoid<Rhs = Self> = Add<Rhs, Output = Self> + Zero;
@@ -68,6 +67,7 @@ macro_rules! plain_gcd_impl {
 
             #[inline]
             fn gcd(self, other: Self) -> Self::Output {
+                use crate::utils;
                 utils::gcd::<$t>(self, other)
             }
         }

@@ -26,8 +26,7 @@ pub trait BinaryDigit = AssigningAdditiveMonoid
     + PartialOrd
     + Rem<Output = Self>
     + Sub<Output = Self>
-    + SubAssign
-    + Sized;
+    + SubAssign;
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {

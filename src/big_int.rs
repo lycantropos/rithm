@@ -18,7 +18,7 @@ pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
     digits: Vec<Digit>,
 }
 
-impl<Digit: PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
+impl<Digit: Clone + PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn ge(&self, other: &Self) -> bool {
@@ -240,7 +240,7 @@ where
     }
 }
 
-impl<Digit: Eq + PartialOrd, const SEPARATOR: char, const SHIFT: usize> Ord
+impl<Digit: Clone + Eq + PartialOrd, const SEPARATOR: char, const SHIFT: usize> Ord
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn cmp(&self, other: &Self) -> Ordering {

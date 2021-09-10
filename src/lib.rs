@@ -11,6 +11,7 @@ use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, P
 use pyo3::PyNumberProtocol;
 
 pub mod big_int;
+mod digits;
 pub mod fraction;
 pub mod traits;
 mod utils;

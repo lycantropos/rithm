@@ -48,7 +48,7 @@ impl<Component: Clone + Display + Eq + Unitary> Display for Fraction<Component> 
     }
 }
 
-impl<Component: Clone + Eq + ModularUnaryAlgebra + Unitary> Modular for Fraction<Component> {
+impl<Component: Clone + Eq + ModularUnaryAlgebra> Modular for Fraction<Component> {
     type Output = Self;
 
     fn abs(self) -> <Self as Modular>::Output {

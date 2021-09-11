@@ -55,8 +55,12 @@ impl PyFraction {
     #[new]
     fn new(_numerator: Option<PyInt>, _denominator: Option<PyInt>) -> PyResult<Self> {
         match _Fraction::new(
-            _numerator.map(|value| value.0).unwrap_or(_BigInt::zero()),
-            _denominator.map(|value| value.0).unwrap_or(_BigInt::one()),
+            _numerator
+                .map(|value| value.0)
+                .unwrap_or_else(_BigInt::zero),
+            _denominator
+                .map(|value| value.0)
+                .unwrap_or_else(_BigInt::one),
         ) {
             Ok(value) => Ok(PyFraction(value)),
             Err(reason) => Err(PyZeroDivisionError::new_err(reason)),

@@ -1,6 +1,6 @@
 """Arbitrary precision arithmetic."""
 
-__version__ = '1.0.1-alpha'
+__version__ = '1.0.1'
 
 try:
     from ._rithm import (Fraction,

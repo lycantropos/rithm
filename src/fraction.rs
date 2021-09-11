@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-use crate::traits::{DivisivePartialMagma, Gcd, MultiplicativeMonoid, One, Oppositive, Zero};
+use crate::traits::{DivisivePartialMagma, Gcd, MultiplicativeMonoid, One, Oppositive};
 use std::cmp::Ordering;
 
 #[derive(Clone, Eq, PartialEq)]
@@ -14,16 +14,14 @@ impl<
             + DivisivePartialMagma
             + Gcd<Output = Component>
             + Oppositive
-            + PartialOrd
-            + Eq
-            + Zero,
+            + Eq,
     > Fraction<Component>
 {
     pub fn new(mut numerator: Component, mut denominator: Component) -> Result<Self, &'static str> {
         if denominator.is_zero() {
             Err("Denominator should not be zero.")
         } else {
-            if denominator.lt(&Component::zero()) {
+            if denominator.is_negative() {
                 (numerator, denominator) = (-numerator, -denominator);
             };
             let gcd = numerator.clone().gcd(denominator.clone());

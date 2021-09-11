@@ -51,11 +51,14 @@ impl<
     type Output = Self;
 
     fn add(self, other: Self) -> Self::Output {
-        Self::new(
-            self.numerator * other.denominator.clone() + other.numerator * self.denominator.clone(),
-            self.denominator * other.denominator,
-        )
-        .unwrap()
+        unsafe {
+            Self::new(
+                self.numerator * other.denominator.clone()
+                    + other.numerator * self.denominator.clone(),
+                self.denominator * other.denominator,
+            )
+            .unwrap_unchecked()
+        }
     }
 }
 
@@ -104,11 +107,14 @@ impl<
     type Output = Self;
 
     fn sub(self, other: Self) -> Self::Output {
-        Self::new(
-            self.numerator * other.denominator.clone() - other.numerator * self.denominator.clone(),
-            self.denominator * other.denominator,
-        )
-        .unwrap()
+        unsafe {
+            Self::new(
+                self.numerator * other.denominator.clone()
+                    - other.numerator * self.denominator.clone(),
+                self.denominator * other.denominator,
+            )
+            .unwrap_unchecked()
+        }
     }
 }
 

@@ -440,7 +440,7 @@ where
     type Output = Self;
 
     fn div(self, divisor: Self) -> Self::Output {
-        self.divrem(&divisor).unwrap().0
+        self.checked_div(divisor).unwrap()
     }
 }
 

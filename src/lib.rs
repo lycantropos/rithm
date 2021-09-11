@@ -2,7 +2,7 @@
 #![feature(option_result_unwrap_unchecked)]
 #![feature(trait_alias)]
 
-use crate::traits::{Gcd, Modular, Oppositive, Unitary, Zeroable};
+use crate::traits::{CheckedDiv, Gcd, Modular, Oppositive, Unitary, Zeroable};
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
@@ -205,6 +205,13 @@ impl PyNumberProtocol for PyFraction {
 
     fn __sub__(lhs: PyFraction, rhs: PyFraction) -> PyFraction {
         PyFraction(lhs.0 - rhs.0)
+    }
+
+    fn __truediv__(lhs: PyFraction, rhs: PyFraction) -> PyResult<PyFraction> {
+        match lhs.0.checked_div(rhs.0) {
+            Some(result) => Ok(PyFraction(result)),
+            None => Err(PyZeroDivisionError::new_err("Division by zero is undefined.")),
+        }
     }
 }
 

@@ -236,6 +236,17 @@ except ImportError:
                 if isinstance(other, Fraction)
                 else NotImplemented)
 
+        def __truediv__(self, other: 'Fraction') -> 'Fraction':
+            return (
+                Fraction(*map(_mul,
+                              _normalize_components_moduli(self.numerator,
+                                                           other.numerator),
+                              _normalize_components_moduli(self.denominator,
+                                                           other.denominator)),
+                         _normalize=False)
+                if isinstance(other, Fraction)
+                else NotImplemented)
+
 
     def _normalize_components_moduli(numerator: Int,
                                      denominator: Int) -> _Tuple[Int, Int]:

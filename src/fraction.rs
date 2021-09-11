@@ -94,30 +94,6 @@ impl<Component: Clone + Eq + NegatableUnaryAlgebra> Neg for Fraction<Component> 
     }
 }
 
-impl<
-        Component: Clone
-            + DivisivePartialMagma
-            + Eq
-            + GcdMagma
-            + Oppositive
-            + MultiplicativeMonoid
-            + SubtractiveMagma,
-    > Sub for Fraction<Component>
-{
-    type Output = Self;
-
-    fn sub(self, other: Self) -> Self::Output {
-        unsafe {
-            Self::new(
-                self.numerator * other.denominator.clone()
-                    - other.numerator * self.denominator.clone(),
-                self.denominator * other.denominator,
-            )
-            .unwrap_unchecked()
-        }
-    }
-}
-
 impl<Component: Clone + Eq + MultiplicativeMonoid + PartialOrd> PartialOrd for Fraction<Component> {
     fn ge(&self, other: &Self) -> bool {
         self.numerator.clone() * other.denominator.clone()
@@ -147,5 +123,29 @@ impl<Component: Clone + Eq + MultiplicativeMonoid + PartialOrd> PartialOrd for F
         } else {
             Ordering::Equal
         })
+    }
+}
+
+impl<
+        Component: Clone
+            + DivisivePartialMagma
+            + Eq
+            + GcdMagma
+            + Oppositive
+            + MultiplicativeMonoid
+            + SubtractiveMagma,
+    > Sub for Fraction<Component>
+{
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self::Output {
+        unsafe {
+            Self::new(
+                self.numerator * other.denominator.clone()
+                    - other.numerator * self.denominator.clone(),
+                self.denominator * other.denominator,
+            )
+            .unwrap_unchecked()
+        }
     }
 }

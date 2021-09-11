@@ -21,10 +21,11 @@ impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fract
             if denominator.is_negative() {
                 (numerator, denominator) = (-numerator, -denominator);
             };
-            let gcd = numerator.clone().gcd(denominator.clone());
+            (numerator, denominator) =
+                normalize_components_moduli::<Component>(numerator, denominator);
             Ok(Self {
-                numerator: numerator / gcd.clone(),
-                denominator: denominator / gcd,
+                numerator,
+                denominator,
             })
         }
     }

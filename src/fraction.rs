@@ -1,7 +1,8 @@
 use std::fmt::{Display, Formatter};
 
 use crate::traits::{
-    DivisivePartialMagma, Gcd, Modular, ModularUnaryAlgebra, MultiplicativeMonoid, One, Oppositive,
+    DivisivePartialMagma, Gcd, Modular, ModularUnaryAlgebra, MultiplicativeMonoid, Oppositive,
+    Unitary,
 };
 use std::cmp::Ordering;
 
@@ -38,7 +39,7 @@ impl<Component: Clone + DivisivePartialMagma + Gcd<Output = Component> + Opposit
     }
 }
 
-impl<Component: Clone + Display + Eq + One> Display for Fraction<Component> {
+impl<Component: Clone + Display + Eq + Unitary> Display for Fraction<Component> {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
         if self.denominator.is_one() {
             write!(formatter, "{}", self.numerator)
@@ -48,7 +49,7 @@ impl<Component: Clone + Display + Eq + One> Display for Fraction<Component> {
     }
 }
 
-impl<Component: Clone + Eq + ModularUnaryAlgebra + One> Modular for Fraction<Component> {
+impl<Component: Clone + Eq + ModularUnaryAlgebra + Unitary> Modular for Fraction<Component> {
     type Output = Self;
 
     fn abs(self) -> <Self as Modular>::Output {

@@ -2,7 +2,7 @@
 #![feature(option_result_unwrap_unchecked)]
 #![feature(trait_alias)]
 
-use crate::traits::{Gcd, Modular, One, Oppositive, Zero};
+use crate::traits::{Gcd, Modular, Oppositive, Unitary, Zeroable};
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;

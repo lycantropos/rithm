@@ -9,7 +9,7 @@ use std::str::Chars;
 use crate::digits::*;
 use crate::traits::{
     DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd, Modular, ModularPartialMagma,
-    ModularSubtractiveMagma, One, Oppose, OppositionOf, Oppositive, Zero,
+    ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -19,7 +19,7 @@ pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
     digits: Vec<Digit>,
 }
 
-impl<Digit: Clone + PartialOrd + Zero, const SEPARATOR: char, const SHIFT: usize> PartialOrd
+impl<Digit: Clone + PartialOrd + Zeroable, const SEPARATOR: char, const SHIFT: usize> PartialOrd
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn ge(&self, other: &Self) -> bool {
@@ -246,7 +246,7 @@ where
     }
 }
 
-impl<Digit: Clone + Eq + PartialOrd + Zero, const SEPARATOR: char, const SHIFT: usize> Ord
+impl<Digit: Clone + Eq + PartialOrd + Zeroable, const SEPARATOR: char, const SHIFT: usize> Ord
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn cmp(&self, other: &Self) -> Ordering {
@@ -270,7 +270,7 @@ where
         + TryFrom<u8>
         + TryFrom<DoublePrecisionOf<u8>>
         + TryFrom<DoublePrecisionOf<Digit>>
-        + Zero,
+        + Zeroable,
     DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + TryFrom<usize>,
 {
     const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
@@ -607,7 +607,7 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision + TryFrom<usize> + TryFrom<DoublePrecisionOf<Digit>> + Zero,
+    Digit: DoublePrecision + TryFrom<usize> + TryFrom<DoublePrecisionOf<Digit>> + Zeroable,
     DoublePrecisionOf<Digit>: BinaryDigit,
 {
     fn from(mut value: DoublePrecisionOf<Digit>) -> Self {
@@ -635,7 +635,7 @@ where
         + TryFrom<u8>
         + TryFrom<DoublePrecisionOf<u8>>
         + TryFrom<DoublePrecisionOf<Digit>>
-        + Zero,
+        + Zeroable,
     DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + TryFrom<usize>,
 {
     type Error = String;
@@ -678,7 +678,7 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> Modular for BigInt<Digit,
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Oppositive
     for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: Zero,
+    Digit: Zeroable,
 {
     fn is_negative(&self) -> bool {
         self.sign.is_negative()
@@ -794,14 +794,14 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> One for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Unitary for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: BinaryDigit
-        + DoublePrecision
+    Digit: DoublePrecision
         + ModularSubtractiveMagma
         + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
+        + TryFrom<usize>
+        + Unitary
+        + Zeroable,
 {
     fn one() -> Self {
         Self {
@@ -815,9 +815,9 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Zero for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Zeroable for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: Zero,
+    Digit: Zeroable,
 {
     fn zero() -> Self {
         Self {

@@ -6,7 +6,7 @@ use crate::traits::{
     AssigningAdditiveMonoid, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
     AssigningShiftingRightMonoid, AssigningSubtractiveMagma, BitwiseAndMagma, BitwiseOrMonoid,
     DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, ModularPartialMagma,
-    ModularSubtractiveMagma, One, Oppose, OppositionOf, Zero,
+    ModularSubtractiveMagma, Oppose, OppositionOf, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -18,8 +18,8 @@ pub trait BinaryDigit = AssigningAdditiveMonoid
     + BitwiseAndMagma
     + BitwiseOrMonoid
     + Copy
-    + One
-    + PartialOrd;
+    + PartialOrd
+    + Unitary;
 
 pub(crate) type Sign = i8;
 
@@ -35,7 +35,7 @@ where
         + TryFrom<SourceDigit>
         + TryFrom<DoublePrecisionOf<SourceDigit>>
         + TryFrom<DoublePrecisionOf<TargetDigit>>
-        + Zero,
+        + Zeroable,
     DoublePrecisionOf<SourceDigit>: BinaryDigit,
     DoublePrecisionOf<TargetDigit>: BinaryDigit
         + DivisivePartialMagma
@@ -71,7 +71,7 @@ where
         + TryFrom<SourceDigit>
         + TryFrom<DoublePrecisionOf<SourceDigit>>
         + TryFrom<DoublePrecisionOf<TargetDigit>>
-        + Zero,
+        + Zeroable,
     DoublePrecisionOf<SourceDigit>: BinaryDigit,
     DoublePrecisionOf<TargetDigit>:
         BinaryDigit + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
@@ -128,7 +128,7 @@ fn binary_digits_to_non_binary_base<SourceDigit, TargetDigit>(
 ) -> Vec<TargetDigit>
 where
     SourceDigit: Copy + DoublePrecision,
-    TargetDigit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>> + Zero,
+    TargetDigit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>> + Zeroable,
     DoublePrecisionOf<TargetDigit>: BinaryDigit
         + DivisivePartialMagma
         + From<SourceDigit>
@@ -396,7 +396,7 @@ fn non_binary_digits_to_binary_base<SourceDigit, TargetDigit>(
 ) -> Vec<TargetDigit>
 where
     SourceDigit: Copy,
-    TargetDigit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>> + Zero,
+    TargetDigit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>> + Zeroable,
     DoublePrecisionOf<TargetDigit>:
         BinaryDigit + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
 {
@@ -684,7 +684,7 @@ where
 
 fn split_digits<Digit>(digits: &[Digit], size: usize) -> (Vec<Digit>, Vec<Digit>)
 where
-    Digit: Clone + Zero,
+    Digit: Clone + Zeroable,
 {
     let (low, high) = digits.split_at(digits.len().min(size));
     let (mut low, mut high) = (low.to_vec(), high.to_vec());
@@ -836,7 +836,7 @@ where
 
 pub fn normalize_digits<Digit>(digits: &mut Vec<Digit>)
 where
-    Digit: Clone + Zero,
+    Digit: Clone + Zeroable,
 {
     let mut digits_count = digits.len();
     while digits_count > 1 && digits[digits_count - 1].is_zero() {

@@ -3,7 +3,7 @@ use std::ops::{
     Sub, SubAssign,
 };
 
-pub trait AdditiveMonoid<Rhs = Self> = Add<Rhs, Output = Self> + Zero;
+pub trait AdditiveMonoid<Rhs = Self> = Add<Rhs, Output = Self> + Zeroable;
 
 pub trait AssigningAdditiveMonoid<Rhs = Self> = AdditiveMonoid<Rhs> + AddAssign<Rhs>;
 
@@ -15,9 +15,9 @@ pub trait AssigningShiftingRightMonoid<Rhs = Self> = ShiftingRightMonoid<Rhs> + 
 
 pub trait AssigningSubtractiveMagma<Rhs = Self> = SubtractiveMagma<Rhs> + SubAssign<Rhs>;
 
-pub trait BitwiseAndMagma<Rhs = Self> = BitAnd<Rhs, Output = Self> + Zero;
+pub trait BitwiseAndMagma<Rhs = Self> = BitAnd<Rhs, Output = Self> + Zeroable;
 
-pub trait BitwiseOrMonoid<Rhs = Self> = BitOr<Rhs, Output = Self> + Zero;
+pub trait BitwiseOrMonoid<Rhs = Self> = BitOr<Rhs, Output = Self> + Zeroable;
 
 pub trait DivisivePartialMagma<Rhs = Self> = Div<Rhs, Output = Self>;
 
@@ -27,11 +27,11 @@ pub trait ModularPartialMagma<Rhs = Self> = Rem<Rhs, Output = Self>;
 
 pub trait ModularSubtractiveMagma<Rhs = Self> = ModularSub<Rhs, Output = Self>;
 
-pub trait MultiplicativeMonoid<Rhs = Self> = Mul<Rhs, Output = Self> + One;
+pub trait MultiplicativeMonoid<Rhs = Self> = Mul<Rhs, Output = Self> + Unitary;
 
-pub trait ShiftingLeftMonoid<Rhs = Self> = Shl<Rhs, Output = Self> + Zero;
+pub trait ShiftingLeftMonoid<Rhs = Self> = Shl<Rhs, Output = Self> + Zeroable;
 
-pub trait ShiftingRightMonoid<Rhs = Self> = Shr<Rhs, Output = Self> + Zero;
+pub trait ShiftingRightMonoid<Rhs = Self> = Shr<Rhs, Output = Self> + Zeroable;
 
 pub trait SubtractiveMagma<Rhs = Self> = Sub<Rhs, Output = Self>;
 
@@ -135,28 +135,7 @@ macro_rules! plain_modular_sub_impl {
 
 plain_modular_sub_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait One {
-    fn one() -> Self;
-
-    fn is_one(&self) -> bool;
-}
-
-macro_rules! plain_one_impl {
-    ($($t:ty)*) => ($(
-        impl One for $t {
-            fn one() -> $t {1}
-
-            #[inline]
-            fn is_one(&self) -> bool {
-                *self == Self::one()
-            }
-        }
-    )*)
-}
-
-plain_one_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
-
-pub trait Oppositive: Neg<Output = Self> + Zero {
+pub trait Oppositive: Neg<Output = Self> + Zeroable {
     fn is_negative(&self) -> bool;
     fn is_positive(&self) -> bool;
 }
@@ -203,7 +182,28 @@ impl Oppose for u128 {
     type Result = i128;
 }
 
-pub trait Zero {
+pub trait Unitary {
+    fn one() -> Self;
+
+    fn is_one(&self) -> bool;
+}
+
+macro_rules! plain_unitary_impl {
+    ($($t:ty)*) => ($(
+        impl Unitary for $t {
+            fn one() -> $t {1}
+
+            #[inline]
+            fn is_one(&self) -> bool {
+                *self == Self::one()
+            }
+        }
+    )*)
+}
+
+plain_unitary_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
+pub trait Zeroable {
     fn zero() -> Self;
 
     fn is_zero(&self) -> bool;
@@ -211,7 +211,7 @@ pub trait Zero {
 
 macro_rules! plain_zero_impl {
     ($($t:ty)*) => ($(
-        impl Zero for $t {
+        impl Zeroable for $t {
             fn zero() -> $t {0}
 
             #[inline]

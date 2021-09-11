@@ -150,6 +150,9 @@ except ImportError:
                                                   denominator // gcd)
             return self
 
+        def __abs__(self) -> 'Fraction':
+            return Fraction(abs(self.numerator), self.denominator)
+
         def __bool__(self) -> bool:
             return bool(self.numerator)
 

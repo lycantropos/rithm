@@ -14,15 +14,15 @@ pub struct Fraction<Component: Clone + Eq> {
 }
 
 impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fraction<Component> {
-    pub fn new(mut numerator: Component, mut denominator: Component) -> Result<Self, &'static str> {
+    pub fn new(mut numerator: Component, mut denominator: Component) -> Option<Self> {
         if denominator.is_zero() {
-            Err("Denominator should not be zero.")
+            None
         } else {
             (numerator, denominator) =
                 normalize_components_sign::<Component>(numerator, denominator);
             (numerator, denominator) =
                 normalize_components_moduli::<Component>(numerator, denominator);
-            Ok(Self {
+            Some(Self {
                 numerator,
                 denominator,
             })

@@ -63,8 +63,10 @@ impl PyFraction {
                 .map(|value| value.0)
                 .unwrap_or_else(_BigInt::one),
         ) {
-            Ok(value) => Ok(PyFraction(value)),
-            Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
+            Some(value) => Ok(PyFraction(value)),
+            None => Err(PyZeroDivisionError::new_err(
+                UNDEFINED_DIVISION_ERROR_MESSAGE,
+            )),
         }
     }
 
@@ -213,7 +215,9 @@ impl PyNumberProtocol for PyFraction {
     fn __truediv__(lhs: PyFraction, rhs: PyFraction) -> PyResult<PyFraction> {
         match lhs.0.checked_div(rhs.0) {
             Some(result) => Ok(PyFraction(result)),
-            None => Err(PyZeroDivisionError::new_err("Division by zero is undefined.")),
+            None => Err(PyZeroDivisionError::new_err(
+                UNDEFINED_DIVISION_ERROR_MESSAGE,
+            )),
         }
     }
 }

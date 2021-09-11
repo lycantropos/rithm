@@ -133,7 +133,9 @@ except ImportError:
 
         def __new__(cls,
                     numerator: Int = _ZERO,
-                    denominator: Int = _ONE) -> 'Fraction':
+                    denominator: Int = _ONE,
+                    *,
+                    _normalize: bool = True) -> 'Fraction':
             self = super().__new__(cls)
             if not isinstance(numerator, Int):
                 raise TypeError(f'First argument should be of type {Int}, '
@@ -143,22 +145,28 @@ except ImportError:
                                 f'but found: {type(denominator)}.')
             if not denominator:
                 raise ZeroDivisionError('Denominator should not be zero.')
-            if denominator < _ZERO:
-                numerator, denominator = -numerator, -denominator
-            gcd = numerator.gcd(denominator)
-            self._numerator, self._denominator = (numerator // gcd,
-                                                  denominator // gcd)
+            if _normalize:
+                if denominator < _ZERO:
+                    numerator, denominator = -numerator, -denominator
+                numerator, denominator = _normalize_components_moduli(
+                    numerator, denominator)
+            self._numerator, self._denominator = numerator, denominator
             return self
 
         def __abs__(self) -> 'Fraction':
-            return Fraction(abs(self.numerator), self.denominator)
+            return Fraction(abs(self.numerator), self.denominator,
+                            _normalize=False)
 
         def __add__(self, other: 'Fraction') -> 'Fraction':
-            return (Fraction(self.numerator * other.denominator
-                             + other.numerator * self.denominator,
-                             self.denominator * other.denominator)
-                    if isinstance(other, Fraction)
-                    else NotImplemented)
+            return (
+                Fraction(
+                    *_normalize_components_moduli(
+                        self.numerator * other.denominator
+                        + other.numerator * self.denominator,
+                        self.denominator * other.denominator),
+                    _normalize=False)
+                if isinstance(other, Fraction)
+                else NotImplemented)
 
         def __bool__(self) -> bool:
             return bool(self.numerator)
@@ -194,7 +202,8 @@ except ImportError:
                     else NotImplemented)
 
         def __neg__(self) -> 'Fraction':
-            return Fraction(-self.numerator, self.denominator)
+            return Fraction(-self.numerator, self.denominator,
+                            _normalize=False)
 
         def __repr__(self) -> str:
             return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'
@@ -205,8 +214,18 @@ except ImportError:
                     else f'{self.numerator}/{self.denominator}')
 
         def __sub__(self, other: 'Fraction') -> 'Fraction':
-            return (Fraction(self.numerator * other.denominator
-                             - other.numerator * self.denominator,
-                             self.denominator * other.denominator)
-                    if isinstance(other, Fraction)
-                    else NotImplemented)
+            return (
+                Fraction(
+                    *_normalize_components_moduli(
+                        self.numerator * other.denominator
+                        - other.numerator * self.denominator,
+                        self.denominator * other.denominator),
+                    _normalize=False)
+                if isinstance(other, Fraction)
+                else NotImplemented)
+
+
+    def _normalize_components_moduli(numerator: Int,
+                                     denominator: Int) -> _Tuple[Int, Int]:
+        gcd = numerator.gcd(denominator)
+        return numerator // gcd, denominator // gcd

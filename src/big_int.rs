@@ -8,8 +8,9 @@ use std::str::Chars;
 
 use crate::digits::*;
 use crate::traits::{
-    DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd, Modular, ModularPartialMagma,
-    ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Unitary, Zeroable,
+    CheckedDiv, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd, Modular,
+    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Unitary,
+    Zeroable,
 };
 use crate::utils;
 
@@ -393,6 +394,33 @@ where
 {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
         formatter.write_str(self.to_base_string(10).as_str())
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDiv
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    type Output = Option<Self>;
+
+    fn checked_div(self, divisor: Self) -> Self::Output {
+        match self.divrem(&divisor) {
+            Ok(value) => Some(value.0),
+            _ => None,
+        }
     }
 }
 

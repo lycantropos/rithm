@@ -5,7 +5,7 @@ use crate::traits::{
     MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, SubtractiveMagma, Unitary,
 };
 use std::cmp::Ordering;
-use std::ops::{Add, Neg, Sub};
+use std::ops::{Add, Mul, Neg, Sub};
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct Fraction<Component: Clone + Eq> {
@@ -80,6 +80,24 @@ impl<Component: Clone + Eq + ModularUnaryAlgebra> Modular for Fraction<Component
         Self {
             numerator: self.numerator.abs(),
             denominator: self.denominator,
+        }
+    }
+}
+
+impl<
+        Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
+    > Mul for Fraction<Component>
+{
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self::Output {
+        let (numerator, other_denominator) =
+            normalize_components_moduli::<Component>(self.numerator, other.denominator);
+        let (other_numerator, denominator) =
+            normalize_components_moduli::<Component>(other.numerator, self.denominator);
+        Self {
+            numerator: numerator * other_numerator,
+            denominator: denominator * other_denominator,
         }
     }
 }

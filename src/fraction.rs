@@ -1,11 +1,11 @@
 use std::fmt::{Display, Formatter};
 
 use crate::traits::{
-    DivisivePartialMagma, GcdMagma, Modular, ModularUnaryAlgebra, MultiplicativeMonoid,
-    NegatableUnaryAlgebra, Oppositive, SubtractiveMagma, Unitary,
+    AdditiveMonoid, DivisivePartialMagma, GcdMagma, Modular, ModularUnaryAlgebra,
+    MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, SubtractiveMagma, Unitary,
 };
 use std::cmp::Ordering;
-use std::ops::{Neg, Sub};
+use std::ops::{Add, Neg, Sub};
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct Fraction<Component: Clone + Eq> {
@@ -35,6 +35,27 @@ impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fract
 
     pub fn numerator(&self) -> &Component {
         &self.numerator
+    }
+}
+
+impl<
+        Component: AdditiveMonoid
+            + Clone
+            + DivisivePartialMagma
+            + Eq
+            + GcdMagma
+            + Oppositive
+            + MultiplicativeMonoid,
+    > Add for Fraction<Component>
+{
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self::Output {
+        Self::new(
+            self.numerator * other.denominator.clone() + other.numerator * self.denominator.clone(),
+            self.denominator * other.denominator,
+        )
+        .unwrap()
     }
 }
 

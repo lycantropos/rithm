@@ -1,11 +1,17 @@
 use std::ops::{
-    Add, AddAssign, BitAnd, BitOr, Div, Mul, MulAssign, Neg, Rem, Shl, ShlAssign, Shr, ShrAssign,
-    Sub, SubAssign,
+    Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, Div, Mul, MulAssign, Neg, Rem, Shl,
+    ShlAssign, Shr, ShrAssign, Sub, SubAssign,
 };
 
 pub trait AdditiveMonoid<Rhs = Self> = Add<Rhs, Output = Self> + Zeroable;
 
 pub trait AssigningAdditiveMonoid<Rhs = Self> = AdditiveMonoid<Rhs> + AddAssign<Rhs>;
+
+pub trait AssigningBitwiseConjunctiveMagma<Rhs = Self> =
+    BitwiseConjunctiveMagma<Rhs> + BitAndAssign<Rhs>;
+
+pub trait AssigningBitwiseDisjunctiveMonoid<Rhs = Self> =
+    BitwiseDisjunctiveMonoid<Rhs> + BitOrAssign<Rhs>;
 
 pub trait AssigningMultiplicativeMonoid<Rhs = Self> = MultiplicativeMonoid<Rhs> + MulAssign<Rhs>;
 
@@ -15,9 +21,9 @@ pub trait AssigningShiftingRightMonoid<Rhs = Self> = ShiftingRightMonoid<Rhs> + 
 
 pub trait AssigningSubtractiveMagma<Rhs = Self> = SubtractiveMagma<Rhs> + SubAssign<Rhs>;
 
-pub trait BitwiseAndMagma<Rhs = Self> = BitAnd<Rhs, Output = Self> + Zeroable;
+pub trait BitwiseConjunctiveMagma<Rhs = Self> = BitAnd<Rhs, Output = Self> + Zeroable;
 
-pub trait BitwiseOrMonoid<Rhs = Self> = BitOr<Rhs, Output = Self> + Zeroable;
+pub trait BitwiseDisjunctiveMonoid<Rhs = Self> = BitOr<Rhs, Output = Self> + Zeroable;
 
 pub trait DivisivePartialMagma<Rhs = Self> = Div<Rhs, Output = Self>;
 

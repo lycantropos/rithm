@@ -3,20 +3,20 @@ use std::convert::TryFrom;
 use std::{f64, fmt};
 
 use crate::traits::{
-    AssigningAdditiveMonoid, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
-    AssigningShiftingRightMonoid, AssigningSubtractiveMagma, BitwiseAndMagma, BitwiseOrMonoid,
-    DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, ModularPartialMagma,
-    ModularSubtractiveMagma, Oppose, OppositionOf, Unitary, Zeroable,
+    AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
+    AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid, AssigningShiftingRightMonoid,
+    AssigningSubtractiveMagma, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf,
+    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Unitary, Zeroable,
 };
 use crate::utils;
 
 pub trait BinaryDigit = AssigningAdditiveMonoid
+    + AssigningBitwiseConjunctiveMagma
+    + AssigningBitwiseDisjunctiveMonoid
     + AssigningMultiplicativeMonoid
     + AssigningShiftingLeftMonoid<usize>
     + AssigningShiftingRightMonoid<usize>
     + AssigningSubtractiveMagma
-    + BitwiseAndMagma
-    + BitwiseOrMonoid
     + Copy
     + PartialOrd
     + Unitary;

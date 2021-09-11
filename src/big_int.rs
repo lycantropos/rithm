@@ -822,12 +822,12 @@ where
 {
     type Output = Self;
 
-    fn sub(self, other: Self) -> Self::Output {
+    fn sub(self, subtrahend: Self) -> Self::Output {
         if self.is_negative() {
-            if other.is_negative() {
+            if subtrahend.is_negative() {
                 let mut sign = Sign::one();
                 let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
-                    &other.digits,
+                    &subtrahend.digits,
                     &self.digits,
                     &mut sign,
                 );
@@ -835,18 +835,18 @@ where
             } else {
                 Self {
                     sign: -Sign::one(),
-                    digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
+                    digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &subtrahend.digits),
                 }
             }
-        } else if other.is_negative() {
+        } else if subtrahend.is_negative() {
             Self {
                 sign: Sign::one(),
-                digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
+                digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &subtrahend.digits),
             }
         } else {
             let mut sign = Sign::one();
             let digits =
-                subtract_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits, &mut sign);
+                subtract_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &subtrahend.digits, &mut sign);
             Self { sign, digits }
         }
     }

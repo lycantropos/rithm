@@ -2,7 +2,7 @@
 #![feature(option_result_unwrap_unchecked)]
 #![feature(trait_alias)]
 
-use crate::traits::{Gcd, One, Zero};
+use crate::traits::{Gcd, Modular, One, Oppositive, Zero};
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
@@ -77,7 +77,7 @@ impl PyFraction {
 #[pyproto]
 impl PyNumberProtocol for PyInt {
     fn __abs__(&self) -> PyInt {
-        PyInt(self.0.abs())
+        PyInt(self.0.clone().abs())
     }
 
     fn __add__(lhs: PyInt, rhs: PyInt) -> PyInt {

@@ -8,8 +8,8 @@ use std::str::Chars;
 
 use crate::digits::*;
 use crate::traits::{
-    DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd, ModularPartialMagma,
-    ModularSubtractiveMagma, One, Oppose, OppositionOf, Zero,
+    DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd, Modular, ModularPartialMagma,
+    ModularSubtractiveMagma, One, Oppose, OppositionOf, Oppositive, Zero,
 };
 use crate::utils;
 
@@ -19,7 +19,7 @@ pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
     digits: Vec<Digit>,
 }
 
-impl<Digit: Clone + PartialOrd, const SEPARATOR: char, const SHIFT: usize> PartialOrd
+impl<Digit: Clone + PartialOrd + Zero, const SEPARATOR: char, const SHIFT: usize> PartialOrd
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn ge(&self, other: &Self) -> bool {
@@ -246,7 +246,7 @@ where
     }
 }
 
-impl<Digit: Clone + Eq + PartialOrd, const SEPARATOR: char, const SHIFT: usize> Ord
+impl<Digit: Clone + Eq + PartialOrd + Zero, const SEPARATOR: char, const SHIFT: usize> Ord
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn cmp(&self, other: &Self) -> Ordering {
@@ -664,23 +664,28 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: Clone,
-{
-    pub fn abs(&self) -> Self {
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Modular for BigInt<Digit, SEPARATOR, SHIFT> {
+    type Output = Self;
+
+    fn abs(self) -> Self {
         Self {
             sign: self.sign.abs(),
-            digits: self.digits.clone(),
+            digits: self.digits,
         }
     }
+}
 
-    pub fn is_positive(&self) -> bool {
-        self.sign.is_positive()
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Oppositive
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: Zero,
+{
+    fn is_negative(&self) -> bool {
+        self.sign.is_negative()
     }
 
-    pub fn is_negative(&self) -> bool {
-        self.sign.is_negative()
+    fn is_positive(&self) -> bool {
+        self.sign.is_positive()
     }
 }
 

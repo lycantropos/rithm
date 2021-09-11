@@ -91,6 +91,27 @@ macro_rules! plain_gcd_impl {
 
 plain_gcd_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
+pub trait Modular {
+    type Output;
+
+    fn abs(self) -> <Self as Modular>::Output;
+}
+
+macro_rules! plain_modular_impl {
+    ($($t:ty)*) => ($(
+        impl Modular for $t {
+            type Output = $t;
+
+            #[inline]
+            fn abs(self) -> <Self as Modular>::Output {
+                <$t>::abs(self)
+            }
+        }
+    )*)
+}
+
+plain_modular_impl!(i8 i16 i32 i64 i128 isize);
+
 pub trait ModularSub<Rhs = Self> {
     type Output;
 
@@ -133,7 +154,28 @@ macro_rules! plain_one_impl {
 
 plain_one_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait Oppositive = Neg<Output = Self>;
+pub trait Oppositive: Neg<Output = Self> + Zero {
+    fn is_negative(&self) -> bool;
+    fn is_positive(&self) -> bool;
+}
+
+macro_rules! plain_oppositive_impl {
+    ($($t:ty)*) => ($(
+        impl Oppositive for $t {
+            #[inline]
+            fn is_negative(&self) -> bool {
+                <$t>::is_negative(*self)
+            }
+
+            #[inline]
+            fn is_positive(&self) -> bool {
+                <$t>::is_positive(*self)
+            }
+        }
+    )*)
+}
+
+plain_oppositive_impl!(i8 i16 i32 i64 i128 isize);
 
 pub trait Oppose {
     type Result: Oppositive;

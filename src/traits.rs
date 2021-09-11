@@ -21,6 +21,8 @@ pub trait BitwiseOrMonoid<Rhs = Self> = BitOr<Rhs, Output = Self> + Zero;
 
 pub trait DivisivePartialMagma<Rhs = Self> = Div<Rhs, Output = Self>;
 
+pub trait ModularUnaryAlgebra = Modular<Output = Self>;
+
 pub trait ModularPartialMagma<Rhs = Self> = Rem<Rhs, Output = Self>;
 
 pub trait ModularSubtractiveMagma<Rhs = Self> = ModularSub<Rhs, Output = Self>;

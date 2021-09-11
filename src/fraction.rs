@@ -1,6 +1,8 @@
 use std::fmt::{Display, Formatter};
 
-use crate::traits::{DivisivePartialMagma, Gcd, MultiplicativeMonoid, One, Oppositive};
+use crate::traits::{
+    DivisivePartialMagma, Gcd, Modular, ModularUnaryAlgebra, MultiplicativeMonoid, One, Oppositive,
+};
 use std::cmp::Ordering;
 
 #[derive(Clone, Eq, PartialEq)]
@@ -9,13 +11,8 @@ pub struct Fraction<Component: Clone + Eq> {
     denominator: Component,
 }
 
-impl<
-        Component: Clone
-            + DivisivePartialMagma
-            + Gcd<Output = Component>
-            + Oppositive
-            + Eq,
-    > Fraction<Component>
+impl<Component: Clone + DivisivePartialMagma + Gcd<Output = Component> + Oppositive + Eq>
+    Fraction<Component>
 {
     pub fn new(mut numerator: Component, mut denominator: Component) -> Result<Self, &'static str> {
         if denominator.is_zero() {
@@ -47,6 +44,17 @@ impl<Component: Clone + Display + Eq + One> Display for Fraction<Component> {
             write!(formatter, "{}", self.numerator)
         } else {
             write!(formatter, "{}/{}", self.numerator, self.denominator)
+        }
+    }
+}
+
+impl<Component: Clone + Eq + ModularUnaryAlgebra + One> Modular for Fraction<Component> {
+    type Output = Self;
+
+    fn abs(self) -> <Self as Modular>::Output {
+        Self {
+            numerator: self.numerator.abs(),
+            denominator: self.denominator.clone(),
         }
     }
 }

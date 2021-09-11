@@ -18,9 +18,8 @@ impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fract
         if denominator.is_zero() {
             Err("Denominator should not be zero.")
         } else {
-            if denominator.is_negative() {
-                (numerator, denominator) = (-numerator, -denominator);
-            };
+            (numerator, denominator) =
+                normalize_components_sign::<Component>(numerator, denominator);
             (numerator, denominator) =
                 normalize_components_moduli::<Component>(numerator, denominator);
             Ok(Self {
@@ -169,10 +168,23 @@ impl<
     }
 }
 
+#[inline]
 fn normalize_components_moduli<Component: Clone + DivisivePartialMagma + GcdMagma>(
     numerator: Component,
     denominator: Component,
 ) -> (Component, Component) {
     let gcd = numerator.clone().gcd(denominator.clone());
     (numerator / gcd.clone(), denominator / gcd)
+}
+
+#[inline]
+fn normalize_components_sign<Component: Oppositive>(
+    numerator: Component,
+    denominator: Component,
+) -> (Component, Component) {
+    if denominator.is_negative() {
+        (-numerator, -denominator)
+    } else {
+        (numerator, denominator)
+    }
 }

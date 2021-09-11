@@ -90,7 +90,7 @@ pub trait CheckedDiv<Rhs = Self> {
 macro_rules! plain_checked_div_impl {
     ($($t:ty)*) => ($(
         impl CheckedDiv for $t {
-            type Output = Option::<Self>;
+            type Output = Option<Self>;
 
             #[inline]
             fn checked_div(self, other: Self) -> Self::Output {

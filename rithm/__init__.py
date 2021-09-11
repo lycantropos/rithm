@@ -147,10 +147,8 @@ except ImportError:
             if not denominator:
                 raise ZeroDivisionError('Denominator should not be zero.')
             if _normalize:
-                if denominator < _ZERO:
-                    numerator, denominator = -numerator, -denominator
-                numerator, denominator = _normalize_components_moduli(
-                    numerator, denominator)
+                numerator, denominator = _normalize_components_sign(
+                    *_normalize_components_moduli(numerator, denominator))
             self._numerator, self._denominator = numerator, denominator
             return self
 
@@ -238,11 +236,12 @@ except ImportError:
 
         def __truediv__(self, other: 'Fraction') -> 'Fraction':
             return (
-                Fraction(*map(_mul,
-                              _normalize_components_moduli(self.numerator,
-                                                           other.numerator),
-                              _normalize_components_moduli(self.denominator,
-                                                           other.denominator)),
+                Fraction(*_normalize_components_sign(
+                    *map(_mul,
+                         _normalize_components_moduli(self.numerator,
+                                                      other.numerator),
+                         _normalize_components_moduli(other.denominator,
+                                                      self.denominator))),
                          _normalize=False)
                 if isinstance(other, Fraction)
                 else NotImplemented)
@@ -252,3 +251,10 @@ except ImportError:
                                      denominator: Int) -> _Tuple[Int, Int]:
         gcd = numerator.gcd(denominator)
         return numerator // gcd, denominator // gcd
+
+
+    def _normalize_components_sign(numerator: Int,
+                                   denominator: Int) -> _Tuple[Int, Int]:
+        return ((-numerator, -denominator)
+                if denominator < _ZERO
+                else (numerator, denominator))

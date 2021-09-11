@@ -8,6 +8,11 @@ from tests.utils import is_equivalent_to_builtin_fraction
 from . import strategies
 
 
+@given(strategies.fractions, strategies.fractions)
+def test_alternatives(first: Fraction, second: Fraction) -> None:
+    assert first - second == first + (-second)
+
+
 @given(strategies.fractions_with_builtin_fractions,
        strategies.fractions_with_builtin_fractions)
 def test_connection_with_builtin(first_with_builtin

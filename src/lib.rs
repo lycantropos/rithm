@@ -186,6 +186,10 @@ impl PyNumberProtocol for PyFraction {
     fn __abs__(&self) -> PyFraction {
         PyFraction(self.0.clone().abs())
     }
+
+    fn __sub__(lhs: PyFraction, rhs: PyFraction) -> PyFraction {
+        PyFraction(lhs.0 - rhs.0)
+    }
 }
 
 fn compare<T: PartialOrd>(left: &T, right: &T, op: CompareOp) -> bool {

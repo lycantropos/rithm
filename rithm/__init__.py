@@ -193,3 +193,10 @@ except ImportError:
             return (str(self.numerator)
                     if self.denominator == _ONE
                     else f'{self.numerator}/{self.denominator}')
+
+        def __sub__(self, other: 'Fraction') -> 'Fraction':
+            return (Fraction(self.numerator * other.denominator
+                             - other.numerator * self.denominator,
+                             self.denominator * other.denominator)
+                    if isinstance(other, Fraction)
+                    else NotImplemented)

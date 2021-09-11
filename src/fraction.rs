@@ -1,10 +1,11 @@
 use std::fmt::{Display, Formatter};
 
 use crate::traits::{
-    DivisivePartialMagma, Gcd, Modular, ModularUnaryAlgebra, MultiplicativeMonoid, Oppositive,
-    Unitary,
+    DivisivePartialMagma, GcdMagma, Modular, ModularUnaryAlgebra, MultiplicativeMonoid, Oppositive,
+    SubtractiveMagma, Unitary,
 };
 use std::cmp::Ordering;
+use std::ops::Sub;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct Fraction<Component: Clone + Eq> {
@@ -12,9 +13,7 @@ pub struct Fraction<Component: Clone + Eq> {
     denominator: Component,
 }
 
-impl<Component: Clone + DivisivePartialMagma + Gcd<Output = Component> + Oppositive + Eq>
-    Fraction<Component>
-{
+impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fraction<Component> {
     pub fn new(mut numerator: Component, mut denominator: Component) -> Result<Self, &'static str> {
         if denominator.is_zero() {
             Err("Denominator should not be zero.")
@@ -57,6 +56,27 @@ impl<Component: Clone + Eq + ModularUnaryAlgebra + Unitary> Modular for Fraction
             numerator: self.numerator.abs(),
             denominator: self.denominator.clone(),
         }
+    }
+}
+
+impl<
+        Component: Clone
+            + DivisivePartialMagma
+            + Eq
+            + GcdMagma
+            + Oppositive
+            + MultiplicativeMonoid
+            + SubtractiveMagma,
+    > Sub for Fraction<Component>
+{
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self::Output {
+        Self::new(
+            self.numerator * other.denominator.clone() - other.numerator * self.denominator.clone(),
+            self.denominator * other.denominator,
+        )
+        .unwrap()
     }
 }
 

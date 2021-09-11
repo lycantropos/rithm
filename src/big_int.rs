@@ -764,6 +764,7 @@ where
     Digit: BinaryDigit + ModularSubtractiveMagma + TryFrom<usize>,
 {
     type Output = Self;
+
     fn sub(self, other: Self) -> Self::Output {
         if self.is_negative() {
             if other.is_negative() {

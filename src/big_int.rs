@@ -9,7 +9,7 @@ use std::str::Chars;
 use crate::digits::*;
 use crate::traits::{
     DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd, ModularPartialMagma,
-    ModularSubtractiveMagma, One, SignedOf, Signify, Zero,
+    ModularSubtractiveMagma, One, Oppose, OppositionOf, Zero,
 };
 use crate::utils;
 
@@ -83,16 +83,17 @@ where
         + DoublePrecision
         + From<u8>
         + ModularSubtractiveMagma
-        + Signify
+        + Oppose
         + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + ModularPartialMagma + Signify,
-    SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + ModularPartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit
         + DivisivePartialMagma
         + From<Digit>
-        + From<SignedOf<Digit>>
+        + From<OppositionOf<Digit>>
         + ModularPartialMagma,
     usize: TryFrom<Digit>,
 {
@@ -118,46 +119,46 @@ where
             }
             let highest_digit_bit_length =
                 utils::bit_length(largest_digits[largest_digits.len() - 1]);
-            let mut largest_leading_bits = (SignedOf::<DoublePrecisionOf<Digit>>::from(
+            let mut largest_leading_bits = (OppositionOf::<DoublePrecisionOf<Digit>>::from(
                 largest_digits[largest_digits_count - 1],
             ) << (2 * SHIFT - highest_digit_bit_length))
-                | (SignedOf::<DoublePrecisionOf<Digit>>::from(
+                | (OppositionOf::<DoublePrecisionOf<Digit>>::from(
                     largest_digits[largest_digits_count - 2],
                 ) << (SHIFT - highest_digit_bit_length))
-                | SignedOf::<DoublePrecisionOf<Digit>>::from(
+                | OppositionOf::<DoublePrecisionOf<Digit>>::from(
                     largest_digits[largest_digits_count - 3] >> highest_digit_bit_length,
                 );
             let mut smallest_leading_bits = if smallest_digits_count >= largest_digits_count - 2 {
-                SignedOf::<DoublePrecisionOf<Digit>>::from(
+                OppositionOf::<DoublePrecisionOf<Digit>>::from(
                     smallest_digits[largest_digits_count - 3] >> highest_digit_bit_length,
                 )
             } else {
-                SignedOf::<DoublePrecisionOf<Digit>>::zero()
+                OppositionOf::<DoublePrecisionOf<Digit>>::zero()
             } | if smallest_digits_count >= largest_digits_count - 1
             {
-                SignedOf::<DoublePrecisionOf<Digit>>::from(
+                OppositionOf::<DoublePrecisionOf<Digit>>::from(
                     smallest_digits[largest_digits_count - 2],
                 ) << (SHIFT - highest_digit_bit_length)
             } else {
-                SignedOf::<DoublePrecisionOf<Digit>>::zero()
+                OppositionOf::<DoublePrecisionOf<Digit>>::zero()
             } | if smallest_digits_count >= largest_digits_count {
-                SignedOf::<DoublePrecisionOf<Digit>>::from(
+                OppositionOf::<DoublePrecisionOf<Digit>>::from(
                     smallest_digits[largest_digits_count - 1],
                 ) << (2 * SHIFT - highest_digit_bit_length)
             } else {
-                SignedOf::<DoublePrecisionOf<Digit>>::zero()
+                OppositionOf::<DoublePrecisionOf<Digit>>::zero()
             };
-            let mut first_coefficient = SignedOf::<DoublePrecisionOf<Digit>>::one();
-            let mut second_coefficient = SignedOf::<DoublePrecisionOf<Digit>>::zero();
-            let mut third_coefficient = SignedOf::<DoublePrecisionOf<Digit>>::zero();
-            let mut fourth_coefficient = SignedOf::<DoublePrecisionOf<Digit>>::one();
+            let mut first_coefficient = OppositionOf::<DoublePrecisionOf<Digit>>::one();
+            let mut second_coefficient = OppositionOf::<DoublePrecisionOf<Digit>>::zero();
+            let mut third_coefficient = OppositionOf::<DoublePrecisionOf<Digit>>::zero();
+            let mut fourth_coefficient = OppositionOf::<DoublePrecisionOf<Digit>>::one();
             let mut iterations_count = 0usize;
             loop {
                 if third_coefficient == smallest_leading_bits {
                     break;
                 }
                 let scale = (largest_leading_bits
-                    + (first_coefficient - SignedOf::<DoublePrecisionOf<Digit>>::one()))
+                    + (first_coefficient - OppositionOf::<DoublePrecisionOf<Digit>>::one()))
                     / (smallest_leading_bits - third_coefficient);
                 let next_third_coefficient = second_coefficient + scale * fourth_coefficient;
                 let next_smallest_leading_bits =
@@ -192,22 +193,22 @@ where
                 (first_coefficient, second_coefficient) = (-second_coefficient, -first_coefficient);
                 (third_coefficient, fourth_coefficient) = (-fourth_coefficient, -third_coefficient);
             }
-            let digit_mask = to_digit_mask::<SignedOf<DoublePrecisionOf<Digit>>>(SHIFT);
-            let mut next_largest_accumulator = SignedOf::<DoublePrecisionOf<Digit>>::zero();
-            let mut next_smallest_accumulator = SignedOf::<DoublePrecisionOf<Digit>>::zero();
+            let digit_mask = to_digit_mask::<OppositionOf<DoublePrecisionOf<Digit>>>(SHIFT);
+            let mut next_largest_accumulator = OppositionOf::<DoublePrecisionOf<Digit>>::zero();
+            let mut next_smallest_accumulator = OppositionOf::<DoublePrecisionOf<Digit>>::zero();
             let mut next_largest_digits = Vec::<Digit>::with_capacity(largest_digits_count);
             let mut next_smallest_digits = Vec::<Digit>::with_capacity(largest_digits_count);
             for index in 0..smallest_digits_count {
                 next_largest_accumulator = next_largest_accumulator
                     + (first_coefficient
-                        * SignedOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]))
+                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]))
                     - (second_coefficient
-                        * SignedOf::<DoublePrecisionOf<Digit>>::from(smallest_digits[index]));
+                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(smallest_digits[index]));
                 next_smallest_accumulator = next_smallest_accumulator
                     + (fourth_coefficient
-                        * SignedOf::<DoublePrecisionOf<Digit>>::from(smallest_digits[index]))
+                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(smallest_digits[index]))
                     - (third_coefficient
-                        * SignedOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]));
+                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]));
                 next_largest_digits.push(unsafe {
                     Digit::try_from(next_largest_accumulator & digit_mask).unwrap_unchecked()
                 });
@@ -220,10 +221,10 @@ where
             for index in smallest_digits_count..largest_digits_count {
                 next_largest_accumulator = next_largest_accumulator
                     + first_coefficient
-                        * SignedOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]);
+                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]);
                 next_smallest_accumulator = next_smallest_accumulator
                     - third_coefficient
-                        * SignedOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]);
+                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]);
                 next_largest_digits.push(unsafe {
                     Digit::try_from(next_largest_accumulator & digit_mask).unwrap_unchecked()
                 });
@@ -403,13 +404,14 @@ where
         + DoublePrecision
         + From<u8>
         + ModularSubtractiveMagma
-        + Signify
+        + Oppose
         + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Signify,
-    SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
     usize: TryFrom<Digit>,
 {
     type Output = Self;
@@ -425,15 +427,16 @@ where
         + DoublePrecision
         + From<u8>
         + ModularSubtractiveMagma
-        + Signify
+        + Oppose
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<DoublePrecisionOf<u8>>
-        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
         + TryFrom<u8>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + Signify + TryFrom<usize>,
-    SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
+    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + Oppose + TryFrom<usize>,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
     usize: TryFrom<Digit>,
 {
     pub fn from_str_radix(string: &str, radix: u32) -> Result<Self, String> {
@@ -447,13 +450,14 @@ where
         + DoublePrecision
         + From<u8>
         + ModularSubtractiveMagma
-        + Signify
+        + Oppose
         + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Signify,
-    SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
     usize: TryFrom<Digit>,
 {
     type Output = Self;
@@ -696,13 +700,14 @@ where
     Digit: BinaryDigit
         + DoublePrecision
         + From<u8>
-        + Signify
+        + Oppose
         + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Signify,
-    SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
     usize: TryFrom<Digit>,
 {
     pub(crate) fn divrem(self, divisor: &Self) -> Result<(Self, Self), &'static str> {

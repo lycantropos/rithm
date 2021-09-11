@@ -133,29 +133,29 @@ macro_rules! plain_one_impl {
 
 plain_one_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait Signed = Neg<Output = Self>;
+pub trait Oppositive = Neg<Output = Self>;
 
-pub trait Signify {
-    type Result: Signed;
+pub trait Oppose {
+    type Result: Oppositive;
 }
 
-impl Signify for u8 {
+impl Oppose for u8 {
     type Result = i8;
 }
 
-impl Signify for u16 {
+impl Oppose for u16 {
     type Result = i16;
 }
 
-impl Signify for u32 {
+impl Oppose for u32 {
     type Result = i32;
 }
 
-impl Signify for u64 {
+impl Oppose for u64 {
     type Result = i64;
 }
 
-impl Signify for u128 {
+impl Oppose for u128 {
     type Result = i128;
 }
 
@@ -181,4 +181,4 @@ macro_rules! plain_zero_impl {
 plain_zero_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub type DoublePrecisionOf<T> = <T as DoublePrecision>::Result;
-pub type SignedOf<T> = <T as Signify>::Result;
+pub type OppositionOf<T> = <T as Oppose>::Result;

@@ -6,7 +6,7 @@ use crate::traits::{
     AssigningAdditiveMonoid, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
     AssigningShiftingRightMonoid, AssigningSubtractiveMagma, BitwiseAndMagma, BitwiseOrMonoid,
     DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, ModularPartialMagma,
-    ModularSubtractiveMagma, One, SignedOf, Signify, Zero,
+    ModularSubtractiveMagma, One, Oppose, OppositionOf, Zero,
 };
 use crate::utils;
 
@@ -283,12 +283,13 @@ where
     Digit: BinaryDigit
         + DoublePrecision
         + From<u8>
-        + Signify
+        + Oppose
         + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Signify,
-    SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
     usize: TryFrom<Digit>,
 {
     let dividend_digits_count = dividend.len();
@@ -342,24 +343,25 @@ where
                 break;
             }
         }
-        let mut accumulator = SignedOf::<Digit>::zero();
+        let mut accumulator = OppositionOf::<Digit>::zero();
         for index in 0..divisor_digits_count {
             let step =
-                SignedOf::<DoublePrecisionOf<Digit>>::from(dividend_normalized[offset + index])
-                    + SignedOf::<DoublePrecisionOf<Digit>>::from(accumulator)
-                    - SignedOf::<DoublePrecisionOf<Digit>>::from(quotient_digit)
-                        * SignedOf::<DoublePrecisionOf<Digit>>::from(divisor_normalized[index]);
+                OppositionOf::<DoublePrecisionOf<Digit>>::from(dividend_normalized[offset + index])
+                    + OppositionOf::<DoublePrecisionOf<Digit>>::from(accumulator)
+                    - OppositionOf::<DoublePrecisionOf<Digit>>::from(quotient_digit)
+                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(divisor_normalized[index]);
             dividend_normalized[offset + index] = unsafe {
-                Digit::try_from(step & SignedOf::<DoublePrecisionOf<Digit>>::from(digit_mask))
+                Digit::try_from(step & OppositionOf::<DoublePrecisionOf<Digit>>::from(digit_mask))
                     .unwrap_unchecked()
             };
-            accumulator = unsafe { SignedOf::<Digit>::try_from(step >> SHIFT).unwrap_unchecked() };
+            accumulator =
+                unsafe { OppositionOf::<Digit>::try_from(step >> SHIFT).unwrap_unchecked() };
         }
         if unsafe {
-            SignedOf::<Digit>::try_from(dividend_normalized[offset + divisor_digits_count])
+            OppositionOf::<Digit>::try_from(dividend_normalized[offset + divisor_digits_count])
                 .unwrap_unchecked()
         } + accumulator
-            < SignedOf::<Digit>::zero()
+            < OppositionOf::<Digit>::zero()
         {
             let mut accumulator = Digit::zero();
             for index in 0..divisor_digits_count {

@@ -1,7 +1,6 @@
 use std::fmt::{Display, Formatter};
-use std::ops::{Div, Mul, Neg};
 
-use crate::traits::{Gcd, One, Zero};
+use crate::traits::{DivisivePartialMagma, Gcd, MultiplicativeMonoid, One, Oppositive, Zero};
 use std::cmp::Ordering;
 
 #[derive(Clone, Eq, PartialEq)]
@@ -12,9 +11,9 @@ pub struct Fraction<Component: Clone + Eq> {
 
 impl<
         Component: Clone
-            + Div<Output = Component>
+            + DivisivePartialMagma
             + Gcd<Output = Component>
-            + Neg<Output = Component>
+            + Oppositive
             + PartialOrd
             + Eq
             + Zero,
@@ -54,9 +53,7 @@ impl<Component: Clone + Display + Eq + One> Display for Fraction<Component> {
     }
 }
 
-impl<Component: Clone + Eq + Mul<Output = Component> + PartialOrd> PartialOrd
-    for Fraction<Component>
-{
+impl<Component: Clone + Eq + MultiplicativeMonoid + PartialOrd> PartialOrd for Fraction<Component> {
     fn ge(&self, other: &Self) -> bool {
         self.numerator.clone() * other.denominator.clone()
             >= other.numerator.clone() * self.denominator.clone()

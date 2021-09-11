@@ -21,7 +21,7 @@ type Digit = u16;
 #[cfg(not(target_arch = "x86"))]
 type Digit = u32;
 
-const BINARY_SHIFT: usize = (traits::SignedOf::<Digit>::BITS - 2) as usize;
+const BINARY_SHIFT: usize = (traits::OppositionOf::<Digit>::BITS - 2) as usize;
 
 type _BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
 type _Fraction = fraction::Fraction<_BigInt>;

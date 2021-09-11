@@ -186,6 +186,9 @@ except ImportError:
                     if isinstance(other, Fraction)
                     else NotImplemented)
 
+        def __neg__(self) -> 'Fraction':
+            return Fraction(-self.numerator, self.denominator)
+
         def __repr__(self) -> str:
             return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'
 

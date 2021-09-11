@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 
 use crate::traits::{
-    AdditiveMonoid, CheckedDiv, DivisivePartialMagma, GcdMagma, Modular, ModularUnaryAlgebra,
+    Abs, AdditiveMonoid, CheckedDiv, DivisivePartialMagma, GcdMagma, ModularUnaryAlgebra,
     MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, SubtractiveMagma, Unitary,
 };
 use std::cmp::Ordering;
@@ -108,10 +108,10 @@ impl<
     }
 }
 
-impl<Component: Clone + Eq + ModularUnaryAlgebra> Modular for Fraction<Component> {
+impl<Component: Clone + Eq + ModularUnaryAlgebra> Abs for Fraction<Component> {
     type Output = Self;
 
-    fn abs(self) -> <Self as Modular>::Output {
+    fn abs(self) -> <Self as Abs>::Output {
         Self {
             numerator: self.numerator.abs(),
             denominator: self.denominator,

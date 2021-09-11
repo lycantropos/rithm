@@ -29,7 +29,7 @@ pub trait DivisivePartialMagma<Rhs = Self> = Div<Rhs, Output = Self>;
 
 pub trait GcdMagma<Rhs = Self> = Gcd<Rhs, Output = Self>;
 
-pub trait ModularUnaryAlgebra = Modular<Output = Self>;
+pub trait ModularUnaryAlgebra = Abs<Output = Self>;
 
 pub trait ModularPartialMagma<Rhs = Self> = Rem<Rhs, Output = Self>;
 
@@ -44,6 +44,27 @@ pub trait ShiftingLeftMonoid<Rhs = Self> = Shl<Rhs, Output = Self> + Zeroable;
 pub trait ShiftingRightMonoid<Rhs = Self> = Shr<Rhs, Output = Self> + Zeroable;
 
 pub trait SubtractiveMagma<Rhs = Self> = Sub<Rhs, Output = Self>;
+
+pub trait Abs {
+    type Output;
+
+    fn abs(self) -> Self::Output;
+}
+
+macro_rules! plain_abs_impl {
+    ($($t:ty)*) => ($(
+        impl Abs for $t {
+            type Output = $t;
+
+            #[inline]
+            fn abs(self) -> <Self as Abs>::Output {
+                <$t>::abs(self)
+            }
+        }
+    )*)
+}
+
+plain_abs_impl!(i8 i16 i32 i64 i128 isize);
 
 pub trait DoublePrecision: Sized {
     type Result: From<Self>;
@@ -138,27 +159,6 @@ macro_rules! plain_unsigned_gcd_impl {
 
 plain_signed_gcd_impl!(i8 i16 i32 i64 i128 isize);
 plain_unsigned_gcd_impl!(u8 u16 u32 u64 u128 usize);
-
-pub trait Modular {
-    type Output;
-
-    fn abs(self) -> <Self as Modular>::Output;
-}
-
-macro_rules! plain_modular_impl {
-    ($($t:ty)*) => ($(
-        impl Modular for $t {
-            type Output = $t;
-
-            #[inline]
-            fn abs(self) -> <Self as Modular>::Output {
-                <$t>::abs(self)
-            }
-        }
-    )*)
-}
-
-plain_modular_impl!(i8 i16 i32 i64 i128 isize);
 
 pub trait ModularSub<Rhs = Self> {
     type Output;

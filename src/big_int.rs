@@ -8,7 +8,7 @@ use std::str::Chars;
 
 use crate::digits::*;
 use crate::traits::{
-    CheckedDiv, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd, Modular,
+    Abs, CheckedDiv, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd,
     ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Unitary,
     Zeroable,
 };
@@ -760,7 +760,7 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Modular for BigInt<Digit, SEPARATOR, SHIFT> {
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Abs for BigInt<Digit, SEPARATOR, SHIFT> {
     type Output = Self;
 
     fn abs(self) -> Self {

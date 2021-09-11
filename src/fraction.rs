@@ -5,7 +5,7 @@ use crate::traits::{
     MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, SubtractiveMagma, Unitary,
 };
 use std::cmp::Ordering;
-use std::ops::{Add, Mul, Neg, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct Fraction<Component: Clone + Eq> {
@@ -94,6 +94,17 @@ impl<Component: Clone + Display + Eq + Unitary> Display for Fraction<Component> 
         } else {
             write!(formatter, "{}/{}", self.numerator, self.denominator)
         }
+    }
+}
+
+impl<
+        Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
+    > Div for Fraction<Component>
+{
+    type Output = Self;
+
+    fn div(self, other: Self) -> Self::Output {
+        self.checked_div(other).unwrap()
     }
 }
 

@@ -195,6 +195,13 @@ impl PyObjectProtocol for PyFraction {
     }
 }
 
+#[pyproto]
+impl PyNumberProtocol for PyFraction {
+    fn __abs__(&self) -> PyFraction {
+        PyFraction(self.0.clone().abs())
+    }
+}
+
 #[pymodule]
 fn _rithm(_py: Python, module: &PyModule) -> PyResult<()> {
     module.setattr("__doc__", env!("CARGO_PKG_DESCRIPTION"))?;

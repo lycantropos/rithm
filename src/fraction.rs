@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 
 use crate::traits::{
-    AdditiveMonoid, DivisivePartialMagma, GcdMagma, Modular, ModularUnaryAlgebra,
+    AdditiveMonoid, CheckedDiv, DivisivePartialMagma, GcdMagma, Modular, ModularUnaryAlgebra,
     MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, SubtractiveMagma, Unitary,
 };
 use std::cmp::Ordering;
@@ -58,6 +58,32 @@ impl<
         Self {
             numerator,
             denominator,
+        }
+    }
+}
+
+impl<
+        Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
+    > CheckedDiv for Fraction<Component>
+{
+    type Output = Option<Self>;
+
+    fn checked_div(self, other: Self) -> Self::Output {
+        let (numerator, other_numerator) =
+            normalize_components_moduli::<Component>(self.numerator, other.numerator);
+        let (denominator, other_denominator) =
+            normalize_components_moduli::<Component>(self.denominator, other.denominator);
+        let (result_numerator, result_denominator) = normalize_components_sign::<Component>(
+            numerator * other_denominator,
+            denominator * other_numerator,
+        );
+        if result_denominator.is_zero() {
+            None
+        } else {
+            Some(Self {
+                numerator: result_numerator,
+                denominator: result_denominator,
+            })
         }
     }
 }

@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
 use std::iter::Peekable;
-use std::ops::{Add, AddAssign, Div, Mul, Neg, Rem, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 use std::str::Chars;
 
 use crate::digits::*;
@@ -718,6 +718,21 @@ where
             sign: self.sign * other.sign,
             digits: multiply_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
         }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> MulAssign for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + ModularSubtractiveMagma
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit,
+{
+    fn mul_assign(&mut self, other: Self) {
+        self.sign *= other.sign;
+        self.digits = multiply_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits);
     }
 }
 

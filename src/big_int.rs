@@ -417,7 +417,31 @@ where
     type Output = Option<Self>;
 
     fn checked_div(self, divisor: Self) -> Self::Output {
-        Some(self.divrem(&divisor)?.0)
+        if divisor.is_zero() {
+            None
+        } else if self.is_zero()
+            || self.digits.len() < divisor.digits.len()
+            || (self.digits.len() == divisor.digits.len()
+                && self.digits[self.digits.len() - 1] < divisor.digits[divisor.digits.len() - 1])
+        {
+            Some(Self::zero())
+        } else if divisor.digits.len() == 1 {
+            let (digits, _) =
+                divrem_digits_by_digit::<Digit, SHIFT>(&self.digits, divisor.digits[0]);
+            Some(Self {
+                sign: self.sign * divisor.sign,
+                digits,
+            })
+        } else {
+            let (digits, _) =
+                divrem_two_or_more_digits::<Digit, SHIFT>(&self.digits, &divisor.digits);
+            Some(Self {
+                sign: self.sign
+                    * divisor.sign
+                    * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+                digits,
+            })
+        }
     }
 }
 

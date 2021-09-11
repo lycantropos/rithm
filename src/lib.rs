@@ -94,20 +94,26 @@ impl PyNumberProtocol for PyInt {
     fn __divmod__(lhs: PyInt, rhs: PyInt) -> PyResult<(PyInt, PyInt)> {
         match divmod(lhs.0, rhs.0) {
             Some((quotient, remainder)) => Ok((PyInt(quotient), PyInt(remainder))),
-            None => Err(PyZeroDivisionError::new_err(UNDEFINED_DIVISION_ERROR_MESSAGE)),
+            None => Err(PyZeroDivisionError::new_err(
+                UNDEFINED_DIVISION_ERROR_MESSAGE,
+            )),
         }
     }
 
     fn __floordiv__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {
         match divmod(lhs.0, rhs.0) {
             Some((result, _)) => Ok(PyInt(result)),
-            None => Err(PyZeroDivisionError::new_err(UNDEFINED_DIVISION_ERROR_MESSAGE)),
+            None => Err(PyZeroDivisionError::new_err(
+                UNDEFINED_DIVISION_ERROR_MESSAGE,
+            )),
         }
     }
     fn __mod__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {
         match divmod(lhs.0, rhs.0) {
             Some((_, result)) => Ok(PyInt(result)),
-            None => Err(PyZeroDivisionError::new_err(UNDEFINED_DIVISION_ERROR_MESSAGE)),
+            None => Err(PyZeroDivisionError::new_err(
+                UNDEFINED_DIVISION_ERROR_MESSAGE,
+            )),
         }
     }
 

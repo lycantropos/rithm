@@ -51,13 +51,13 @@ impl<
     type Output = Self;
 
     fn add(self, other: Self) -> Self::Output {
-        unsafe {
-            Self::new(
-                self.numerator * other.denominator.clone()
-                    + other.numerator * self.denominator.clone(),
-                self.denominator * other.denominator,
-            )
-            .unwrap_unchecked()
+        let (numerator, denominator) = normalize_components_moduli::<Component>(
+            self.numerator * other.denominator.clone() + other.numerator * self.denominator.clone(),
+            self.denominator * other.denominator,
+        );
+        Self {
+            numerator,
+            denominator,
         }
     }
 }

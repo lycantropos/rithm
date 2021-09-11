@@ -845,8 +845,11 @@ where
             }
         } else {
             let mut sign = Sign::one();
-            let digits =
-                subtract_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &subtrahend.digits, &mut sign);
+            let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
+                &self.digits,
+                &subtrahend.digits,
+                &mut sign,
+            );
             Self { sign, digits }
         }
     }

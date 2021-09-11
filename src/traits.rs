@@ -129,21 +129,7 @@ pub trait Gcd<Rhs = Self> {
     fn gcd(self, other: Rhs) -> Self::Output;
 }
 
-macro_rules! plain_signed_gcd_impl {
-    ($($t:ty)*) => ($(
-        impl Gcd for $t {
-            type Output = Self;
-
-            #[inline(always)]
-            fn gcd(self, other: Self) -> Self::Output {
-                use crate::utils;
-                utils::gcd::<$t>(self.abs(), other.abs())
-            }
-        }
-    )*)
-}
-
-macro_rules! plain_unsigned_gcd_impl {
+macro_rules! plain_gcd_impl {
     ($($t:ty)*) => ($(
         impl Gcd for $t {
             type Output = Self;
@@ -157,8 +143,7 @@ macro_rules! plain_unsigned_gcd_impl {
     )*)
 }
 
-plain_signed_gcd_impl!(i8 i16 i32 i64 i128 isize);
-plain_unsigned_gcd_impl!(u8 u16 u32 u64 u128 usize);
+plain_gcd_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait Modulo<Rhs = Self> {
     type Output;

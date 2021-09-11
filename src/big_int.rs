@@ -553,7 +553,7 @@ where
             for _ in 0..shift {
                 characters.push(
                     Self::DIGIT_VALUES_ASCII_CODES
-                        [unsafe { usize::try_from(remainder % target_base).unwrap_unchecked() }],
+                        [unsafe { usize::try_from(remainder.modulo(target_base)).unwrap_unchecked() }],
                 );
                 remainder = remainder / target_base;
             }
@@ -562,7 +562,7 @@ where
         while !remainder.is_zero() {
             characters.push(
                 Self::DIGIT_VALUES_ASCII_CODES
-                    [unsafe { usize::try_from(remainder % target_base).unwrap_unchecked() }],
+                    [unsafe { usize::try_from(remainder.modulo(target_base)).unwrap_unchecked() }],
             );
             remainder = remainder / target_base;
         }

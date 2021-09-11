@@ -152,7 +152,7 @@ where
             *result_position = TargetDigit::try_from(step - digit * target_base).unwrap();
         }
         while !digit.is_zero() {
-            result.push(TargetDigit::try_from(digit % target_base).unwrap());
+            result.push(TargetDigit::try_from(digit.modulo(target_base)).unwrap());
             digit = digit / target_base;
         }
     }

@@ -1,5 +1,5 @@
 use std::ops::{
-    Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, Div, Mul, MulAssign, Neg, Rem, Shl,
+    Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, Div, Mul, MulAssign, Neg, Shl,
     ShlAssign, Shr, ShrAssign, Sub, SubAssign,
 };
 
@@ -31,7 +31,7 @@ pub trait GcdMagma<Rhs = Self> = Gcd<Rhs, Output = Self>;
 
 pub trait ModularUnaryAlgebra = Abs<Output = Self>;
 
-pub trait ModularPartialMagma<Rhs = Self> = Rem<Rhs, Output = Self>;
+pub trait ModularPartialMagma<Rhs = Self> = Modulo<Rhs, Output = Self>;
 
 pub trait ModularSubtractiveMagma<Rhs = Self> = ModularSub<Rhs, Output = Self>;
 
@@ -159,6 +159,27 @@ macro_rules! plain_unsigned_gcd_impl {
 
 plain_signed_gcd_impl!(i8 i16 i32 i64 i128 isize);
 plain_unsigned_gcd_impl!(u8 u16 u32 u64 u128 usize);
+
+pub trait Modulo<Rhs = Self> {
+    type Output;
+
+    fn modulo(self, other: Rhs) -> Self::Output;
+}
+
+macro_rules! plain_modulo_impl {
+    ($($t:ty)*) => ($(
+        impl Modulo for $t {
+            type Output = $t;
+
+            #[inline(always)]
+            fn modulo(self, other: Self) -> <Self as Modulo>::Output {
+                <$t>::rem_euclid(self, other)
+            }
+        }
+    )*)
+}
+
+plain_modulo_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait ModularSub<Rhs = Self> {
     type Output;

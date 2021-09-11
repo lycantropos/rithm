@@ -8,9 +8,9 @@ use std::str::Chars;
 
 use crate::digits::*;
 use crate::traits::{
-    Abs, CheckedDiv, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd,
-    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Unitary,
-    Zeroable,
+    Abs, AssigningDivisivePartialMagma, CheckedDiv, DivisivePartialMagma, DoublePrecision,
+    DoublePrecisionOf, Gcd, ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf,
+    Oppositive, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -379,15 +379,15 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Display for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: BinaryDigit
-        + DivisivePartialMagma
+    Digit: AssigningDivisivePartialMagma
+        + BinaryDigit
         + DoublePrecision
         + From<u8>
         + ModularPartialMagma
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<usize>,
     DoublePrecisionOf<Digit>:
-        BinaryDigit + DivisivePartialMagma + ModularPartialMagma + TryFrom<usize>,
+        AssigningDivisivePartialMagma + BinaryDigit + ModularPartialMagma + TryFrom<usize>,
     <DoublePrecisionOf<Digit> as TryFrom<usize>>::Error: fmt::Debug,
     <Digit as TryFrom<DoublePrecisionOf<Digit>>>::Error: fmt::Debug,
     usize: TryFrom<Digit>,
@@ -516,15 +516,15 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: BinaryDigit
-        + DivisivePartialMagma
+    Digit: AssigningDivisivePartialMagma
+        + BinaryDigit
         + DoublePrecision
         + From<u8>
         + ModularPartialMagma
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<usize>,
     DoublePrecisionOf<Digit>:
-        BinaryDigit + DivisivePartialMagma + ModularPartialMagma + TryFrom<usize>,
+        AssigningDivisivePartialMagma + BinaryDigit + ModularPartialMagma + TryFrom<usize>,
     <DoublePrecisionOf<Digit> as TryFrom<usize>>::Error: fmt::Debug,
     <Digit as TryFrom<DoublePrecisionOf<Digit>>>::Error: fmt::Debug,
     usize: TryFrom<Digit>,
@@ -552,10 +552,11 @@ where
             let mut remainder = digits[index];
             for _ in 0..shift {
                 characters.push(
-                    Self::DIGIT_VALUES_ASCII_CODES
-                        [unsafe { usize::try_from(remainder.modulo(target_base)).unwrap_unchecked() }],
+                    Self::DIGIT_VALUES_ASCII_CODES[unsafe {
+                        usize::try_from(remainder.modulo(target_base)).unwrap_unchecked()
+                    }],
                 );
-                remainder = remainder / target_base;
+                remainder /= target_base;
             }
         }
         let mut remainder = *digits.last().unwrap();
@@ -564,7 +565,7 @@ where
                 Self::DIGIT_VALUES_ASCII_CODES
                     [unsafe { usize::try_from(remainder.modulo(target_base)).unwrap_unchecked() }],
             );
-            remainder = remainder / target_base;
+            remainder /= target_base;
         }
         if self.is_zero() {
             characters.push('0');

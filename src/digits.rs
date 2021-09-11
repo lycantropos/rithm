@@ -4,9 +4,10 @@ use std::{f64, fmt};
 
 use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
-    AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid, AssigningShiftingRightMonoid,
-    AssigningSubtractiveMagma, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf,
-    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Unitary, Zeroable,
+    AssigningDivisivePartialMagma, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
+    AssigningShiftingRightMonoid, AssigningSubtractiveMagma, DivisivePartialMagma, DoublePrecision,
+    DoublePrecisionOf, ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Unitary,
+    Zeroable,
 };
 use crate::utils;
 
@@ -37,8 +38,8 @@ where
         + TryFrom<DoublePrecisionOf<TargetDigit>>
         + Zeroable,
     DoublePrecisionOf<SourceDigit>: BinaryDigit,
-    DoublePrecisionOf<TargetDigit>: BinaryDigit
-        + DivisivePartialMagma
+    DoublePrecisionOf<TargetDigit>: AssigningDivisivePartialMagma
+        + BinaryDigit
         + From<SourceDigit>
         + From<TargetDigit>
         + ModularPartialMagma
@@ -129,8 +130,8 @@ fn binary_digits_to_non_binary_base<SourceDigit, TargetDigit>(
 where
     SourceDigit: Copy + DoublePrecision,
     TargetDigit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>> + Zeroable,
-    DoublePrecisionOf<TargetDigit>: BinaryDigit
-        + DivisivePartialMagma
+    DoublePrecisionOf<TargetDigit>: AssigningDivisivePartialMagma
+        + BinaryDigit
         + From<SourceDigit>
         + From<TargetDigit>
         + ModularPartialMagma
@@ -153,7 +154,7 @@ where
         }
         while !digit.is_zero() {
             result.push(TargetDigit::try_from(digit.modulo(target_base)).unwrap());
-            digit = digit / target_base;
+            digit /= target_base;
         }
     }
     if result.is_empty() {

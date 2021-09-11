@@ -114,7 +114,7 @@ where
             let smallest_digits_count = smallest_digits.len();
             if smallest_digits_count == 1 && smallest_digits[0].is_zero() {
                 return Self {
-                    sign: 1,
+                    sign: Sign::one(),
                     digits: largest_digits,
                 };
             }
@@ -296,14 +296,14 @@ where
             ));
         }
         let mut characters = string.trim().chars().peekable();
-        let sign: Sign = if characters.peek() == Some(&'-') {
+        let sign = if characters.peek() == Some(&'-') {
             characters.next();
-            -1
+            -Sign::one()
         } else if characters.peek() == Some(&'+') {
             characters.next();
-            1
+            Sign::one()
         } else {
-            1
+            Sign::one()
         };
         if base == 0 {
             base = if characters.peek() != Some(&'0') {
@@ -606,7 +606,7 @@ where
                     digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
                 }
             } else {
-                let mut sign: Sign = 1;
+                let mut sign = Sign::one();
                 let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
                     &other.digits,
                     &self.digits,
@@ -640,7 +640,7 @@ where
                     sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
                 )
             } else {
-                let mut sign: Sign = 1;
+                let mut sign = Sign::one();
                 let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
                     &other.digits,
                     &self.digits,
@@ -834,13 +834,13 @@ where
                 Self { sign, digits }
             } else {
                 Self {
-                    sign: -1,
+                    sign: -Sign::one(),
                     digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
                 }
             }
         } else if other.is_negative() {
             Self {
-                sign: 1,
+                sign: Sign::one(),
                 digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
             }
         } else {

@@ -8,7 +8,8 @@ use std::str::Chars;
 
 use crate::digits::*;
 use crate::traits::{
-    DoublePrecision, DoublePrecisionOf, Gcd, ModularSub, One, SignedOf, Signify, Zero,
+    DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd, ModularPartialMagma,
+    ModularSubtractiveMagma, One, SignedOf, Signify, Zero,
 };
 use crate::utils;
 
@@ -81,14 +82,18 @@ where
     Digit: BinaryDigit
         + DoublePrecision
         + From<u8>
-        + ModularSub<Output = Digit>
+        + ModularSubtractiveMagma
         + Signify
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + Signify,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + ModularPartialMagma + Signify,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
+    SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit
+        + DivisivePartialMagma
+        + From<Digit>
+        + From<SignedOf<Digit>>
+        + ModularPartialMagma,
     usize: TryFrom<Digit>,
 {
     type Output = Self;
@@ -375,11 +380,14 @@ where
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Display for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: BinaryDigit
+        + DivisivePartialMagma
         + DoublePrecision
         + From<u8>
+        + ModularPartialMagma
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + TryFrom<usize>,
+    DoublePrecisionOf<Digit>:
+        BinaryDigit + DivisivePartialMagma + ModularPartialMagma + TryFrom<usize>,
     <DoublePrecisionOf<Digit> as TryFrom<usize>>::Error: fmt::Debug,
     <Digit as TryFrom<DoublePrecisionOf<Digit>>>::Error: fmt::Debug,
     usize: TryFrom<Digit>,
@@ -394,12 +402,12 @@ where
     Digit: BinaryDigit
         + DoublePrecision
         + From<u8>
-        + ModularSub<Output = Digit>
+        + ModularSubtractiveMagma
         + Signify
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + Signify,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Signify,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
     SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
@@ -416,7 +424,7 @@ where
     Digit: BinaryDigit
         + DoublePrecision
         + From<u8>
-        + ModularSub<Output = Digit>
+        + ModularSubtractiveMagma
         + Signify
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<DoublePrecisionOf<u8>>
@@ -438,12 +446,12 @@ where
     Digit: BinaryDigit
         + DoublePrecision
         + From<u8>
-        + ModularSub<Output = Digit>
+        + ModularSubtractiveMagma
         + Signify
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + Signify,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Signify,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
     SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
@@ -458,11 +466,14 @@ where
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: BinaryDigit
+        + DivisivePartialMagma
         + DoublePrecision
         + From<u8>
+        + ModularPartialMagma
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + TryFrom<usize>,
+    DoublePrecisionOf<Digit>:
+        BinaryDigit + DivisivePartialMagma + ModularPartialMagma + TryFrom<usize>,
     <DoublePrecisionOf<Digit> as TryFrom<usize>>::Error: fmt::Debug,
     <Digit as TryFrom<DoublePrecisionOf<Digit>>>::Error: fmt::Debug,
     usize: TryFrom<Digit>,
@@ -556,7 +567,7 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Add for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: BinaryDigit + ModularSub<Output = Digit> + TryFrom<usize>,
+    Digit: BinaryDigit + ModularSubtractiveMagma + TryFrom<usize>,
 {
     type Output = Self;
 
@@ -634,7 +645,7 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> Mul for BigInt<Digit, SEP
 where
     Digit: BinaryDigit
         + DoublePrecision
-        + ModularSub<Output = Digit>
+        + ModularSubtractiveMagma
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit,
@@ -689,7 +700,7 @@ where
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + Signify,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Signify,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
     SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
@@ -740,7 +751,7 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Sub for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: BinaryDigit + ModularSub<Output = Digit> + TryFrom<usize>,
+    Digit: BinaryDigit + ModularSubtractiveMagma + TryFrom<usize>,
 {
     type Output = Self;
     fn sub(self, other: Self) -> Self::Output {
@@ -777,7 +788,7 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> One for BigInt<Digit, SEP
 where
     Digit: BinaryDigit
         + DoublePrecision
-        + ModularSub<Output = Digit>
+        + ModularSubtractiveMagma
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit,

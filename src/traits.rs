@@ -1,4 +1,7 @@
-use std::ops::{Add, AddAssign, BitOr, Mul, MulAssign, Neg, Shl, ShlAssign, Shr, ShrAssign};
+use std::ops::{
+    Add, AddAssign, BitAnd, BitOr, Div, Mul, MulAssign, Neg, Rem, Shl, ShlAssign, Shr, ShrAssign,
+    Sub, SubAssign,
+};
 
 pub trait AdditiveMonoid<Rhs = Self> = Add<Rhs, Output = Self> + Zero;
 
@@ -10,13 +13,25 @@ pub trait AssigningShiftingLeftMonoid<Rhs = Self> = ShiftingLeftMonoid<Rhs> + Sh
 
 pub trait AssigningShiftingRightMonoid<Rhs = Self> = ShiftingRightMonoid<Rhs> + ShrAssign<Rhs>;
 
+pub trait AssigningSubtractiveMagma<Rhs = Self> = SubtractiveMagma<Rhs> + SubAssign<Rhs>;
+
+pub trait BitwiseAndMagma<Rhs = Self> = BitAnd<Rhs, Output = Self> + Zero;
+
 pub trait BitwiseOrMonoid<Rhs = Self> = BitOr<Rhs, Output = Self> + Zero;
+
+pub trait DivisivePartialMagma<Rhs = Self> = Div<Rhs, Output = Self>;
+
+pub trait ModularPartialMagma<Rhs = Self> = Rem<Rhs, Output = Self>;
+
+pub trait ModularSubtractiveMagma<Rhs = Self> = ModularSub<Rhs, Output = Self>;
 
 pub trait MultiplicativeMonoid<Rhs = Self> = Mul<Rhs, Output = Self> + One;
 
 pub trait ShiftingLeftMonoid<Rhs = Self> = Shl<Rhs, Output = Self> + Zero;
 
 pub trait ShiftingRightMonoid<Rhs = Self> = Shr<Rhs, Output = Self> + Zero;
+
+pub trait SubtractiveMagma<Rhs = Self> = Sub<Rhs, Output = Self>;
 
 pub trait DoublePrecision: Sized {
     type Result: From<Self>;

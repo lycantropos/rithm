@@ -1,12 +1,12 @@
 use std::cmp::Ordering;
 use std::convert::TryFrom;
-use std::ops::{BitAnd, Div, Rem, Sub, SubAssign};
 use std::{f64, fmt};
 
 use crate::traits::{
     AssigningAdditiveMonoid, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
-    AssigningShiftingRightMonoid, BitwiseOrMonoid, DoublePrecision, DoublePrecisionOf, ModularSub,
-    One, Signify, SignedOf, Zero,
+    AssigningShiftingRightMonoid, AssigningSubtractiveMagma, BitwiseAndMagma, BitwiseOrMonoid,
+    DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, ModularPartialMagma,
+    ModularSubtractiveMagma, One, SignedOf, Signify, Zero,
 };
 use crate::utils;
 
@@ -14,15 +14,12 @@ pub trait BinaryDigit = AssigningAdditiveMonoid
     + AssigningMultiplicativeMonoid
     + AssigningShiftingLeftMonoid<usize>
     + AssigningShiftingRightMonoid<usize>
-    + BitAnd<Output = Self>
+    + AssigningSubtractiveMagma
+    + BitwiseAndMagma
     + BitwiseOrMonoid
     + Copy
-    + Div<Output = Self>
     + One
-    + PartialOrd
-    + Rem<Output = Self>
-    + Sub<Output = Self>
-    + SubAssign;
+    + PartialOrd;
 
 pub(crate) type Sign = i8;
 
@@ -40,8 +37,12 @@ where
         + TryFrom<DoublePrecisionOf<TargetDigit>>
         + Zero,
     DoublePrecisionOf<SourceDigit>: BinaryDigit,
-    DoublePrecisionOf<TargetDigit>:
-        BinaryDigit + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
+    DoublePrecisionOf<TargetDigit>: BinaryDigit
+        + DivisivePartialMagma
+        + From<SourceDigit>
+        + From<TargetDigit>
+        + ModularPartialMagma
+        + TryFrom<usize>,
     <DoublePrecisionOf<TargetDigit> as TryFrom<usize>>::Error: fmt::Debug,
     <TargetDigit as TryFrom<DoublePrecisionOf<TargetDigit>>>::Error: fmt::Debug,
     usize: TryFrom<SourceDigit>,
@@ -128,8 +129,12 @@ fn binary_digits_to_non_binary_base<SourceDigit, TargetDigit>(
 where
     SourceDigit: Copy + DoublePrecision,
     TargetDigit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>> + Zero,
-    DoublePrecisionOf<TargetDigit>:
-        BinaryDigit + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
+    DoublePrecisionOf<TargetDigit>: BinaryDigit
+        + DivisivePartialMagma
+        + From<SourceDigit>
+        + From<TargetDigit>
+        + ModularPartialMagma
+        + TryFrom<usize>,
     <DoublePrecisionOf<TargetDigit> as TryFrom<usize>>::Error: fmt::Debug,
     <TargetDigit as TryFrom<DoublePrecisionOf<TargetDigit>>>::Error: fmt::Debug,
 {
@@ -251,7 +256,7 @@ pub fn divrem_digits_by_digit<Digit, const SHIFT: usize>(
 ) -> (Vec<Digit>, Digit)
 where
     Digit: BinaryDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma,
 {
     let mut quotient = vec![Digit::zero(); dividend.len()];
     let mut remainder = DoublePrecisionOf::<Digit>::zero();
@@ -281,7 +286,7 @@ where
         + Signify
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<SignedOf<DoublePrecisionOf<Digit>>>,
-    DoublePrecisionOf<Digit>: BinaryDigit + Signify,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Signify,
     SignedOf<Digit>: BinaryDigit + TryFrom<SignedOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
     SignedOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<SignedOf<Digit>>,
     usize: TryFrom<Digit>,
@@ -468,7 +473,7 @@ pub fn multiply_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
 where
     Digit: BinaryDigit
         + DoublePrecision
-        + ModularSub<Output = Digit>
+        + ModularSubtractiveMagma
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit,
@@ -540,7 +545,7 @@ fn multiply_digits_lopsided<Digit, const SEPARATOR: char, const SHIFT: usize>(
 where
     Digit: BinaryDigit
         + DoublePrecision
-        + ModularSub<Output = Digit>
+        + ModularSubtractiveMagma
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<usize>,
     DoublePrecisionOf<Digit>: BinaryDigit,
@@ -692,7 +697,7 @@ pub fn subtract_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
     sign: &mut Sign,
 ) -> Vec<Digit>
 where
-    Digit: BinaryDigit + ModularSub<Output = Digit> + TryFrom<usize>,
+    Digit: BinaryDigit + ModularSubtractiveMagma + TryFrom<usize>,
 {
     let mut longest = &first;
     let mut shortest = &second;
@@ -749,7 +754,7 @@ fn subtract_digits_in_place<Digit, const SEPARATOR: char, const SHIFT: usize>(
     shortest: &[Digit],
 ) -> Digit
 where
-    Digit: BinaryDigit + ModularSub<Output = Digit>,
+    Digit: BinaryDigit + ModularSubtractiveMagma,
 {
     let mut accumulator = Digit::zero();
     let digit_mask = to_digit_mask::<Digit>(SHIFT);

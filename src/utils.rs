@@ -1,7 +1,6 @@
 use std::convert::TryFrom;
 
-use crate::traits::{AssigningShiftingRightMonoid, Zero};
-use std::ops::Rem;
+use crate::traits::{AssigningShiftingRightMonoid, ModularPartialMagma, Zero};
 
 pub(crate) fn bit_length<T>(value: T) -> usize
 where
@@ -23,7 +22,7 @@ where
 
 pub(crate) fn gcd<T>(mut first: T, mut second: T) -> T
 where
-    T: Copy + Rem<Output = T> + Zero,
+    T: Copy + ModularPartialMagma + Zero,
 {
     while !second.is_zero() {
         (first, second) = (second, first % second);

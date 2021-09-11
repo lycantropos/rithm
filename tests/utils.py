@@ -4,7 +4,7 @@ from typing import Tuple
 from rithm import (Fraction,
                    Int)
 
-FractionsWithBuiltin = Tuple[Fraction, fractions.Fraction]
+FractionWithBuiltin = Tuple[Fraction, fractions.Fraction]
 IntWithBuiltin = Tuple[Int, int]
 
 

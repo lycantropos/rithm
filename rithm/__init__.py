@@ -7,6 +7,7 @@ try:
                          Int)
 except ImportError:
     from math import gcd as _gcd
+    from operator import mul as _mul
     from typing import (Tuple as _Tuple,
                         Union as _Union)
 
@@ -200,6 +201,17 @@ except ImportError:
                     < other.numerator * self.denominator
                     if isinstance(other, Fraction)
                     else NotImplemented)
+
+        def __mul__(self, other: 'Fraction') -> 'Fraction':
+            return (
+                Fraction(*map(_mul,
+                              _normalize_components_moduli(self.numerator,
+                                                           other.denominator),
+                              _normalize_components_moduli(other.numerator,
+                                                           self.denominator)),
+                         _normalize=False)
+                if isinstance(other, Fraction)
+                else NotImplemented)
 
         def __neg__(self) -> 'Fraction':
             return Fraction(-self.numerator, self.denominator,

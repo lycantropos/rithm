@@ -151,7 +151,7 @@ except ImportError:
             return self
 
         def __bool__(self) -> bool:
-            return bool(self._numerator)
+            return bool(self.numerator)
 
         def __eq__(self, other: 'Fraction') -> bool:
             return (self.numerator == other.numerator

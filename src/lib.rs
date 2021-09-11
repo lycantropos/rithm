@@ -191,6 +191,10 @@ impl PyNumberProtocol for PyFraction {
         PyFraction(self.0.clone().abs())
     }
 
+    fn __add__(lhs: PyFraction, rhs: PyFraction) -> PyFraction {
+        PyFraction(lhs.0 + rhs.0)
+    }
+
     fn __neg__(&self) -> PyFraction {
         PyFraction(-self.0.clone())
     }

@@ -153,6 +153,13 @@ except ImportError:
         def __abs__(self) -> 'Fraction':
             return Fraction(abs(self.numerator), self.denominator)
 
+        def __add__(self, other: 'Fraction') -> 'Fraction':
+            return (Fraction(self.numerator * other.denominator
+                             + other.numerator * self.denominator,
+                             self.denominator * other.denominator)
+                    if isinstance(other, Fraction)
+                    else NotImplemented)
+
         def __bool__(self) -> bool:
             return bool(self.numerator)
 

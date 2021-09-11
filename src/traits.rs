@@ -37,6 +37,8 @@ pub trait ModularSubtractiveMagma<Rhs = Self> = ModularSub<Rhs, Output = Self>;
 
 pub trait MultiplicativeMonoid<Rhs = Self> = Mul<Rhs, Output = Self> + Unitary;
 
+pub trait NegatableUnaryAlgebra = Neg<Output = Self>;
+
 pub trait ShiftingLeftMonoid<Rhs = Self> = Shl<Rhs, Output = Self> + Zeroable;
 
 pub trait ShiftingRightMonoid<Rhs = Self> = Shr<Rhs, Output = Self> + Zeroable;
@@ -143,7 +145,7 @@ macro_rules! plain_modular_sub_impl {
 
 plain_modular_sub_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait Oppositive: Neg<Output = Self> + Zeroable {
+pub trait Oppositive: NegatableUnaryAlgebra + Zeroable {
     fn is_negative(&self) -> bool;
     fn is_positive(&self) -> bool;
 }

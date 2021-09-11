@@ -56,7 +56,7 @@ macro_rules! plain_abs_impl {
         impl Abs for $t {
             type Output = $t;
 
-            #[inline]
+            #[inline(always)]
             fn abs(self) -> <Self as Abs>::Output {
                 <$t>::abs(self)
             }
@@ -113,7 +113,7 @@ macro_rules! plain_checked_div_impl {
         impl CheckedDiv for $t {
             type Output = Option<Self>;
 
-            #[inline]
+            #[inline(always)]
             fn checked_div(self, other: Self) -> Self::Output {
                 <$t>::checked_div(self, other)
             }
@@ -134,7 +134,7 @@ macro_rules! plain_signed_gcd_impl {
         impl Gcd for $t {
             type Output = Self;
 
-            #[inline]
+            #[inline(always)]
             fn gcd(self, other: Self) -> Self::Output {
                 use crate::utils;
                 utils::gcd::<$t>(self.abs(), other.abs())
@@ -148,7 +148,7 @@ macro_rules! plain_unsigned_gcd_impl {
         impl Gcd for $t {
             type Output = Self;
 
-            #[inline]
+            #[inline(always)]
             fn gcd(self, other: Self) -> Self::Output {
                 use crate::utils;
                 utils::gcd::<$t>(self, other)
@@ -171,7 +171,7 @@ macro_rules! plain_modular_sub_impl {
         impl ModularSub for $t {
             type Output = $t;
 
-            #[inline]
+            #[inline(always)]
             fn wrapping_sub(self, rhs: Self) -> Self::Output {
                 <$t>::wrapping_sub(self, rhs)
             }
@@ -189,12 +189,12 @@ pub trait Oppositive: NegatableUnaryAlgebra + Zeroable {
 macro_rules! plain_oppositive_impl {
     ($($t:ty)*) => ($(
         impl Oppositive for $t {
-            #[inline]
+            #[inline(always)]
             fn is_negative(&self) -> bool {
                 <$t>::is_negative(*self)
             }
 
-            #[inline]
+            #[inline(always)]
             fn is_positive(&self) -> bool {
                 <$t>::is_positive(*self)
             }
@@ -237,9 +237,10 @@ pub trait Unitary {
 macro_rules! plain_unitary_impl {
     ($($t:ty)*) => ($(
         impl Unitary for $t {
+            #[inline(always)]
             fn one() -> $t {1}
 
-            #[inline]
+            #[inline(always)]
             fn is_one(&self) -> bool {
                 *self == Self::one()
             }
@@ -258,9 +259,10 @@ pub trait Zeroable {
 macro_rules! plain_zero_impl {
     ($($t:ty)*) => ($(
         impl Zeroable for $t {
+            #[inline(always)]
             fn zero() -> $t {0}
 
-            #[inline]
+            #[inline(always)]
             fn is_zero(&self) -> bool {
                 *self == Self::zero()
             }

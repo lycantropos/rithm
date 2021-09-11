@@ -150,14 +150,7 @@ impl PyObjectProtocol for PyInt {
     }
 
     fn __richcmp__(&self, other: PyInt, op: CompareOp) -> bool {
-        match op {
-            CompareOp::Eq => self.0 == other.0,
-            CompareOp::Ge => self.0 >= other.0,
-            CompareOp::Gt => self.0 > other.0,
-            CompareOp::Le => self.0 <= other.0,
-            CompareOp::Lt => self.0 < other.0,
-            CompareOp::Ne => self.0 != other.0,
-        }
+        compare(&self.0, &other.0, op)
     }
 
     fn __str__(&self) -> String {
@@ -180,14 +173,7 @@ impl PyObjectProtocol for PyFraction {
     }
 
     fn __richcmp__(&self, other: PyFraction, op: CompareOp) -> bool {
-        match op {
-            CompareOp::Eq => self.0 == other.0,
-            CompareOp::Ge => self.0 >= other.0,
-            CompareOp::Gt => self.0 > other.0,
-            CompareOp::Le => self.0 <= other.0,
-            CompareOp::Lt => self.0 < other.0,
-            CompareOp::Ne => self.0 != other.0,
-        }
+        compare(&self.0, &other.0, op)
     }
 
     fn __str__(&self) -> String {
@@ -199,6 +185,17 @@ impl PyObjectProtocol for PyFraction {
 impl PyNumberProtocol for PyFraction {
     fn __abs__(&self) -> PyFraction {
         PyFraction(self.0.clone().abs())
+    }
+}
+
+fn compare<T: PartialOrd>(left: &T, right: &T, op: CompareOp) -> bool {
+    match op {
+        CompareOp::Eq => left == right,
+        CompareOp::Ge => left >= right,
+        CompareOp::Gt => left > right,
+        CompareOp::Le => left <= right,
+        CompareOp::Lt => left < right,
+        CompareOp::Ne => left != right,
     }
 }
 

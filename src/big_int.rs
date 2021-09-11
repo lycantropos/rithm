@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
 use std::iter::Peekable;
-use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, Neg, Rem, Sub};
 use std::str::Chars;
 
 use crate::digits::*;
@@ -625,6 +625,40 @@ where
                 digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
             }
         }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> AddAssign for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit + ModularSubtractiveMagma + TryFrom<usize>,
+{
+    fn add_assign(&mut self, other: Self) {
+        (self.sign, self.digits) = if self.is_negative() {
+            if other.is_negative() {
+                (
+                    -Sign::one(),
+                    sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
+                )
+            } else {
+                let mut sign: Sign = 1;
+                let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
+                    &other.digits,
+                    &self.digits,
+                    &mut sign,
+                );
+                (sign, digits)
+            }
+        } else if other.is_negative() {
+            let mut sign = Sign::one();
+            let digits =
+                subtract_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits, &mut sign);
+            (sign, digits)
+        } else {
+            (
+                self.sign.max(other.sign),
+                sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
+            )
+        };
     }
 }
 

@@ -81,6 +81,27 @@ impl DoublePrecision for u64 {
     type Result = u128;
 }
 
+pub trait CheckedDiv<Rhs = Self> {
+    type Output;
+
+    fn checked_div(self, other: Rhs) -> Self::Output;
+}
+
+macro_rules! plain_checked_div_impl {
+    ($($t:ty)*) => ($(
+        impl CheckedDiv for $t {
+            type Output = Option::<Self>;
+
+            #[inline]
+            fn checked_div(self, other: Self) -> Self::Output {
+                <$t>::checked_div(self, other)
+            }
+        }
+    )*)
+}
+
+plain_checked_div_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
 pub trait Gcd<Rhs = Self> {
     type Output;
 

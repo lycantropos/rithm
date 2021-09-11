@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
 use std::iter::Peekable;
-use std::ops::{Add, AddAssign, Div, Mul, Neg, Rem, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, Neg, Rem, Sub, SubAssign};
 use std::str::Chars;
 
 use crate::digits::*;
@@ -849,6 +849,43 @@ where
                 subtract_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &subtrahend.digits, &mut sign);
             Self { sign, digits }
         }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> SubAssign for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit + ModularSubtractiveMagma + TryFrom<usize>,
+{
+    fn sub_assign(&mut self, subtrahend: Self) {
+        (self.sign, self.digits) = if self.is_negative() {
+            if subtrahend.is_negative() {
+                let mut sign = Sign::one();
+                let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
+                    &subtrahend.digits,
+                    &self.digits,
+                    &mut sign,
+                );
+                (sign, digits)
+            } else {
+                (
+                    -Sign::one(),
+                    sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &subtrahend.digits),
+                )
+            }
+        } else if subtrahend.is_negative() {
+            (
+                Sign::one(),
+                sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &subtrahend.digits),
+            )
+        } else {
+            let mut sign = Sign::one();
+            let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
+                &self.digits,
+                &subtrahend.digits,
+                &mut sign,
+            );
+            (sign, digits)
+        };
     }
 }
 

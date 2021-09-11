@@ -69,6 +69,9 @@ impl<
     type Output = Option<Self>;
 
     fn checked_div(self, other: Self) -> Self::Output {
+        if other.numerator.is_zero() {
+            return None;
+        }
         let (numerator, other_numerator) =
             normalize_components_moduli::<Component>(self.numerator, other.numerator);
         let (denominator, other_denominator) =
@@ -77,14 +80,10 @@ impl<
             numerator * other_denominator,
             denominator * other_numerator,
         );
-        if result_denominator.is_zero() {
-            None
-        } else {
-            Some(Self {
-                numerator: result_numerator,
-                denominator: result_denominator,
-            })
-        }
+        Some(Self {
+            numerator: result_numerator,
+            denominator: result_denominator,
+        })
     }
 }
 

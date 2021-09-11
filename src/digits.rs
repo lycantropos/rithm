@@ -179,8 +179,7 @@ where
     let mut accumulator = DoublePrecisionOf::<TargetDigit>::zero();
     let mut accumulator_bits_count: usize = 0;
     for digit in source_digits {
-        accumulator = accumulator
-            | (DoublePrecisionOf::<TargetDigit>::from(*digit) << accumulator_bits_count);
+        accumulator |= DoublePrecisionOf::<TargetDigit>::from(*digit) << accumulator_bits_count;
         accumulator_bits_count += source_shift;
         if accumulator_bits_count >= target_shift {
             unsafe {
@@ -219,10 +218,8 @@ where
     let mut accumulator = DoublePrecisionOf::<SourceDigit>::zero();
     let mut accumulator_bits_count: usize = 0;
     for index in 0..source_digits.len() {
-        accumulator = accumulator
-            | DoublePrecisionOf::<SourceDigit>::from(
-                source_digits[index] << accumulator_bits_count,
-            );
+        accumulator |=
+            DoublePrecisionOf::<SourceDigit>::from(source_digits[index] << accumulator_bits_count);
         accumulator_bits_count += source_shift;
         loop {
             unsafe {
@@ -449,11 +446,10 @@ where
             source_base.pow(base_exponent as u32)
         };
         for result_position in result.iter_mut() {
-            digit = digit
-                + DoublePrecisionOf::<TargetDigit>::from(*result_position)
-                    * unsafe {
-                        DoublePrecisionOf::<TargetDigit>::try_from(base_power).unwrap_unchecked()
-                    };
+            digit += DoublePrecisionOf::<TargetDigit>::from(*result_position)
+                * unsafe {
+                    DoublePrecisionOf::<TargetDigit>::try_from(base_power).unwrap_unchecked()
+                };
             *result_position =
                 unsafe { TargetDigit::try_from(digit & target_digit_mask).unwrap_unchecked() };
             digit >>= target_shift;
@@ -597,8 +593,7 @@ where
             accumulator >>= SHIFT;
             digit <<= 1;
             for next_index in index + 1..shortest.len() {
-                accumulator = accumulator
-                    + DoublePrecisionOf::<Digit>::from(result[result_position])
+                accumulator += DoublePrecisionOf::<Digit>::from(result[result_position])
                     + DoublePrecisionOf::<Digit>::from(shortest[next_index]) * digit;
                 result[result_position] =
                     unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
@@ -606,16 +601,15 @@ where
                 accumulator >>= SHIFT;
             }
             if !accumulator.is_zero() {
-                accumulator =
-                    accumulator + DoublePrecisionOf::<Digit>::from(result[result_position]);
+                accumulator += DoublePrecisionOf::<Digit>::from(result[result_position]);
                 result[result_position] =
                     unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
                 result_position += 1;
                 accumulator >>= SHIFT;
             }
             if !accumulator.is_zero() {
-                result[result_position] = result[result_position]
-                    + unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+                result[result_position] +=
+                    unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
             }
         }
     } else {
@@ -633,8 +627,8 @@ where
                 accumulator >>= SHIFT;
             }
             if !accumulator.is_zero() {
-                result[result_position] = result[result_position]
-                    + unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+                result[result_position] +=
+                    unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
             }
         }
     }
@@ -739,13 +733,13 @@ where
         accumulator = longest[index].wrapping_sub(shortest[index]) - accumulator;
         result.push(accumulator & digit_mask);
         accumulator >>= SHIFT;
-        accumulator = accumulator & Digit::one();
+        accumulator &= Digit::one();
     }
     for index in size_shortest..size_longest {
         accumulator = longest[index] - accumulator;
         result.push(accumulator & digit_mask);
         accumulator >>= SHIFT;
-        accumulator = accumulator & Digit::one();
+        accumulator &= Digit::one();
     }
     normalize_digits(&mut result);
     result

@@ -219,12 +219,10 @@ where
                 next_smallest_accumulator >>= SHIFT;
             }
             for index in smallest_digits_count..largest_digits_count {
-                next_largest_accumulator = next_largest_accumulator
-                    + first_coefficient
-                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]);
-                next_smallest_accumulator = next_smallest_accumulator
-                    - third_coefficient
-                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]);
+                next_largest_accumulator += first_coefficient
+                    * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]);
+                next_smallest_accumulator -= third_coefficient
+                    * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]);
                 next_largest_digits.push(unsafe {
                     Digit::try_from(next_largest_accumulator & digit_mask).unwrap_unchecked()
                 });

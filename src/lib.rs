@@ -22,6 +22,7 @@ type Digit = u16;
 type Digit = u32;
 
 const BINARY_SHIFT: usize = (traits::OppositionOf::<Digit>::BITS - 2) as usize;
+const UNDEFINED_DIVISION_ERROR_MESSAGE: &str = "Division by zero is undefined.";
 
 type _BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
 type _Fraction = fraction::Fraction<_BigInt>;
@@ -90,21 +91,21 @@ impl PyNumberProtocol for PyInt {
 
     fn __divmod__(lhs: PyInt, rhs: PyInt) -> PyResult<(PyInt, PyInt)> {
         match divmod(lhs.0, rhs.0) {
-            Ok((quotient, remainder)) => Ok((PyInt(quotient), PyInt(remainder))),
-            Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
+            Some((quotient, remainder)) => Ok((PyInt(quotient), PyInt(remainder))),
+            None => Err(PyZeroDivisionError::new_err(UNDEFINED_DIVISION_ERROR_MESSAGE)),
         }
     }
 
     fn __floordiv__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {
         match divmod(lhs.0, rhs.0) {
-            Ok((result, _)) => Ok(PyInt(result)),
-            Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
+            Some((result, _)) => Ok(PyInt(result)),
+            None => Err(PyZeroDivisionError::new_err(UNDEFINED_DIVISION_ERROR_MESSAGE)),
         }
     }
     fn __mod__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {
         match divmod(lhs.0, rhs.0) {
-            Ok((_, result)) => Ok(PyInt(result)),
-            Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
+            Some((_, result)) => Ok(PyInt(result)),
+            None => Err(PyZeroDivisionError::new_err(UNDEFINED_DIVISION_ERROR_MESSAGE)),
         }
     }
 
@@ -122,13 +123,15 @@ impl PyNumberProtocol for PyInt {
 
     fn __truediv__(lhs: PyInt, rhs: PyInt) -> PyResult<PyFraction> {
         match _Fraction::new(lhs.0, rhs.0) {
-            Ok(result) => Ok(PyFraction(result)),
-            Err(reason) => Err(PyZeroDivisionError::new_err(reason)),
+            Some(result) => Ok(PyFraction(result)),
+            None => Err(PyZeroDivisionError::new_err(
+                UNDEFINED_DIVISION_ERROR_MESSAGE,
+            )),
         }
     }
 }
 
-fn divmod(dividend: _BigInt, divisor: _BigInt) -> Result<(_BigInt, _BigInt), &'static str> {
+fn divmod(dividend: _BigInt, divisor: _BigInt) -> Option<(_BigInt, _BigInt)> {
     let (mut quotient, mut modulo) = dividend.divrem(&divisor)?;
     if (divisor.is_negative() && modulo.is_positive())
         || (divisor.is_positive() && modulo.is_negative())
@@ -136,7 +139,7 @@ fn divmod(dividend: _BigInt, divisor: _BigInt) -> Result<(_BigInt, _BigInt), &'s
         quotient = quotient - _BigInt::one();
         modulo = modulo + divisor;
     }
-    Ok((quotient, modulo))
+    Some((quotient, modulo))
 }
 
 #[pyproto]

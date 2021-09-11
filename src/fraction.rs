@@ -54,7 +54,7 @@ impl<Component: Clone + Eq + ModularUnaryAlgebra + Unitary> Modular for Fraction
     fn abs(self) -> <Self as Modular>::Output {
         Self {
             numerator: self.numerator.abs(),
-            denominator: self.denominator.clone(),
+            denominator: self.denominator,
         }
     }
 }

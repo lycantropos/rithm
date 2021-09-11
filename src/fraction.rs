@@ -139,13 +139,21 @@ impl<
     type Output = Self;
 
     fn sub(self, other: Self) -> Self::Output {
-        unsafe {
-            Self::new(
-                self.numerator * other.denominator.clone()
-                    - other.numerator * self.denominator.clone(),
-                self.denominator * other.denominator,
-            )
-            .unwrap_unchecked()
+        let (numerator, denominator) = normalize_components_moduli::<Component>(
+            self.numerator * other.denominator.clone() - other.numerator * self.denominator.clone(),
+            self.denominator * other.denominator,
+        );
+        Self {
+            numerator,
+            denominator,
         }
     }
+}
+
+fn normalize_components_moduli<Component: Clone + DivisivePartialMagma + GcdMagma>(
+    numerator: Component,
+    denominator: Component,
+) -> (Component, Component) {
+    let gcd = numerator.clone().gcd(denominator.clone());
+    (numerator / gcd.clone(), denominator / gcd)
 }

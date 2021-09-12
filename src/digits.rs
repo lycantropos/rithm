@@ -905,7 +905,7 @@ where
     }
 }
 
-pub(crate) fn subtract_digits<Digit, const SHIFT: usize>(
+fn subtract_digits<Digit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
     sign: &mut Sign,
@@ -988,7 +988,33 @@ where
     accumulator
 }
 
-pub(crate) fn sum_digits<Digit, const SHIFT: usize>(first: &[Digit], second: &[Digit]) -> Vec<Digit>
+pub(crate) fn sum_signed_digits<Digit, const SHIFT: usize>(
+    first: &[Digit],
+    first_sign: Sign,
+    second: &[Digit],
+    second_sign: Sign,
+) -> (Sign, Vec<Digit>)
+where
+    Digit: BinaryDigit + ModularSubtractiveMagma + TryFrom<usize>,
+{
+    if first_sign.is_negative() {
+        if second_sign.is_negative() {
+            (-Sign::one(), sum_digits::<Digit, SHIFT>(first, second))
+        } else {
+            let mut sign = Sign::one();
+            let digits = subtract_digits::<Digit, SHIFT>(second, first, &mut sign);
+            (sign, digits)
+        }
+    } else if second_sign.is_negative() {
+        let mut sign = Sign::one();
+        let digits = subtract_digits::<Digit, SHIFT>(first, second, &mut sign);
+        (sign, digits)
+    } else {
+        (first_sign.max(second_sign), sum_digits::<Digit, SHIFT>(first, second))
+    }
+}
+
+fn sum_digits<Digit, const SHIFT: usize>(first: &[Digit], second: &[Digit]) -> Vec<Digit>
 where
     Digit: BinaryDigit + TryFrom<usize>,
 {

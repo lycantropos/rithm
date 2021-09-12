@@ -324,6 +324,37 @@ where
     }
 }
 
+pub(crate) fn checked_rem_euclid<Digit, const SHIFT: usize>(
+    dividend: &[Digit],
+    dividend_sign: Sign,
+    divisor: &[Digit],
+    divisor_sign: Sign,
+) -> Option<(Sign, Vec<Digit>)>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    let (mut sign, mut digits) =
+        checked_rem::<Digit, SHIFT>(dividend, dividend_sign, divisor, divisor_sign)?;
+    if (divisor_sign.is_negative() && sign.is_positive())
+        || (divisor_sign.is_positive() && sign.is_negative())
+    {
+        digits = subtract_digits::<Digit, SHIFT>(&digits, &divisor, &mut sign);
+    }
+    Some((sign, digits))
+}
+
 #[inline]
 pub(crate) fn digits_lesser_than<Digit: PartialOrd>(left: &[Digit], right: &[Digit]) -> bool {
     left.len() < right.len()

@@ -632,12 +632,8 @@ where
     type Output = Option<Self>;
 
     fn checked_div(self, divisor: Self) -> Self::Output {
-        let (sign, digits) = checked_div::<Digit, SHIFT>(
-            self.digits.as_slice(),
-            self.sign,
-            divisor.digits.as_slice(),
-            divisor.sign,
-        )?;
+        let (sign, digits) =
+            checked_div::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)?;
         Some(Self { sign, digits })
     }
 }

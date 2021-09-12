@@ -324,6 +324,69 @@ where
     }
 }
 
+pub(crate) fn checked_div_euclid<Digit, const SHIFT: usize>(
+    dividend: &[Digit],
+    dividend_sign: Sign,
+    divisor: &[Digit],
+    divisor_sign: Sign,
+) -> Option<(Sign, Vec<Digit>)>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    if divisor_sign.is_zero() {
+        None
+    } else if dividend_sign.is_zero() {
+        Some((Sign::zero(), vec![Digit::zero()]))
+    } else if digits_lesser_than(dividend, divisor) {
+        Some(
+            if (dividend_sign.is_negative() && divisor_sign.is_positive())
+                || (dividend_sign.is_positive() && divisor_sign.is_negative())
+            {
+                (-Sign::one(), vec![Digit::one()])
+            } else {
+                (Sign::zero(), vec![Digit::zero()])
+            },
+        )
+    } else {
+        let (sign, mut digits, remainder_is_non_zero) = if divisor.len() == 1 {
+            let (digits, remainder_digit) =
+                div_rem_digits_by_digit::<Digit, SHIFT>(&dividend, divisor[0]);
+            (
+                dividend_sign * divisor_sign,
+                digits,
+                !remainder_digit.is_zero(),
+            )
+        } else {
+            let (digits, remainder_digits) =
+                div_rem_two_or_more_digits::<Digit, SHIFT>(&dividend, &divisor);
+            (
+                dividend_sign * divisor_sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+                digits,
+                remainder_digits.len() > 1 || !remainder_digits[0].is_zero(),
+            )
+        };
+        if remainder_is_non_zero
+            && ((dividend_sign.is_negative() && divisor_sign.is_positive())
+                || (dividend_sign.is_positive() && divisor_sign.is_negative()))
+        {
+            digits = sum_digits::<Digit, SHIFT>(&digits, &vec![Digit::one()]);
+        }
+        Some((sign, digits))
+    }
+}
+
 pub(crate) fn checked_rem_euclid<Digit, const SHIFT: usize>(
     dividend: &[Digit],
     dividend_sign: Sign,

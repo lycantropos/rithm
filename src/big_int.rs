@@ -8,7 +8,7 @@ use std::str::Chars;
 
 use crate::digits::*;
 use crate::traits::{
-    Abs, AssigningDivisivePartialMagma, CheckedDiv, CheckedRem, CheckedRemEuclid,
+    Abs, AssigningDivisivePartialMagma, CheckedDiv, CheckedDivEuclid, CheckedRem, CheckedRemEuclid,
     DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd, ModularPartialMagma,
     ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Unitary, Zeroable,
 };
@@ -594,6 +594,36 @@ where
     fn checked_div(self, divisor: Self) -> Self::Output {
         let (sign, digits) =
             checked_div::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)?;
+        Some(Self { sign, digits })
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDivEuclid
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    type Output = Option<Self>;
+
+    fn checked_div_euclid(self, divisor: Self) -> Self::Output {
+        let (sign, digits) = checked_div_euclid::<Digit, SHIFT>(
+            &self.digits,
+            self.sign,
+            &divisor.digits,
+            divisor.sign,
+        )?;
         Some(Self { sign, digits })
     }
 }

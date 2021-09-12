@@ -33,7 +33,7 @@ pub trait GcdMagma<Rhs = Self> = Gcd<Rhs, Output = Self>;
 
 pub trait ModularUnaryAlgebra = Abs<Output = Self>;
 
-pub trait ModularPartialMagma<Rhs = Self> = Modulo<Rhs, Output = Self>;
+pub trait ModularPartialMagma<Rhs = Self> = RemEuclid<Rhs, Output = Self>;
 
 pub trait ModularSubtractiveMagma<Rhs = Self> = ModularSub<Rhs, Output = Self>;
 
@@ -107,7 +107,7 @@ impl DoublePrecision for u64 {
 pub trait CheckedDiv<Rhs = Self> {
     type Output;
 
-    fn checked_div(self, other: Rhs) -> Self::Output;
+    fn checked_div(self, divisor: Rhs) -> Self::Output;
 }
 
 macro_rules! plain_checked_div_impl {
@@ -116,8 +116,8 @@ macro_rules! plain_checked_div_impl {
             type Output = Option<Self>;
 
             #[inline(always)]
-            fn checked_div(self, other: Self) -> Self::Output {
-                <$t>::checked_div(self, other)
+            fn checked_div(self, divisor: Self) -> Self::Output {
+                <$t>::checked_div(self, divisor)
             }
         }
     )*)
@@ -125,31 +125,10 @@ macro_rules! plain_checked_div_impl {
 
 plain_checked_div_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait CheckedModulo<Rhs = Self> {
-    type Output;
-
-    fn checked_modulo(self, other: Rhs) -> Self::Output;
-}
-
-macro_rules! plain_checked_modulo_impl {
-    ($($t:ty)*) => ($(
-        impl CheckedModulo for $t {
-            type Output = Option<Self>;
-
-            #[inline(always)]
-            fn checked_modulo(self, other: Self) -> Self::Output {
-                <$t>::checked_rem_euclid(self, other)
-            }
-        }
-    )*)
-}
-
-plain_checked_modulo_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
-
 pub trait CheckedRem<Rhs = Self> {
     type Output;
 
-    fn checked_rem(self, other: Rhs) -> Self::Output;
+    fn checked_rem(self, divisor: Rhs) -> Self::Output;
 }
 
 macro_rules! plain_checked_rem_impl {
@@ -158,14 +137,35 @@ macro_rules! plain_checked_rem_impl {
             type Output = Option<Self>;
 
             #[inline(always)]
-            fn checked_rem(self, other: Self) -> Self::Output {
-                <$t>::checked_rem(self, other)
+            fn checked_rem(self, divisor: Self) -> Self::Output {
+                <$t>::checked_rem(self, divisor)
             }
         }
     )*)
 }
 
 plain_checked_rem_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
+pub trait CheckedRemEuclid<Rhs = Self> {
+    type Output;
+
+    fn checked_rem_euclid(self, divisor: Rhs) -> Self::Output;
+}
+
+macro_rules! plain_checked_rem_euclid_impl {
+    ($($t:ty)*) => ($(
+        impl CheckedRemEuclid for $t {
+            type Output = Option<Self>;
+
+            #[inline(always)]
+            fn checked_rem_euclid(self, divisor: Self) -> Self::Output {
+                <$t>::checked_rem_euclid(self, divisor)
+            }
+        }
+    )*)
+}
+
+plain_checked_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait Gcd<Rhs = Self> {
     type Output;
@@ -189,26 +189,26 @@ macro_rules! plain_gcd_impl {
 
 plain_gcd_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait Modulo<Rhs = Self> {
+pub trait RemEuclid<Rhs = Self> {
     type Output;
 
-    fn modulo(self, other: Rhs) -> Self::Output;
+    fn rem_euclid(self, other: Rhs) -> Self::Output;
 }
 
-macro_rules! plain_modulo_impl {
+macro_rules! plain_rem_euclid_impl {
     ($($t:ty)*) => ($(
-        impl Modulo for $t {
+        impl RemEuclid for $t {
             type Output = $t;
 
             #[inline(always)]
-            fn modulo(self, other: Self) -> <Self as Modulo>::Output {
+            fn rem_euclid(self, other: Self) -> <Self as RemEuclid>::Output {
                 <$t>::rem_euclid(self, other)
             }
         }
     )*)
 }
 
-plain_modulo_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+plain_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait ModularSub<Rhs = Self> {
     type Output;

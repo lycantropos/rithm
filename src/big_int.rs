@@ -286,7 +286,7 @@ where
             for _ in 0..shift {
                 characters.push(
                     Self::DIGIT_VALUES_ASCII_CODES[unsafe {
-                        usize::try_from(remainder.modulo(target_base)).unwrap_unchecked()
+                        usize::try_from(remainder.rem_euclid(target_base)).unwrap_unchecked()
                     }],
                 );
                 remainder /= target_base;
@@ -295,8 +295,9 @@ where
         let mut remainder = *digits.last().unwrap();
         while !remainder.is_zero() {
             characters.push(
-                Self::DIGIT_VALUES_ASCII_CODES
-                    [unsafe { usize::try_from(remainder.modulo(target_base)).unwrap_unchecked() }],
+                Self::DIGIT_VALUES_ASCII_CODES[unsafe {
+                    usize::try_from(remainder.rem_euclid(target_base)).unwrap_unchecked()
+                }],
             );
             remainder /= target_base;
         }

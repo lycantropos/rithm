@@ -25,7 +25,7 @@ where
     T: Copy + ModularPartialMagma + Zeroable,
 {
     while !second.is_zero() {
-        (first, second) = (second, first.modulo(second));
+        (first, second) = (second, first.rem_euclid(second));
     }
     first
 }

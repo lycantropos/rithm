@@ -331,26 +331,22 @@ where
             if other.is_negative() {
                 Self {
                     sign: -Sign::one(),
-                    digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
+                    digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
                 }
             } else {
                 let mut sign = Sign::one();
-                let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
-                    &other.digits,
-                    &self.digits,
-                    &mut sign,
-                );
+                let digits =
+                    subtract_digits::<Digit, SHIFT>(&other.digits, &self.digits, &mut sign);
                 Self { sign, digits }
             }
         } else if other.is_negative() {
             let mut sign = Sign::one();
-            let digits =
-                subtract_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits, &mut sign);
+            let digits = subtract_digits::<Digit, SHIFT>(&self.digits, &other.digits, &mut sign);
             Self { sign, digits }
         } else {
             Self {
                 sign: self.sign.max(other.sign),
-                digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
+                digits: sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
             }
         }
     }
@@ -365,26 +361,22 @@ where
             if other.is_negative() {
                 (
                     -Sign::one(),
-                    sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
+                    sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
                 )
             } else {
                 let mut sign = Sign::one();
-                let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
-                    &other.digits,
-                    &self.digits,
-                    &mut sign,
-                );
+                let digits =
+                    subtract_digits::<Digit, SHIFT>(&other.digits, &self.digits, &mut sign);
                 (sign, digits)
             }
         } else if other.is_negative() {
             let mut sign = Sign::one();
-            let digits =
-                subtract_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits, &mut sign);
+            let digits = subtract_digits::<Digit, SHIFT>(&self.digits, &other.digits, &mut sign);
             (sign, digits)
         } else {
             (
                 self.sign.max(other.sign),
-                sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
+                sum_digits::<Digit, SHIFT>(&self.digits, &other.digits),
             )
         };
     }
@@ -700,7 +692,7 @@ where
     fn mul(self, other: Self) -> Self::Output {
         Self::Output {
             sign: self.sign * other.sign,
-            digits: multiply_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits),
+            digits: multiply_digits::<Digit, SHIFT>(&self.digits, &other.digits),
         }
     }
 }
@@ -716,7 +708,7 @@ where
 {
     fn mul_assign(&mut self, other: Self) {
         self.sign *= other.sign;
-        self.digits = multiply_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &other.digits);
+        self.digits = multiply_digits::<Digit, SHIFT>(&self.digits, &other.digits);
     }
 }
 
@@ -861,30 +853,24 @@ where
         if self.is_negative() {
             if subtrahend.is_negative() {
                 let mut sign = Sign::one();
-                let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
-                    &subtrahend.digits,
-                    &self.digits,
-                    &mut sign,
-                );
+                let digits =
+                    subtract_digits::<Digit, SHIFT>(&subtrahend.digits, &self.digits, &mut sign);
                 Self { sign, digits }
             } else {
                 Self {
                     sign: -Sign::one(),
-                    digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &subtrahend.digits),
+                    digits: sum_digits::<Digit, SHIFT>(&self.digits, &subtrahend.digits),
                 }
             }
         } else if subtrahend.is_negative() {
             Self {
                 sign: Sign::one(),
-                digits: sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &subtrahend.digits),
+                digits: sum_digits::<Digit, SHIFT>(&self.digits, &subtrahend.digits),
             }
         } else {
             let mut sign = Sign::one();
-            let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
-                &self.digits,
-                &subtrahend.digits,
-                &mut sign,
-            );
+            let digits =
+                subtract_digits::<Digit, SHIFT>(&self.digits, &subtrahend.digits, &mut sign);
             Self { sign, digits }
         }
     }
@@ -898,30 +884,24 @@ where
         (self.sign, self.digits) = if self.is_negative() {
             if subtrahend.is_negative() {
                 let mut sign = Sign::one();
-                let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
-                    &subtrahend.digits,
-                    &self.digits,
-                    &mut sign,
-                );
+                let digits =
+                    subtract_digits::<Digit, SHIFT>(&subtrahend.digits, &self.digits, &mut sign);
                 (sign, digits)
             } else {
                 (
                     -Sign::one(),
-                    sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &subtrahend.digits),
+                    sum_digits::<Digit, SHIFT>(&self.digits, &subtrahend.digits),
                 )
             }
         } else if subtrahend.is_negative() {
             (
                 Sign::one(),
-                sum_digits::<Digit, SEPARATOR, SHIFT>(&self.digits, &subtrahend.digits),
+                sum_digits::<Digit, SHIFT>(&self.digits, &subtrahend.digits),
             )
         } else {
             let mut sign = Sign::one();
-            let digits = subtract_digits::<Digit, SEPARATOR, SHIFT>(
-                &self.digits,
-                &subtrahend.digits,
-                &mut sign,
-            );
+            let digits =
+                subtract_digits::<Digit, SHIFT>(&self.digits, &subtrahend.digits, &mut sign);
             (sign, digits)
         };
     }

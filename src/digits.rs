@@ -547,7 +547,7 @@ where
     result
 }
 
-pub(crate) fn multiply_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
+pub(crate) fn multiply_digits<Digit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
 ) -> Vec<Digit>
@@ -579,11 +579,11 @@ where
         return if size_shortest == 1 && shortest[0].is_zero() {
             vec![Digit::zero()]
         } else {
-            multiply_digits_plain::<Digit, SEPARATOR, SHIFT>(*shortest, *longest)
+            multiply_digits_plain::<Digit, SHIFT>(*shortest, *longest)
         };
     };
     if 2 * size_shortest <= size_longest {
-        return multiply_digits_lopsided::<Digit, SEPARATOR, SHIFT>(*shortest, *longest);
+        return multiply_digits_lopsided::<Digit, SHIFT>(*shortest, *longest);
     }
     let shift = size_longest >> 1;
     let (shortest_high, shortest_low) = split_digits(*shortest, shift);
@@ -593,33 +593,33 @@ where
         split_digits(*longest, shift)
     };
     let mut result = vec![Digit::zero(); size_shortest + size_longest];
-    let highs_product = multiply_digits::<Digit, SEPARATOR, SHIFT>(&shortest_high, &longest_high);
+    let highs_product = multiply_digits::<Digit, SHIFT>(&shortest_high, &longest_high);
     for (index, &digit) in highs_product.iter().enumerate() {
         result[index + 2 * shift] = digit;
     }
-    let lows_product = multiply_digits::<Digit, SEPARATOR, SHIFT>(&shortest_low, &longest_low);
+    let lows_product = multiply_digits::<Digit, SHIFT>(&shortest_low, &longest_low);
     for (index, &digit) in lows_product.iter().enumerate() {
         result[index] = digit;
     }
-    subtract_digits_in_place::<Digit, SEPARATOR, SHIFT>(&mut result[shift..], &lows_product);
-    subtract_digits_in_place::<Digit, SEPARATOR, SHIFT>(&mut result[shift..], &highs_product);
+    subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &lows_product);
+    subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &highs_product);
     let shortest_components_sum =
-        sum_digits::<Digit, SEPARATOR, SHIFT>(&shortest_high, &shortest_low);
+        sum_digits::<Digit, SHIFT>(&shortest_high, &shortest_low);
     let longest_components_sum = if shortest.as_ptr() == longest.as_ptr() {
         shortest_components_sum.clone()
     } else {
-        sum_digits::<Digit, SEPARATOR, SHIFT>(&longest_high, &longest_low)
+        sum_digits::<Digit, SHIFT>(&longest_high, &longest_low)
     };
-    let components_sums_product = multiply_digits::<Digit, SEPARATOR, SHIFT>(
+    let components_sums_product = multiply_digits::<Digit, SHIFT>(
         &shortest_components_sum,
         &longest_components_sum,
     );
-    sum_digits_in_place::<Digit, SEPARATOR, SHIFT>(&mut result[shift..], &components_sums_product);
+    sum_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &components_sums_product);
     normalize_digits(&mut result);
     result
 }
 
-fn multiply_digits_lopsided<Digit, const SEPARATOR: char, const SHIFT: usize>(
+fn multiply_digits_lopsided<Digit, const SHIFT: usize>(
     shortest: &[Digit],
     longest: &[Digit],
 ) -> Vec<Digit>
@@ -637,11 +637,11 @@ where
     let mut processed_digits_count = 0;
     while size_longest > 0 {
         let step_digits_count = size_longest.min(size_shortest);
-        let product = multiply_digits::<Digit, SEPARATOR, SHIFT>(
+        let product = multiply_digits::<Digit, SHIFT>(
             shortest,
             &longest[processed_digits_count..processed_digits_count + step_digits_count].to_vec(),
         );
-        sum_digits_in_place::<Digit, SEPARATOR, SHIFT>(
+        sum_digits_in_place::<Digit, SHIFT>(
             &mut result[processed_digits_count..],
             &product,
         );
@@ -652,7 +652,7 @@ where
     result
 }
 
-fn multiply_digits_plain<Digit, const SEPARATOR: char, const SHIFT: usize>(
+fn multiply_digits_plain<Digit, const SHIFT: usize>(
     shortest: &[Digit],
     longest: &[Digit],
 ) -> Vec<Digit>
@@ -770,7 +770,7 @@ where
     (high, low)
 }
 
-pub(crate) fn subtract_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
+pub(crate) fn subtract_digits<Digit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
     sign: &mut Sign,
@@ -828,7 +828,7 @@ where
     result
 }
 
-fn subtract_digits_in_place<Digit, const SEPARATOR: char, const SHIFT: usize>(
+fn subtract_digits_in_place<Digit, const SHIFT: usize>(
     longest: &mut [Digit],
     shortest: &[Digit],
 ) -> Digit
@@ -853,7 +853,7 @@ where
     accumulator
 }
 
-pub(crate) fn sum_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
+pub(crate) fn sum_digits<Digit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
 ) -> Vec<Digit>
@@ -886,7 +886,7 @@ where
     result
 }
 
-fn sum_digits_in_place<Digit, const SEPARATOR: char, const SHIFT: usize>(
+fn sum_digits_in_place<Digit, const SHIFT: usize>(
     longest: &mut [Digit],
     shortest: &[Digit],
 ) -> Digit

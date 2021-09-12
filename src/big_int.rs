@@ -913,29 +913,13 @@ where
     type Output = Self;
 
     fn sub(self, subtrahend: Self) -> Self::Output {
-        if self.is_negative() {
-            if subtrahend.is_negative() {
-                let mut sign = Sign::one();
-                let digits =
-                    subtract_digits::<Digit, SHIFT>(&subtrahend.digits, &self.digits, &mut sign);
-                Self { sign, digits }
-            } else {
-                Self {
-                    sign: -Sign::one(),
-                    digits: sum_digits::<Digit, SHIFT>(&self.digits, &subtrahend.digits),
-                }
-            }
-        } else if subtrahend.is_negative() {
-            Self {
-                sign: Sign::one(),
-                digits: sum_digits::<Digit, SHIFT>(&self.digits, &subtrahend.digits),
-            }
-        } else {
-            let mut sign = Sign::one();
-            let digits =
-                subtract_digits::<Digit, SHIFT>(&self.digits, &subtrahend.digits, &mut sign);
-            Self { sign, digits }
-        }
+        let (sign, digits) = subtract_signed_digits::<Digit, SHIFT>(
+            &self.digits,
+            self.sign,
+            &subtrahend.digits,
+            subtrahend.sign,
+        );
+        Self { sign, digits }
     }
 }
 
@@ -944,29 +928,12 @@ where
     Digit: BinaryDigit + ModularSubtractiveMagma + TryFrom<usize>,
 {
     fn sub_assign(&mut self, subtrahend: Self) {
-        (self.sign, self.digits) = if self.is_negative() {
-            if subtrahend.is_negative() {
-                let mut sign = Sign::one();
-                let digits =
-                    subtract_digits::<Digit, SHIFT>(&subtrahend.digits, &self.digits, &mut sign);
-                (sign, digits)
-            } else {
-                (
-                    -Sign::one(),
-                    sum_digits::<Digit, SHIFT>(&self.digits, &subtrahend.digits),
-                )
-            }
-        } else if subtrahend.is_negative() {
-            (
-                Sign::one(),
-                sum_digits::<Digit, SHIFT>(&self.digits, &subtrahend.digits),
-            )
-        } else {
-            let mut sign = Sign::one();
-            let digits =
-                subtract_digits::<Digit, SHIFT>(&self.digits, &subtrahend.digits, &mut sign);
-            (sign, digits)
-        };
+        (self.sign, self.digits) = subtract_signed_digits::<Digit, SHIFT>(
+            &self.digits,
+            self.sign,
+            &subtrahend.digits,
+            subtrahend.sign,
+        );
     }
 }
 

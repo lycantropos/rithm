@@ -876,6 +876,35 @@ where
     (high, low)
 }
 
+pub(crate) fn subtract_signed_digits<Digit, const SHIFT: usize>(
+    minuend: &[Digit],
+    minuend_sign: Sign,
+    subtrahend: &[Digit],
+    subtrahend_sign: Sign,
+) -> (Sign, Vec<Digit>)
+where
+    Digit: BinaryDigit + ModularSubtractiveMagma + TryFrom<usize>,
+{
+    if minuend_sign.is_negative() {
+        if subtrahend_sign.is_negative() {
+            let mut sign = Sign::one();
+            let digits = subtract_digits::<Digit, SHIFT>(subtrahend, minuend, &mut sign);
+            (sign, digits)
+        } else {
+            (
+                -Sign::one(),
+                sum_digits::<Digit, SHIFT>(minuend, subtrahend),
+            )
+        }
+    } else if subtrahend_sign.is_negative() {
+        (Sign::one(), sum_digits::<Digit, SHIFT>(minuend, subtrahend))
+    } else {
+        let mut sign = Sign::one();
+        let digits = subtract_digits::<Digit, SHIFT>(minuend, subtrahend, &mut sign);
+        (sign, digits)
+    }
+}
+
 pub(crate) fn subtract_digits<Digit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],

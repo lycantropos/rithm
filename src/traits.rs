@@ -125,6 +125,27 @@ macro_rules! plain_checked_div_impl {
 
 plain_checked_div_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
+pub trait CheckedModulo<Rhs = Self> {
+    type Output;
+
+    fn checked_modulo(self, other: Rhs) -> Self::Output;
+}
+
+macro_rules! plain_checked_modulo_impl {
+    ($($t:ty)*) => ($(
+        impl CheckedModulo for $t {
+            type Output = Option<Self>;
+
+            #[inline(always)]
+            fn checked_modulo(self, other: Self) -> Self::Output {
+                <$t>::checked_rem_euclid(self, other)
+            }
+        }
+    )*)
+}
+
+plain_checked_modulo_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
 pub trait CheckedRem<Rhs = Self> {
     type Output;
 

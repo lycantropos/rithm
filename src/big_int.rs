@@ -143,29 +143,6 @@ where
     Digit: BinaryDigit
         + DoublePrecision
         + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<DoublePrecisionOf<u8>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<u8>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + Oppose + TryFrom<usize>,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
-    pub fn from_str_radix(string: &str, radix: u32) -> Result<Self, String> {
-        Self::new(string, radix as u8)
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
         + Oppose
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
@@ -217,6 +194,29 @@ where
                 },
             ))
         }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<DoublePrecisionOf<u8>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<u8>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + Oppose + TryFrom<usize>,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    pub fn from_str_radix(string: &str, radix: u32) -> Result<Self, String> {
+        Self::new(string, radix as u8)
     }
 }
 

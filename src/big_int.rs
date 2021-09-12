@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
 use std::iter::Peekable;
-use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 use std::str::Chars;
 
 use crate::digits::*;
@@ -417,31 +417,13 @@ where
     type Output = Option<Self>;
 
     fn checked_div(self, divisor: Self) -> Self::Output {
-        if divisor.is_zero() {
-            None
-        } else if self.is_zero()
-            || self.digits.len() < divisor.digits.len()
-            || (self.digits.len() == divisor.digits.len()
-                && self.digits[self.digits.len() - 1] < divisor.digits[divisor.digits.len() - 1])
-        {
-            Some(Self::zero())
-        } else if divisor.digits.len() == 1 {
-            let (digits, _) =
-                divrem_digits_by_digit::<Digit, SHIFT>(&self.digits, divisor.digits[0]);
-            Some(Self {
-                sign: self.sign * divisor.sign,
-                digits,
-            })
-        } else {
-            let (digits, _) =
-                divrem_two_or_more_digits::<Digit, SHIFT>(&self.digits, &divisor.digits);
-            Some(Self {
-                sign: self.sign
-                    * divisor.sign
-                    * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
-                digits,
-            })
-        }
+        let (sign, digits) = checked_div::<Digit, SHIFT>(
+            self.digits.as_slice(),
+            self.sign,
+            divisor.digits.as_slice(),
+            divisor.sign,
+        )?;
+        Some(Self { sign, digits })
     }
 }
 
@@ -464,7 +446,14 @@ where
     type Output = Self;
 
     fn div(self, divisor: Self) -> Self::Output {
-        self.checked_div(divisor).unwrap()
+        let (sign, digits) = checked_div::<Digit, SHIFT>(
+            self.digits.as_slice(),
+            self.sign,
+            divisor.digits.as_slice(),
+            divisor.sign,
+        )
+        .unwrap();
+        Self { sign, digits }
     }
 }
 

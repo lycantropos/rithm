@@ -159,7 +159,7 @@ where
     OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
     usize: TryFrom<Digit>,
 {
-    pub(crate) fn divrem(self, divisor: &Self) -> Option<(Self, Self)> {
+    pub(crate) fn checked_divrem(self, divisor: &Self) -> Option<(Self, Self)> {
         let digits_count = self.digits.len();
         let divisor_digits_count = divisor.digits.len();
         if divisor.is_zero() {

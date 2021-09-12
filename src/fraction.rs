@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter};
 
 use crate::traits::{
     Abs, AdditiveMonoid, CheckedDiv, DivisivePartialMagma, GcdMagma, ModularUnaryAlgebra,
-    MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, SubtractiveMagma, Unitary,
+    MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, SubtractiveMagma, Unitary, Zeroable,
 };
 use std::cmp::Ordering;
 use std::ops::{Add, Div, Mul, Neg, Sub};
@@ -201,6 +201,19 @@ impl<
             numerator,
             denominator,
         }
+    }
+}
+
+impl<Component: Clone + Eq + Unitary + Zeroable> Zeroable for Fraction<Component> {
+    fn zero() -> Self {
+        Self {
+            numerator: Component::zero(),
+            denominator: Component::one(),
+        }
+    }
+
+    fn is_zero(&self) -> bool {
+        self.numerator.is_zero()
     }
 }
 

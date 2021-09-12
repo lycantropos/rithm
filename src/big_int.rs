@@ -247,47 +247,6 @@ where
     }
 }
 
-#[cfg(target_arch = "x86")]
-const HASH_BITS: usize = 31;
-#[cfg(not(target_arch = "x86"))]
-const HASH_BITS: usize = 61;
-const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit + From<bool>,
-    usize: TryFrom<Digit>,
-{
-    pub(crate) fn hash(&self) -> usize {
-        if self.digits.len() == 1 {
-            return if self.is_negative() {
-                usize::MAX
-                    - unsafe {
-                        usize::try_from(
-                            self.digits[0] + <Digit as From<bool>>::from(self.digits[0].is_one()),
-                        )
-                        .unwrap_unchecked()
-                    }
-                    + 1
-            } else {
-                unsafe { usize::try_from(self.digits[0]).unwrap_unchecked() }
-            };
-        };
-        let mut result = 0;
-        for &position in self.digits.iter().rev() {
-            result = ((result << SHIFT) & HASH_MODULUS) | (result >> (HASH_BITS - SHIFT));
-            result += unsafe { usize::try_from(position).unwrap_unchecked() };
-            if result >= HASH_MODULUS {
-                result -= HASH_MODULUS;
-            }
-        }
-        if self.is_negative() {
-            result = usize::MAX - result + 1
-        };
-        result - ((result == usize::MAX) as usize)
-    }
-}
-
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: AssigningDivisivePartialMagma

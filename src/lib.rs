@@ -9,6 +9,7 @@ use pyo3::exceptions::*;
 use pyo3::ffi::Py_hash_t;
 use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, Python};
 use pyo3::PyNumberProtocol;
+use std::convert::TryFrom;
 
 pub mod big_int;
 mod digits;
@@ -150,6 +151,40 @@ fn divmod(dividend: _BigInt, divisor: _BigInt) -> Option<(_BigInt, _BigInt)> {
     Some((quotient, modulo))
 }
 
+fn hash(value: &_BigInt) -> usize {
+    #[cfg(target_arch = "x86")]
+    const HASH_BITS: usize = 31;
+    #[cfg(not(target_arch = "x86"))]
+    const HASH_BITS: usize = 61;
+    const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
+    if value.digits().len() == 1 {
+        return if value.is_negative() {
+            usize::MAX
+                - unsafe {
+                    usize::try_from(
+                        value.digits()[0] + <Digit as From<bool>>::from(value.digits()[0].is_one()),
+                    )
+                    .unwrap_unchecked()
+                }
+                + 1
+        } else {
+            unsafe { usize::try_from(value.digits()[0]).unwrap_unchecked() }
+        };
+    };
+    let mut result = 0;
+    for &position in value.digits().iter().rev() {
+        result = ((result << BINARY_SHIFT) & HASH_MODULUS) | (result >> (HASH_BITS - BINARY_SHIFT));
+        result += unsafe { usize::try_from(position).unwrap_unchecked() };
+        if result >= HASH_MODULUS {
+            result -= HASH_MODULUS;
+        }
+    }
+    if value.is_negative() {
+        result = usize::MAX - result + 1
+    };
+    result - ((result == usize::MAX) as usize)
+}
+
 #[pyproto]
 impl PyObjectProtocol for PyInt {
     fn __bool__(self) -> bool {
@@ -157,7 +192,7 @@ impl PyObjectProtocol for PyInt {
     }
 
     fn __hash__(&self) -> Py_hash_t {
-        self.0.hash() as Py_hash_t
+        hash(&self.0) as Py_hash_t
     }
 
     fn __repr__(&self) -> String {

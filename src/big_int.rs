@@ -138,6 +138,12 @@ where
     }
 }
 
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT> {
+    pub(crate) fn digits(&self) -> &[Digit] {
+        &self.digits
+    }
+}
+
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: BinaryDigit

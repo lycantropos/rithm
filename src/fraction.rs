@@ -69,7 +69,7 @@ impl<
     type Output = Option<Self>;
 
     fn checked_div(self, other: Self) -> Self::Output {
-        if other.numerator.is_zero() {
+        if other.is_zero() {
             return None;
         }
         let (numerator, other_numerator) =

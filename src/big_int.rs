@@ -835,8 +835,8 @@ impl<Digit: Clone + PartialOrd + Zeroable, const SEPARATOR: char, const SHIFT: u
 }
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Rem for BigInt<Digit, SEPARATOR, SHIFT>
-    where
-        Digit: BinaryDigit
+where
+    Digit: BinaryDigit
         + DoublePrecision
         + From<u8>
         + ModularSubtractiveMagma
@@ -844,11 +844,11 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> Rem for BigInt<Digit, SEP
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-        DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-        OppositionOf<Digit>:
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
         BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-        OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-        usize: TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
 {
     type Output = Self;
 
@@ -934,16 +934,16 @@ where
 }
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&str>
-for BigInt<Digit, SEPARATOR, SHIFT>
-    where
-        Digit: Copy
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: Copy
         + DoublePrecision
         + TryFrom<DoublePrecisionOf<Digit>>
         + TryFrom<u8>
         + TryFrom<DoublePrecisionOf<u8>>
         + TryFrom<DoublePrecisionOf<Digit>>
         + Zeroable,
-        DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + TryFrom<usize>,
 {
     type Error = String;
 

@@ -2,7 +2,7 @@
 #![feature(option_result_unwrap_unchecked)]
 #![feature(trait_alias)]
 
-use crate::traits::{Abs, CheckedDiv, Gcd, Oppositive, Unitary, Zeroable};
+use crate::traits::{Abs, CheckedDiv, CheckedRemEuclid, Gcd, Oppositive, Unitary, Zeroable};
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
@@ -110,8 +110,8 @@ impl PyNumberProtocol for PyInt {
         }
     }
     fn __mod__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {
-        match checked_div_rem_euclid(lhs.0, rhs.0) {
-            Some((_, result)) => Ok(PyInt(result)),
+        match lhs.0.checked_rem_euclid(rhs.0) {
+            Some(result) => Ok(PyInt(result)),
             None => Err(PyZeroDivisionError::new_err(
                 UNDEFINED_DIVISION_ERROR_MESSAGE,
             )),

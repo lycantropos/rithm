@@ -159,7 +159,7 @@ where
     OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
     usize: TryFrom<Digit>,
 {
-    pub(crate) fn checked_divrem(self, divisor: &Self) -> Option<(Self, Self)> {
+    pub(crate) fn checked_div_rem(self, divisor: &Self) -> Option<(Self, Self)> {
         let digits_count = self.digits.len();
         let divisor_digits_count = divisor.digits.len();
         if divisor.is_zero() {
@@ -172,7 +172,7 @@ where
             Some((Self::zero(), self))
         } else if divisor_digits_count == 1 {
             let (quotient_digits, remainder_digit) =
-                divrem_digits_by_digit::<Digit, SHIFT>(&self.digits, divisor.digits[0]);
+                div_rem_digits_by_digit::<Digit, SHIFT>(&self.digits, divisor.digits[0]);
             Some((
                 Self {
                     sign: self.sign * divisor.sign,
@@ -185,7 +185,7 @@ where
             ))
         } else {
             let (quotient_digits, remainder_digits) =
-                divrem_two_or_more_digits::<Digit, SHIFT>(&self.digits, &divisor.digits);
+                div_rem_two_or_more_digits::<Digit, SHIFT>(&self.digits, &divisor.digits);
             Some((
                 Self {
                     sign: self.sign
@@ -483,11 +483,13 @@ where
             }
             if iterations_count == 0 {
                 (largest_digits, smallest_digits) = if smallest_digits_count == 1 {
-                    let (_, remainder) =
-                        divrem_digits_by_digit::<Digit, SHIFT>(&largest_digits, smallest_digits[0]);
+                    let (_, remainder) = div_rem_digits_by_digit::<Digit, SHIFT>(
+                        &largest_digits,
+                        smallest_digits[0],
+                    );
                     (smallest_digits, vec![remainder])
                 } else {
-                    let (_, remainder) = divrem_two_or_more_digits::<Digit, SHIFT>(
+                    let (_, remainder) = div_rem_two_or_more_digits::<Digit, SHIFT>(
                         &largest_digits,
                         &smallest_digits,
                     );

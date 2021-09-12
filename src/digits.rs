@@ -272,10 +272,10 @@ where
     {
         Some((Sign::zero(), vec![Digit::zero()]))
     } else if divisor.len() == 1 {
-        let (digits, _) = divrem_digits_by_digit::<Digit, SHIFT>(&dividend, divisor[0]);
+        let (digits, _) = div_rem_digits_by_digit::<Digit, SHIFT>(&dividend, divisor[0]);
         Some((dividend_sign * divisor_sign, digits))
     } else {
-        let (digits, _) = divrem_two_or_more_digits::<Digit, SHIFT>(&dividend, &divisor);
+        let (digits, _) = div_rem_two_or_more_digits::<Digit, SHIFT>(&dividend, &divisor);
         Some((
             dividend_sign * divisor_sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
             digits,
@@ -313,10 +313,10 @@ where
     {
         Some((dividend_sign, dividend.to_vec()))
     } else if divisor.len() == 1 {
-        let (_, digit) = divrem_digits_by_digit::<Digit, SHIFT>(&dividend, divisor[0]);
+        let (_, digit) = div_rem_digits_by_digit::<Digit, SHIFT>(&dividend, divisor[0]);
         Some((dividend_sign * ((!digit.is_zero()) as Sign), vec![digit]))
     } else {
-        let (_, digits) = divrem_two_or_more_digits::<Digit, SHIFT>(&dividend, &divisor);
+        let (_, digits) = div_rem_two_or_more_digits::<Digit, SHIFT>(&dividend, &divisor);
         Some((
             dividend_sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
             digits,
@@ -330,7 +330,7 @@ pub(crate) fn digits_lesser_than<Digit: PartialOrd>(left: &[Digit], right: &[Dig
         || left.len() == right.len() && left.iter().rev().lt(right.iter().rev())
 }
 
-pub(crate) fn divrem_digits_by_digit<Digit, const SHIFT: usize>(
+pub(crate) fn div_rem_digits_by_digit<Digit, const SHIFT: usize>(
     dividend: &[Digit],
     divisor: Digit,
 ) -> (Vec<Digit>, Digit)
@@ -355,7 +355,7 @@ where
     })
 }
 
-pub(crate) fn divrem_two_or_more_digits<Digit, const SHIFT: usize>(
+pub(crate) fn div_rem_two_or_more_digits<Digit, const SHIFT: usize>(
     dividend: &[Digit],
     divisor: &[Digit],
 ) -> (Vec<Digit>, Vec<Digit>)
@@ -603,17 +603,14 @@ where
     }
     subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &lows_product);
     subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &highs_product);
-    let shortest_components_sum =
-        sum_digits::<Digit, SHIFT>(&shortest_high, &shortest_low);
+    let shortest_components_sum = sum_digits::<Digit, SHIFT>(&shortest_high, &shortest_low);
     let longest_components_sum = if shortest.as_ptr() == longest.as_ptr() {
         shortest_components_sum.clone()
     } else {
         sum_digits::<Digit, SHIFT>(&longest_high, &longest_low)
     };
-    let components_sums_product = multiply_digits::<Digit, SHIFT>(
-        &shortest_components_sum,
-        &longest_components_sum,
-    );
+    let components_sums_product =
+        multiply_digits::<Digit, SHIFT>(&shortest_components_sum, &longest_components_sum);
     sum_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &components_sums_product);
     normalize_digits(&mut result);
     result
@@ -641,10 +638,7 @@ where
             shortest,
             &longest[processed_digits_count..processed_digits_count + step_digits_count].to_vec(),
         );
-        sum_digits_in_place::<Digit, SHIFT>(
-            &mut result[processed_digits_count..],
-            &product,
-        );
+        sum_digits_in_place::<Digit, SHIFT>(&mut result[processed_digits_count..], &product);
         size_longest -= step_digits_count;
         processed_digits_count += step_digits_count;
     }
@@ -853,10 +847,7 @@ where
     accumulator
 }
 
-pub(crate) fn sum_digits<Digit, const SHIFT: usize>(
-    first: &[Digit],
-    second: &[Digit],
-) -> Vec<Digit>
+pub(crate) fn sum_digits<Digit, const SHIFT: usize>(first: &[Digit], second: &[Digit]) -> Vec<Digit>
 where
     Digit: BinaryDigit + TryFrom<usize>,
 {

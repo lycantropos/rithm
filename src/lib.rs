@@ -93,7 +93,7 @@ impl PyNumberProtocol for PyInt {
     }
 
     fn __divmod__(lhs: PyInt, rhs: PyInt) -> PyResult<(PyInt, PyInt)> {
-        match checked_divmod(lhs.0, rhs.0) {
+        match checked_div_rem_euclid(lhs.0, rhs.0) {
             Some((quotient, remainder)) => Ok((PyInt(quotient), PyInt(remainder))),
             None => Err(PyZeroDivisionError::new_err(
                 UNDEFINED_DIVISION_ERROR_MESSAGE,
@@ -102,7 +102,7 @@ impl PyNumberProtocol for PyInt {
     }
 
     fn __floordiv__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {
-        match checked_divmod(lhs.0, rhs.0) {
+        match checked_div_rem_euclid(lhs.0, rhs.0) {
             Some((result, _)) => Ok(PyInt(result)),
             None => Err(PyZeroDivisionError::new_err(
                 UNDEFINED_DIVISION_ERROR_MESSAGE,
@@ -110,7 +110,7 @@ impl PyNumberProtocol for PyInt {
         }
     }
     fn __mod__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {
-        match checked_divmod(lhs.0, rhs.0) {
+        match checked_div_rem_euclid(lhs.0, rhs.0) {
             Some((_, result)) => Ok(PyInt(result)),
             None => Err(PyZeroDivisionError::new_err(
                 UNDEFINED_DIVISION_ERROR_MESSAGE,
@@ -140,8 +140,8 @@ impl PyNumberProtocol for PyInt {
     }
 }
 
-fn checked_divmod(dividend: _BigInt, divisor: _BigInt) -> Option<(_BigInt, _BigInt)> {
-    let (mut quotient, mut modulo) = dividend.checked_divrem(&divisor)?;
+fn checked_div_rem_euclid(dividend: _BigInt, divisor: _BigInt) -> Option<(_BigInt, _BigInt)> {
+    let (mut quotient, mut modulo) = dividend.checked_div_rem(&divisor)?;
     if (divisor.is_negative() && modulo.is_positive())
         || (divisor.is_positive() && modulo.is_negative())
     {

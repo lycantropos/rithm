@@ -457,6 +457,33 @@ where
     }
 }
 
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivAssign for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    fn div_assign(&mut self, divisor: Self) {
+        (self.sign, self.digits) = checked_div::<Digit, SHIFT>(
+            self.digits.as_slice(),
+            self.sign,
+            divisor.digits.as_slice(),
+            divisor.sign,
+        )
+        .unwrap();
+    }
+}
+
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: BinaryDigit

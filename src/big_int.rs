@@ -9,7 +9,7 @@ use std::str::Chars;
 use crate::digits::*;
 use crate::traits::{
     Abs, AssigningDivisivePartialMagma, CheckedDiv, CheckedDivEuclid, CheckedRem, CheckedRemEuclid,
-    DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd, ModularPartialMagma,
+    DivEuclid, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd, ModularPartialMagma,
     ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, RemEuclid, Unitary, Zeroable,
 };
 use crate::utils;
@@ -668,6 +668,36 @@ where
             self.digits.as_slice(),
             self.sign,
             divisor.digits.as_slice(),
+            divisor.sign,
+        )
+        .unwrap();
+        Self { sign, digits }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivEuclid for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    type Output = Self;
+
+    fn div_euclid(self, divisor: Self) -> Self::Output {
+        let (sign, digits) = checked_div_euclid::<Digit, SHIFT>(
+            &self.digits,
+            self.sign,
+            &divisor.digits,
             divisor.sign,
         )
         .unwrap();

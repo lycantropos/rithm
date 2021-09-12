@@ -24,7 +24,7 @@ pub trait BinaryDigit = AssigningAdditiveMonoid
 
 pub(crate) type Sign = i8;
 
-pub fn binary_digits_to_base<SourceDigit, TargetDigit>(
+pub(crate) fn binary_digits_to_base<SourceDigit, TargetDigit>(
     source_digits: &[SourceDigit],
     source_shift: usize,
     target_base: usize,
@@ -59,7 +59,7 @@ where
     }
 }
 
-pub fn digits_to_binary_base<SourceDigit, TargetDigit>(
+pub(crate) fn digits_to_binary_base<SourceDigit, TargetDigit>(
     source_digits: &[SourceDigit],
     source_base: usize,
     target_shift: usize,
@@ -284,12 +284,12 @@ where
 }
 
 #[inline]
-pub fn digits_lesser_than<Digit: PartialOrd>(left: &[Digit], right: &[Digit]) -> bool {
+pub(crate) fn digits_lesser_than<Digit: PartialOrd>(left: &[Digit], right: &[Digit]) -> bool {
     left.len() < right.len()
         || left.len() == right.len() && left.iter().rev().lt(right.iter().rev())
 }
 
-pub fn divrem_digits_by_digit<Digit, const SHIFT: usize>(
+pub(crate) fn divrem_digits_by_digit<Digit, const SHIFT: usize>(
     dividend: &[Digit],
     divisor: Digit,
 ) -> (Vec<Digit>, Digit)
@@ -314,7 +314,7 @@ where
     })
 }
 
-pub fn divrem_two_or_more_digits<Digit, const SHIFT: usize>(
+pub(crate) fn divrem_two_or_more_digits<Digit, const SHIFT: usize>(
     dividend: &[Digit],
     divisor: &[Digit],
 ) -> (Vec<Digit>, Vec<Digit>)
@@ -506,7 +506,7 @@ where
     result
 }
 
-pub fn multiply_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
+pub(crate) fn multiply_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
 ) -> Vec<Digit>
@@ -729,7 +729,7 @@ where
     (high, low)
 }
 
-pub fn subtract_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
+pub(crate) fn subtract_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
     sign: &mut Sign,
@@ -812,7 +812,7 @@ where
     accumulator
 }
 
-pub fn sum_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
+pub(crate) fn sum_digits<Digit, const SEPARATOR: char, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
 ) -> Vec<Digit>
@@ -870,7 +870,7 @@ where
     accumulator
 }
 
-pub fn normalize_digits<Digit>(digits: &mut Vec<Digit>)
+pub(crate) fn normalize_digits<Digit>(digits: &mut Vec<Digit>)
 where
     Digit: Clone + Zeroable,
 {
@@ -883,7 +883,7 @@ where
     }
 }
 
-pub fn reduce_digits<Digit, Output, const SHIFT: usize>(digits: &[Digit]) -> Output
+pub(crate) fn reduce_digits<Digit, Output, const SHIFT: usize>(digits: &[Digit]) -> Output
 where
     Digit: Copy,
     Output: BinaryDigit + From<Digit>,
@@ -896,7 +896,7 @@ where
 }
 
 #[inline]
-pub fn to_digit_mask<Digit>(shift: usize) -> Digit
+pub(crate) fn to_digit_mask<Digit>(shift: usize) -> Digit
 where
     Digit: BinaryDigit,
 {

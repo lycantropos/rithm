@@ -621,7 +621,7 @@ where
 {
     let size_shortest = shortest.len();
     let size_longest = longest.len();
-    let mut result: Vec<Digit> = vec![Digit::zero(); size_shortest + size_longest];
+    let mut result = vec![Digit::zero(); size_shortest + size_longest];
     let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
     if shortest.as_ptr() == longest.as_ptr() {
         for index in 0..size_shortest {

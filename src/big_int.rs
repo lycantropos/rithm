@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
 use std::iter::Peekable;
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Not, Rem, Sub, SubAssign};
 use std::str::Chars;
 
 use crate::digits::*;
@@ -966,6 +966,14 @@ where
 
     fn is_one(&self) -> bool {
         self.is_positive() && self.digits.len() == 1 && self.digits[0].is_one()
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Not for BigInt<Digit, SEPARATOR, SHIFT> {
+    type Output = bool;
+
+    fn not(self) -> Self::Output {
+        self.sign.is_zero()
     }
 }
 

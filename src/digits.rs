@@ -283,6 +283,47 @@ where
     }
 }
 
+pub(crate) fn checked_rem<Digit, const SHIFT: usize>(
+    dividend: &[Digit],
+    dividend_sign: Sign,
+    divisor: &[Digit],
+    divisor_sign: Sign,
+) -> Option<(Sign, Vec<Digit>)>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    if divisor_sign.is_zero() {
+        None
+    } else if dividend_sign.is_zero()
+        || dividend.len() < divisor.len()
+        || (dividend.len() == divisor.len()
+            && dividend[dividend.len() - 1] < divisor[divisor.len() - 1])
+    {
+        Some((dividend_sign, dividend.to_vec()))
+    } else if divisor.len() == 1 {
+        let (_, digit) = divrem_digits_by_digit::<Digit, SHIFT>(&dividend, divisor[0]);
+        Some((dividend_sign * ((!digit.is_zero()) as Sign), vec![digit]))
+    } else {
+        let (_, digits) = divrem_two_or_more_digits::<Digit, SHIFT>(&dividend, &divisor);
+        Some((
+            dividend_sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+            digits,
+        ))
+    }
+}
+
 #[inline]
 pub(crate) fn digits_lesser_than<Digit: PartialOrd>(left: &[Digit], right: &[Digit]) -> bool {
     left.len() < right.len()

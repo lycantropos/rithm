@@ -853,7 +853,10 @@ where
     type Output = Self;
 
     fn rem(self, divisor: Self) -> Self::Output {
-        self.divrem(&divisor).unwrap().1
+        let (sign, digits) =
+            checked_rem::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+                .unwrap();
+        Self { sign, digits }
     }
 }
 

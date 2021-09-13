@@ -74,7 +74,8 @@ except ImportError:
             return hash(self._value)
 
         def __invert__(self) -> 'Int':
-            return Int(~self._value)
+            return Int(~self._value,
+                       _parse=False)
 
         def __le__(self, other: 'Int') -> bool:
             return (self._value <= other._value

@@ -222,29 +222,6 @@ impl PyObjectProtocol for PyInt {
 }
 
 #[pyproto]
-impl PyObjectProtocol for PyFraction {
-    fn __bool__(self) -> bool {
-        self.numerator().__bool__()
-    }
-
-    fn __repr__(&self) -> String {
-        format!(
-            "rithm.Fraction({}, {})",
-            self.numerator().__repr__(),
-            self.denominator().__repr__()
-        )
-    }
-
-    fn __richcmp__(&self, other: PyFraction, op: CompareOp) -> bool {
-        compare(&self.0, &other.0, op)
-    }
-
-    fn __str__(&self) -> String {
-        self.0.to_string()
-    }
-}
-
-#[pyproto]
 impl PyNumberProtocol for PyFraction {
     fn __abs__(&self) -> PyFraction {
         PyFraction(self.0.clone().abs())
@@ -273,6 +250,29 @@ impl PyNumberProtocol for PyFraction {
                 UNDEFINED_DIVISION_ERROR_MESSAGE,
             )),
         }
+    }
+}
+
+#[pyproto]
+impl PyObjectProtocol for PyFraction {
+    fn __bool__(self) -> bool {
+        self.numerator().__bool__()
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "rithm.Fraction({}, {})",
+            self.numerator().__repr__(),
+            self.denominator().__repr__()
+        )
+    }
+
+    fn __richcmp__(&self, other: PyFraction, op: CompareOp) -> bool {
+        compare(&self.0, &other.0, op)
+    }
+
+    fn __str__(&self) -> String {
+        self.0.to_string()
     }
 }
 

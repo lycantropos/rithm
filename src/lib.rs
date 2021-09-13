@@ -11,7 +11,7 @@ use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
 use pyo3::ffi::Py_hash_t;
 use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, Python};
-use pyo3::PyNumberProtocol;
+use pyo3::{IntoPy, PyNumberProtocol, PyObject};
 use std::convert::TryFrom;
 
 pub mod big_int;
@@ -134,9 +134,23 @@ impl PyNumberProtocol for PyInt {
         PyInt(-self.0.clone())
     }
 
-    fn __pow__(lhs: PyInt, rhs: PyInt, _modulo: Option<PyInt>) -> PyInt {
+    fn __pow__(lhs: PyInt, rhs: PyInt, _modulo: Option<PyInt>) -> PyResult<PyObject> {
         debug_assert!(_modulo.is_none());
-        PyInt(lhs.0.pow(rhs.0))
+        Ok({
+            if rhs.0.is_negative() {
+                to_py_object(PyFraction(
+                    match _Fraction::new(_BigInt::one(), lhs.0) {
+                        Some(value) => Ok(value),
+                        None => Err(PyZeroDivisionError::new_err(
+                            UNDEFINED_DIVISION_ERROR_MESSAGE,
+                        )),
+                    }?
+                    .pow(-rhs.0),
+                ))
+            } else {
+                to_py_object(PyInt(lhs.0.pow(rhs.0)))
+            }
+        })
     }
 
     fn __sub__(lhs: PyInt, rhs: PyInt) -> PyInt {
@@ -299,4 +313,8 @@ fn _rithm(_py: Python, module: &PyModule) -> PyResult<()> {
     module.add_class::<PyInt>()?;
     module.add_class::<PyFraction>()?;
     Ok(())
+}
+
+fn to_py_object<T: IntoPy<PyObject>>(result: T) -> PyObject {
+    Python::with_gil(|py| result.into_py(py))
 }

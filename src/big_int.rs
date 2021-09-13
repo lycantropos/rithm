@@ -8,10 +8,10 @@ use std::str::Chars;
 
 use crate::digits::*;
 use crate::traits::{
-    Abs, AssigningDivisivePartialMagma, CheckedDiv, CheckedDivEuclid, CheckedRem, CheckedRemEuclid,
-    DivEuclid, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, FromStrRadix, Gcd,
-    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Pow, RemEuclid,
-    Unitary, Zeroable,
+    Abs, AssigningDivisivePartialMagma, CheckedDiv, CheckedDivEuclid, CheckedPow, CheckedRem,
+    CheckedRemEuclid, DivEuclid, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf,
+    FromStrRadix, Gcd, ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf,
+    Oppositive, Pow, RemEuclid, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -224,7 +224,8 @@ const WINDOW_CUTOFF: usize = 8;
 const WINDOW_SHIFT: usize = 5;
 const WINDOW_BASE: usize = 1 << WINDOW_SHIFT;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Pow<Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedPow<Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: BinaryDigit
         + DoublePrecision
@@ -237,11 +238,11 @@ where
     DoublePrecisionOf<Digit>: BinaryDigit,
     usize: TryFrom<Digit>,
 {
-    type Output = Self;
+    type Output = Option<Self>;
 
-    fn pow(self, exponent: Self) -> Self::Output {
+    fn checked_pow(self, exponent: Self) -> Self::Output {
         if exponent.is_negative() {
-            panic!("Exponent should be positive.");
+            return None;
         }
         let mut result = Self::one();
         let mut exponent_digit = exponent.digits[exponent.digits.len() - 1];
@@ -300,7 +301,7 @@ where
                 }
             }
         }
-        result
+        Some(result)
     }
 }
 
@@ -1034,6 +1035,27 @@ impl<Digit: Clone + PartialOrd + Zeroable, const SEPARATOR: char, const SHIFT: u
         } else {
             Ordering::Equal
         })
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Pow<Self> for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + ModularSubtractiveMagma
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit,
+    Digit: BinaryDigit + DoublePrecision + From<u8>,
+    WindowDigit: TryFrom<DoublePrecisionOf<Digit>>,
+    DoublePrecisionOf<Digit>: BinaryDigit,
+    usize: TryFrom<Digit>,
+{
+    type Output = Self;
+
+    fn pow(self, exponent: Self) -> Self::Output {
+        self.checked_pow(exponent)
+            .unwrap_or_else(|| panic!("Exponent should be non-negative."))
     }
 }
 

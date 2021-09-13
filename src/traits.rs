@@ -1,8 +1,8 @@
+use std::num::ParseIntError;
 use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, Div, DivAssign, Mul, MulAssign, Neg,
     Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
 };
-use std::num::ParseIntError;
 
 pub trait AdditiveMonoid<Rhs = Self> = Add<Rhs, Output = Self> + Zeroable;
 

@@ -1010,7 +1010,10 @@ where
         let digits = subtract_digits::<Digit, SHIFT>(first, second, &mut sign);
         (sign, digits)
     } else {
-        (first_sign.max(second_sign), sum_digits::<Digit, SHIFT>(first, second))
+        (
+            first_sign.max(second_sign),
+            sum_digits::<Digit, SHIFT>(first, second),
+        )
     }
 }
 

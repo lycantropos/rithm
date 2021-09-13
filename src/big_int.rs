@@ -72,7 +72,6 @@ impl BigIntParsingErrorKind {
             }
         }
     }
-
 }
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>

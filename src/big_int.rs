@@ -14,7 +14,6 @@ use crate::traits::{
     Unitary, Zeroable,
 };
 use crate::utils;
-use std::error::Error;
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
@@ -45,8 +44,6 @@ impl BigIntParsingError {
         &self.kind
     }
 }
-
-impl Error for BigIntParsingError {}
 
 pub enum BigIntParsingErrorKind {
     StartsWithSeparator,

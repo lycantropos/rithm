@@ -3,7 +3,8 @@
 #![feature(trait_alias)]
 
 use crate::traits::{
-    Abs, CheckedDiv, CheckedDivEuclid, CheckedRemEuclid, Gcd, Oppositive, Unitary, Zeroable,
+    Abs, CheckedDiv, CheckedDivEuclid, CheckedRemEuclid, FromStrRadix, Gcd, Oppositive, Unitary,
+    Zeroable,
 };
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;

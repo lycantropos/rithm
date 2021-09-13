@@ -9,8 +9,9 @@ use std::str::Chars;
 use crate::digits::*;
 use crate::traits::{
     Abs, AssigningDivisivePartialMagma, CheckedDiv, CheckedDivEuclid, CheckedRem, CheckedRemEuclid,
-    DivEuclid, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Gcd, ModularPartialMagma,
-    ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, RemEuclid, Unitary, Zeroable,
+    DivEuclid, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, FromStrRadix, Gcd,
+    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, RemEuclid,
+    Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -203,7 +204,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> FromStrRadix
+    for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: BinaryDigit
         + DoublePrecision
@@ -221,7 +223,9 @@ where
     OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
     usize: TryFrom<Digit>,
 {
-    pub fn from_str_radix(string: &str, radix: u32) -> Result<Self, String> {
+    type Output = Result<Self, String>;
+
+    fn from_str_radix(string: &str, radix: u32) -> Self::Output {
         Self::new(string, radix as u8)
     }
 }

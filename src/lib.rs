@@ -46,7 +46,7 @@ impl PyInt {
     fn new(_string: &str, base: u32) -> PyResult<Self> {
         match _BigInt::from_str_radix(_string, base) {
             Ok(value) => Ok(PyInt(value)),
-            Err(reason) => Err(PyValueError::new_err(reason)),
+            Err(reason) => Err(PyValueError::new_err(reason.to_string())),
         }
     }
 

@@ -1,7 +1,7 @@
 use core::fmt;
 use std::cmp::Ordering;
 use std::convert::TryFrom;
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::iter::Peekable;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Not, Rem, Sub, SubAssign};
 use std::str::Chars;
@@ -14,6 +14,7 @@ use crate::traits::{
     Unitary, Zeroable,
 };
 use crate::utils;
+use std::error::Error;
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
@@ -22,6 +23,57 @@ pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
 }
 
 const MAX_REPRESENTABLE_BASE: u8 = 36;
+
+pub struct BigIntParsingError {
+    kind: BigIntParsingErrorKind,
+}
+
+impl Debug for BigIntParsingError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(&self.kind.description(), formatter)
+    }
+}
+
+impl Display for BigIntParsingError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.kind.description(), formatter)
+    }
+}
+
+impl BigIntParsingError {
+    pub fn kind(&self) -> &BigIntParsingErrorKind {
+        &self.kind
+    }
+}
+
+impl Error for BigIntParsingError {}
+
+pub enum BigIntParsingErrorKind {
+    StartsWithSeparator,
+    ConsecutiveSeparators,
+    InvalidDigit(char, u8),
+    EndsWithSeparator,
+}
+
+impl BigIntParsingErrorKind {
+    fn description(&self) -> String {
+        match self {
+            BigIntParsingErrorKind::StartsWithSeparator => {
+                String::from("Should not start with separator.")
+            }
+            BigIntParsingErrorKind::InvalidDigit(character, base) => {
+                format!("Invalid digit in base {}: {}.", base, character)
+            }
+            BigIntParsingErrorKind::ConsecutiveSeparators => {
+                String::from("Consecutive separators found.")
+            }
+            BigIntParsingErrorKind::EndsWithSeparator => {
+                String::from("Should not end with separator.")
+            }
+        }
+    }
+
+}
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
@@ -49,13 +101,13 @@ where
         37,
     ];
 
-    pub fn new(string: &str, mut base: u8) -> Result<Self, String> {
+    pub fn new(string: &str, mut base: u8) -> Result<Self, BigIntParsingError> {
         debug_assert!(Self::ASCII_CODES_DIGIT_VALUES[SEPARATOR as usize] >= MAX_REPRESENTABLE_BASE);
         if (base != 0 && base < 2) || base > MAX_REPRESENTABLE_BASE {
-            return Err(format!(
+            panic!(
                 "Base should be zero or in range from 2 to {}.",
                 MAX_REPRESENTABLE_BASE
-            ));
+            );
         }
         let mut characters = string.trim().chars().peekable();
         let sign = if characters.peek() == Some(&'-') {
@@ -113,9 +165,14 @@ where
         })
     }
 
-    fn parse_digits(mut characters: Peekable<Chars>, base: u8) -> Result<Vec<u8>, String> {
+    fn parse_digits(
+        mut characters: Peekable<Chars>,
+        base: u8,
+    ) -> Result<Vec<u8>, BigIntParsingError> {
         if characters.peek() == Some(&SEPARATOR) {
-            return Err(String::from("Should not start with separator."));
+            return Err(BigIntParsingError {
+                kind: BigIntParsingErrorKind::StartsWithSeparator,
+            });
         }
         let mut result: Vec<u8> = Vec::new();
         let mut prev: char = SEPARATOR;
@@ -123,16 +180,22 @@ where
             if character != SEPARATOR {
                 let digit = Self::ASCII_CODES_DIGIT_VALUES[character as usize];
                 if digit >= base {
-                    return Err(format!("Invalid digit in base {}: {}.", base, character));
+                    return Err(BigIntParsingError {
+                        kind: BigIntParsingErrorKind::InvalidDigit(character, base),
+                    });
                 }
                 result.push(digit);
             } else if prev == SEPARATOR {
-                return Err(String::from("Consecutive separators found."));
+                return Err(BigIntParsingError {
+                    kind: BigIntParsingErrorKind::ConsecutiveSeparators,
+                });
             }
             prev = character;
         }
         if prev == SEPARATOR {
-            return Err(String::from("Should not end with separator."));
+            return Err(BigIntParsingError {
+                kind: BigIntParsingErrorKind::EndsWithSeparator,
+            });
         }
         result.reverse();
         Ok(result)
@@ -223,7 +286,7 @@ where
     OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
     usize: TryFrom<Digit>,
 {
-    type Error = String;
+    type Error = BigIntParsingError;
 
     fn from_str_radix(string: &str, radix: u32) -> Result<Self, Self::Error> {
         Self::new(string, radix as u8)
@@ -977,7 +1040,7 @@ where
         + Zeroable,
     DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + TryFrom<usize>,
 {
-    type Error = String;
+    type Error = BigIntParsingError;
 
     fn try_from(string: &str) -> Result<Self, Self::Error> {
         Self::new(string, 0)

@@ -106,50 +106,11 @@ where
             );
         }
         let mut characters = string.trim().chars().peekable();
-        let sign = if characters.peek() == Some(&'-') {
-            characters.next();
-            -Sign::one()
-        } else if characters.peek() == Some(&'+') {
-            characters.next();
-            Sign::one()
-        } else {
-            Sign::one()
-        };
+        let sign = Self::parse_sign(&mut characters);
         if base == 0 {
-            base = if characters.peek() != Some(&'0') {
-                10
-            } else {
-                match characters.clone().nth(1) {
-                    Some('b') | Some('B') => 2,
-                    Some('o') | Some('O') => 8,
-                    Some('x') | Some('X') => 16,
-                    _ => 10,
-                }
-            };
+            base = Self::guess_base(&mut characters);
         };
-        if characters.peek() == Some(&'0') {
-            match characters.clone().nth(1) {
-                Some('b') | Some('B') => {
-                    if base == 2 {
-                        characters.nth(1);
-                        characters.next_if_eq(&SEPARATOR);
-                    }
-                }
-                Some('o') | Some('O') => {
-                    if base == 8 {
-                        characters.nth(1);
-                        characters.next_if_eq(&SEPARATOR);
-                    }
-                }
-                Some('x') | Some('X') => {
-                    if base == 16 {
-                        characters.nth(1);
-                        characters.next_if_eq(&SEPARATOR);
-                    }
-                }
-                _ => {}
-            };
-        };
+        Self::skip_prefix(&mut characters, base);
         let digits = digits_to_binary_base::<u8, Digit>(
             &Self::parse_digits(characters, base)?,
             base as usize,
@@ -161,6 +122,21 @@ where
         })
     }
 
+    #[inline]
+    fn guess_base(characters: &mut Peekable<Chars>) -> u8 {
+        if characters.peek() != Some(&'0') {
+            10
+        } else {
+            match characters.clone().nth(1) {
+                Some('b') | Some('B') => 2,
+                Some('o') | Some('O') => 8,
+                Some('x') | Some('X') => 16,
+                _ => 10,
+            }
+        }
+    }
+
+    #[inline]
     fn parse_digits(
         mut characters: Peekable<Chars>,
         base: u8,
@@ -195,6 +171,45 @@ where
         }
         result.reverse();
         Ok(result)
+    }
+
+    #[inline]
+    fn parse_sign(characters: &mut Peekable<Chars>) -> i8 {
+        if characters.peek() == Some(&'-') {
+            characters.next();
+            -Sign::one()
+        } else if characters.peek() == Some(&'+') {
+            characters.next();
+            Sign::one()
+        } else {
+            Sign::one()
+        }
+    }
+
+    fn skip_prefix(characters: &mut Peekable<Chars>, base: u8) {
+        if characters.peek() == Some(&'0') {
+            match characters.clone().nth(1) {
+                Some('b') | Some('B') => {
+                    if base == 2 {
+                        characters.nth(1);
+                        characters.next_if_eq(&SEPARATOR);
+                    }
+                }
+                Some('o') | Some('O') => {
+                    if base == 8 {
+                        characters.nth(1);
+                        characters.next_if_eq(&SEPARATOR);
+                    }
+                }
+                Some('x') | Some('X') => {
+                    if base == 16 {
+                        characters.nth(1);
+                        characters.next_if_eq(&SEPARATOR);
+                    }
+                }
+                _ => {}
+            };
+        };
     }
 }
 

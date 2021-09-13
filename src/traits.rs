@@ -253,6 +253,27 @@ macro_rules! plain_gcd_impl {
 
 plain_gcd_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
+pub trait Pow<Exponent> {
+    type Output;
+
+    fn pow(self, exponent: Exponent) -> Self::Output;
+}
+
+macro_rules! plain_pow_impl {
+    ($($t:ty)*) => ($(
+        impl Pow<u32> for $t {
+            type Output = $t;
+
+            #[inline(always)]
+            fn pow(self, exponent: u32) -> Self::Output {
+                <$t>::pow(self, exponent)
+            }
+        }
+    )*)
+}
+
+plain_pow_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
 pub trait RemEuclid<Rhs = Self> {
     type Output;
 

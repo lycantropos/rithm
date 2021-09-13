@@ -60,7 +60,7 @@ macro_rules! plain_abs_impl {
             type Output = $t;
 
             #[inline(always)]
-            fn abs(self) -> <Self as Abs>::Output {
+            fn abs(self) -> Self::Output {
                 <$t>::abs(self)
             }
         }
@@ -265,7 +265,7 @@ macro_rules! plain_rem_euclid_impl {
             type Output = $t;
 
             #[inline(always)]
-            fn rem_euclid(self, other: Self) -> <Self as RemEuclid>::Output {
+            fn rem_euclid(self, other: Self) -> Self::Output {
                 <$t>::rem_euclid(self, other)
             }
         }

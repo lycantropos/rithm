@@ -103,7 +103,7 @@ except ImportError:
             return Int(-self._value,
                        _parse=False)
 
-        def __pow__(self, exponent: 'Int') -> 'Int':
+        def __pow__(self, exponent: 'Int') -> _Union['Fraction', 'Int']:
             return ((Int(self._value ** exponent._value,
                          _parse=False)
                      if exponent >= _ZERO

@@ -883,7 +883,7 @@ pub(crate) fn subtract_signed_digits<Digit, const SHIFT: usize>(
     subtrahend_sign: Sign,
 ) -> (Sign, Vec<Digit>)
 where
-    Digit: BinaryDigit + ModularSubtractiveMagma + TryFrom<usize>,
+    Digit: BinaryDigit + ModularSubtractiveMagma,
 {
     if minuend_sign.is_negative() {
         if subtrahend_sign.is_negative() {
@@ -911,7 +911,7 @@ fn subtract_digits<Digit, const SHIFT: usize>(
     sign: &mut Sign,
 ) -> Vec<Digit>
 where
-    Digit: BinaryDigit + ModularSubtractiveMagma + TryFrom<usize>,
+    Digit: BinaryDigit + ModularSubtractiveMagma,
 {
     let mut longest = &first;
     let mut shortest = &second;
@@ -995,7 +995,7 @@ pub(crate) fn sum_signed_digits<Digit, const SHIFT: usize>(
     second_sign: Sign,
 ) -> (Sign, Vec<Digit>)
 where
-    Digit: BinaryDigit + ModularSubtractiveMagma + TryFrom<usize>,
+    Digit: BinaryDigit + ModularSubtractiveMagma,
 {
     if first_sign.is_negative() {
         if second_sign.is_negative() {
@@ -1016,7 +1016,7 @@ where
 
 fn sum_digits<Digit, const SHIFT: usize>(first: &[Digit], second: &[Digit]) -> Vec<Digit>
 where
-    Digit: BinaryDigit + TryFrom<usize>,
+    Digit: BinaryDigit,
 {
     let mut longest = &first;
     let mut shortest = &second;

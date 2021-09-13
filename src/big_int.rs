@@ -97,14 +97,8 @@ where
         37,
     ];
 
-    pub fn new(string: &str, mut base: u8) -> Result<Self, BigIntParsingError> {
+    fn new(string: &str, mut base: u8) -> Result<Self, BigIntParsingError> {
         debug_assert!(Self::ASCII_CODES_DIGIT_VALUES[SEPARATOR as usize] >= MAX_REPRESENTABLE_BASE);
-        if (base != 0 && base < 2) || base > MAX_REPRESENTABLE_BASE {
-            panic!(
-                "Base should be zero or in range from 2 to {}.",
-                MAX_REPRESENTABLE_BASE
-            );
-        }
         let mut characters = string.trim().chars().peekable();
         let sign = Self::parse_sign(&mut characters);
         if base == 0 {
@@ -387,6 +381,12 @@ where
     type Error = BigIntParsingError;
 
     fn from_str_radix(string: &str, radix: u32) -> Result<Self, Self::Error> {
+        if (radix != 0 && radix < 2) || radix > (MAX_REPRESENTABLE_BASE as u32) {
+            panic!(
+                "Radix should be in range from 2 to {}.",
+                MAX_REPRESENTABLE_BASE
+            );
+        }
         Self::new(string, radix as u8)
     }
 }

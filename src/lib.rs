@@ -3,8 +3,8 @@
 #![feature(trait_alias)]
 
 use crate::traits::{
-    Abs, CheckedDiv, CheckedDivEuclid, CheckedRemEuclid, FromStrRadix, Gcd, Oppositive, Unitary,
-    Zeroable,
+    Abs, CheckedDiv, CheckedDivEuclid, CheckedRemEuclid, FromStrRadix, Gcd, Oppositive, Pow,
+    Unitary, Zeroable,
 };
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
@@ -132,6 +132,11 @@ impl PyNumberProtocol for PyInt {
 
     fn __neg__(&self) -> PyInt {
         PyInt(-self.0.clone())
+    }
+
+    fn __pow__(lhs: PyInt, rhs: PyInt, _modulo: Option<PyInt>) -> PyInt {
+        debug_assert!(_modulo.is_none());
+        PyInt(lhs.0.pow(rhs.0))
     }
 
     fn __sub__(lhs: PyInt, rhs: PyInt) -> PyInt {

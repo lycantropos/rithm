@@ -391,20 +391,22 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+impl<SourceDigit, TargetDigit, const SEPARATOR: char, const SHIFT: usize> From<SourceDigit>
+    for BigInt<TargetDigit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision + TryFrom<usize> + TryFrom<DoublePrecisionOf<Digit>> + Zeroable,
-    DoublePrecisionOf<Digit>: BinaryDigit,
+    SourceDigit: BinaryDigit,
+    TargetDigit: TryFrom<SourceDigit> + Zeroable,
 {
-    fn from(mut value: DoublePrecisionOf<Digit>) -> Self {
+    fn from(mut value: SourceDigit) -> Self {
         if value.is_zero() {
             Self::zero()
         } else {
             let sign = Sign::one();
-            let mut digits = Vec::<Digit>::new();
-            let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
+            let mut digits = Vec::<TargetDigit>::new();
+            let digit_mask = to_digit_mask::<SourceDigit>(SHIFT);
             while !value.is_zero() {
-                digits.push(unsafe { Digit::try_from(value & digit_mask).unwrap_unchecked() });
+                digits
+                    .push(unsafe { TargetDigit::try_from(value & digit_mask).unwrap_unchecked() });
                 value >>= SHIFT;
             }
             Self { sign, digits }

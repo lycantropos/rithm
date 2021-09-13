@@ -153,8 +153,8 @@ fn checked_div_rem_euclid(dividend: _BigInt, divisor: _BigInt) -> Option<(_BigIn
     if (divisor.is_negative() && modulo.is_positive())
         || (divisor.is_positive() && modulo.is_negative())
     {
-        quotient = quotient - _BigInt::one();
-        modulo = modulo + divisor;
+        quotient -= _BigInt::one();
+        modulo += divisor;
     }
     Some((quotient, modulo))
 }

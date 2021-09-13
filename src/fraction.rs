@@ -6,7 +6,7 @@ use crate::traits::{
     SubtractiveMagma, Unitary, Zeroable,
 };
 use std::cmp::Ordering;
-use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, Neg, Sub};
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct Fraction<Component: Clone + Eq> {
@@ -60,6 +60,25 @@ impl<
             numerator,
             denominator,
         }
+    }
+}
+
+impl<
+        Component: AdditiveMonoid
+            + Clone
+            + DivisivePartialMagma
+            + Eq
+            + GcdMagma
+            + Oppositive
+            + MultiplicativeMonoid,
+    > AddAssign for Fraction<Component>
+{
+    fn add_assign(&mut self, other: Self) {
+        (self.numerator, self.denominator) = normalize_components_moduli::<Component>(
+            self.numerator.clone() * other.denominator.clone()
+                + other.numerator * self.denominator.clone(),
+            self.denominator.clone() * other.denominator,
+        );
     }
 }
 

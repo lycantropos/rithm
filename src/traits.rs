@@ -2,6 +2,7 @@ use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, Div, DivAssign, Mul, MulAssign, Neg,
     Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
 };
+use std::num::ParseIntError;
 
 pub trait AdditiveMonoid<Rhs = Self> = Add<Rhs, Output = Self> + Zeroable;
 
@@ -208,6 +209,27 @@ macro_rules! plain_checked_rem_euclid_impl {
 }
 
 plain_checked_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
+pub trait FromStrRadix {
+    type Output;
+
+    fn from_str_radix(string: &str, radix: u32) -> Self::Output;
+}
+
+macro_rules! plain_from_str_radix_impl {
+    ($($t:ty)*) => ($(
+        impl FromStrRadix for $t {
+            type Output = Result<Self, ParseIntError>;
+
+            #[inline(always)]
+            fn from_str_radix(string: &str, radix: u32) -> Self::Output {
+                <$t>::from_str_radix(string, radix)
+            }
+        }
+    )*)
+}
+
+plain_from_str_radix_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait Gcd<Rhs = Self> {
     type Output;

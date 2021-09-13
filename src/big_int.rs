@@ -220,6 +220,7 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, 
 }
 
 type WindowDigit = u8;
+
 const WINDOW_CUTOFF: usize = 8;
 const WINDOW_SHIFT: usize = 5;
 const WINDOW_BASE: usize = 1 << WINDOW_SHIFT;

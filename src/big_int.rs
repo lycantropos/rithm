@@ -231,10 +231,9 @@ where
         if exponent.is_negative() {
             panic!("Exponent should be positive.");
         }
-        let exponent_digits = exponent.digits();
-        let mut exponent_digit = exponent_digits[exponent_digits.len() - 1];
         let mut result = Self::one();
-        if exponent_digits.len() == 1 && exponent_digit <= Digit::from(3) {
+        let mut exponent_digit = exponent.digits[exponent.digits.len() - 1];
+        if exponent.digits.len() == 1 && exponent_digit <= Digit::from(3) {
             if exponent_digit >= Digit::from(2) {
                 result = self.clone() * self.clone();
                 if exponent_digit == Digit::from(3) {
@@ -243,7 +242,7 @@ where
             } else if exponent_digit.is_one() {
                 result *= self;
             }
-        } else if exponent_digits.len() <= WINDOW_CUTOFF {
+        } else if exponent.digits.len() <= WINDOW_CUTOFF {
             result = self.clone();
             let mut bit = Digit::from(2);
             loop {
@@ -254,7 +253,7 @@ where
                 bit <<= 1;
             }
             bit >>= 1;
-            let mut exponent_digits_iterator = exponent_digits.iter().rev().skip(1).peekable();
+            let mut exponent_digits_iterator = exponent.digits.iter().rev().skip(1).peekable();
             loop {
                 while !bit.is_zero() {
                     result *= result.clone();
@@ -276,7 +275,7 @@ where
                 cache[index] = cache[index - 1].clone() * self.clone();
             }
             let exponent_window_digits = binary_digits_to_lesser_binary_base::<Digit, WindowDigit>(
-                exponent_digits,
+                &exponent.digits,
                 SHIFT,
                 WINDOW_SHIFT,
             );

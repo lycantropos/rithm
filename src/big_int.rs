@@ -979,12 +979,7 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Unitary for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision
-        + ModularSubtractiveMagma
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>
-        + Unitary
-        + Zeroable,
+    Digit: Unitary + Zeroable,
 {
     fn one() -> Self {
         Self {

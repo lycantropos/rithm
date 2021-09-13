@@ -112,6 +112,10 @@ impl PyNumberProtocol for PyInt {
         }
     }
 
+    fn __invert__(&self) -> PyInt {
+        PyInt(!self.0.clone())
+    }
+
     fn __mod__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {
         match lhs.0.checked_rem_euclid(rhs.0) {
             Some(result) => Ok(PyInt(result)),

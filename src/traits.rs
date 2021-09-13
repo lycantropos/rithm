@@ -210,19 +210,19 @@ macro_rules! plain_checked_rem_euclid_impl {
 
 plain_checked_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait FromStrRadix {
-    type Output;
+pub trait FromStrRadix: Sized {
+    type Error;
 
-    fn from_str_radix(string: &str, radix: u32) -> Self::Output;
+    fn from_str_radix(string: &str, radix: u32) -> Result<Self, Self::Error>;
 }
 
 macro_rules! plain_from_str_radix_impl {
     ($($t:ty)*) => ($(
         impl FromStrRadix for $t {
-            type Output = Result<Self, ParseIntError>;
+            type Error = ParseIntError;
 
             #[inline(always)]
-            fn from_str_radix(string: &str, radix: u32) -> Self::Output {
+            fn from_str_radix(string: &str, radix: u32) -> Result<Self, Self::Error> {
                 <$t>::from_str_radix(string, radix)
             }
         }

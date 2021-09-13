@@ -223,9 +223,9 @@ where
     OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
     usize: TryFrom<Digit>,
 {
-    type Output = Result<Self, String>;
+    type Error = String;
 
-    fn from_str_radix(string: &str, radix: u32) -> Self::Output {
+    fn from_str_radix(string: &str, radix: u32) -> Result<Self, Self::Error> {
         Self::new(string, radix as u8)
     }
 }

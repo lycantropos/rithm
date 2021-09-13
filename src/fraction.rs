@@ -205,27 +205,31 @@ impl<
     }
 }
 
-impl<Component: Clone + Eq + Oppositive + Pow<Component, Output = Component>> Pow<Component>
+impl<Component: Clone + Eq + Oppositive + Pow<Component, Output = Component> + Unitary + Zeroable> Pow<Component>
     for Fraction<Component>
 {
-    type Output = Self;
+    type Output = Option<Self>;
 
     fn pow(self, exponent: Component) -> Self::Output {
         if exponent.is_negative() {
-            let exponent = -exponent;
-            let (numerator, denominator) = normalize_components_sign(
-                self.denominator.pow(exponent.clone()),
-                self.numerator.pow(exponent),
-            );
-            Self {
-                numerator,
-                denominator,
+            if self.is_zero() {
+                None
+            } else {
+                let exponent = -exponent;
+                let (numerator, denominator) = normalize_components_sign(
+                    self.denominator.pow(exponent.clone()),
+                    self.numerator.pow(exponent),
+                );
+                Some(Self {
+                    numerator,
+                    denominator,
+                })
             }
         } else {
-            Self {
+            Some(Self {
                 numerator: self.numerator.pow(exponent.clone()),
                 denominator: self.denominator.pow(exponent),
-            }
+            })
         }
     }
 }

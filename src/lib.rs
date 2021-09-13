@@ -138,15 +138,16 @@ impl PyNumberProtocol for PyInt {
         debug_assert!(_modulo.is_none());
         Ok({
             if rhs.0.is_negative() {
-                to_py_object(PyFraction(
-                    match _Fraction::new(_BigInt::one(), lhs.0) {
-                        Some(value) => Ok(value),
-                        None => Err(PyZeroDivisionError::new_err(
-                            UNDEFINED_DIVISION_ERROR_MESSAGE,
-                        )),
-                    }?
-                    .pow(-rhs.0),
-                ))
+                to_py_object(match unsafe {
+                    _Fraction::new(lhs.0, _BigInt::one()).unwrap_unchecked()
+                }
+                .pow(rhs.0)
+                {
+                    Some(value) => Ok(PyFraction(value)),
+                    None => Err(PyZeroDivisionError::new_err(
+                        UNDEFINED_DIVISION_ERROR_MESSAGE,
+                    )),
+                }?)
             } else {
                 to_py_object(PyInt(lhs.0.pow(rhs.0)))
             }
@@ -253,9 +254,14 @@ impl PyNumberProtocol for PyFraction {
         PyFraction(-self.0.clone())
     }
 
-    fn __pow__(lhs: PyFraction, rhs: PyInt, _modulo: Option<PyInt>) -> PyFraction {
+    fn __pow__(lhs: PyFraction, rhs: PyInt, _modulo: Option<PyInt>) -> PyResult<PyFraction> {
         debug_assert!(_modulo.is_none());
-        PyFraction(lhs.0.pow(rhs.0))
+        match lhs.0.pow(rhs.0) {
+            Some(value) => Ok(PyFraction(value)),
+            None => Err(PyZeroDivisionError::new_err(
+                UNDEFINED_DIVISION_ERROR_MESSAGE,
+            )),
+        }
     }
 
     fn __sub__(lhs: PyFraction, rhs: PyFraction) -> PyFraction {

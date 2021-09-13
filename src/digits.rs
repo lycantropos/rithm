@@ -268,10 +268,10 @@ where
     } else if dividend_sign.is_zero() || digits_lesser_than(dividend, divisor) {
         Some((Sign::zero(), vec![Digit::zero()]))
     } else if divisor.len() == 1 {
-        let (digits, _) = div_rem_digits_by_digit::<Digit, SHIFT>(&dividend, divisor[0]);
+        let (digits, _) = div_rem_digits_by_digit::<Digit, SHIFT>(dividend, divisor[0]);
         Some((dividend_sign * divisor_sign, digits))
     } else {
-        let (digits, _) = div_rem_two_or_more_digits::<Digit, SHIFT>(&dividend, &divisor);
+        let (digits, _) = div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
         Some((
             dividend_sign * divisor_sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
             digits,
@@ -317,7 +317,7 @@ where
     } else {
         let (sign, mut digits, remainder_is_non_zero) = if divisor.len() == 1 {
             let (digits, remainder_digit) =
-                div_rem_digits_by_digit::<Digit, SHIFT>(&dividend, divisor[0]);
+                div_rem_digits_by_digit::<Digit, SHIFT>(dividend, divisor[0]);
             (
                 dividend_sign * divisor_sign,
                 digits,
@@ -325,7 +325,7 @@ where
             )
         } else {
             let (digits, remainder_digits) =
-                div_rem_two_or_more_digits::<Digit, SHIFT>(&dividend, &divisor);
+                div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
             (
                 dividend_sign * divisor_sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
                 digits,
@@ -336,7 +336,7 @@ where
             && ((dividend_sign.is_negative() && divisor_sign.is_positive())
                 || (dividend_sign.is_positive() && divisor_sign.is_negative()))
         {
-            digits = sum_digits::<Digit, SHIFT>(&digits, &vec![Digit::one()]);
+            digits = sum_digits::<Digit, SHIFT>(&digits, &[Digit::one()]);
         }
         Some((sign, digits))
     }
@@ -368,10 +368,10 @@ where
     } else if dividend_sign.is_zero() || digits_lesser_than(dividend, divisor) {
         Some((dividend_sign, dividend.to_vec()))
     } else if divisor.len() == 1 {
-        let (_, digit) = div_rem_digits_by_digit::<Digit, SHIFT>(&dividend, divisor[0]);
+        let (_, digit) = div_rem_digits_by_digit::<Digit, SHIFT>(dividend, divisor[0]);
         Some((dividend_sign * ((!digit.is_zero()) as Sign), vec![digit]))
     } else {
-        let (_, digits) = div_rem_two_or_more_digits::<Digit, SHIFT>(&dividend, &divisor);
+        let (_, digits) = div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
         Some((
             dividend_sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
             digits,
@@ -418,10 +418,10 @@ where
         )
     } else {
         let (mut sign, mut digits) = if divisor.len() == 1 {
-            let (_, digit) = div_rem_digits_by_digit::<Digit, SHIFT>(&dividend, divisor[0]);
+            let (_, digit) = div_rem_digits_by_digit::<Digit, SHIFT>(dividend, divisor[0]);
             (dividend_sign * ((!digit.is_zero()) as Sign), vec![digit])
         } else {
-            let (_, digits) = div_rem_two_or_more_digits::<Digit, SHIFT>(&dividend, &divisor);
+            let (_, digits) = div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
             (
                 dividend_sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
                 digits,
@@ -430,7 +430,7 @@ where
         if (divisor_sign.is_negative() && sign.is_positive())
             || (divisor_sign.is_positive() && sign.is_negative())
         {
-            digits = subtract_digits::<Digit, SHIFT>(&digits, &divisor, &mut sign);
+            digits = subtract_digits::<Digit, SHIFT>(&digits, divisor, &mut sign);
         }
         Some((sign, digits))
     }

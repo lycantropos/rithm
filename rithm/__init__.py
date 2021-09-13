@@ -103,6 +103,14 @@ except ImportError:
             return Int(-self._value,
                        _parse=False)
 
+        def __pow__(self, exponent: 'Int') -> 'Int':
+            return ((Int(self._value ** exponent._value,
+                         _parse=False)
+                     if exponent >= _ZERO
+                     else Fraction(_ONE, self) ** -exponent)
+                    if isinstance(exponent, Int)
+                    else NotImplemented)
+
         def __repr__(self) -> str:
             return f'rithm.Int(\'{self._value}\')'
 
@@ -218,6 +226,19 @@ except ImportError:
         def __neg__(self) -> 'Fraction':
             return Fraction(-self.numerator, self.denominator,
                             _normalize=False)
+
+        def __pow__(self, exponent: 'Int') -> 'Fraction':
+            return (
+                (Fraction(self.numerator ** exponent,
+                          self.denominator ** exponent,
+                          _normalize=False)
+                 if exponent >= _ZERO
+                 else Fraction(
+                    *_normalize_components_sign(self.denominator ** -exponent,
+                                                self.numerator ** -exponent),
+                    _normalize=False))
+                if isinstance(exponent, Int)
+                else NotImplemented)
 
         def __repr__(self) -> str:
             return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'

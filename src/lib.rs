@@ -239,6 +239,11 @@ impl PyNumberProtocol for PyFraction {
         PyFraction(-self.0.clone())
     }
 
+    fn __pow__(lhs: PyFraction, rhs: PyInt, _modulo: Option<PyInt>) -> PyFraction {
+        debug_assert!(_modulo.is_none());
+        PyFraction(lhs.0.pow(rhs.0))
+    }
+
     fn __sub__(lhs: PyFraction, rhs: PyFraction) -> PyFraction {
         PyFraction(lhs.0 - rhs.0)
     }

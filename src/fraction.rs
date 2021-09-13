@@ -2,7 +2,8 @@ use std::fmt::{Display, Formatter};
 
 use crate::traits::{
     Abs, AdditiveMonoid, CheckedDiv, DivisivePartialMagma, GcdMagma, ModularUnaryAlgebra,
-    MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, SubtractiveMagma, Unitary, Zeroable,
+    MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, Pow, SubtractiveMagma, Unitary,
+    Zeroable,
 };
 use std::cmp::Ordering;
 use std::ops::{Add, Div, Mul, Neg, Sub};
@@ -200,6 +201,31 @@ impl<
         Self {
             numerator,
             denominator,
+        }
+    }
+}
+
+impl<Component: Clone + Eq + Oppositive + Pow<Component, Output = Component>> Pow<Component>
+    for Fraction<Component>
+{
+    type Output = Self;
+
+    fn pow(self, exponent: Component) -> Self::Output {
+        if exponent.is_negative() {
+            let exponent = -exponent;
+            let (numerator, denominator) = normalize_components_sign(
+                self.denominator.pow(exponent.clone()),
+                self.numerator.pow(exponent),
+            );
+            Self {
+                numerator,
+                denominator,
+            }
+        } else {
+            Self {
+                numerator: self.numerator.pow(exponent.clone()),
+                denominator: self.denominator.pow(exponent),
+            }
         }
     }
 }

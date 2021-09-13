@@ -88,6 +88,41 @@ impl<
     }
 }
 
+impl<
+        Component: Clone
+            + Eq
+            + Oppositive
+            + CheckedPow<Component, Output = Option<Component>>
+            + Unitary
+            + Zeroable,
+    > CheckedPow<Component> for Fraction<Component>
+{
+    type Output = Option<Self>;
+
+    fn checked_pow(self, exponent: Component) -> Self::Output {
+        if exponent.is_negative() {
+            if self.is_zero() {
+                None
+            } else {
+                let exponent = -exponent;
+                let (numerator, denominator) = normalize_components_sign(
+                    self.denominator.checked_pow(exponent.clone())?,
+                    self.numerator.checked_pow(exponent)?,
+                );
+                Some(Self {
+                    numerator,
+                    denominator,
+                })
+            }
+        } else {
+            Some(Self {
+                numerator: self.numerator.checked_pow(exponent.clone())?,
+                denominator: self.denominator.checked_pow(exponent)?,
+            })
+        }
+    }
+}
+
 impl<Component: Clone + Display + Eq + Unitary> Display for Fraction<Component> {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
         if self.denominator.is_one() {
@@ -231,41 +266,6 @@ impl<
         Self {
             numerator,
             denominator,
-        }
-    }
-}
-
-impl<
-        Component: Clone
-            + Eq
-            + Oppositive
-            + CheckedPow<Component, Output = Option<Component>>
-            + Unitary
-            + Zeroable,
-    > CheckedPow<Component> for Fraction<Component>
-{
-    type Output = Option<Self>;
-
-    fn checked_pow(self, exponent: Component) -> Self::Output {
-        if exponent.is_negative() {
-            if self.is_zero() {
-                None
-            } else {
-                let exponent = -exponent;
-                let (numerator, denominator) = normalize_components_sign(
-                    self.denominator.checked_pow(exponent.clone())?,
-                    self.numerator.checked_pow(exponent)?,
-                );
-                Some(Self {
-                    numerator,
-                    denominator,
-                })
-            }
-        } else {
-            Some(Self {
-                numerator: self.numerator.checked_pow(exponent.clone())?,
-                denominator: self.denominator.checked_pow(exponent)?,
-            })
         }
     }
 }

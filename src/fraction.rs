@@ -1,9 +1,9 @@
 use std::fmt::{Display, Formatter};
 
 use crate::traits::{
-    Abs, AdditiveMonoid, CheckedDiv, DivisivePartialMagma, GcdMagma, ModularUnaryAlgebra,
-    MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, Pow, SubtractiveMagma, Unitary,
-    Zeroable,
+    Abs, AdditiveMonoid, CheckedDiv, CheckedPow, DivisivePartialMagma, GcdMagma,
+    ModularUnaryAlgebra, MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, SubtractiveMagma,
+    Unitary, Zeroable,
 };
 use std::cmp::Ordering;
 use std::ops::{Add, Div, Mul, Neg, Sub};
@@ -205,20 +205,26 @@ impl<
     }
 }
 
-impl<Component: Clone + Eq + Oppositive + Pow<Component, Output = Component> + Unitary + Zeroable> Pow<Component>
-    for Fraction<Component>
+impl<
+        Component: Clone
+            + Eq
+            + Oppositive
+            + CheckedPow<Component, Output = Option<Component>>
+            + Unitary
+            + Zeroable,
+    > CheckedPow<Component> for Fraction<Component>
 {
     type Output = Option<Self>;
 
-    fn pow(self, exponent: Component) -> Self::Output {
+    fn checked_pow(self, exponent: Component) -> Self::Output {
         if exponent.is_negative() {
             if self.is_zero() {
                 None
             } else {
                 let exponent = -exponent;
                 let (numerator, denominator) = normalize_components_sign(
-                    self.denominator.pow(exponent.clone()),
-                    self.numerator.pow(exponent),
+                    self.denominator.checked_pow(exponent.clone())?,
+                    self.numerator.checked_pow(exponent)?,
                 );
                 Some(Self {
                     numerator,
@@ -227,8 +233,8 @@ impl<Component: Clone + Eq + Oppositive + Pow<Component, Output = Component> + U
             }
         } else {
             Some(Self {
-                numerator: self.numerator.pow(exponent.clone()),
-                denominator: self.denominator.pow(exponent),
+                numerator: self.numerator.checked_pow(exponent.clone())?,
+                denominator: self.denominator.checked_pow(exponent)?,
             })
         }
     }

@@ -3,8 +3,8 @@
 #![feature(trait_alias)]
 
 use crate::traits::{
-    Abs, CheckedDiv, CheckedDivEuclid, CheckedRemEuclid, FromStrRadix, Gcd, Oppositive, Pow,
-    Unitary, Zeroable,
+    Abs, CheckedDiv, CheckedDivEuclid, CheckedPow, CheckedRemEuclid, FromStrRadix, Gcd, Oppositive,
+    Pow, Unitary, Zeroable,
 };
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
@@ -141,7 +141,7 @@ impl PyNumberProtocol for PyInt {
                 to_py_object(match unsafe {
                     _Fraction::new(lhs.0, _BigInt::one()).unwrap_unchecked()
                 }
-                .pow(rhs.0)
+                .checked_pow(rhs.0)
                 {
                     Some(value) => Ok(PyFraction(value)),
                     None => Err(PyZeroDivisionError::new_err(
@@ -256,7 +256,7 @@ impl PyNumberProtocol for PyFraction {
 
     fn __pow__(lhs: PyFraction, rhs: PyInt, _modulo: Option<PyInt>) -> PyResult<PyFraction> {
         debug_assert!(_modulo.is_none());
-        match lhs.0.pow(rhs.0) {
+        match lhs.0.checked_pow(rhs.0) {
             Some(value) => Ok(PyFraction(value)),
             None => Err(PyZeroDivisionError::new_err(
                 UNDEFINED_DIVISION_ERROR_MESSAGE,

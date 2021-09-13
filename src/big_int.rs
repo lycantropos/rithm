@@ -10,7 +10,7 @@ use crate::digits::*;
 use crate::traits::{
     Abs, AssigningDivisivePartialMagma, CheckedDiv, CheckedDivEuclid, CheckedRem, CheckedRemEuclid,
     DivEuclid, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, FromStrRadix, Gcd,
-    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, RemEuclid,
+    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Pow, RemEuclid,
     Unitary, Zeroable,
 };
 use crate::utils;
@@ -204,6 +204,92 @@ where
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT> {
     pub(crate) fn digits(&self) -> &[Digit] {
         &self.digits
+    }
+}
+
+type WindowDigit = u8;
+const WINDOW_CUTOFF: usize = 8;
+const WINDOW_SHIFT: usize = 5;
+const WINDOW_BASE: usize = 1 << WINDOW_SHIFT;
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Pow<Self> for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + ModularSubtractiveMagma
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit,
+    Digit: BinaryDigit + DoublePrecision + From<u8>,
+    WindowDigit: TryFrom<DoublePrecisionOf<Digit>>,
+    DoublePrecisionOf<Digit>: BinaryDigit,
+    usize: TryFrom<Digit>,
+{
+    type Output = Self;
+
+    fn pow(self, exponent: Self) -> Self::Output {
+        if exponent.is_negative() {
+            panic!("Exponent should be positive.");
+        }
+        let exponent_digits = exponent.digits();
+        let mut exponent_digit = exponent_digits[exponent_digits.len() - 1];
+        let mut result = Self::one();
+        if exponent_digits.len() == 1 && exponent_digit <= Digit::from(3) {
+            if exponent_digit >= Digit::from(2) {
+                result = self.clone() * self.clone();
+                if exponent_digit == Digit::from(3) {
+                    result *= self;
+                }
+            } else if exponent_digit.is_one() {
+                result *= self;
+            }
+        } else if exponent_digits.len() <= WINDOW_CUTOFF {
+            result = self.clone();
+            let mut bit = Digit::from(2);
+            loop {
+                if bit > exponent_digit {
+                    bit >>= 1;
+                    break;
+                }
+                bit <<= 1;
+            }
+            bit >>= 1;
+            let mut exponent_digits_iterator = exponent_digits.iter().rev().skip(1).peekable();
+            loop {
+                while !bit.is_zero() {
+                    result *= result.clone();
+                    if !(exponent_digit & bit).is_zero() {
+                        result *= self.clone();
+                    }
+                    bit >>= 1;
+                }
+                if exponent_digits_iterator.peek().is_none() {
+                    break;
+                }
+                exponent_digit = unsafe { *exponent_digits_iterator.next().unwrap_unchecked() };
+                bit = Digit::one() << (SHIFT - 1);
+            }
+        } else {
+            let mut cache = vec![Self::zero(); WINDOW_BASE];
+            cache[0] = result.clone();
+            for index in 1..WINDOW_BASE {
+                cache[index] = cache[index - 1].clone() * self.clone();
+            }
+            let exponent_window_digits = binary_digits_to_lesser_binary_base::<Digit, WindowDigit>(
+                exponent_digits,
+                SHIFT,
+                WINDOW_SHIFT,
+            );
+            for &digit in exponent_window_digits.iter().rev() {
+                for _ in 0..WINDOW_SHIFT {
+                    result *= result.clone();
+                }
+                if !digit.is_zero() {
+                    result *= cache[digit as usize].clone();
+                }
+            }
+        }
+        result
     }
 }
 

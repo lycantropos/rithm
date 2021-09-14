@@ -3,19 +3,19 @@ use std::convert::TryFrom;
 use crate::traits::{AssigningShiftingRightMonoid, ModularPartialMagma, Zeroable};
 
 pub const fn are_same<T: ?Sized, U: ?Sized>() -> bool {
-    trait AreSame<U: ?Sized> {
+    trait SameTo<U: ?Sized> {
         const VALUE: bool;
     }
 
-    impl<T: ?Sized, U: ?Sized> AreSame<U> for T {
+    impl<T: ?Sized, U: ?Sized> SameTo<U> for T {
         default const VALUE: bool = false;
     }
 
-    impl<T: ?Sized> AreSame<T> for T {
+    impl<T: ?Sized> SameTo<T> for T {
         const VALUE: bool = true;
     }
 
-    <T as AreSame<U>>::VALUE
+    <T as SameTo<U>>::VALUE
 }
 
 pub(crate) fn bit_length<T>(value: T) -> usize

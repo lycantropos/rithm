@@ -463,8 +463,7 @@ where
             + 1;
         let mut characters: String = String::with_capacity(characters_count);
         let target_base = unsafe { Digit::try_from(base).unwrap_unchecked() };
-        for index in 0..digits.len() - 1 {
-            let mut remainder = digits[index];
+        for &(mut remainder) in digits.iter().take(digits.len() - 1) {
             for _ in 0..shift {
                 characters.push(
                     Self::DIGIT_VALUES_ASCII_CODES[unsafe {

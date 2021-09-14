@@ -448,7 +448,7 @@ where
     ];
 
     fn to_base_string(&self, base: usize) -> String {
-        let shift = utils::floor_log(1 << SHIFT, base).unwrap();
+        let shift = unsafe { utils::floor_log(1 << SHIFT, base).unwrap_unchecked() };
         let digits =
             binary_digits_to_base::<Digit, Digit>(&self.digits, SHIFT, utils::power(base, shift));
         let characters_count = (self.is_negative() as usize)

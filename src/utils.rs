@@ -66,14 +66,11 @@ pub(crate) const fn power(base: usize, exponent: usize) -> usize {
     }
 }
 
-pub(crate) fn floor_log2<T>(value: T) -> Result<usize, &'static str>
+pub(crate) fn floor_log2<T>(value: T) -> usize
 where
     T: From<u8> + AssigningShiftingRightMonoid<usize> + PartialOrd,
     usize: TryFrom<T>,
 {
-    if value.is_zero() {
-        Err("Logarithm of zero is undefined.")
-    } else {
-        Ok(bit_length(value) - 1)
-    }
+    debug_assert!(!value.is_zero());
+    bit_length(value) - 1
 }

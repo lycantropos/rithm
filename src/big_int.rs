@@ -440,8 +440,6 @@ where
         + TryFrom<usize>,
     DoublePrecisionOf<Digit>:
         AssigningDivisivePartialMagma + BinaryDigit + ModularPartialMagma + TryFrom<usize>,
-    <DoublePrecisionOf<Digit> as TryFrom<usize>>::Error: fmt::Debug,
-    <Digit as TryFrom<DoublePrecisionOf<Digit>>>::Error: fmt::Debug,
     usize: TryFrom<Digit>,
 {
     const DIGIT_VALUES_ASCII_CODES: [char; MAX_REPRESENTABLE_BASE as usize] = [

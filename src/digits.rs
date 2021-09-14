@@ -44,15 +44,13 @@ where
         + From<TargetDigit>
         + ModularPartialMagma
         + TryFrom<usize>,
-    <DoublePrecisionOf<TargetDigit> as TryFrom<usize>>::Error: fmt::Debug,
-    <TargetDigit as TryFrom<DoublePrecisionOf<TargetDigit>>>::Error: fmt::Debug,
     usize: TryFrom<SourceDigit>,
 {
     if target_base & (target_base - 1) == 0 {
         binary_digits_to_binary_base(
             source_digits,
             source_shift,
-            utils::floor_log2::<usize>(target_base).unwrap(),
+            utils::floor_log2::<usize>(target_base),
         )
     } else {
         binary_digits_to_non_binary_base(source_digits, source_shift, target_base)
@@ -81,7 +79,7 @@ where
     if source_base & (source_base - 1) == 0 {
         binary_digits_to_binary_base(
             source_digits,
-            utils::floor_log2::<usize>(source_base).unwrap(),
+            utils::floor_log2::<usize>(source_base),
             target_shift,
         )
     } else {
@@ -136,13 +134,12 @@ where
         + From<TargetDigit>
         + ModularPartialMagma
         + TryFrom<usize>,
-    <DoublePrecisionOf<TargetDigit> as TryFrom<usize>>::Error: fmt::Debug,
-    <TargetDigit as TryFrom<DoublePrecisionOf<TargetDigit>>>::Error: fmt::Debug,
 {
     let result_max_digits_count: usize = 1
         + ((((source_digits.len() * source_shift) as f64) / (target_base as f64).log2()) as usize);
     let mut result = Vec::<TargetDigit>::with_capacity(result_max_digits_count);
-    let target_base = DoublePrecisionOf::<TargetDigit>::try_from(target_base).unwrap();
+    let target_base =
+        unsafe { DoublePrecisionOf::<TargetDigit>::try_from(target_base).unwrap_unchecked() };
     for source_digit in source_digits.iter().rev() {
         let mut digit: DoublePrecisionOf<TargetDigit> =
             DoublePrecisionOf::<TargetDigit>::from(*source_digit);
@@ -150,10 +147,13 @@ where
             let step: DoublePrecisionOf<TargetDigit> =
                 (DoublePrecisionOf::<TargetDigit>::from(*result_position) << source_shift) | digit;
             digit = step / target_base;
-            *result_position = TargetDigit::try_from(step - digit * target_base).unwrap();
+            *result_position =
+                unsafe { TargetDigit::try_from(step - digit * target_base).unwrap_unchecked() };
         }
         while !digit.is_zero() {
-            result.push(TargetDigit::try_from(digit.rem_euclid(target_base)).unwrap());
+            result.push(unsafe {
+                TargetDigit::try_from(digit.rem_euclid(target_base)).unwrap_unchecked()
+            });
             digit /= target_base;
         }
     }

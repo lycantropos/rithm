@@ -448,7 +448,7 @@ where
     ];
 
     fn to_base_string(&self, base: usize) -> String {
-        let shift = utils::floor_log(1 << SHIFT, base).unwrap();
+        let shift = utils::floor_log(1 << SHIFT, base);
         let digits =
             binary_digits_to_base::<Digit, Digit>(&self.digits, SHIFT, utils::power(base, shift));
         let characters_count = (self.is_negative() as usize)
@@ -457,7 +457,6 @@ where
                 unsafe { usize::try_from(digits[digits.len() - 1]).unwrap_unchecked() },
                 base,
             )
-            .unwrap_or(0usize)
             + 1;
         let mut characters: String = String::with_capacity(characters_count);
         let target_base = unsafe { Digit::try_from(base).unwrap_unchecked() };

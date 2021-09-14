@@ -1,3 +1,4 @@
+#![feature(const_panic)]
 #![feature(destructuring_assignment)]
 #![feature(option_result_unwrap_unchecked)]
 #![feature(specialization)]

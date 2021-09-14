@@ -46,16 +46,12 @@ where
     first
 }
 
-pub(crate) const fn floor_log(value: usize, base: usize) -> Result<usize, &'static str> {
-    if value == 0usize {
-        Err("Logarithm of zero is undefined.")
-    } else if value < base {
-        Ok(0)
+pub(crate) const fn floor_log(value: usize, base: usize) -> usize {
+    debug_assert!(value != 0);
+    if value < base {
+        0
     } else {
-        match floor_log(value / base, base) {
-            Ok(value) => Ok(value + 1),
-            error => error,
-        }
+        floor_log(value / base, base) + 1
     }
 }
 

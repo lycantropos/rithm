@@ -173,6 +173,7 @@ where
     TargetDigit: DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>>,
     DoublePrecisionOf<TargetDigit>: BinaryDigit + From<SourceDigit>,
 {
+    debug_assert!(target_shift > source_shift && source_shift > 0);
     let target_digit_mask = to_digit_mask::<DoublePrecisionOf<TargetDigit>>(target_shift);
     let result_capacity: usize =
         (source_digits.len() * target_shift + (target_shift - 1)) / target_shift;
@@ -211,6 +212,7 @@ where
     DoublePrecisionOf<SourceDigit>: BinaryDigit,
     usize: TryFrom<SourceDigit>,
 {
+    debug_assert!(source_shift > target_shift && target_shift > 0);
     let target_digit_mask = to_digit_mask::<DoublePrecisionOf<SourceDigit>>(target_shift);
     let result_digits_bits_count: usize = (source_digits.len() - 1) * source_shift
         + utils::bit_length(source_digits[source_digits.len() - 1]);

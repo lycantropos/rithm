@@ -364,6 +364,30 @@ pub trait Oppose {
     type Result: Oppositive;
 }
 
+impl Oppose for i8 {
+    type Result = i8;
+}
+
+impl Oppose for isize {
+    type Result = isize;
+}
+
+impl Oppose for i16 {
+    type Result = i16;
+}
+
+impl Oppose for i32 {
+    type Result = i32;
+}
+
+impl Oppose for i64 {
+    type Result = i64;
+}
+
+impl Oppose for i128 {
+    type Result = i128;
+}
+
 impl Oppose for u8 {
     type Result = i8;
 }
@@ -384,24 +408,8 @@ impl Oppose for u128 {
     type Result = i128;
 }
 
-impl Oppose for i8 {
-    type Result = i8;
-}
-
-impl Oppose for i16 {
-    type Result = i16;
-}
-
-impl Oppose for i32 {
-    type Result = i32;
-}
-
-impl Oppose for i64 {
-    type Result = i64;
-}
-
-impl Oppose for i128 {
-    type Result = i128;
+impl Oppose for usize {
+    type Result = isize;
 }
 
 pub trait Unitary {

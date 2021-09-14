@@ -456,7 +456,7 @@ where
         let characters_count = (self.is_negative() as usize)
             + (digits.len() - 1) * shift
             + utils::floor_log(
-                unsafe { usize::try_from(*digits.last().unwrap()).unwrap_unchecked() },
+                unsafe { usize::try_from(digits[digits.len() - 1]).unwrap_unchecked() },
                 base,
             )
             .unwrap_or(0usize)
@@ -474,7 +474,7 @@ where
                 remainder /= target_base;
             }
         }
-        let mut remainder = *digits.last().unwrap();
+        let mut remainder = digits[digits.len() - 1];
         while !remainder.is_zero() {
             characters.push(
                 Self::DIGIT_VALUES_ASCII_CODES[unsafe {

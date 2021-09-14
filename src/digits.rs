@@ -213,7 +213,7 @@ where
 {
     let target_digit_mask = to_digit_mask::<DoublePrecisionOf<SourceDigit>>(target_shift);
     let result_digits_bits_count: usize = (source_digits.len() - 1) * source_shift
-        + utils::bit_length(*source_digits.last().unwrap());
+        + utils::bit_length(source_digits[source_digits.len() - 1]);
     let result_digits_count: usize = (result_digits_bits_count + (target_shift - 1)) / target_shift;
     let mut result = Vec::<TargetDigit>::with_capacity(result_digits_count);
     let mut accumulator = DoublePrecisionOf::<SourceDigit>::zero();

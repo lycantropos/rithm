@@ -90,42 +90,6 @@ macro_rules! plain_div_euclid_impl {
 
 plain_div_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait DoublePrecision: Sized {
-    type Result: From<Self>;
-}
-
-impl DoublePrecision for i8 {
-    type Result = i16;
-}
-
-impl DoublePrecision for i16 {
-    type Result = i32;
-}
-
-impl DoublePrecision for i32 {
-    type Result = i64;
-}
-
-impl DoublePrecision for i64 {
-    type Result = i128;
-}
-
-impl DoublePrecision for u8 {
-    type Result = u16;
-}
-
-impl DoublePrecision for u16 {
-    type Result = u32;
-}
-
-impl DoublePrecision for u32 {
-    type Result = u64;
-}
-
-impl DoublePrecision for u64 {
-    type Result = u128;
-}
-
 pub trait CheckedDiv<Rhs = Self> {
     type Output;
 
@@ -230,6 +194,42 @@ macro_rules! plain_checked_rem_euclid_impl {
 }
 
 plain_checked_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
+pub trait DoublePrecision: Sized {
+    type Result: From<Self>;
+}
+
+impl DoublePrecision for i8 {
+    type Result = i16;
+}
+
+impl DoublePrecision for i16 {
+    type Result = i32;
+}
+
+impl DoublePrecision for i32 {
+    type Result = i64;
+}
+
+impl DoublePrecision for i64 {
+    type Result = i128;
+}
+
+impl DoublePrecision for u8 {
+    type Result = u16;
+}
+
+impl DoublePrecision for u16 {
+    type Result = u32;
+}
+
+impl DoublePrecision for u32 {
+    type Result = u64;
+}
+
+impl DoublePrecision for u64 {
+    type Result = u128;
+}
 
 pub trait FromStrRadix: Sized {
     type Error;

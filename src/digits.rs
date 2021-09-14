@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 use std::convert::TryFrom;
-use std::{f64, fmt};
+use std::f64;
 
 use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,

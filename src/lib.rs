@@ -1,5 +1,6 @@
 #![feature(destructuring_assignment)]
 #![feature(option_result_unwrap_unchecked)]
+#![feature(specialization)]
 #![feature(trait_alias)]
 
 use crate::traits::{

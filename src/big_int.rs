@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt::{Debug, Display, Formatter};
 use std::iter::Peekable;
+use std::mem::size_of;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Not, Rem, Sub, SubAssign};
 use std::str::Chars;
 
@@ -394,12 +395,26 @@ where
 impl<SourceDigit, TargetDigit, const SEPARATOR: char, const SHIFT: usize> From<SourceDigit>
     for BigInt<TargetDigit, SEPARATOR, SHIFT>
 where
-    SourceDigit: BinaryDigit,
-    TargetDigit: TryFrom<SourceDigit> + Zeroable,
+    SourceDigit: BinaryDigit + Oppose,
+    TargetDigit: BinaryDigit + Oppose + TryFrom<SourceDigit>,
 {
     fn from(mut value: SourceDigit) -> Self {
         if value.is_zero() {
             Self::zero()
+        } else if size_of::<SourceDigit>() < size_of::<TargetDigit>()
+            || (size_of::<SourceDigit>() == size_of::<TargetDigit>()
+                && utils::are_same::<SourceDigit, OppositionOf<SourceDigit>>()
+                && !utils::are_same::<TargetDigit, OppositionOf<TargetDigit>>())
+        {
+            let mut value = unsafe { TargetDigit::try_from(value).unwrap_unchecked() };
+            let sign = Sign::one();
+            let mut digits = Vec::<TargetDigit>::new();
+            let digit_mask = to_digit_mask::<TargetDigit>(SHIFT);
+            while !value.is_zero() {
+                digits.push(value & digit_mask);
+                value >>= SHIFT;
+            }
+            Self { sign, digits }
         } else {
             let sign = Sign::one();
             let mut digits = Vec::<TargetDigit>::new();

@@ -2,6 +2,22 @@ use std::convert::TryFrom;
 
 use crate::traits::{AssigningShiftingRightMonoid, ModularPartialMagma, Zeroable};
 
+pub const fn are_same<T: ?Sized, U: ?Sized>() -> bool {
+    trait AreSame<U: ?Sized> {
+        const VALUE: bool;
+    }
+
+    impl<T: ?Sized, U: ?Sized> AreSame<U> for T {
+        default const VALUE: bool = false;
+    }
+
+    impl<T: ?Sized> AreSame<T> for T {
+        const VALUE: bool = true;
+    }
+
+    <T as AreSame<U>>::VALUE
+}
+
 pub(crate) fn bit_length<T>(value: T) -> usize
 where
     T: From<u8> + AssigningShiftingRightMonoid<usize> + PartialOrd,

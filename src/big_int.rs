@@ -10,9 +10,10 @@ use std::str::Chars;
 use crate::digits::*;
 use crate::traits::{
     Abs, AssigningDivisivePartialMagma, CheckedDiv, CheckedDivEuclid, CheckedDivRem,
-    CheckedDivRemEuclid, CheckedPow, CheckedRem, CheckedRemEuclid, DivEuclid, DivisivePartialMagma,
-    DoublePrecision, DoublePrecisionOf, FromStrRadix, Gcd, ModularPartialMagma,
-    ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Pow, RemEuclid, Unitary, Zeroable,
+    CheckedDivRemEuclid, CheckedPow, CheckedRem, CheckedRemEuclid, DivEuclid, DivRem,
+    DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, FromStrRadix, Gcd,
+    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Pow, RemEuclid,
+    Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -391,6 +392,28 @@ where
             modulo += divisor;
         }
         Some((quotient, modulo))
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivRem for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    type Output = (Self, Self);
+
+    fn div_rem(self, divisor: Self) -> Self::Output {
+        self.checked_div_rem(divisor).unwrap()
     }
 }
 

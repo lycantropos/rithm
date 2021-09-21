@@ -4,8 +4,8 @@
 #![feature(trait_alias)]
 
 use crate::traits::{
-    Abs, CheckedDiv, CheckedDivEuclid, CheckedPow, CheckedRemEuclid, FromStrRadix, Gcd, Oppositive,
-    Pow, Unitary, Zeroable,
+    Abs, CheckedDiv, CheckedDivEuclid, CheckedDivRem, CheckedPow, CheckedRemEuclid, FromStrRadix,
+    Gcd, Oppositive, Pow, Unitary, Zeroable,
 };
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
@@ -173,7 +173,7 @@ impl PyNumberProtocol for PyInt {
 }
 
 fn checked_div_rem_euclid(dividend: _BigInt, divisor: _BigInt) -> Option<(_BigInt, _BigInt)> {
-    let (mut quotient, mut modulo) = dividend.checked_div_rem(&divisor)?;
+    let (mut quotient, mut modulo) = dividend.checked_div_rem(divisor.clone())?;
     if (divisor.is_negative() && modulo.is_positive())
         || (divisor.is_positive() && modulo.is_negative())
     {

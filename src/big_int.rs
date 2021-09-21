@@ -9,10 +9,10 @@ use std::str::Chars;
 
 use crate::digits::*;
 use crate::traits::{
-    Abs, AssigningDivisivePartialMagma, CheckedDiv, CheckedDivEuclid, CheckedPow, CheckedRem,
-    CheckedRemEuclid, DivEuclid, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf,
-    FromStrRadix, Gcd, ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf,
-    Oppositive, Pow, RemEuclid, Unitary, Zeroable,
+    Abs, AssigningDivisivePartialMagma, CheckedDiv, CheckedDivEuclid, CheckedDivRem, CheckedPow,
+    CheckedRem, CheckedRemEuclid, DivEuclid, DivisivePartialMagma, DoublePrecision,
+    DoublePrecisionOf, FromStrRadix, Gcd, ModularPartialMagma, ModularSubtractiveMagma, Oppose,
+    OppositionOf, Oppositive, Pow, RemEuclid, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -301,7 +301,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRem
+    for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: BinaryDigit
         + DoublePrecision
@@ -316,7 +317,9 @@ where
     OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
     usize: TryFrom<Digit>,
 {
-    pub(crate) fn checked_div_rem(self, divisor: &Self) -> Option<(Self, Self)> {
+    type Output = Option<(Self, Self)>;
+
+    fn checked_div_rem(self, divisor: Self) -> Self::Output {
         let digits_count = self.digits.len();
         let divisor_digits_count = divisor.digits.len();
         if divisor.is_zero() {

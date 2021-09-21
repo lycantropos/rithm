@@ -209,6 +209,9 @@ except ImportError:
                     if isinstance(other, Fraction)
                     else NotImplemented)
 
+        def __getstate__(self) -> _Tuple[Int, Int]:
+            return self._numerator, self._denominator
+
         def __gt__(self, other: 'Fraction') -> bool:
             return (self.numerator * other.denominator
                     > other.numerator * self.denominator
@@ -257,6 +260,9 @@ except ImportError:
 
         def __repr__(self) -> str:
             return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'
+
+        def __setstate__(self, state: _Tuple[Int, Int]) -> None:
+            self._numerator, self._denominator = state
 
         def __str__(self) -> str:
             return (str(self.numerator)

@@ -107,14 +107,12 @@ where
             base = Self::guess_base(&mut characters);
         };
         Self::skip_prefix(&mut characters, base);
-        let digits = digits_to_binary_base::<u8, Digit>(
-            &Self::parse_digits(characters, base)?,
-            base as usize,
-            SHIFT,
-        );
-        Ok(Self {
-            sign: sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
-            digits,
+        Self::parse_digits(characters, base).map(|digits| {
+            let digits = digits_to_binary_base::<u8, Digit>(&digits, base as usize, SHIFT);
+            Self {
+                sign: sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+                digits,
+            }
         })
     }
 
@@ -384,18 +382,16 @@ where
     type Output = Option<(Self, Self)>;
 
     fn checked_div_rem_euclid(self, divisor: Self) -> Self::Output {
-        match self.checked_div_rem(divisor.clone()) {
-            Some((mut quotient, mut modulo)) => {
+        self.checked_div_rem(divisor.clone())
+            .map(|(mut quotient, mut modulo)| {
                 if (divisor.is_negative() && modulo.is_positive())
                     || (divisor.is_positive() && modulo.is_negative())
                 {
                     quotient -= Self::one();
                     modulo += divisor;
                 }
-                Some((quotient, modulo))
-            }
-            None => None,
-        }
+                (quotient, modulo)
+            })
     }
 }
 
@@ -817,9 +813,8 @@ where
     type Output = Option<Self>;
 
     fn checked_div(self, divisor: Self) -> Self::Output {
-        let (sign, digits) =
-            checked_div::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)?;
-        Some(Self { sign, digits })
+        checked_div::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+            .map(|(sign, digits)| Self { sign, digits })
     }
 }
 
@@ -843,13 +838,8 @@ where
     type Output = Option<Self>;
 
     fn checked_div_euclid(self, divisor: Self) -> Self::Output {
-        let (sign, digits) = checked_div_euclid::<Digit, SHIFT>(
-            &self.digits,
-            self.sign,
-            &divisor.digits,
-            divisor.sign,
-        )?;
-        Some(Self { sign, digits })
+        checked_div_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+            .map(|(sign, digits)| Self { sign, digits })
     }
 }
 
@@ -873,13 +863,8 @@ where
     type Output = Option<Self>;
 
     fn checked_rem_euclid(self, divisor: Self) -> Self::Output {
-        let (sign, digits) = checked_rem_euclid::<Digit, SHIFT>(
-            &self.digits,
-            self.sign,
-            &divisor.digits,
-            divisor.sign,
-        )?;
-        Some(Self { sign, digits })
+        checked_rem_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+            .map(|(sign, digits)| Self { sign, digits })
     }
 }
 
@@ -903,9 +888,8 @@ where
     type Output = Option<Self>;
 
     fn checked_rem(self, divisor: Self) -> Self::Output {
-        let (sign, digits) =
-            checked_rem::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)?;
-        Some(Self { sign, digits })
+        checked_rem::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+            .map(|(sign, digits)| Self { sign, digits })
     }
 }
 

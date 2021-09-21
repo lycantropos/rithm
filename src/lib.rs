@@ -67,14 +67,14 @@ impl PyInt {
         big_int_to_py_long(&self.0)
     }
 
+    pub fn __getstate__(&self, py: Python) -> PyObject {
+        PyBytes::new(py, &self.0.as_bytes()).to_object(py)
+    }
+
     pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         state.extract::<&PyBytes>(py).map(|py_bytes| {
             self.0 = _BigInt::from_bytes(py_bytes.extract().unwrap());
         })
-    }
-
-    pub fn __getstate__(&self, py: Python) -> PyResult<PyObject> {
-        Ok(PyBytes::new(py, &self.0.as_bytes()).to_object(py))
     }
 
     fn __trunc__(&self) -> PyObject {

@@ -213,90 +213,147 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, 
     }
 }
 
-type WindowDigit = u8;
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: AssigningDivisivePartialMagma
+        + BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularPartialMagma
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>:
+        AssigningDivisivePartialMagma + BinaryDigit + ModularPartialMagma + TryFrom<usize>,
+    usize: TryFrom<Digit>,
+{
+    const DIGIT_VALUES_ASCII_CODES: [char; MAX_REPRESENTABLE_BASE as usize] = [
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
+        'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    ];
 
-const WINDOW_CUTOFF: usize = 8;
-const WINDOW_SHIFT: usize = 5;
-const WINDOW_BASE: usize = 1 << WINDOW_SHIFT;
+    fn to_base_string(&self, base: usize) -> String {
+        let shift = unsafe { utils::floor_log(1 << SHIFT, base).unwrap_unchecked() };
+        let digits =
+            binary_digits_to_base::<Digit, Digit>(&self.digits, SHIFT, utils::power(base, shift));
+        let characters_count = (self.is_negative() as usize)
+            + (digits.len() - 1) * shift
+            + utils::floor_log(
+                unsafe { usize::try_from(digits[digits.len() - 1]).unwrap_unchecked() },
+                base,
+            )
+            .unwrap_or(0usize)
+            + 1;
+        let mut characters: String = String::with_capacity(characters_count);
+        let target_base = unsafe { Digit::try_from(base).unwrap_unchecked() };
+        for &(mut remainder) in digits.iter().take(digits.len() - 1) {
+            for _ in 0..shift {
+                characters.push(
+                    Self::DIGIT_VALUES_ASCII_CODES[unsafe {
+                        usize::try_from(remainder.rem_euclid(target_base)).unwrap_unchecked()
+                    }],
+                );
+                remainder /= target_base;
+            }
+        }
+        let mut remainder = digits[digits.len() - 1];
+        while !remainder.is_zero() {
+            characters.push(
+                Self::DIGIT_VALUES_ASCII_CODES[unsafe {
+                    usize::try_from(remainder.rem_euclid(target_base)).unwrap_unchecked()
+                }],
+            );
+            remainder /= target_base;
+        }
+        if self.is_zero() {
+            characters.push('0');
+        } else if self.is_negative() {
+            characters.push('-');
+        }
+        characters.chars().rev().collect()
+    }
+}
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedPow<Self>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Abs for BigInt<Digit, SEPARATOR, SHIFT> {
+    type Output = Self;
+
+    fn abs(self) -> Self {
+        Self {
+            sign: self.sign.abs(),
+            digits: self.digits,
+        }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Add for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit + ModularSubtractiveMagma,
+{
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self::Output {
+        let (sign, digits) =
+            sum_signed_digits::<Digit, SHIFT>(&self.digits, self.sign, &other.digits, other.sign);
+        Self { sign, digits }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> AddAssign for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit + ModularSubtractiveMagma,
+{
+    fn add_assign(&mut self, other: Self) {
+        (self.sign, self.digits) =
+            sum_signed_digits::<Digit, SHIFT>(&self.digits, self.sign, &other.digits, other.sign);
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDiv
     for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: BinaryDigit
         + DoublePrecision
+        + From<u8>
         + ModularSubtractiveMagma
+        + Oppose
         + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
-    Digit: BinaryDigit + DoublePrecision + From<u8>,
-    WindowDigit: TryFrom<DoublePrecisionOf<Digit>>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
     usize: TryFrom<Digit>,
 {
     type Output = Option<Self>;
 
-    fn checked_pow(self, exponent: Self) -> Self::Output {
-        if exponent.is_negative() {
-            return None;
-        }
-        let mut result = Self::one();
-        let mut exponent_digit = exponent.digits[exponent.digits.len() - 1];
-        if exponent.digits.len() == 1 && exponent_digit <= Digit::from(3) {
-            if exponent_digit >= Digit::from(2) {
-                result = self.clone() * self.clone();
-                if exponent_digit == Digit::from(3) {
-                    result *= self;
-                }
-            } else if exponent_digit.is_one() {
-                result *= self;
-            }
-        } else if exponent.digits.len() <= WINDOW_CUTOFF {
-            result = self.clone();
-            let mut bit = Digit::from(2);
-            loop {
-                if bit > exponent_digit {
-                    bit >>= 1;
-                    break;
-                }
-                bit <<= 1;
-            }
-            bit >>= 1;
-            let mut exponent_digits_iterator = exponent.digits.iter().rev().skip(1).peekable();
-            loop {
-                while !bit.is_zero() {
-                    result *= result.clone();
-                    if !(exponent_digit & bit).is_zero() {
-                        result *= self.clone();
-                    }
-                    bit >>= 1;
-                }
-                if exponent_digits_iterator.peek().is_none() {
-                    break;
-                }
-                exponent_digit = unsafe { *exponent_digits_iterator.next().unwrap_unchecked() };
-                bit = Digit::one() << (SHIFT - 1);
-            }
-        } else {
-            let mut cache = vec![Self::zero(); WINDOW_BASE];
-            cache[0] = result.clone();
-            for index in 1..WINDOW_BASE {
-                cache[index] = cache[index - 1].clone() * self.clone();
-            }
-            let exponent_window_digits = binary_digits_to_lesser_binary_base::<Digit, WindowDigit>(
-                &exponent.digits,
-                SHIFT,
-                WINDOW_SHIFT,
-            );
-            for &digit in exponent_window_digits.iter().rev() {
-                for _ in 0..WINDOW_SHIFT {
-                    result *= result.clone();
-                }
-                if !digit.is_zero() {
-                    result *= cache[digit as usize].clone();
-                }
-            }
-        }
-        Some(result)
+    fn checked_div(self, divisor: Self) -> Self::Output {
+        checked_div::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+            .map(|(sign, digits)| Self { sign, digits })
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDivEuclid
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    type Output = Option<Self>;
+
+    fn checked_div_euclid(self, divisor: Self) -> Self::Output {
+        checked_div_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+            .map(|(sign, digits)| Self { sign, digits })
     }
 }
 
@@ -395,6 +452,250 @@ where
     }
 }
 
+type WindowDigit = u8;
+
+const WINDOW_CUTOFF: usize = 8;
+const WINDOW_SHIFT: usize = 5;
+const WINDOW_BASE: usize = 1 << WINDOW_SHIFT;
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedPow<Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + ModularSubtractiveMagma
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit,
+    Digit: BinaryDigit + DoublePrecision + From<u8>,
+    WindowDigit: TryFrom<DoublePrecisionOf<Digit>>,
+    DoublePrecisionOf<Digit>: BinaryDigit,
+    usize: TryFrom<Digit>,
+{
+    type Output = Option<Self>;
+
+    fn checked_pow(self, exponent: Self) -> Self::Output {
+        if exponent.is_negative() {
+            return None;
+        }
+        let mut result = Self::one();
+        let mut exponent_digit = exponent.digits[exponent.digits.len() - 1];
+        if exponent.digits.len() == 1 && exponent_digit <= Digit::from(3) {
+            if exponent_digit >= Digit::from(2) {
+                result = self.clone() * self.clone();
+                if exponent_digit == Digit::from(3) {
+                    result *= self;
+                }
+            } else if exponent_digit.is_one() {
+                result *= self;
+            }
+        } else if exponent.digits.len() <= WINDOW_CUTOFF {
+            result = self.clone();
+            let mut bit = Digit::from(2);
+            loop {
+                if bit > exponent_digit {
+                    bit >>= 1;
+                    break;
+                }
+                bit <<= 1;
+            }
+            bit >>= 1;
+            let mut exponent_digits_iterator = exponent.digits.iter().rev().skip(1).peekable();
+            loop {
+                while !bit.is_zero() {
+                    result *= result.clone();
+                    if !(exponent_digit & bit).is_zero() {
+                        result *= self.clone();
+                    }
+                    bit >>= 1;
+                }
+                if exponent_digits_iterator.peek().is_none() {
+                    break;
+                }
+                exponent_digit = unsafe { *exponent_digits_iterator.next().unwrap_unchecked() };
+                bit = Digit::one() << (SHIFT - 1);
+            }
+        } else {
+            let mut cache = vec![Self::zero(); WINDOW_BASE];
+            cache[0] = result.clone();
+            for index in 1..WINDOW_BASE {
+                cache[index] = cache[index - 1].clone() * self.clone();
+            }
+            let exponent_window_digits = binary_digits_to_lesser_binary_base::<Digit, WindowDigit>(
+                &exponent.digits,
+                SHIFT,
+                WINDOW_SHIFT,
+            );
+            for &digit in exponent_window_digits.iter().rev() {
+                for _ in 0..WINDOW_SHIFT {
+                    result *= result.clone();
+                }
+                if !digit.is_zero() {
+                    result *= cache[digit as usize].clone();
+                }
+            }
+        }
+        Some(result)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedRem
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    type Output = Option<Self>;
+
+    fn checked_rem(self, divisor: Self) -> Self::Output {
+        checked_rem::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+            .map(|(sign, digits)| Self { sign, digits })
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclid
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    type Output = Option<Self>;
+
+    fn checked_rem_euclid(self, divisor: Self) -> Self::Output {
+        checked_rem_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+            .map(|(sign, digits)| Self { sign, digits })
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Display for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: AssigningDivisivePartialMagma
+        + BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularPartialMagma
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>:
+        AssigningDivisivePartialMagma + BinaryDigit + ModularPartialMagma + TryFrom<usize>,
+    <DoublePrecisionOf<Digit> as TryFrom<usize>>::Error: fmt::Debug,
+    <Digit as TryFrom<DoublePrecisionOf<Digit>>>::Error: fmt::Debug,
+    usize: TryFrom<Digit>,
+{
+    fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
+        formatter.write_str(self.to_base_string(10).as_str())
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Div for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    type Output = Self;
+
+    fn div(self, divisor: Self) -> Self::Output {
+        let (sign, digits) = checked_div::<Digit, SHIFT>(
+            self.digits.as_slice(),
+            self.sign,
+            divisor.digits.as_slice(),
+            divisor.sign,
+        )
+        .unwrap();
+        Self { sign, digits }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivAssign for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    fn div_assign(&mut self, divisor: Self) {
+        (self.sign, self.digits) = checked_div::<Digit, SHIFT>(
+            self.digits.as_slice(),
+            self.sign,
+            divisor.digits.as_slice(),
+            divisor.sign,
+        )
+        .unwrap();
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivEuclid for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    type Output = Self;
+
+    fn div_euclid(self, divisor: Self) -> Self::Output {
+        let (sign, digits) = checked_div_euclid::<Digit, SHIFT>(
+            &self.digits,
+            self.sign,
+            &divisor.digits,
+            divisor.sign,
+        )
+        .unwrap();
+        Self { sign, digits }
+    }
+}
+
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivRem for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: BinaryDigit
@@ -441,38 +742,6 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> FromStrRadix
-    for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<DoublePrecisionOf<u8>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<u8>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + Oppose + TryFrom<usize>,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
-    type Error = BigIntParsingError;
-
-    fn from_str_radix(string: &str, radix: u32) -> Result<Self, Self::Error> {
-        if (radix != 0 && radix < 2) || radix > (MAX_REPRESENTABLE_BASE as u32) {
-            panic!(
-                "Radix should be in range from 2 to {}.",
-                MAX_REPRESENTABLE_BASE
-            );
-        }
-        Self::new(string, radix as u8)
-    }
-}
-
 impl<SourceDigit, TargetDigit, const SEPARATOR: char, const SHIFT: usize> From<SourceDigit>
     for BigInt<TargetDigit, SEPARATOR, SHIFT>
 where
@@ -510,97 +779,35 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> FromStrRadix
+    for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: AssigningDivisivePartialMagma
-        + BinaryDigit
+    Digit: BinaryDigit
         + DoublePrecision
         + From<u8>
-        + ModularPartialMagma
+        + ModularSubtractiveMagma
+        + Oppose
         + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<DoublePrecisionOf<u8>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<u8>
         + TryFrom<usize>,
-    DoublePrecisionOf<Digit>:
-        AssigningDivisivePartialMagma + BinaryDigit + ModularPartialMagma + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + Oppose + TryFrom<usize>,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
     usize: TryFrom<Digit>,
 {
-    const DIGIT_VALUES_ASCII_CODES: [char; MAX_REPRESENTABLE_BASE as usize] = [
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
-        'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-    ];
+    type Error = BigIntParsingError;
 
-    fn to_base_string(&self, base: usize) -> String {
-        let shift = unsafe { utils::floor_log(1 << SHIFT, base).unwrap_unchecked() };
-        let digits =
-            binary_digits_to_base::<Digit, Digit>(&self.digits, SHIFT, utils::power(base, shift));
-        let characters_count = (self.is_negative() as usize)
-            + (digits.len() - 1) * shift
-            + utils::floor_log(
-                unsafe { usize::try_from(digits[digits.len() - 1]).unwrap_unchecked() },
-                base,
-            )
-            .unwrap_or(0usize)
-            + 1;
-        let mut characters: String = String::with_capacity(characters_count);
-        let target_base = unsafe { Digit::try_from(base).unwrap_unchecked() };
-        for &(mut remainder) in digits.iter().take(digits.len() - 1) {
-            for _ in 0..shift {
-                characters.push(
-                    Self::DIGIT_VALUES_ASCII_CODES[unsafe {
-                        usize::try_from(remainder.rem_euclid(target_base)).unwrap_unchecked()
-                    }],
-                );
-                remainder /= target_base;
-            }
-        }
-        let mut remainder = digits[digits.len() - 1];
-        while !remainder.is_zero() {
-            characters.push(
-                Self::DIGIT_VALUES_ASCII_CODES[unsafe {
-                    usize::try_from(remainder.rem_euclid(target_base)).unwrap_unchecked()
-                }],
+    fn from_str_radix(string: &str, radix: u32) -> Result<Self, Self::Error> {
+        if (radix != 0 && radix < 2) || radix > (MAX_REPRESENTABLE_BASE as u32) {
+            panic!(
+                "Radix should be in range from 2 to {}.",
+                MAX_REPRESENTABLE_BASE
             );
-            remainder /= target_base;
         }
-        if self.is_zero() {
-            characters.push('0');
-        } else if self.is_negative() {
-            characters.push('-');
-        }
-        characters.chars().rev().collect()
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Abs for BigInt<Digit, SEPARATOR, SHIFT> {
-    type Output = Self;
-
-    fn abs(self) -> Self {
-        Self {
-            sign: self.sign.abs(),
-            digits: self.digits,
-        }
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Add for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit + ModularSubtractiveMagma,
-{
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self::Output {
-        let (sign, digits) =
-            sum_signed_digits::<Digit, SHIFT>(&self.digits, self.sign, &other.digits, other.sign);
-        Self { sign, digits }
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> AddAssign for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit + ModularSubtractiveMagma,
-{
-    fn add_assign(&mut self, other: Self) {
-        (self.sign, self.digits) =
-            sum_signed_digits::<Digit, SHIFT>(&self.digits, self.sign, &other.digits, other.sign);
+        Self::new(string, radix as u8)
     }
 }
 
@@ -770,213 +977,6 @@ where
             reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&largest_digits),
             reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&smallest_digits),
         ))
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Display for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: AssigningDivisivePartialMagma
-        + BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularPartialMagma
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>:
-        AssigningDivisivePartialMagma + BinaryDigit + ModularPartialMagma + TryFrom<usize>,
-    <DoublePrecisionOf<Digit> as TryFrom<usize>>::Error: fmt::Debug,
-    <Digit as TryFrom<DoublePrecisionOf<Digit>>>::Error: fmt::Debug,
-    usize: TryFrom<Digit>,
-{
-    fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
-        formatter.write_str(self.to_base_string(10).as_str())
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDiv
-    for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
-    type Output = Option<Self>;
-
-    fn checked_div(self, divisor: Self) -> Self::Output {
-        checked_div::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
-            .map(|(sign, digits)| Self { sign, digits })
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDivEuclid
-    for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
-    type Output = Option<Self>;
-
-    fn checked_div_euclid(self, divisor: Self) -> Self::Output {
-        checked_div_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
-            .map(|(sign, digits)| Self { sign, digits })
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclid
-    for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
-    type Output = Option<Self>;
-
-    fn checked_rem_euclid(self, divisor: Self) -> Self::Output {
-        checked_rem_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
-            .map(|(sign, digits)| Self { sign, digits })
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedRem
-    for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
-    type Output = Option<Self>;
-
-    fn checked_rem(self, divisor: Self) -> Self::Output {
-        checked_rem::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
-            .map(|(sign, digits)| Self { sign, digits })
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Div for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
-    type Output = Self;
-
-    fn div(self, divisor: Self) -> Self::Output {
-        let (sign, digits) = checked_div::<Digit, SHIFT>(
-            self.digits.as_slice(),
-            self.sign,
-            divisor.digits.as_slice(),
-            divisor.sign,
-        )
-        .unwrap();
-        Self { sign, digits }
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivEuclid for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
-    type Output = Self;
-
-    fn div_euclid(self, divisor: Self) -> Self::Output {
-        let (sign, digits) = checked_div_euclid::<Digit, SHIFT>(
-            &self.digits,
-            self.sign,
-            &divisor.digits,
-            divisor.sign,
-        )
-        .unwrap();
-        Self { sign, digits }
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivAssign for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
-    fn div_assign(&mut self, divisor: Self) {
-        (self.sign, self.digits) = checked_div::<Digit, SHIFT>(
-            self.digits.as_slice(),
-            self.sign,
-            divisor.digits.as_slice(),
-            divisor.sign,
-        )
-        .unwrap();
     }
 }
 

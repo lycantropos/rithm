@@ -4,8 +4,8 @@
 #![feature(trait_alias)]
 
 use crate::traits::{
-    Abs, CheckedDiv, CheckedDivEuclid, CheckedDivRem, CheckedPow, CheckedRemEuclid, FromStrRadix,
-    Gcd, Oppositive, Pow, Unitary, Zeroable,
+    Abs, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow, CheckedRemEuclid,
+    FromStrRadix, Gcd, Oppositive, Pow, Unitary, Zeroable,
 };
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
@@ -100,7 +100,7 @@ impl PyNumberProtocol for PyInt {
     }
 
     fn __divmod__(lhs: PyInt, rhs: PyInt) -> PyResult<(PyInt, PyInt)> {
-        match checked_div_rem_euclid(lhs.0, rhs.0) {
+        match lhs.0.checked_div_rem_euclid(rhs.0) {
             Some((quotient, remainder)) => Ok((PyInt(quotient), PyInt(remainder))),
             None => Err(PyZeroDivisionError::new_err(
                 UNDEFINED_DIVISION_ERROR_MESSAGE,
@@ -170,17 +170,6 @@ impl PyNumberProtocol for PyInt {
             )),
         }
     }
-}
-
-fn checked_div_rem_euclid(dividend: _BigInt, divisor: _BigInt) -> Option<(_BigInt, _BigInt)> {
-    let (mut quotient, mut modulo) = dividend.checked_div_rem(divisor.clone())?;
-    if (divisor.is_negative() && modulo.is_positive())
-        || (divisor.is_positive() && modulo.is_negative())
-    {
-        quotient -= _BigInt::one();
-        modulo += divisor;
-    }
-    Some((quotient, modulo))
 }
 
 fn hash(value: &_BigInt) -> usize {

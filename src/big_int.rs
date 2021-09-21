@@ -9,10 +9,10 @@ use std::str::Chars;
 
 use crate::digits::*;
 use crate::traits::{
-    Abs, AssigningDivisivePartialMagma, CheckedDiv, CheckedDivEuclid, CheckedDivRem, CheckedPow,
-    CheckedRem, CheckedRemEuclid, DivEuclid, DivisivePartialMagma, DoublePrecision,
-    DoublePrecisionOf, FromStrRadix, Gcd, ModularPartialMagma, ModularSubtractiveMagma, Oppose,
-    OppositionOf, Oppositive, Pow, RemEuclid, Unitary, Zeroable,
+    Abs, AssigningDivisivePartialMagma, CheckedDiv, CheckedDivEuclid, CheckedDivRem,
+    CheckedDivRemEuclid, CheckedPow, CheckedRem, CheckedRemEuclid, DivEuclid, DivisivePartialMagma,
+    DoublePrecision, DoublePrecisionOf, FromStrRadix, Gcd, ModularPartialMagma,
+    ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Pow, RemEuclid, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -360,6 +360,37 @@ where
                 },
             ))
         }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRemEuclid
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    type Output = Option<(Self, Self)>;
+
+    fn checked_div_rem_euclid(self, divisor: Self) -> Self::Output {
+        let (mut quotient, mut modulo) = self.checked_div_rem(divisor.clone())?;
+        if (divisor.is_negative() && modulo.is_positive())
+            || (divisor.is_positive() && modulo.is_negative())
+        {
+            quotient -= Self::one();
+            modulo += divisor;
+        }
+        Some((quotient, modulo))
     }
 }
 

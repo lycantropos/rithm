@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 
 use crate::traits::{AssigningShiftingRightMonoid, ModularPartialMagma, Zeroable};
 
-pub const fn are_same<T: ?Sized, U: ?Sized>() -> bool {
+pub(crate) const fn are_same<T: ?Sized, U: ?Sized>() -> bool {
     trait SameTo<U: ?Sized> {
         const VALUE: bool;
     }

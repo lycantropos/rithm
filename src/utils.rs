@@ -59,13 +59,6 @@ pub(crate) const fn floor_log(value: usize, base: usize) -> Result<usize, &'stat
     }
 }
 
-pub(crate) const fn power(base: usize, exponent: usize) -> usize {
-    match exponent {
-        0 => 1,
-        _ => base * power(base, exponent - 1),
-    }
-}
-
 pub(crate) fn floor_log2<T>(value: T) -> usize
 where
     T: From<u8> + AssigningShiftingRightMonoid<usize> + PartialOrd,
@@ -73,4 +66,11 @@ where
 {
     debug_assert!(!value.is_zero());
     bit_length(value) - 1
+}
+
+pub(crate) const fn power(base: usize, exponent: usize) -> usize {
+    match exponent {
+        0 => 1,
+        _ => base * power(base, exponent - 1),
+    }
 }

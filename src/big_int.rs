@@ -10,7 +10,7 @@ use std::str::Chars;
 use crate::digits::*;
 use crate::traits::{
     Abs, AssigningDivisivePartialMagma, CheckedDiv, CheckedDivEuclid, CheckedDivRem,
-    CheckedDivRemEuclid, CheckedPow, CheckedRem, CheckedRemEuclid, DivEuclid, DivRem,
+    CheckedDivRemEuclid, CheckedPow, CheckedRem, CheckedRemEuclid, DivEuclid, DivRem, DivRemEuclid,
     DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, FromStrRadix, Gcd,
     ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Pow, RemEuclid,
     Unitary, Zeroable,
@@ -414,6 +414,30 @@ where
 
     fn div_rem(self, divisor: Self) -> Self::Output {
         self.checked_div_rem(divisor).unwrap()
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivRemEuclid
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
+    usize: TryFrom<Digit>,
+{
+    type Output = (Self, Self);
+
+    fn div_rem_euclid(self, divisor: Self) -> Self::Output {
+        self.checked_div_rem_euclid(divisor).unwrap()
     }
 }
 

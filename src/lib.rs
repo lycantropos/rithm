@@ -73,7 +73,7 @@ impl PyInt {
 
 #[inline]
 fn big_int_to_py_long(value: &_BigInt) -> PyObject {
-    let buffer = value.to_bytes();
+    let buffer = value.as_bytes();
     Python::with_gil(|py| unsafe {
         PyObject::from_owned_ptr(
             py,

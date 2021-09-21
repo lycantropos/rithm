@@ -163,7 +163,7 @@ where
     result
 }
 
-fn binary_digits_to_greater_binary_base<SourceDigit, TargetDigit>(
+pub(crate) fn binary_digits_to_greater_binary_base<SourceDigit, TargetDigit>(
     source_digits: &[SourceDigit],
     source_shift: usize,
     target_shift: usize,

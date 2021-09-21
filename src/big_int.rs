@@ -273,6 +273,8 @@ where
     }
 }
 
+const MIDDLE_BYTE: u8 = 1u8 << (u8::BITS - 1);
+
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
     Digit: BinaryDigit + DoublePrecision + From<u8>,
@@ -280,16 +282,15 @@ where
     DoublePrecisionOf<Digit>: BinaryDigit,
     usize: TryFrom<Digit>,
 {
-    pub(crate) fn to_bytes(&self) -> Vec<u8> {
+    pub(crate) fn as_bytes(&self) -> Vec<u8> {
         let mut result = binary_digits_to_lesser_binary_base::<Digit, u8>(
             &self.digits,
             SHIFT,
             u8::BITS as usize,
         );
         let most_significant_byte = result[result.len() - 1];
-        const MIDDLE: u8 = 1u8 << (u8::BITS - 1);
-        if most_significant_byte >= MIDDLE
-            && !(most_significant_byte == MIDDLE
+        if most_significant_byte >= MIDDLE_BYTE
+            && !(most_significant_byte == MIDDLE_BYTE
                 && result.iter().rev().skip(1).all(Zeroable::is_zero)
                 && self.is_negative())
         {
@@ -299,6 +300,30 @@ where
             negate_digits(&mut result);
         }
         result
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: DoublePrecision + TryFrom<DoublePrecisionOf<Digit>>,
+    DoublePrecisionOf<Digit>: BinaryDigit + From<u8>,
+{
+    pub(crate) fn from_bytes(mut bytes: Vec<u8>) -> Self {
+        let most_significant_byte = bytes[bytes.len() - 1];
+        let sign = if most_significant_byte > MIDDLE_BYTE {
+            negate_digits(&mut bytes);
+            -Sign::one()
+        } else {
+            (bytes.len() > 1 || !bytes[0].is_zero()) as Sign
+        };
+        Self {
+            sign,
+            digits: binary_digits_to_greater_binary_base::<u8, Digit>(
+                &bytes,
+                u8::BITS as usize,
+                SHIFT,
+            ),
+        }
     }
 }
 

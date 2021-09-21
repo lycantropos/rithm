@@ -4,49 +4,53 @@ use std::ops::{
     Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
 };
 
-pub trait AdditiveMonoid<Rhs = Self> = Add<Rhs, Output = Self> + Zeroable;
+pub trait AdditiveMonoid<Other = Self> = Add<Other, Output = Self> + Zeroable;
 
-pub trait AssigningAdditiveMonoid<Rhs = Self> = AdditiveMonoid<Rhs> + AddAssign<Rhs>;
+pub trait AssigningAdditiveMonoid<Other = Self> = AdditiveMonoid<Other> + AddAssign<Other>;
 
-pub trait AssigningBitwiseConjunctiveMagma<Rhs = Self> =
-    BitwiseConjunctiveMagma<Rhs> + BitAndAssign<Rhs>;
+pub trait AssigningBitwiseConjunctiveMagma<Other = Self> =
+    BitwiseConjunctiveMagma<Other> + BitAndAssign<Other>;
 
-pub trait AssigningBitwiseDisjunctiveMonoid<Rhs = Self> =
-    BitwiseDisjunctiveMonoid<Rhs> + BitOrAssign<Rhs>;
+pub trait AssigningBitwiseDisjunctiveMonoid<Other = Self> =
+    BitwiseDisjunctiveMonoid<Other> + BitOrAssign<Other>;
 
-pub trait AssigningDivisivePartialMagma<Rhs = Self> = DivisivePartialMagma<Rhs> + DivAssign<Rhs>;
+pub trait AssigningDivisivePartialMagma<Divisor = Self> =
+    DivisivePartialMagma<Divisor> + DivAssign<Divisor>;
 
-pub trait AssigningMultiplicativeMonoid<Rhs = Self> = MultiplicativeMonoid<Rhs> + MulAssign<Rhs>;
+pub trait AssigningMultiplicativeMonoid<Other = Self> =
+    MultiplicativeMonoid<Other> + MulAssign<Other>;
 
-pub trait AssigningShiftingLeftMonoid<Rhs = Self> = ShiftingLeftMonoid<Rhs> + ShlAssign<Rhs>;
+pub trait AssigningShiftingLeftMonoid<Shift = Self> = ShiftingLeftMonoid<Shift> + ShlAssign<Shift>;
 
-pub trait AssigningShiftingRightMonoid<Rhs = Self> = ShiftingRightMonoid<Rhs> + ShrAssign<Rhs>;
+pub trait AssigningShiftingRightMonoid<Shift = Self> =
+    ShiftingRightMonoid<Shift> + ShrAssign<Shift>;
 
-pub trait AssigningSubtractiveMagma<Rhs = Self> = SubtractiveMagma<Rhs> + SubAssign<Rhs>;
+pub trait AssigningSubtractiveMagma<Subtrahend = Self> =
+    SubtractiveMagma<Subtrahend> + SubAssign<Subtrahend>;
 
-pub trait BitwiseConjunctiveMagma<Rhs = Self> = BitAnd<Rhs, Output = Self> + Zeroable;
+pub trait BitwiseConjunctiveMagma<Other = Self> = BitAnd<Other, Output = Self> + Zeroable;
 
-pub trait BitwiseDisjunctiveMonoid<Rhs = Self> = BitOr<Rhs, Output = Self> + Zeroable;
+pub trait BitwiseDisjunctiveMonoid<Other = Self> = BitOr<Other, Output = Self> + Zeroable;
 
-pub trait DivisivePartialMagma<Rhs = Self> = Div<Rhs, Output = Self>;
+pub trait DivisivePartialMagma<Divisor = Self> = Div<Divisor, Output = Self>;
 
-pub trait GcdMagma<Rhs = Self> = Gcd<Rhs, Output = Self>;
+pub trait GcdMagma<Other = Self> = Gcd<Other, Output = Self>;
 
 pub trait ModularUnaryAlgebra = Abs<Output = Self>;
 
-pub trait ModularPartialMagma<Rhs = Self> = RemEuclid<Rhs, Output = Self>;
+pub trait ModularPartialMagma<Divisor = Self> = RemEuclid<Divisor, Output = Self>;
 
-pub trait ModularSubtractiveMagma<Rhs = Self> = ModularSub<Rhs, Output = Self>;
+pub trait ModularSubtractiveMagma<Subtrahend = Self> = ModularSub<Subtrahend, Output = Self>;
 
-pub trait MultiplicativeMonoid<Rhs = Self> = Mul<Rhs, Output = Self> + Unitary;
+pub trait MultiplicativeMonoid<Other = Self> = Mul<Other, Output = Self> + Unitary;
 
 pub trait NegatableUnaryAlgebra = Neg<Output = Self>;
 
-pub trait ShiftingLeftMonoid<Rhs = Self> = Shl<Rhs, Output = Self> + Zeroable;
+pub trait ShiftingLeftMonoid<Shift = Self> = Shl<Shift, Output = Self> + Zeroable;
 
-pub trait ShiftingRightMonoid<Rhs = Self> = Shr<Rhs, Output = Self> + Zeroable;
+pub trait ShiftingRightMonoid<Shift = Self> = Shr<Shift, Output = Self> + Zeroable;
 
-pub trait SubtractiveMagma<Rhs = Self> = Sub<Rhs, Output = Self>;
+pub trait SubtractiveMagma<Subtrahend = Self> = Sub<Subtrahend, Output = Self>;
 
 pub trait Abs {
     type Output;
@@ -69,10 +73,10 @@ macro_rules! plain_abs_impl {
 
 plain_abs_impl!(i8 i16 i32 i64 i128 isize);
 
-pub trait DivEuclid<Rhs = Self> {
+pub trait DivEuclid<Divisor = Self> {
     type Output;
 
-    fn div_euclid(self, divisor: Rhs) -> Self::Output;
+    fn div_euclid(self, divisor: Divisor) -> Self::Output;
 }
 
 macro_rules! plain_div_euclid_impl {
@@ -90,10 +94,10 @@ macro_rules! plain_div_euclid_impl {
 
 plain_div_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait CheckedDiv<Rhs = Self> {
+pub trait CheckedDiv<Divisor = Self> {
     type Output;
 
-    fn checked_div(self, divisor: Rhs) -> Self::Output;
+    fn checked_div(self, divisor: Divisor) -> Self::Output;
 }
 
 macro_rules! plain_checked_div_impl {
@@ -111,10 +115,10 @@ macro_rules! plain_checked_div_impl {
 
 plain_checked_div_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait CheckedDivEuclid<Rhs = Self> {
+pub trait CheckedDivEuclid<Divisor = Self> {
     type Output;
 
-    fn checked_div_euclid(self, divisor: Rhs) -> Self::Output;
+    fn checked_div_euclid(self, divisor: Divisor) -> Self::Output;
 }
 
 macro_rules! plain_checked_div_euclid_impl {
@@ -153,10 +157,10 @@ macro_rules! plain_checked_pow_impl {
 
 plain_checked_pow_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait CheckedRem<Rhs = Self> {
+pub trait CheckedRem<Divisor = Self> {
     type Output;
 
-    fn checked_rem(self, divisor: Rhs) -> Self::Output;
+    fn checked_rem(self, divisor: Divisor) -> Self::Output;
 }
 
 macro_rules! plain_checked_rem_impl {
@@ -174,10 +178,10 @@ macro_rules! plain_checked_rem_impl {
 
 plain_checked_rem_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait CheckedRemEuclid<Rhs = Self> {
+pub trait CheckedRemEuclid<Divisor = Self> {
     type Output;
 
-    fn checked_rem_euclid(self, divisor: Rhs) -> Self::Output;
+    fn checked_rem_euclid(self, divisor: Divisor) -> Self::Output;
 }
 
 macro_rules! plain_checked_rem_euclid_impl {
@@ -252,10 +256,10 @@ macro_rules! plain_from_str_radix_impl {
 
 plain_from_str_radix_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait Gcd<Rhs = Self> {
+pub trait Gcd<Other = Self> {
     type Output;
 
-    fn gcd(self, other: Rhs) -> Self::Output;
+    fn gcd(self, other: Other) -> Self::Output;
 }
 
 macro_rules! plain_gcd_impl {
@@ -295,10 +299,10 @@ macro_rules! plain_pow_impl {
 
 plain_pow_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait RemEuclid<Rhs = Self> {
+pub trait RemEuclid<Divisor = Self> {
     type Output;
 
-    fn rem_euclid(self, other: Rhs) -> Self::Output;
+    fn rem_euclid(self, divisor: Divisor) -> Self::Output;
 }
 
 macro_rules! plain_rem_euclid_impl {
@@ -307,8 +311,8 @@ macro_rules! plain_rem_euclid_impl {
             type Output = $t;
 
             #[inline(always)]
-            fn rem_euclid(self, other: Self) -> Self::Output {
-                <$t>::rem_euclid(self, other)
+            fn rem_euclid(self, divisor: Self) -> Self::Output {
+                <$t>::rem_euclid(self, divisor)
             }
         }
     )*)
@@ -316,10 +320,10 @@ macro_rules! plain_rem_euclid_impl {
 
 plain_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait ModularSub<Rhs = Self> {
+pub trait ModularSub<Subtrahend = Self> {
     type Output;
 
-    fn wrapping_sub(self, rhs: Rhs) -> Self::Output;
+    fn wrapping_sub(self, subtrahend: Subtrahend) -> Self::Output;
 }
 
 macro_rules! plain_modular_sub_impl {
@@ -328,8 +332,8 @@ macro_rules! plain_modular_sub_impl {
             type Output = $t;
 
             #[inline(always)]
-            fn wrapping_sub(self, rhs: Self) -> Self::Output {
-                <$t>::wrapping_sub(self, rhs)
+            fn wrapping_sub(self, subtrahend: Self) -> Self::Output {
+                <$t>::wrapping_sub(self, subtrahend)
             }
         }
     )*)

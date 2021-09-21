@@ -158,8 +158,8 @@ impl<
 {
     type Output = Self;
 
-    fn div(self, other: Self) -> Self::Output {
-        self.checked_div(other).unwrap()
+    fn div(self, divisor: Self) -> Self::Output {
+        self.checked_div(divisor).unwrap()
     }
 }
 
@@ -291,10 +291,11 @@ impl<
 {
     type Output = Self;
 
-    fn sub(self, other: Self) -> Self::Output {
+    fn sub(self, subtrahend: Self) -> Self::Output {
         let (numerator, denominator) = normalize_components_moduli::<Component>(
-            self.numerator * other.denominator.clone() - other.numerator * self.denominator.clone(),
-            self.denominator * other.denominator,
+            self.numerator * subtrahend.denominator.clone()
+                - subtrahend.numerator * self.denominator.clone(),
+            self.denominator * subtrahend.denominator,
         );
         Self {
             numerator,
@@ -313,11 +314,11 @@ impl<
             + SubtractiveMagma,
     > SubAssign for Fraction<Component>
 {
-    fn sub_assign(&mut self, other: Self) {
+    fn sub_assign(&mut self, subtrahend: Self) {
         (self.numerator, self.denominator) = normalize_components_moduli::<Component>(
-            self.numerator.clone() * other.denominator.clone()
-                - other.numerator * self.denominator.clone(),
-            self.denominator.clone() * other.denominator,
+            self.numerator.clone() * subtrahend.denominator.clone()
+                - subtrahend.numerator * self.denominator.clone(),
+            self.denominator.clone() * subtrahend.denominator,
         );
     }
 }

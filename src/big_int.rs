@@ -273,6 +273,35 @@ where
     }
 }
 
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit + DoublePrecision + From<u8>,
+    u8: TryFrom<DoublePrecisionOf<Digit>>,
+    DoublePrecisionOf<Digit>: BinaryDigit,
+    usize: TryFrom<Digit>,
+{
+    pub(crate) fn to_bytes(&self) -> Vec<u8> {
+        let mut result = binary_digits_to_lesser_binary_base::<Digit, u8>(
+            &self.digits,
+            SHIFT,
+            u8::BITS as usize,
+        );
+        let most_significant_byte = result[result.len() - 1];
+        const MIDDLE: u8 = 1u8 << (u8::BITS - 1);
+        if most_significant_byte >= MIDDLE
+            && !(most_significant_byte == MIDDLE
+                && result.iter().rev().skip(1).all(Zeroable::is_zero)
+                && self.is_negative())
+        {
+            result.push(0u8);
+        }
+        if self.is_negative() {
+            negate_digits(&mut result);
+        }
+        result
+    }
+}
+
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Abs for BigInt<Digit, SEPARATOR, SHIFT> {
     type Output = Self;
 

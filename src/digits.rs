@@ -825,6 +825,42 @@ where
     result
 }
 
+pub(crate) fn negate_digits(digits: &mut [u8]) {
+    let mut carry = true;
+    for digit in digits {
+        *digit = !*digit;
+        if carry {
+            *digit = digit.wrapping_add(1);
+            carry = digit.is_zero();
+        }
+    }
+}
+
+pub(crate) fn normalize_digits<Digit>(digits: &mut Vec<Digit>)
+where
+    Digit: Clone + Zeroable,
+{
+    let mut digits_count = digits.len();
+    while digits_count > 1 && digits[digits_count - 1].is_zero() {
+        digits_count -= 1;
+    }
+    if digits_count != digits.len() {
+        digits.resize(digits_count, Digit::zero());
+    }
+}
+
+pub(crate) fn reduce_digits<Digit, Output, const SHIFT: usize>(digits: &[Digit]) -> Output
+where
+    Digit: Copy,
+    Output: BinaryDigit + From<Digit>,
+{
+    let mut result = Output::zero();
+    for &digit in digits.iter().rev() {
+        result = (result << SHIFT) | <Output as From<Digit>>::from(digit);
+    }
+    result
+}
+
 fn shift_digits_left<Digit, const SHIFT: usize>(
     input_digits: &[Digit],
     shift: usize,
@@ -1070,31 +1106,6 @@ where
         accumulator >>= SHIFT;
     }
     accumulator
-}
-
-pub(crate) fn normalize_digits<Digit>(digits: &mut Vec<Digit>)
-where
-    Digit: Clone + Zeroable,
-{
-    let mut digits_count = digits.len();
-    while digits_count > 1 && digits[digits_count - 1].is_zero() {
-        digits_count -= 1;
-    }
-    if digits_count != digits.len() {
-        digits.resize(digits_count, Digit::zero());
-    }
-}
-
-pub(crate) fn reduce_digits<Digit, Output, const SHIFT: usize>(digits: &[Digit]) -> Output
-where
-    Digit: Copy,
-    Output: BinaryDigit + From<Digit>,
-{
-    let mut result = Output::zero();
-    for &digit in digits.iter().rev() {
-        result = (result << SHIFT) | <Output as From<Digit>>::from(digit);
-    }
-    result
 }
 
 #[inline]

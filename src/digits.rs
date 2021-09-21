@@ -228,11 +228,11 @@ where
             result.push(unsafe {
                 TargetDigit::try_from(accumulator & target_digit_mask).unwrap_unchecked()
             });
-            accumulator_bits_count -= target_shift;
             accumulator >>= target_shift;
             if if index == source_digits.len() - 1 {
                 accumulator.is_zero()
             } else {
+                accumulator_bits_count -= target_shift;
                 accumulator_bits_count < target_shift
             } {
                 break;

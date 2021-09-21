@@ -2,16 +2,16 @@ use std::convert::TryFrom;
 
 use crate::traits::{AssigningShiftingRightMonoid, ModularPartialMagma, Zeroable};
 
-pub(crate) const fn are_same<T: ?Sized, U: ?Sized>() -> bool {
-    trait SameTo<U: ?Sized> {
+pub(crate) const fn are_same<T, U>() -> bool {
+    trait SameTo<U> {
         const VALUE: bool;
     }
 
-    impl<T: ?Sized, U: ?Sized> SameTo<U> for T {
+    impl<T, U> SameTo<U> for T {
         default const VALUE: bool = false;
     }
 
-    impl<T: ?Sized> SameTo<T> for T {
+    impl<T> SameTo<T> for T {
         const VALUE: bool = true;
     }
 

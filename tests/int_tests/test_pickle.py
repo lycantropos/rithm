@@ -1,12 +1,10 @@
 from hypothesis import given
 
-from tests.utils import (IntWithBuiltin,
-                         pickle_round_trip)
+from rithm import Int
+from tests.utils import pickle_round_trip
 from . import strategies
 
 
-@given(strategies.ints_with_builtin_ints)
-def test_round_trip(int_with_builtin_int: IntWithBuiltin) -> None:
-    int_, builtin_int = int_with_builtin_int
-
+@given(strategies.ints)
+def test_round_trip(int_: Int) -> None:
     assert pickle_round_trip(int_) == int_

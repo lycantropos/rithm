@@ -7,9 +7,6 @@ RUN pip install --upgrade pip setuptools setuptools_rust
 
 WORKDIR /opt/rithm
 
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
 COPY requirements-tests.txt .
 RUN pip install -r requirements-tests.txt
 

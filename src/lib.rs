@@ -33,6 +33,7 @@ type _BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
 type _Fraction = fraction::Fraction<_BigInt>;
 
 #[pyclass(name = "Int", module = "rithm", subclass)]
+#[pyo3(text_signature = "(string, base, /)")]
 #[derive(Clone)]
 struct PyInt(_BigInt);
 
@@ -43,14 +44,15 @@ struct PyFraction(_Fraction);
 #[pymethods]
 impl PyInt {
     #[new]
-    #[args(_string = "\"0\"", base = 10)]
-    fn new(_string: &str, base: u32) -> PyResult<Self> {
-        match _BigInt::from_str_radix(_string, base) {
+    #[args(_string = "\"0\"", _base = 10)]
+    fn new(_string: &str, _base: u32) -> PyResult<Self> {
+        match _BigInt::from_str_radix(_string, _base) {
             Ok(value) => Ok(PyInt(value)),
             Err(reason) => Err(PyValueError::new_err(reason.to_string())),
         }
     }
 
+    #[pyo3(text_signature = "($self, other, /)")]
     fn gcd(&self, other: Self) -> PyInt {
         PyInt(self.0.clone().gcd(other.0))
     }

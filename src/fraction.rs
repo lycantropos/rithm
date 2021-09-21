@@ -88,21 +88,21 @@ impl<
 {
     type Output = Option<Self>;
 
-    fn checked_div(self, other: Self) -> Self::Output {
-        if other.is_zero() {
+    fn checked_div(self, divisor: Self) -> Self::Output {
+        if divisor.is_zero() {
             return None;
         }
-        let (numerator, other_numerator) =
-            normalize_components_moduli::<Component>(self.numerator, other.numerator);
-        let (denominator, other_denominator) =
-            normalize_components_moduli::<Component>(self.denominator, other.denominator);
-        let (result_numerator, result_denominator) = normalize_components_sign::<Component>(
-            numerator * other_denominator,
-            denominator * other_numerator,
+        let (dividend_numerator, divisor_numerator) =
+            normalize_components_moduli::<Component>(self.numerator, divisor.numerator);
+        let (dividend_denominator, divisor_denominator) =
+            normalize_components_moduli::<Component>(self.denominator, divisor.denominator);
+        let (numerator, denominator) = normalize_components_sign::<Component>(
+            dividend_numerator * divisor_denominator,
+            dividend_denominator * divisor_numerator,
         );
         Some(Self {
-            numerator: result_numerator,
-            denominator: result_denominator,
+            numerator,
+            denominator,
         })
     }
 }

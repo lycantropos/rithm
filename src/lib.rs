@@ -10,7 +10,7 @@ use crate::traits::{
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
-use pyo3::ffi::Py_hash_t;
+use pyo3::ffi;
 use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, Python};
 use pyo3::{IntoPy, PyNumberProtocol, PyObject};
 use std::convert::TryFrom;
@@ -57,6 +57,29 @@ impl PyInt {
     fn gcd(&self, other: Self) -> PyInt {
         PyInt(self.0.clone().gcd(other.0))
     }
+
+    fn __ceil__(&self) -> PyObject {
+        big_int_to_py_long(&self.0)
+    }
+
+    fn __floor__(&self) -> PyObject {
+        big_int_to_py_long(&self.0)
+    }
+
+    fn __trunc__(&self) -> PyObject {
+        big_int_to_py_long(&self.0)
+    }
+}
+
+#[inline]
+fn big_int_to_py_long(value: &_BigInt) -> PyObject {
+    let buffer = value.to_bytes();
+    Python::with_gil(|py| unsafe {
+        PyObject::from_owned_ptr(
+            py,
+            ffi::_PyLong_FromByteArray(buffer.as_ptr(), buffer.len(), 1, 1),
+        )
+    })
 }
 
 #[pymethods]
@@ -212,8 +235,8 @@ impl PyObjectProtocol for PyInt {
         !self.0.is_zero()
     }
 
-    fn __hash__(&self) -> Py_hash_t {
-        hash(&self.0) as Py_hash_t
+    fn __hash__(&self) -> ffi::Py_hash_t {
+        hash(&self.0) as ffi::Py_hash_t
     }
 
     fn __repr__(&self) -> String {

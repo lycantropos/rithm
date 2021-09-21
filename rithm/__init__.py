@@ -42,6 +42,12 @@ except ImportError:
         def __bool__(self) -> bool:
             return bool(self._value)
 
+        def __ceil__(self) -> int:
+            return self._value
+
+        def __floor__(self) -> int:
+            return self._value
+
         def __floordiv__(self, other: 'Int') -> 'Int':
             return (Int(self._value // other._value,
                         _parse=False)
@@ -127,6 +133,9 @@ except ImportError:
             return (Fraction(self, other)
                     if isinstance(other, Int)
                     else NotImplemented)
+
+        def __trunc__(self) -> int:
+            return self._value
 
 
     _ONE = Int('1')

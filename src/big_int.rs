@@ -384,14 +384,18 @@ where
     type Output = Option<(Self, Self)>;
 
     fn checked_div_rem_euclid(self, divisor: Self) -> Self::Output {
-        let (mut quotient, mut modulo) = self.checked_div_rem(divisor.clone())?;
-        if (divisor.is_negative() && modulo.is_positive())
-            || (divisor.is_positive() && modulo.is_negative())
-        {
-            quotient -= Self::one();
-            modulo += divisor;
+        match self.checked_div_rem(divisor.clone()) {
+            Some((mut quotient, mut modulo)) => {
+                if (divisor.is_negative() && modulo.is_positive())
+                    || (divisor.is_positive() && modulo.is_negative())
+                {
+                    quotient -= Self::one();
+                    modulo += divisor;
+                }
+                Some((quotient, modulo))
+            }
+            None => None,
         }
-        Some((quotient, modulo))
     }
 }
 

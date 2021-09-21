@@ -20,7 +20,7 @@ def is_equivalent_to_builtin_fraction(value: Fraction,
 
 
 def is_equivalent_to_builtin_int(value: Int, builtin: int) -> bool:
-    return str(value) == str(builtin)
+    return int(value) == builtin
 
 
 def to_int_with_builtin_int(decimal_string: str) -> Tuple[Int, int]:

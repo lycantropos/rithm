@@ -1,7 +1,7 @@
 use std::num::ParseIntError;
 use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, Div, DivAssign, Mul, MulAssign, Neg,
-    Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
+    Rem, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
 };
 
 pub trait AdditiveMonoid<Other = Self> = Add<Other, Output = Self> + Zeroable;
@@ -135,6 +135,31 @@ macro_rules! plain_checked_div_euclid_impl {
 }
 
 plain_checked_div_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
+pub trait CheckedDivRem<Divisor = Self> {
+    type Output;
+
+    fn checked_div_rem(self, divisor: Divisor) -> Self::Output;
+}
+
+macro_rules! plain_checked_div_rem_impl {
+    ($($t:ty)*) => ($(
+        impl CheckedDivRem for $t {
+            type Output = Option<(Self, Self)>;
+
+            #[inline(always)]
+            fn checked_div_rem(self, divisor: Self) -> Self::Output {
+                if divisor.is_zero() {
+                    None
+                } else {
+                    Some((<$t>::div(self, divisor), <$t>::rem(self, divisor)))
+                }
+            }
+        }
+    )*)
+}
+
+plain_checked_div_rem_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedPow<Exponent> {
     type Output;

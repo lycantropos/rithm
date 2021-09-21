@@ -71,6 +71,9 @@ except ImportError:
                     if isinstance(other, Int)
                     else NotImplemented)
 
+        def __getstate__(self) -> int:
+            return self._value
+
         def __gt__(self, other: 'Int') -> bool:
             return (self._value > other._value
                     if isinstance(other, Int)
@@ -119,6 +122,9 @@ except ImportError:
 
         def __repr__(self) -> str:
             return f'rithm.Int(\'{self._value}\')'
+
+        def __setstate__(self, state: int) -> None:
+            self._value = state
 
         def __str__(self) -> str:
             return str(self._value)

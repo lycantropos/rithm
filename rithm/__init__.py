@@ -8,34 +8,31 @@ try:
 except ImportError:
     from math import gcd as _gcd
     from operator import mul as _mul
-    from typing import (Tuple as _Tuple,
+    from typing import (Optional as _Optional,
+                        Tuple as _Tuple,
                         Union as _Union)
 
 
     class Int:
         def gcd(self, other: 'Int') -> 'Int':
-            return Int(_gcd(self._value, other._value),
-                       _parse=False)
+            return Int(_gcd(self._value, other._value))
 
         __slots__ = '_value',
 
-        def __new__(cls, _value: _Union[str, int] = '0', _base: int = 10,
-                    *,
-                    _parse: bool = True) -> 'Int':
+        def __new__(cls,
+                    _value: _Union[str, int] = 0,
+                    _base: _Optional[int] = None) -> 'Int':
             self = super().__new__(cls)
-            if _parse and not isinstance(_value, str):
-                raise TypeError(f'First argument should be of type {str}, '
-                                f'but found {type(_value)}.')
-            self._value = int(_value, _base) if _parse else _value
+            self._value = (int(_value, _base)
+                           if _base is not None
+                           else int(_value))
             return self
 
         def __abs__(self) -> 'Int':
-            return Int(abs(self._value),
-                       _parse=False)
+            return Int(abs(self._value))
 
         def __add__(self, other: 'Int') -> 'Int':
-            return (Int(self._value + other._value,
-                        _parse=False)
+            return (Int(self._value + other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
@@ -49,14 +46,12 @@ except ImportError:
             return self._value
 
         def __floordiv__(self, other: 'Int') -> 'Int':
-            return (Int(self._value // other._value,
-                        _parse=False)
+            return (Int(self._value // other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
         def __divmod__(self, other: 'Int') -> _Tuple['Int', 'Int']:
-            return (tuple(Int(value,
-                              _parse=False)
+            return (tuple(Int(value)
                           for value in divmod(self._value, other._value))
                     if isinstance(other, Int)
                     else NotImplemented)
@@ -83,8 +78,7 @@ except ImportError:
             return hash(self._value)
 
         def __invert__(self) -> 'Int':
-            return Int(~self._value,
-                       _parse=False)
+            return Int(~self._value)
 
         def __le__(self, other: 'Int') -> bool:
             return (self._value <= other._value
@@ -97,24 +91,20 @@ except ImportError:
                     else NotImplemented)
 
         def __mod__(self, other: 'Int') -> 'Int':
-            return (Int(self._value % other._value,
-                        _parse=False)
+            return (Int(self._value % other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
         def __mul__(self, other: 'Int') -> 'Int':
-            return (Int(self._value * other._value,
-                        _parse=False)
+            return (Int(self._value * other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
         def __neg__(self) -> 'Int':
-            return Int(-self._value,
-                       _parse=False)
+            return Int(-self._value)
 
         def __pow__(self, exponent: 'Int') -> _Union['Fraction', 'Int']:
-            return ((Int(self._value ** exponent._value,
-                         _parse=False)
+            return ((Int(self._value ** exponent._value)
                      if exponent >= _ZERO
                      else Fraction(_ONE, self) ** -exponent)
                     if isinstance(exponent, Int)
@@ -130,8 +120,7 @@ except ImportError:
             return str(self._value)
 
         def __sub__(self, other: 'Int') -> 'Int':
-            return (Int(self._value - other._value,
-                        _parse=False)
+            return (Int(self._value - other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 

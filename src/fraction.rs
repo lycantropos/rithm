@@ -194,6 +194,22 @@ impl<
 
 impl<
         Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
+    > Mul<Component> for Fraction<Component>
+{
+    type Output = Self;
+
+    fn mul(self, other: Component) -> Self::Output {
+        let (other, denominator) =
+            normalize_components_moduli::<Component>(other, self.denominator);
+        Self {
+            numerator: self.numerator * other,
+            denominator,
+        }
+    }
+}
+
+impl<
+        Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
     > MulAssign for Fraction<Component>
 {
     fn mul_assign(&mut self, other: Self) {

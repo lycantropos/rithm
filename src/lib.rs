@@ -11,7 +11,7 @@ use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
 use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, Python};
-use pyo3::types::{PyBytes, PyTuple};
+use pyo3::types::PyBytes;
 use pyo3::{ffi, ToPyObject};
 use pyo3::{IntoPy, PyNumberProtocol, PyObject};
 use std::convert::TryFrom;

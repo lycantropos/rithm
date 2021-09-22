@@ -1031,13 +1031,15 @@ where
     let mut result = Vec::<Digit>::with_capacity(size_longest);
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for index in 0..size_shortest {
-        accumulator = longest[index].wrapping_sub(shortest[index]) - accumulator;
+        accumulator = longest[index]
+            .wrapping_sub(shortest[index])
+            .wrapping_sub(accumulator);
         result.push(accumulator & digit_mask);
         accumulator >>= SHIFT;
         accumulator &= Digit::one();
     }
     for index in size_shortest..size_longest {
-        accumulator = longest[index] - accumulator;
+        accumulator = longest[index].wrapping_sub(accumulator);
         result.push(accumulator & digit_mask);
         accumulator >>= SHIFT;
         accumulator &= Digit::one();
@@ -1056,7 +1058,9 @@ where
     let mut accumulator = Digit::zero();
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for index in 0..shortest.len() {
-        accumulator = longest[index].wrapping_sub(shortest[index]) - accumulator;
+        accumulator = longest[index]
+            .wrapping_sub(shortest[index])
+            .wrapping_sub(accumulator);
         longest[index] = accumulator & digit_mask;
         accumulator = (accumulator >> SHIFT) & Digit::one();
     }

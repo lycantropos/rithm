@@ -309,8 +309,12 @@ where
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: DoublePrecision + TryFrom<DoublePrecisionOf<Digit>>,
+    Digit: DoublePrecision
+        + TryFrom<u8>
+        + TryFrom<DoublePrecisionOf<u8>>
+        + TryFrom<DoublePrecisionOf<Digit>>,
     DoublePrecisionOf<Digit>: BinaryDigit + From<u8>,
+    usize: TryFrom<u8>,
 {
     pub(crate) fn from_bytes(mut bytes: Vec<u8>) -> Self {
         let most_significant_byte = bytes[bytes.len() - 1];
@@ -322,11 +326,7 @@ where
         };
         Self {
             sign,
-            digits: binary_digits_to_greater_binary_base::<u8, Digit>(
-                &bytes,
-                u8::BITS as usize,
-                SHIFT,
-            ),
+            digits: binary_digits_to_binary_base::<u8, Digit>(&bytes, u8::BITS as usize, SHIFT),
         }
     }
 }

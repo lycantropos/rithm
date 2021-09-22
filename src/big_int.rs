@@ -31,7 +31,7 @@ pub struct BigIntParsingError {
 
 impl Debug for BigIntParsingError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        Debug::fmt(&self.kind.description(), formatter)
+        formatter.write_str(self.kind.description().as_str())
     }
 }
 

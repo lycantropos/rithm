@@ -326,7 +326,12 @@ where
         };
         Self {
             sign,
-            digits: binary_digits_to_binary_base::<u8, Digit>(&bytes, u8::BITS as usize, SHIFT),
+            digits: binary_digits_to_binary_base::<u8, Digit>(
+                &bytes[..bytes.len()
+                    - ((bytes.len() > 1 && bytes[bytes.len() - 1].is_zero()) as usize)],
+                u8::BITS as usize,
+                SHIFT,
+            ),
         }
     }
 }

@@ -40,7 +40,7 @@ pub trait ModularUnaryAlgebra = Abs<Output = Self>;
 
 pub trait ModularPartialMagma<Divisor = Self> = RemEuclid<Divisor, Output = Self>;
 
-pub trait ModularSubtractiveMagma<Subtrahend = Self> = ModularSub<Subtrahend, Output = Self>;
+pub trait ModularSubtractiveMagma<Subtrahend = Self> = WrappingSub<Subtrahend, Output = Self>;
 
 pub trait MultiplicativeMonoid<Other = Self> = Mul<Other, Output = Self> + Unitary;
 
@@ -412,27 +412,6 @@ macro_rules! plain_rem_euclid_impl {
 
 plain_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait ModularSub<Subtrahend = Self> {
-    type Output;
-
-    fn wrapping_sub(self, subtrahend: Subtrahend) -> Self::Output;
-}
-
-macro_rules! plain_modular_sub_impl {
-    ($($t:ty)*) => ($(
-        impl ModularSub for $t {
-            type Output = $t;
-
-            #[inline(always)]
-            fn wrapping_sub(self, subtrahend: Self) -> Self::Output {
-                <$t>::wrapping_sub(self, subtrahend)
-            }
-        }
-    )*)
-}
-
-plain_modular_sub_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
-
 pub trait Oppositive: NegatableUnaryAlgebra + Zeroable {
     fn is_negative(&self) -> bool;
     fn is_positive(&self) -> bool;
@@ -529,6 +508,27 @@ macro_rules! plain_unitary_impl {
 }
 
 plain_unitary_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
+pub trait WrappingSub<Subtrahend = Self> {
+    type Output;
+
+    fn wrapping_sub(self, subtrahend: Subtrahend) -> Self::Output;
+}
+
+macro_rules! plain_wrapping_sub_impl {
+    ($($t:ty)*) => ($(
+        impl WrappingSub for $t {
+            type Output = $t;
+
+            #[inline(always)]
+            fn wrapping_sub(self, subtrahend: Self) -> Self::Output {
+                <$t>::wrapping_sub(self, subtrahend)
+            }
+        }
+    )*)
+}
+
+plain_wrapping_sub_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait Zeroable {
     fn zero() -> Self;

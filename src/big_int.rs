@@ -310,7 +310,7 @@ where
 {
     pub(crate) fn from_bytes(mut bytes: Vec<u8>) -> Self {
         let most_significant_byte = bytes[bytes.len() - 1];
-        let sign = if most_significant_byte > MIDDLE_BYTE {
+        let sign = if most_significant_byte >= MIDDLE_BYTE {
             negate_digits(&mut bytes);
             -Sign::one()
         } else {

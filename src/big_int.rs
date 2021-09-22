@@ -108,7 +108,7 @@ where
         };
         Self::skip_prefix(&mut characters, base);
         Self::parse_digits(characters, base).map(|digits| {
-            let digits = digits_to_binary_base::<u8, Digit>(&digits, base as usize, SHIFT);
+            let digits = digits_to_binary_base::<u8, Digit, SHIFT>(&digits, base as usize);
             Self {
                 sign: sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
                 digits,
@@ -232,7 +232,11 @@ where
     ];
 
     fn to_base_string(&self, base: usize) -> String {
-        let shift = unsafe { utils::floor_log(1 << SHIFT, base).unwrap_unchecked() };
+        let shift = if (1 << SHIFT) >= MAX_REPRESENTABLE_BASE || base < (1 << SHIFT) {
+            unsafe { utils::floor_log(1 << SHIFT, base).unwrap_unchecked() }
+        } else {
+            1
+        };
         let digits =
             binary_digits_to_base::<Digit, Digit>(&self.digits, SHIFT, utils::power(base, shift));
         let characters_count = (self.is_negative() as usize)
@@ -277,17 +281,17 @@ const MIDDLE_BYTE: u8 = 1u8 << (u8::BITS - 1);
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: BinaryDigit + DoublePrecision + From<u8>,
-    u8: TryFrom<DoublePrecisionOf<Digit>>,
+    Digit: BinaryDigit + DoublePrecision + From<u8> + TryFrom<DoublePrecisionOf<Digit>>,
+    u8: TryFrom<Digit>,
     DoublePrecisionOf<Digit>: BinaryDigit,
     usize: TryFrom<Digit>,
 {
     pub(crate) fn as_bytes(&self) -> Vec<u8> {
-        let mut result = binary_digits_to_lesser_binary_base::<Digit, u8>(
-            &self.digits,
-            SHIFT,
-            u8::BITS as usize,
-        );
+        let mut result =
+            binary_digits_to_binary_base::<Digit, Digit>(&self.digits, SHIFT, u8::BITS as usize)
+                .iter()
+                .map(|&byte| unsafe { u8::try_from(byte).unwrap_unchecked() })
+                .collect::<Vec<u8>>();
         let most_significant_byte = result[result.len() - 1];
         if most_significant_byte >= MIDDLE_BYTE
             && !(most_significant_byte == MIDDLE_BYTE

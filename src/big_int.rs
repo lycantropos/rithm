@@ -232,11 +232,12 @@ where
     ];
 
     fn to_base_string(&self, base: usize) -> String {
-        let shift = if (1 << SHIFT) >= MAX_REPRESENTABLE_BASE || base < (1 << SHIFT) {
-            unsafe { utils::floor_log(1 << SHIFT, base).unwrap_unchecked() }
-        } else {
-            1
-        };
+        let shift =
+            if (1usize << SHIFT) >= (MAX_REPRESENTABLE_BASE as usize) || base < (1usize << SHIFT) {
+                unsafe { utils::floor_log(1 << SHIFT, base).unwrap_unchecked() }
+            } else {
+                1usize
+            };
         let digits =
             binary_digits_to_base::<Digit, Digit>(&self.digits, SHIFT, utils::power(base, shift));
         let characters_count = (self.is_negative() as usize)

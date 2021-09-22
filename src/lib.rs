@@ -359,6 +359,15 @@ impl PyNumberProtocol for PyFraction {
         }
     }
 
+    fn __rmul__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance::<PyInt>()? {
+            Ok(PyFraction(self.0.clone() * other.extract::<PyInt>()?.0).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
+    }
+
     fn __sub__(lhs: PyFraction, rhs: PyFraction) -> PyFraction {
         PyFraction(lhs.0 - rhs.0)
     }

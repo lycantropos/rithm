@@ -11,10 +11,11 @@ use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
 use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, Python};
-use pyo3::types::PyBytes;
-use pyo3::{ffi, ToPyObject};
+use pyo3::types::{PyBytes, PyLong, PyString};
+use pyo3::{ffi, AsPyPointer, Py, PyAny, PyErr, PyNativeType, ToPyObject};
 use pyo3::{IntoPy, PyNumberProtocol, PyObject};
 use std::convert::TryFrom;
+use std::os::raw::c_uchar;
 
 pub mod big_int;
 mod digits;
@@ -34,7 +35,7 @@ type _BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
 type _Fraction = fraction::Fraction<_BigInt>;
 
 #[pyclass(name = "Int", module = "rithm", subclass)]
-#[pyo3(text_signature = "(string, base, /)")]
+#[pyo3(text_signature = "(value, base=None, /)")]
 #[derive(Clone)]
 struct PyInt(_BigInt);
 
@@ -46,11 +47,50 @@ struct PyFraction(_Fraction);
 #[pymethods]
 impl PyInt {
     #[new]
-    #[args(_string = "\"0\"", _base = 10)]
-    fn new(_string: &str, _base: u32) -> PyResult<Self> {
-        match _BigInt::from_str_radix(_string, _base) {
-            Ok(value) => Ok(PyInt(value)),
-            Err(reason) => Err(PyValueError::new_err(reason.to_string())),
+    fn new(_value: Option<&PyAny>, _base: Option<u32>) -> PyResult<Self> {
+        match _value {
+            None => Ok(PyInt(_BigInt::zero())),
+            Some(value) => {
+                if _base.is_some() || value.is_instance::<PyString>()? {
+                    match _BigInt::from_str_radix(value.extract::<&str>()?, _base.unwrap_or(10)) {
+                        Ok(value) => Ok(PyInt(value)),
+                        Err(reason) => Err(PyValueError::new_err(reason.to_string())),
+                    }
+                } else if value.is_instance::<PyInt>()? {
+                    return value.extract::<PyInt>();
+                } else {
+                    let ptr = value.as_ptr();
+                    let py = value.py();
+                    unsafe {
+                        let value = ffi::PyNumber_Index(ptr);
+                        if value.is_null() {
+                            return Err(PyErr::fetch(py));
+                        }
+                        let bits_count = ffi::_PyLong_NumBits(value);
+                        if bits_count < 0 {
+                            Err(PyErr::fetch(py))
+                        } else if bits_count == 0 {
+                            Ok(PyInt(_BigInt::zero()))
+                        } else {
+                            let bytes_count = bits_count as usize / (c_uchar::BITS as usize) + 1;
+                            let mut buffer = vec![0 as c_uchar; bytes_count];
+                            if ffi::_PyLong_AsByteArray(
+                                Py::<PyLong>::from_owned_ptr(py, value).as_ptr()
+                                    as *mut ffi::PyLongObject,
+                                buffer.as_mut_ptr(),
+                                buffer.len(),
+                                1,
+                                1,
+                            ) < 0
+                            {
+                                Err(PyErr::fetch(py))
+                            } else {
+                                Ok(PyInt(_BigInt::from_bytes(buffer)))
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

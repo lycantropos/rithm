@@ -73,16 +73,8 @@ impl BigIntParsingErrorKind {
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: Copy
-        + DoublePrecision
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<u8>
-        + TryFrom<DoublePrecisionOf<u8>>
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + Zeroable,
-    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + TryFrom<usize>,
+impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
+    BigInt<Digit, SEPARATOR, SHIFT>
 {
     const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
         37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
@@ -843,24 +835,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> FromStrRadix
+impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> FromStrRadix
     for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<DoublePrecisionOf<u8>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<u8>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + Oppose + TryFrom<usize>,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
 {
     type Error = BigIntParsingError;
 
@@ -1294,17 +1270,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&str>
+impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&str>
     for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: Copy
-        + DoublePrecision
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<u8>
-        + TryFrom<DoublePrecisionOf<u8>>
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + Zeroable,
-    DoublePrecisionOf<Digit>: BinaryDigit + From<u8> + TryFrom<usize>,
 {
     type Error = BigIntParsingError;
 

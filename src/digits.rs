@@ -20,6 +20,14 @@ pub trait BinaryDigit = AssigningAdditiveMonoid
     + AssigningSubtractiveMagma
     + Copy
     + PartialOrd;
+pub trait FromStrDigit = Copy
+    + DoublePrecision
+    + TryFrom<DoublePrecisionOf<Self>>
+    + TryFrom<u8>
+    + TryFrom<DoublePrecisionOf<u8>>
+    + TryFrom<DoublePrecisionOf<Self>>
+    + Zeroable
+where DoublePrecisionOf<Self>: BinaryDigit + From<u8> + TryFrom<usize>;
 
 pub(crate) type Sign = i8;
 

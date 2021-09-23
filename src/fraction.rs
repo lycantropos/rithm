@@ -1,11 +1,15 @@
 use std::fmt::{Display, Formatter};
 
+use crate::big_int::BigInt;
+use crate::digits::BinaryDigit;
 use crate::traits::{
-    Abs, AdditiveMonoid, CheckedDiv, CheckedPow, DivisivePartialMagma, GcdMagma,
-    ModularUnaryAlgebra, MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, Pow,
+    Abs, AdditiveMonoid, CheckedDiv, CheckedPow, DivisivePartialMagma, DoublePrecision,
+    DoublePrecisionOf, GcdMagma, ModularPartialMagma, ModularSubtractiveMagma, ModularUnaryAlgebra,
+    MultiplicativeMonoid, NegatableUnaryAlgebra, Oppose, OppositionOf, Oppositive, Pow,
     SubtractiveMagma, Unitary, Zeroable,
 };
 use std::cmp::Ordering;
+use std::convert::TryFrom;
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 
 #[derive(Clone, Eq, PartialEq)]
@@ -84,6 +88,49 @@ impl<
             numerator,
             denominator,
         }
+    }
+}
+
+macro_rules! plain_add_fraction_impl {
+    ($($t:ty)*) => ($(
+    impl Add<Fraction<$t>> for $t {
+        type Output = Fraction<Self>;
+
+        fn add(self, other: Fraction<Self>) -> Self::Output {
+            other + self
+        }
+    }
+    )*)
+}
+
+plain_add_fraction_impl!(i8 i16 i32 i64 i128 isize);
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    Add<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>> for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Digit: BinaryDigit
+        + DoublePrecision
+        + Eq
+        + From<u8>
+        + ModularSubtractiveMagma
+        + Oppose
+        + TryFrom<DoublePrecisionOf<Digit>>
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
+        + TryFrom<usize>,
+    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + ModularPartialMagma + Oppose,
+    OppositionOf<Digit>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
+    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit
+        + DivisivePartialMagma
+        + From<Digit>
+        + From<OppositionOf<Digit>>
+        + ModularPartialMagma,
+    usize: TryFrom<Digit>,
+{
+    type Output = Fraction<Self>;
+
+    fn add(self, other: Fraction<Self>) -> Self::Output {
+        other + self
     }
 }
 

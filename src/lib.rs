@@ -330,8 +330,15 @@ impl PyNumberProtocol for PyFraction {
         PyFraction(self.0.clone().abs())
     }
 
-    fn __add__(lhs: PyFraction, rhs: PyFraction) -> PyFraction {
-        PyFraction(lhs.0 + rhs.0)
+    fn __add__(lhs: PyFraction, rhs: &PyAny) -> PyResult<PyObject> {
+        let py = rhs.py();
+        if rhs.is_instance::<PyFraction>()? {
+            Ok(PyFraction(lhs.0 + rhs.extract::<PyFraction>()?.0).into_py(py))
+        } else if rhs.is_instance::<PyInt>()? {
+            Ok(PyFraction(lhs.0 + rhs.extract::<PyInt>()?.0).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
     }
 
     fn __mul__(lhs: PyFraction, rhs: &PyAny) -> PyResult<PyObject> {

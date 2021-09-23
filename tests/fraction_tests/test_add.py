@@ -1,7 +1,10 @@
+from typing import Union
+
 from hypothesis import given
 
 from rithm import Fraction
 from tests.utils import (FractionWithBuiltin,
+                         IntWithBuiltin,
                          is_equivalent_to_builtin_fraction)
 from . import strategies
 
@@ -11,9 +14,11 @@ def test_alternatives(first: Fraction, second: Fraction) -> None:
     assert first + second == first - (-second)
 
 
-@given(strategies.fractions_with_builtins, strategies.fractions_with_builtins)
+@given(strategies.fractions_with_builtins,
+       strategies.fractions_or_ints_with_builtins)
 def test_connection_with_builtin(first_with_builtin: FractionWithBuiltin,
-                                 second_with_builtin: FractionWithBuiltin
+                                 second_with_builtin
+                                 : Union[FractionWithBuiltin, IntWithBuiltin]
                                  ) -> None:
     first, first_builtin = first_with_builtin
     second, second_builtin = second_with_builtin

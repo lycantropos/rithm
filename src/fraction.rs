@@ -41,6 +41,17 @@ impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fract
     }
 }
 
+impl<Component: Clone + Eq + ModularUnaryAlgebra> Abs for Fraction<Component> {
+    type Output = Self;
+
+    fn abs(self) -> <Self as Abs>::Output {
+        Self {
+            numerator: self.numerator.abs(),
+            denominator: self.denominator,
+        }
+    }
+}
+
 impl<
         Component: AdditiveMonoid
             + Clone
@@ -210,17 +221,6 @@ impl<
 
     fn div(self, divisor: Self) -> Self::Output {
         self.checked_div(divisor).unwrap()
-    }
-}
-
-impl<Component: Clone + Eq + ModularUnaryAlgebra> Abs for Fraction<Component> {
-    type Output = Self;
-
-    fn abs(self) -> <Self as Abs>::Output {
-        Self {
-            numerator: self.numerator.abs(),
-            denominator: self.denominator,
-        }
     }
 }
 

@@ -29,6 +29,17 @@ pub trait BinaryDigit = AssigningAdditiveMonoid
     + AssigningSubtractiveMagma
     + Copy
     + PartialOrd;
+pub trait BinaryDigitConvertibleTo<Target> =
+    BinaryDigitDowncastableTo<Target> + BinaryDigitUpcastableTo<Target> where Target: TryFrom<Self>;
+pub trait BinaryDigitDowncastableTo<Target> = BinaryDigit + DoublePrecision + From<u8>
+where
+    Target: TryFrom<DoublePrecisionOf<Self>>,
+    DoublePrecisionOf<Self>: BinaryDigit,
+    usize: TryFrom<Self>;
+pub trait BinaryDigitUpcastableTo<Target> = BinaryDigit
+where
+    Target: DoublePrecision + TryFrom<DoublePrecisionOf<Target>>,
+    DoublePrecisionOf<Target>: BinaryDigit + From<Self>;
 pub trait DivisibleDigit = BinaryDigit
     + DoublePrecision
     + From<u8>
@@ -152,21 +163,14 @@ where
     }
 }
 
-pub(crate) fn binary_digits_to_binary_base<SourceDigit, TargetDigit>(
+pub(crate) fn binary_digits_to_binary_base<
+    SourceDigit: BinaryDigitConvertibleTo<TargetDigit>,
+    TargetDigit,
+>(
     source_digits: &[SourceDigit],
     source_shift: usize,
     target_shift: usize,
-) -> Vec<TargetDigit>
-where
-    SourceDigit: BinaryDigit + DoublePrecision + From<u8>,
-    TargetDigit: DoublePrecision
-        + TryFrom<SourceDigit>
-        + TryFrom<DoublePrecisionOf<SourceDigit>>
-        + TryFrom<DoublePrecisionOf<TargetDigit>>,
-    DoublePrecisionOf<SourceDigit>: BinaryDigit,
-    DoublePrecisionOf<TargetDigit>: BinaryDigit + From<SourceDigit>,
-    usize: TryFrom<SourceDigit>,
-{
+) -> Vec<TargetDigit> {
     match target_shift.cmp(&source_shift) {
         Ordering::Equal => source_digits
             .iter()
@@ -228,16 +232,14 @@ where
     result
 }
 
-pub(crate) fn binary_digits_to_greater_binary_base<SourceDigit, TargetDigit>(
+pub(crate) fn binary_digits_to_greater_binary_base<
+    SourceDigit: BinaryDigitUpcastableTo<TargetDigit>,
+    TargetDigit,
+>(
     source_digits: &[SourceDigit],
     source_shift: usize,
     target_shift: usize,
-) -> Vec<TargetDigit>
-where
-    SourceDigit: BinaryDigit,
-    TargetDigit: DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>>,
-    DoublePrecisionOf<TargetDigit>: BinaryDigit + From<SourceDigit>,
-{
+) -> Vec<TargetDigit> {
     debug_assert!(target_shift > source_shift && source_shift > 0);
     let target_digit_mask = to_digit_mask::<DoublePrecisionOf<TargetDigit>>(target_shift);
     let result_capacity: usize =
@@ -266,17 +268,14 @@ where
     result
 }
 
-pub(crate) fn binary_digits_to_lesser_binary_base<SourceDigit, TargetDigit>(
+pub(crate) fn binary_digits_to_lesser_binary_base<
+    SourceDigit: BinaryDigitDowncastableTo<TargetDigit>,
+    TargetDigit,
+>(
     source_digits: &[SourceDigit],
     source_shift: usize,
     target_shift: usize,
-) -> Vec<TargetDigit>
-where
-    SourceDigit: BinaryDigit + DoublePrecision + From<u8>,
-    TargetDigit: TryFrom<DoublePrecisionOf<SourceDigit>>,
-    DoublePrecisionOf<SourceDigit>: BinaryDigit,
-    usize: TryFrom<SourceDigit>,
-{
+) -> Vec<TargetDigit> {
     debug_assert!(source_shift > target_shift && target_shift > 0);
     let target_digit_mask = to_digit_mask::<DoublePrecisionOf<SourceDigit>>(target_shift);
     let result_digits_bits_count: usize = (source_digits.len() - 1) * source_shift

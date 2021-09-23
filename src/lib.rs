@@ -386,8 +386,15 @@ impl PyNumberProtocol for PyFraction {
         }
     }
 
-    fn __sub__(lhs: PyFraction, rhs: PyFraction) -> PyFraction {
-        PyFraction(lhs.0 - rhs.0)
+    fn __sub__(lhs: PyFraction, rhs: &PyAny) -> PyResult<PyObject> {
+        let py = rhs.py();
+        if rhs.is_instance::<PyFraction>()? {
+            Ok(PyFraction(lhs.0 - rhs.extract::<PyFraction>()?.0).into_py(py))
+        } else if rhs.is_instance::<PyInt>()? {
+            Ok(PyFraction(lhs.0 - rhs.extract::<PyInt>()?.0).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
     }
 
     fn __truediv__(lhs: PyFraction, rhs: PyFraction) -> PyResult<PyFraction> {

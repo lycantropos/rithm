@@ -371,7 +371,7 @@ impl PyNumberProtocol for PyFraction {
     fn __radd__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
         if other.is_instance::<PyInt>()? {
-            Ok(PyFraction(self.0.clone() + other.extract::<PyInt>()?.0).into_py(py))
+            Ok(PyFraction(other.extract::<PyInt>()?.0 + self.0.clone()).into_py(py))
         } else {
             Ok(py.NotImplemented())
         }
@@ -380,7 +380,7 @@ impl PyNumberProtocol for PyFraction {
     fn __rmul__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
         if other.is_instance::<PyInt>()? {
-            Ok(PyFraction(self.0.clone() * other.extract::<PyInt>()?.0).into_py(py))
+            Ok(PyFraction(other.extract::<PyInt>()?.0 * self.0.clone()).into_py(py))
         } else {
             Ok(py.NotImplemented())
         }

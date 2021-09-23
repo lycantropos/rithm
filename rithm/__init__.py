@@ -174,16 +174,21 @@ except ImportError:
             return Fraction(abs(self.numerator), self.denominator,
                             _normalize=False)
 
-        def __add__(self, other: 'Fraction') -> 'Fraction':
-            return (
-                Fraction(
-                    *_normalize_components_moduli(
-                        self.numerator * other.denominator
-                        + other.numerator * self.denominator,
-                        self.denominator * other.denominator),
-                    _normalize=False)
-                if isinstance(other, Fraction)
-                else NotImplemented)
+        @_overload
+        def __add__(self, other: _Any) -> _Any:
+            ...
+
+        @_overload
+        def __add__(self, other: _Union['Fraction', Int]) -> 'Fraction':
+            ...
+
+        def __add__(self, other: _Union['Fraction', Int, _Any]
+                    ) -> _Union['Fraction', _Any]:
+            return (self._add_fraction(other)
+                    if isinstance(other, Fraction)
+                    else (self._add_int(other)
+                          if isinstance(other, Int)
+                          else NotImplemented))
 
         def __bool__(self) -> bool:
             return bool(self.numerator)
@@ -258,6 +263,20 @@ except ImportError:
             return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'
 
         @_overload
+        def __radd__(self, other: _Any) -> _Any:
+            ...
+
+        @_overload
+        def __radd__(self, other: Int) -> 'Fraction':
+            ...
+
+        def __radd__(self, other: _Union[Int, _Any]
+                     ) -> _Union['Fraction', _Any]:
+            return (self._add_int(other)
+                    if isinstance(other, Int)
+                    else NotImplemented)
+
+        @_overload
         def __rmul__(self, other: _Any) -> _Any:
             ...
 
@@ -301,6 +320,21 @@ except ImportError:
                          _normalize=False)
                 if isinstance(other, Fraction)
                 else NotImplemented)
+
+        def _add_fraction(self, other: 'Fraction') -> 'Fraction':
+            return Fraction(
+                *_normalize_components_moduli(
+                    self.numerator * other.denominator
+                    + other.numerator * self.denominator,
+                    self.denominator * other.denominator),
+                _normalize=False)
+
+        def _add_int(self, other: Int) -> 'Fraction':
+            return Fraction(
+                *_normalize_components_moduli(self.numerator
+                                              + other * self.denominator,
+                                              self.denominator),
+                _normalize=False)
 
         def _mul_by_fraction(self, other: 'Fraction') -> 'Fraction':
             numerator, other_denominator = _normalize_components_moduli(

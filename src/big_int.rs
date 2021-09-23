@@ -386,22 +386,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDivEuclid
-    for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
+impl<Digit: AdditiveDigit + DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDivEuclid for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<Self>;
 
@@ -411,21 +397,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRem
+impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRem
     for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
 {
     type Output = Option<(Self, Self)>;
 
@@ -473,22 +446,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRemEuclid
-    for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
+impl<Digit: AdditiveDigit + DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDivRemEuclid for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<(Self, Self)>;
 
@@ -663,21 +622,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Div for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
+impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 
@@ -693,21 +639,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivAssign for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
+impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivAssign
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn div_assign(&mut self, divisor: Self) {
         (self.sign, self.digits) = checked_div::<Digit, SHIFT>(
@@ -720,21 +653,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivEuclid for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
+impl<Digit: AdditiveDigit + DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivEuclid
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 
@@ -750,20 +670,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivRem for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
+impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivRem
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = (Self, Self);
 
@@ -772,22 +680,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivRemEuclid
+impl<Digit: AdditiveDigit + DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivRemEuclid
     for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
 {
     type Output = (Self, Self);
 
@@ -1181,21 +1075,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Rem for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
+impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Rem
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 
@@ -1207,21 +1088,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> RemEuclid for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
+impl<Digit: AdditiveDigit + DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> RemEuclid
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 
@@ -1276,9 +1144,8 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&st
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Unitary for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: Unitary + Zeroable,
+impl<Digit: Unitary + Zeroable, const SEPARATOR: char, const SHIFT: usize> Unitary
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn one() -> Self {
         Self {
@@ -1292,9 +1159,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Zeroable for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: Zeroable,
+impl<Digit: Zeroable, const SEPARATOR: char, const SHIFT: usize> Zeroable
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn zero() -> Self {
         Self {

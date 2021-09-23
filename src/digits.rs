@@ -29,6 +29,29 @@ pub trait BinaryDigit = AssigningAdditiveMonoid
     + AssigningSubtractiveMagma
     + Copy
     + PartialOrd;
+pub trait DivisibleDigit = BinaryDigit
+    + DoublePrecision
+    + From<u8>
+    + Oppose
+    + TryFrom<DoublePrecisionOf<Self>>
+    + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>
+    + TryFrom<usize>
+where
+    DoublePrecisionOf<Self>: AssigningAdditiveMonoid
+        + AssigningBitwiseConjunctiveMagma
+        + AssigningBitwiseDisjunctiveMonoid
+        + AssigningMultiplicativeMonoid
+        + AssigningShiftingLeftMonoid<usize>
+        + AssigningShiftingRightMonoid<usize>
+        + AssigningSubtractiveMagma
+        + Copy
+        + PartialOrd
+        + DivisivePartialMagma
+        + Oppose,
+    OppositionOf<Self>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Self>>> + TryFrom<Self>,
+    OppositionOf<DoublePrecisionOf<Self>>: BinaryDigit + From<Self> + From<OppositionOf<Self>>,
+    usize: TryFrom<Self>;
 pub trait FromStrDigit = Copy
     + DoublePrecision
     + TryFrom<DoublePrecisionOf<Self>>
@@ -265,27 +288,12 @@ where
     result
 }
 
-pub(crate) fn checked_div<Digit, const SHIFT: usize>(
+pub(crate) fn checked_div<Digit: DivisibleDigit, const SHIFT: usize>(
     dividend: &[Digit],
     dividend_sign: Sign,
     divisor: &[Digit],
     divisor_sign: Sign,
-) -> Option<(Sign, Vec<Digit>)>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
+) -> Option<(Sign, Vec<Digit>)> {
     if divisor_sign.is_zero() {
         None
     } else if dividend_sign.is_zero() || digits_lesser_than(dividend, divisor) {
@@ -302,27 +310,12 @@ where
     }
 }
 
-pub(crate) fn checked_div_euclid<Digit, const SHIFT: usize>(
+pub(crate) fn checked_div_euclid<Digit: AdditiveDigit + DivisibleDigit, const SHIFT: usize>(
     dividend: &[Digit],
     dividend_sign: Sign,
     divisor: &[Digit],
     divisor_sign: Sign,
-) -> Option<(Sign, Vec<Digit>)>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
+) -> Option<(Sign, Vec<Digit>)> {
     if divisor_sign.is_zero() {
         None
     } else if dividend_sign.is_zero() {
@@ -365,27 +358,12 @@ where
     }
 }
 
-pub(crate) fn checked_rem<Digit, const SHIFT: usize>(
+pub(crate) fn checked_rem<Digit: DivisibleDigit, const SHIFT: usize>(
     dividend: &[Digit],
     dividend_sign: Sign,
     divisor: &[Digit],
     divisor_sign: Sign,
-) -> Option<(Sign, Vec<Digit>)>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
+) -> Option<(Sign, Vec<Digit>)> {
     if divisor_sign.is_zero() {
         None
     } else if dividend_sign.is_zero() || digits_lesser_than(dividend, divisor) {
@@ -402,27 +380,12 @@ where
     }
 }
 
-pub(crate) fn checked_rem_euclid<Digit, const SHIFT: usize>(
+pub(crate) fn checked_rem_euclid<Digit: AdditiveDigit + DivisibleDigit, const SHIFT: usize>(
     dividend: &[Digit],
     dividend_sign: Sign,
     divisor: &[Digit],
     divisor_sign: Sign,
-) -> Option<(Sign, Vec<Digit>)>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
+) -> Option<(Sign, Vec<Digit>)> {
     if divisor_sign.is_zero() {
         None
     } else if dividend_sign.is_zero() {
@@ -465,14 +428,10 @@ pub(crate) fn digits_lesser_than<Digit: PartialOrd>(left: &[Digit], right: &[Dig
         || left.len() == right.len() && left.iter().rev().lt(right.iter().rev())
 }
 
-pub(crate) fn div_rem_digits_by_digit<Digit, const SHIFT: usize>(
+pub(crate) fn div_rem_digits_by_digit<Digit: DivisibleDigit, const SHIFT: usize>(
     dividend: &[Digit],
     divisor: Digit,
-) -> (Vec<Digit>, Digit)
-where
-    Digit: BinaryDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma,
-{
+) -> (Vec<Digit>, Digit) {
     let mut quotient = vec![Digit::zero(); dividend.len()];
     let mut remainder = DoublePrecisionOf::<Digit>::zero();
     let digits_count = dividend.len();
@@ -490,23 +449,10 @@ where
     })
 }
 
-pub(crate) fn div_rem_two_or_more_digits<Digit, const SHIFT: usize>(
+pub(crate) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usize>(
     dividend: &[Digit],
     divisor: &[Digit],
-) -> (Vec<Digit>, Vec<Digit>)
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit + From<Digit> + From<OppositionOf<Digit>>,
-    usize: TryFrom<Digit>,
-{
+) -> (Vec<Digit>, Vec<Digit>) {
     let dividend_digits_count = dividend.len();
     let divisor_digits_count = divisor.len();
     let mut dividend_normalized = vec![Digit::zero(); dividend_digits_count];

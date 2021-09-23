@@ -1008,8 +1008,8 @@ where
                 next_largest_accumulator >>= SHIFT;
                 next_smallest_accumulator >>= SHIFT;
             }
-            normalize_digits(&mut next_largest_digits);
-            normalize_digits(&mut next_smallest_digits);
+            trim_leading_zeros(&mut next_largest_digits);
+            trim_leading_zeros(&mut next_smallest_digits);
             largest_digits = next_largest_digits;
             smallest_digits = next_smallest_digits;
         }

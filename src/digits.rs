@@ -475,7 +475,7 @@ where
         quotient[digits_count - offset] = quotient_digit;
         remainder -= DoublePrecisionOf::<Digit>::from(quotient_digit) * divisor;
     }
-    normalize_digits(&mut quotient);
+    trim_leading_zeros(&mut quotient);
     (quotient, unsafe {
         Digit::try_from(remainder).unwrap_unchecked()
     })
@@ -584,14 +584,14 @@ where
     if quotient_size.is_zero() {
         quotient = vec![Digit::zero()];
     }
-    normalize_digits(&mut quotient);
+    trim_leading_zeros(&mut quotient);
     let mut remainder = divisor_normalized;
     shift_digits_right::<Digit, SHIFT>(
         &dividend_normalized[..divisor_digits_count],
         shift,
         remainder.as_mut_slice(),
     );
-    normalize_digits(&mut remainder);
+    trim_leading_zeros(&mut remainder);
     (quotient, remainder)
 }
 
@@ -778,7 +778,7 @@ where
     let components_sums_product =
         multiply_digits::<Digit, SHIFT>(&shortest_components_sum, &longest_components_sum);
     sum_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &components_sums_product);
-    normalize_digits(&mut result);
+    trim_leading_zeros(&mut result);
     result
 }
 
@@ -808,7 +808,7 @@ where
         size_longest -= step_digits_count;
         processed_digits_count += step_digits_count;
     }
-    normalize_digits(&mut result);
+    trim_leading_zeros(&mut result);
     result
 }
 
@@ -875,7 +875,7 @@ where
             }
         }
     }
-    normalize_digits(&mut result);
+    trim_leading_zeros(&mut result);
     result
 }
 
@@ -890,7 +890,7 @@ pub(crate) fn negate_digits(digits: &mut [u8]) {
     }
 }
 
-pub(crate) fn normalize_digits<Digit>(digits: &mut Vec<Digit>)
+pub(crate) fn trim_leading_zeros<Digit>(digits: &mut Vec<Digit>)
 where
     Digit: Clone + Zeroable,
 {
@@ -899,7 +899,7 @@ where
         digits_count -= 1;
     }
     if digits_count != digits.len() {
-        digits.resize(digits_count, Digit::zero());
+        digits.truncate(digits_count);
     }
 }
 
@@ -961,8 +961,8 @@ where
 {
     let (low, high) = digits.split_at(digits.len().min(size));
     let (mut low, mut high) = (low.to_vec(), high.to_vec());
-    normalize_digits(&mut high);
-    normalize_digits(&mut low);
+    trim_leading_zeros(&mut high);
+    trim_leading_zeros(&mut low);
     (high, low)
 }
 
@@ -1051,7 +1051,7 @@ where
         accumulator >>= SHIFT;
         accumulator &= Digit::one();
     }
-    normalize_digits(&mut result);
+    trim_leading_zeros(&mut result);
     result
 }
 
@@ -1137,7 +1137,7 @@ where
         accumulator >>= SHIFT;
     }
     result.push(accumulator);
-    normalize_digits(&mut result);
+    trim_leading_zeros(&mut result);
     result
 }
 

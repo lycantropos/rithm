@@ -466,25 +466,12 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     }
 }
 
-type WindowDigit = u8;
-
 const WINDOW_CUTOFF: usize = 8;
 const WINDOW_SHIFT: usize = 5;
 const WINDOW_BASE: usize = 1 << WINDOW_SHIFT;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedPow<Self>
+impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize> CheckedPow<Self>
     for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + ModularSubtractiveMagma
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
-    Digit: BinaryDigit + DoublePrecision + From<u8>,
-    WindowDigit: TryFrom<DoublePrecisionOf<Digit>>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
-    usize: TryFrom<Digit>,
 {
     type Output = Option<Self>;
 
@@ -1026,18 +1013,8 @@ impl<Digit: Clone + PartialOrd + Zeroable, const SEPARATOR: char, const SHIFT: u
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Pow<Self> for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + ModularSubtractiveMagma
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
-    Digit: BinaryDigit + DoublePrecision + From<u8>,
-    WindowDigit: TryFrom<DoublePrecisionOf<Digit>>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
-    usize: TryFrom<Digit>,
+impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize> Pow<Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 

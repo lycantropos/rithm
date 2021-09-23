@@ -64,6 +64,7 @@ where
     OppositionOf<DoublePrecisionOf<Self>>: BinaryDigit + From<Self> + From<OppositionOf<Self>>,
     usize: TryFrom<Self>;
 pub trait EuclidDivisibleDigit = AdditiveDigit + DivisibleDigit;
+pub trait ExponentiativeDigit = MultiplicativeDigit + BinaryDigitDowncastableTo<WindowDigit>;
 pub trait FromStrDigit = Copy
     + DoublePrecision
     + TryFrom<DoublePrecisionOf<Self>>
@@ -102,6 +103,7 @@ pub trait MultiplicativeDigit =
             + Copy;
 
 pub(crate) type Sign = i8;
+pub(crate) type WindowDigit = u8;
 
 pub(crate) fn binary_digits_to_base<SourceDigit, TargetDigit>(
     source: &[SourceDigit],

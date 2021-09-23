@@ -22,9 +22,9 @@ impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fract
             None
         } else {
             (numerator, denominator) =
-                normalize_components_sign::<Component>(numerator, denominator);
+                normalize_components_sign(numerator, denominator);
             (numerator, denominator) =
-                normalize_components_moduli::<Component>(numerator, denominator);
+                normalize_components_moduli(numerator, denominator);
             Some(Self {
                 numerator,
                 denominator,
@@ -65,7 +65,7 @@ impl<
     type Output = Self;
 
     fn add(self, other: Self) -> Self::Output {
-        let (numerator, denominator) = normalize_components_moduli::<Component>(
+        let (numerator, denominator) = normalize_components_moduli(
             self.numerator * other.denominator.clone() + other.numerator * self.denominator.clone(),
             self.denominator * other.denominator,
         );
@@ -89,7 +89,7 @@ impl<
     type Output = Self;
 
     fn add(self, other: Component) -> Self::Output {
-        let (numerator, denominator) = normalize_components_moduli::<Component>(
+        let (numerator, denominator) = normalize_components_moduli(
             self.numerator + other * self.denominator.clone(),
             self.denominator,
         );
@@ -135,7 +135,7 @@ impl<
     > AddAssign for Fraction<Component>
 {
     fn add_assign(&mut self, other: Self) {
-        (self.numerator, self.denominator) = normalize_components_moduli::<Component>(
+        (self.numerator, self.denominator) = normalize_components_moduli(
             self.numerator.clone() * other.denominator.clone()
                 + other.numerator * self.denominator.clone(),
             self.denominator.clone() * other.denominator,
@@ -154,10 +154,10 @@ impl<
             return None;
         }
         let (dividend_numerator, divisor_numerator) =
-            normalize_components_moduli::<Component>(self.numerator, divisor.numerator);
+            normalize_components_moduli(self.numerator, divisor.numerator);
         let (dividend_denominator, divisor_denominator) =
-            normalize_components_moduli::<Component>(self.denominator, divisor.denominator);
-        let (numerator, denominator) = normalize_components_sign::<Component>(
+            normalize_components_moduli(self.denominator, divisor.denominator);
+        let (numerator, denominator) = normalize_components_sign(
             dividend_numerator * divisor_denominator,
             dividend_denominator * divisor_numerator,
         );
@@ -232,9 +232,9 @@ impl<
 
     fn mul(self, other: Self) -> Self::Output {
         let (numerator, other_denominator) =
-            normalize_components_moduli::<Component>(self.numerator, other.denominator);
+            normalize_components_moduli(self.numerator, other.denominator);
         let (other_numerator, denominator) =
-            normalize_components_moduli::<Component>(other.numerator, self.denominator);
+            normalize_components_moduli(other.numerator, self.denominator);
         Self {
             numerator: numerator * other_numerator,
             denominator: denominator * other_denominator,
@@ -250,7 +250,7 @@ impl<
 
     fn mul(self, other: Component) -> Self::Output {
         let (other, denominator) =
-            normalize_components_moduli::<Component>(other, self.denominator);
+            normalize_components_moduli(other, self.denominator);
         Self {
             numerator: self.numerator * other,
             denominator,
@@ -288,9 +288,9 @@ impl<
 {
     fn mul_assign(&mut self, other: Self) {
         let (numerator, other_denominator) =
-            normalize_components_moduli::<Component>(self.numerator.clone(), other.denominator);
+            normalize_components_moduli(self.numerator.clone(), other.denominator);
         let (other_numerator, denominator) =
-            normalize_components_moduli::<Component>(other.numerator, self.denominator.clone());
+            normalize_components_moduli(other.numerator, self.denominator.clone());
         self.numerator = numerator * other_numerator;
         self.denominator = denominator * other_denominator;
     }
@@ -407,7 +407,7 @@ impl<
     type Output = Self;
 
     fn sub(self, other: Component) -> Self::Output {
-        let (numerator, denominator) = normalize_components_moduli::<Component>(
+        let (numerator, denominator) = normalize_components_moduli(
             self.numerator - other * self.denominator.clone(),
             self.denominator,
         );
@@ -467,7 +467,7 @@ impl<
     > SubAssign for Fraction<Component>
 {
     fn sub_assign(&mut self, subtrahend: Self) {
-        (self.numerator, self.denominator) = normalize_components_moduli::<Component>(
+        (self.numerator, self.denominator) = normalize_components_moduli(
             self.numerator.clone() * subtrahend.denominator.clone()
                 - subtrahend.numerator * self.denominator.clone(),
             self.denominator.clone() * subtrahend.denominator,

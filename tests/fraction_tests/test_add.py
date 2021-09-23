@@ -13,8 +13,7 @@ def test_alternatives(first: Fraction, second: Fraction) -> None:
     assert first + second == first - (-second)
 
 
-@given(strategies.fractions_with_builtin_fractions,
-       strategies.fractions_with_builtin_fractions)
+@given(strategies.fractions_with_builtins, strategies.fractions_with_builtins)
 def test_connection_with_builtin(first_with_builtin
                                  : Tuple[Fraction, fractions.Fraction],
                                  second_with_builtin

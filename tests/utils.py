@@ -32,13 +32,13 @@ def pickle_round_trip(value: _Pickleable) -> _Pickleable:
     return pickle.loads(pickle.dumps(value))
 
 
-def to_int_with_builtin_int(decimal_string: str) -> Tuple[Int, int]:
+def to_int_with_builtin(decimal_string: str) -> Tuple[Int, int]:
     return Int(decimal_string), int(decimal_string)
 
 
-def to_fraction_with_builtin_fraction(numerators_pair: Tuple[Int, int],
-                                      denominators_pair: Tuple[Int, int]
-                                      ) -> Tuple[Fraction, fractions.Fraction]:
+def to_fraction_with_builtin(numerators_pair: Tuple[Int, int],
+                             denominators_pair: Tuple[Int, int]
+                             ) -> Tuple[Fraction, fractions.Fraction]:
     numerator, builtin_numerator = numerators_pair
     denominator, builtin_denominator = denominators_pair
     return (Fraction(numerator, denominator),

@@ -8,8 +8,7 @@ from tests.utils import is_equivalent_to_builtin_fraction
 from . import strategies
 
 
-@given(strategies.fractions_with_builtin_fractions,
-       strategies.fractions_with_builtin_fractions)
+@given(strategies.fractions_with_builtins, strategies.fractions_with_builtins)
 def test_connection_with_builtin(first_with_builtin
                                  : Tuple[Fraction, fractions.Fraction],
                                  second_with_builtin

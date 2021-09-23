@@ -7,8 +7,8 @@ from tests.utils import (FractionWithBuiltin,
 from . import strategies
 
 
-@given(strategies.fractions_with_builtin_fractions,
-       strategies.small_ints_with_builtin_ints)
+@given(strategies.fractions_with_builtins,
+       strategies.small_ints_with_builtins)
 def test_connection_with_builtin(base_with_builtin: FractionWithBuiltin,
                                  exponent_with_builtin: IntWithBuiltin
                                  ) -> None:

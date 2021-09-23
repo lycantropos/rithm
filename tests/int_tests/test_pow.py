@@ -9,8 +9,8 @@ from tests.utils import (IntWithBuiltin,
 from . import strategies
 
 
-@given(strategies.ints_with_builtin_ints,
-       strategies.non_negative_ints_with_builtin_ints)
+@given(strategies.ints_with_builtins,
+       strategies.non_negative_ints_with_builtins)
 def test_non_negative_exponent_no_modulo_connection_with_builtin(
         base_with_builtin: IntWithBuiltin,
         exponent_with_builtin: IntWithBuiltin) -> None:
@@ -21,8 +21,8 @@ def test_non_negative_exponent_no_modulo_connection_with_builtin(
                                         base_builtin ** exponent_builtin)
 
 
-@given(strategies.ints_with_builtin_ints,
-       strategies.negative_ints_with_builtin_ints)
+@given(strategies.ints_with_builtins,
+       strategies.negative_ints_with_builtins)
 def test_negative_exponent_no_modulo_connection_with_builtin(
         base_with_builtin: IntWithBuiltin,
         exponent_with_builtin: IntWithBuiltin) -> None:

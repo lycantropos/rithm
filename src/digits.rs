@@ -910,7 +910,7 @@ where
 {
     let mut result = Output::zero();
     for &digit in digits.iter().rev() {
-        result = (result << SHIFT) | <Output as From<Digit>>::from(digit);
+        result = (result << SHIFT) | Output::from(digit);
     }
     result
 }

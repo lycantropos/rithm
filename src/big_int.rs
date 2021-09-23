@@ -916,9 +916,8 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> Neg for BigInt<Digit, SEP
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Not for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit + ModularSubtractiveMagma,
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Not
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 

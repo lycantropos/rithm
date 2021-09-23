@@ -386,7 +386,7 @@ where
     }
 }
 
-impl<Digit: AdditiveDigit + DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     CheckedDivEuclid for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<Self>;
@@ -446,7 +446,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDi
     }
 }
 
-impl<Digit: AdditiveDigit + DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     CheckedDivRemEuclid for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<(Self, Self)>;
@@ -653,7 +653,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivAssign
     }
 }
 
-impl<Digit: AdditiveDigit + DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivEuclid
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivEuclid
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
@@ -680,7 +680,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivRem
     }
 }
 
-impl<Digit: AdditiveDigit + DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivRemEuclid
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivRemEuclid
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = (Self, Self);
@@ -1088,7 +1088,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Rem
     }
 }
 
-impl<Digit: AdditiveDigit + DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> RemEuclid
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> RemEuclid
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;

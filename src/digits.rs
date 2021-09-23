@@ -52,6 +52,7 @@ where
         BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Self>>> + TryFrom<Self>,
     OppositionOf<DoublePrecisionOf<Self>>: BinaryDigit + From<Self> + From<OppositionOf<Self>>,
     usize: TryFrom<Self>;
+pub trait EuclidDivisibleDigit = AdditiveDigit + DivisibleDigit;
 pub trait FromStrDigit = Copy
     + DoublePrecision
     + TryFrom<DoublePrecisionOf<Self>>
@@ -310,7 +311,7 @@ pub(crate) fn checked_div<Digit: DivisibleDigit, const SHIFT: usize>(
     }
 }
 
-pub(crate) fn checked_div_euclid<Digit: AdditiveDigit + DivisibleDigit, const SHIFT: usize>(
+pub(crate) fn checked_div_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
     dividend: &[Digit],
     dividend_sign: Sign,
     divisor: &[Digit],
@@ -380,7 +381,7 @@ pub(crate) fn checked_rem<Digit: DivisibleDigit, const SHIFT: usize>(
     }
 }
 
-pub(crate) fn checked_rem_euclid<Digit: AdditiveDigit + DivisibleDigit, const SHIFT: usize>(
+pub(crate) fn checked_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
     dividend: &[Digit],
     dividend_sign: Sign,
     divisor: &[Digit],

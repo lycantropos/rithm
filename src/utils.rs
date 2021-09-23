@@ -25,7 +25,7 @@ where
 {
     let mut result: usize = 0;
     let mut value = value;
-    while value >= <T as From<u8>>::from(32u8) {
+    while value >= T::from(32u8) {
         result += 6;
         value >>= 6;
     }

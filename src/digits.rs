@@ -30,7 +30,18 @@ pub trait BinaryDigit = AssigningAdditiveMonoid
     + Copy
     + PartialOrd;
 pub trait BinaryDigitConvertibleTo<Target> =
+    BinaryDigitConvertibleToBinary<Target> + BinaryDigitConvertibleToNonBinary<Target>;
+pub trait BinaryDigitConvertibleToBinary<Target> =
     BinaryDigitDowncastableTo<Target> + BinaryDigitUpcastableTo<Target> where Target: TryFrom<Self>;
+pub trait BinaryDigitConvertibleToNonBinary<Target> = Copy + DoublePrecision
+where
+    Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
+    DoublePrecisionOf<Target>: AssigningDivisivePartialMagma
+        + BinaryDigit
+        + From<Self>
+        + From<Target>
+        + ModularPartialMagma
+        + TryFrom<usize>;
 pub trait BinaryDigitDowncastableTo<Target> = BinaryDigit + DoublePrecision + From<u8>
 where
     Target: TryFrom<DoublePrecisionOf<Self>>,
@@ -40,6 +51,12 @@ pub trait BinaryDigitUpcastableTo<Target> = BinaryDigit
 where
     Target: DoublePrecision + TryFrom<DoublePrecisionOf<Target>>,
     DoublePrecisionOf<Target>: BinaryDigit + From<Self>;
+pub trait DisplayDigit = AssigningDivisivePartialMagma
+    + BinaryDigit
+    + From<u8>
+    + ModularPartialMagma
+    + TryFrom<usize>
+    + BinaryDigitConvertibleTo<Self>;
 pub trait DivisibleDigit = BinaryDigit
     + DoublePrecision
     + From<u8>
@@ -101,7 +118,7 @@ pub trait MultiplicativeDigit =
             + AssigningShiftingRightMonoid<usize>
             + AssigningSubtractiveMagma
             + Copy;
-pub trait NonBinaryDigitConvertibleTo<Target> = Copy
+pub trait NonBinaryDigitConvertibleToBinary<Target> = Copy
 where
     Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
     DoublePrecisionOf<Target>: BinaryDigit + From<Self> + From<Target> + TryFrom<usize>;
@@ -109,28 +126,14 @@ where
 pub(crate) type Sign = i8;
 pub(crate) type WindowDigit = u8;
 
-pub(crate) fn binary_digits_to_base<SourceDigit, TargetDigit>(
+pub(crate) fn binary_digits_to_base<
+    SourceDigit: BinaryDigitConvertibleTo<TargetDigit>,
+    TargetDigit,
+>(
     source: &[SourceDigit],
     source_shift: usize,
     target_base: usize,
-) -> Vec<TargetDigit>
-where
-    SourceDigit: BinaryDigit + DoublePrecision + From<u8>,
-    TargetDigit: Copy
-        + DoublePrecision
-        + TryFrom<SourceDigit>
-        + TryFrom<DoublePrecisionOf<SourceDigit>>
-        + TryFrom<DoublePrecisionOf<TargetDigit>>
-        + Zeroable,
-    DoublePrecisionOf<SourceDigit>: BinaryDigit,
-    DoublePrecisionOf<TargetDigit>: AssigningDivisivePartialMagma
-        + BinaryDigit
-        + From<SourceDigit>
-        + From<TargetDigit>
-        + ModularPartialMagma
-        + TryFrom<usize>,
-    usize: TryFrom<SourceDigit>,
-{
+) -> Vec<TargetDigit> {
     if target_base & (target_base - 1) == 0 {
         binary_digits_to_binary_base(
             source,
@@ -143,7 +146,7 @@ where
 }
 
 pub(crate) fn digits_to_binary_base<
-    SourceDigit: BinaryDigitConvertibleTo<TargetDigit> + NonBinaryDigitConvertibleTo<TargetDigit>,
+    SourceDigit: BinaryDigitConvertibleToBinary<TargetDigit> + NonBinaryDigitConvertibleToBinary<TargetDigit>,
     TargetDigit,
     const TARGET_SHIFT: usize,
 >(
@@ -170,7 +173,7 @@ pub(crate) fn digits_to_binary_base<
 }
 
 pub(crate) fn binary_digits_to_binary_base<
-    SourceDigit: BinaryDigitConvertibleTo<TargetDigit>,
+    SourceDigit: BinaryDigitConvertibleToBinary<TargetDigit>,
     TargetDigit,
 >(
     source: &[SourceDigit],
@@ -195,21 +198,14 @@ pub(crate) fn binary_digits_to_binary_base<
     }
 }
 
-fn binary_digits_to_non_binary_base<SourceDigit, TargetDigit>(
+fn binary_digits_to_non_binary_base<
+    SourceDigit: BinaryDigitConvertibleToNonBinary<TargetDigit>,
+    TargetDigit,
+>(
     source: &[SourceDigit],
     source_shift: usize,
     target_base: usize,
-) -> Vec<TargetDigit>
-where
-    SourceDigit: Copy + DoublePrecision,
-    TargetDigit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>> + Zeroable,
-    DoublePrecisionOf<TargetDigit>: AssigningDivisivePartialMagma
-        + BinaryDigit
-        + From<SourceDigit>
-        + From<TargetDigit>
-        + ModularPartialMagma
-        + TryFrom<usize>,
-{
+) -> Vec<TargetDigit> {
     let result_max_digits_count: usize =
         1 + ((((source.len() * source_shift) as f64) / (target_base as f64).log2()) as usize);
     let mut result = Vec::<TargetDigit>::with_capacity(result_max_digits_count);
@@ -579,7 +575,7 @@ pub(crate) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usi
 }
 
 fn non_binary_digits_to_greater_binary_base<
-    SourceDigit: NonBinaryDigitConvertibleTo<TargetDigit>,
+    SourceDigit: NonBinaryDigitConvertibleToBinary<TargetDigit>,
     TargetDigit,
     const TARGET_SHIFT: usize,
 >(
@@ -653,7 +649,7 @@ fn non_binary_digits_to_greater_binary_base<
 }
 
 fn non_binary_digits_to_lesser_binary_base<
-    SourceDigit: NonBinaryDigitConvertibleTo<TargetDigit>,
+    SourceDigit: NonBinaryDigitConvertibleToBinary<TargetDigit>,
     TargetDigit,
     const TARGET_SHIFT: usize,
 >(

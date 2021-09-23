@@ -205,18 +205,8 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, 
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: AssigningDivisivePartialMagma
-        + BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularPartialMagma
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>:
-        AssigningDivisivePartialMagma + BinaryDigit + ModularPartialMagma + TryFrom<usize>,
-    usize: TryFrom<Digit>,
+impl<Digit: DisplayDigit, const SEPARATOR: char, const SHIFT: usize>
+    BigInt<Digit, SEPARATOR, SHIFT>
 {
     const DIGIT_VALUES_ASCII_CODES: [char; MAX_REPRESENTABLE_BASE as usize] = [
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
@@ -273,7 +263,7 @@ where
 const MIDDLE_BYTE: u8 = 1u8 << (u8::BITS - 1);
 
 impl<
-        Digit: BinaryDigitConvertibleTo<Digit> + From<u8>,
+        Digit: BinaryDigitConvertibleToBinary<Digit> + From<u8>,
         const SEPARATOR: char,
         const SHIFT: usize,
     > BigInt<Digit, SEPARATOR, SHIFT>
@@ -590,20 +580,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Display for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: AssigningDivisivePartialMagma
-        + BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularPartialMagma
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>:
-        AssigningDivisivePartialMagma + BinaryDigit + ModularPartialMagma + TryFrom<usize>,
-    <DoublePrecisionOf<Digit> as TryFrom<usize>>::Error: fmt::Debug,
-    <Digit as TryFrom<DoublePrecisionOf<Digit>>>::Error: fmt::Debug,
-    usize: TryFrom<Digit>,
+impl<Digit: DisplayDigit, const SEPARATOR: char, const SHIFT: usize> Display
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
         formatter.write_str(self.to_base_string(10).as_str())

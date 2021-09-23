@@ -14,6 +14,7 @@ use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, P
 use pyo3::types::{PyBytes, PyLong, PyString};
 use pyo3::{ffi, AsPyPointer, Py, PyAny, PyErr, PyNativeType, ToPyObject};
 use pyo3::{IntoPy, PyNumberProtocol, PyObject};
+use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::os::raw::c_uchar;
 
@@ -57,7 +58,7 @@ impl PyInt {
                         Err(reason) => Err(PyValueError::new_err(reason.to_string())),
                     }
                 } else if value.is_instance::<PyInt>()? {
-                    return value.extract::<PyInt>();
+                    value.extract::<PyInt>()
                 } else {
                     let ptr = value.as_ptr();
                     let py = value.py();
@@ -67,25 +68,26 @@ impl PyInt {
                             return Err(PyErr::fetch(py));
                         }
                         let bits_count = ffi::_PyLong_NumBits(value);
-                        if bits_count < 0 {
-                            Err(PyErr::fetch(py))
-                        } else if bits_count == 0 {
-                            Ok(PyInt(_BigInt::zero()))
-                        } else {
-                            let bytes_count = bits_count as usize / (c_uchar::BITS as usize) + 1;
-                            let mut buffer = vec![0 as c_uchar; bytes_count];
-                            if ffi::_PyLong_AsByteArray(
-                                Py::<PyLong>::from_owned_ptr(py, value).as_ptr()
-                                    as *mut ffi::PyLongObject,
-                                buffer.as_mut_ptr(),
-                                buffer.len(),
-                                1,
-                                1,
-                            ) < 0
-                            {
-                                Err(PyErr::fetch(py))
-                            } else {
-                                Ok(PyInt(_BigInt::from_bytes(buffer)))
+                        match bits_count.cmp(&0) {
+                            Ordering::Less => Err(PyErr::fetch(py)),
+                            Ordering::Equal => Ok(PyInt(_BigInt::zero())),
+                            Ordering::Greater => {
+                                let bytes_count =
+                                    bits_count as usize / (c_uchar::BITS as usize) + 1;
+                                let mut buffer = vec![0u8; bytes_count];
+                                if ffi::_PyLong_AsByteArray(
+                                    Py::<PyLong>::from_owned_ptr(py, value).as_ptr()
+                                        as *mut ffi::PyLongObject,
+                                    buffer.as_mut_ptr(),
+                                    buffer.len(),
+                                    1,
+                                    1,
+                                ) < 0
+                                {
+                                    Err(PyErr::fetch(py))
+                                } else {
+                                    Ok(PyInt(_BigInt::from_bytes(buffer)))
+                                }
                             }
                         }
                     }

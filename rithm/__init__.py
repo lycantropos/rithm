@@ -290,6 +290,16 @@ except ImportError:
                     if isinstance(other, Int)
                     else NotImplemented)
 
+        def __rsub__(self, other: 'Fraction') -> 'Fraction':
+            return (
+                Fraction(
+                    *_normalize_components_moduli(other * self.denominator
+                                                  - self.numerator,
+                                                  self.denominator),
+                    _normalize=False)
+                if isinstance(other, Int)
+                else NotImplemented)
+
         def __setstate__(self, state: _Tuple[Int, Int]) -> None:
             self._numerator, self._denominator = state
 
@@ -307,7 +317,14 @@ except ImportError:
                         self.denominator * other.denominator),
                     _normalize=False)
                 if isinstance(other, Fraction)
-                else NotImplemented)
+                else
+                (Fraction(
+                    *_normalize_components_moduli(self.numerator
+                                                  - other * self.denominator,
+                                                  self.denominator),
+                    _normalize=False)
+                 if isinstance(other, Int)
+                 else NotImplemented))
 
         def __truediv__(self, other: 'Fraction') -> 'Fraction':
             return (

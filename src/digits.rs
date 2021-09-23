@@ -282,25 +282,30 @@ pub(crate) fn binary_digits_to_lesser_binary_base<
         + utils::bit_length(source_digits[source_digits.len() - 1]);
     let result_digits_count: usize = (result_digits_bits_count + (target_shift - 1)) / target_shift;
     let mut result = Vec::<TargetDigit>::with_capacity(result_digits_count);
-    let mut accumulator = DoublePrecisionOf::<SourceDigit>::zero();
-    let mut accumulator_bits_count = 0usize;
-    for index in 0..source_digits.len() {
-        accumulator |=
-            DoublePrecisionOf::<SourceDigit>::from(source_digits[index]) << accumulator_bits_count;
-        accumulator_bits_count += source_shift;
+    let mut accumulator = DoublePrecisionOf::<SourceDigit>::from(source_digits[0]);
+    let mut accumulator_bits_count = source_shift;
+    for index in 1usize..source_digits.len() {
         loop {
             result.push(unsafe {
                 TargetDigit::try_from(accumulator & target_digit_mask).unwrap_unchecked()
             });
             accumulator >>= target_shift;
-            if if index == source_digits.len() - 1 {
-                accumulator.is_zero()
-            } else {
-                accumulator_bits_count -= target_shift;
-                accumulator_bits_count < target_shift
-            } {
+            accumulator_bits_count -= target_shift;
+            if accumulator_bits_count < target_shift {
                 break;
             }
+        }
+        accumulator |=
+            DoublePrecisionOf::<SourceDigit>::from(source_digits[index]) << accumulator_bits_count;
+        accumulator_bits_count += source_shift;
+    }
+    loop {
+        result.push(unsafe {
+            TargetDigit::try_from(accumulator & target_digit_mask).unwrap_unchecked()
+        });
+        accumulator >>= target_shift;
+        if accumulator.is_zero() {
+            break;
         }
     }
     result

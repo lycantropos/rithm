@@ -272,12 +272,13 @@ where
 
 const MIDDLE_BYTE: u8 = 1u8 << (u8::BITS - 1);
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: BinaryDigitConvertibleTo<Digit> + From<u8>,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: BinaryDigit + DoublePrecision + From<u8> + TryFrom<DoublePrecisionOf<Digit>>,
     u8: TryFrom<Digit>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
-    usize: TryFrom<Digit>,
 {
     pub(crate) fn as_bytes(&self) -> Vec<u8> {
         let mut result =

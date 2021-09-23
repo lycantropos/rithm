@@ -220,15 +220,11 @@ except ImportError:
                     else NotImplemented)
 
         def __mul__(self, other: 'Fraction') -> 'Fraction':
-            return (
-                Fraction(*map(_mul,
-                              _normalize_components_moduli(self.numerator,
-                                                           other.denominator),
-                              _normalize_components_moduli(other.numerator,
-                                                           self.denominator)),
-                         _normalize=False)
-                if isinstance(other, Fraction)
-                else NotImplemented)
+            return (self._mul_by_fraction(other)
+                    if isinstance(other, Fraction)
+                    else (self._mul_by_int(other)
+                          if isinstance(other, Int)
+                          else NotImplemented))
 
         def __neg__(self) -> 'Fraction':
             return Fraction(-self.numerator, self.denominator,
@@ -249,6 +245,11 @@ except ImportError:
 
         def __repr__(self) -> str:
             return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'
+
+        def __rmul__(self, other: Int) -> 'Fraction':
+            return (self._mul_by_int(other)
+                    if isinstance(other, Int)
+                    else NotImplemented)
 
         def __setstate__(self, state: _Tuple[Int, Int]) -> None:
             self._numerator, self._denominator = state
@@ -280,6 +281,21 @@ except ImportError:
                          _normalize=False)
                 if isinstance(other, Fraction)
                 else NotImplemented)
+
+        def _mul_by_fraction(self, other: 'Fraction') -> 'Fraction':
+            numerator, other_denominator = _normalize_components_moduli(
+                self.numerator, other.denominator)
+            other_numerator, denominator = _normalize_components_moduli(
+                other.numerator, self.denominator)
+            return Fraction(numerator * other_numerator,
+                            denominator * other_denominator,
+                            _normalize=False)
+
+        def _mul_by_int(self, other: Int) -> 'Fraction':
+            other, denominator = _normalize_components_moduli(other,
+                                                              self.denominator)
+            return Fraction(self.numerator * other, denominator,
+                            _normalize=False)
 
 
     def _normalize_components_moduli(numerator: Int,

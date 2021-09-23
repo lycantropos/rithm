@@ -21,10 +21,8 @@ impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fract
         if denominator.is_zero() {
             None
         } else {
-            (numerator, denominator) =
-                normalize_components_sign(numerator, denominator);
-            (numerator, denominator) =
-                normalize_components_moduli(numerator, denominator);
+            (numerator, denominator) = normalize_components_sign(numerator, denominator);
+            (numerator, denominator) = normalize_components_moduli(numerator, denominator);
             Some(Self {
                 numerator,
                 denominator,
@@ -102,7 +100,7 @@ impl<
 
 macro_rules! plain_add_fraction_impl {
     ($($t:ty)*) => ($(
-    impl Add<Fraction<$t>> for $t {
+    impl Add<Fraction<Self>> for $t {
         type Output = Fraction<Self>;
 
         fn add(self, other: Fraction<Self>) -> Self::Output {
@@ -115,7 +113,7 @@ macro_rules! plain_add_fraction_impl {
 plain_add_fraction_impl!(i8 i16 i32 i64 i128 isize);
 
 impl<Digit: AdditiveDigit + Eq + GcdDigit, const SEPARATOR: char, const SHIFT: usize>
-    Add<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>> for BigInt<Digit, SEPARATOR, SHIFT>
+    Add<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Fraction<Self>;
 
@@ -249,8 +247,7 @@ impl<
     type Output = Self;
 
     fn mul(self, other: Component) -> Self::Output {
-        let (other, denominator) =
-            normalize_components_moduli(other, self.denominator);
+        let (other, denominator) = normalize_components_moduli(other, self.denominator);
         Self {
             numerator: self.numerator * other,
             denominator,
@@ -260,7 +257,7 @@ impl<
 
 macro_rules! plain_mul_fraction_impl {
     ($($t:ty)*) => ($(
-    impl Mul<Fraction<$t>> for $t {
+    impl Mul<Fraction<Self>> for $t {
         type Output = Fraction<Self>;
 
         fn mul(self, other: Fraction<Self>) -> Self::Output {
@@ -273,7 +270,7 @@ macro_rules! plain_mul_fraction_impl {
 plain_mul_fraction_impl!(i8 i16 i32 i64 i128 isize);
 
 impl<Digit: Eq + GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
-    Mul<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>> for BigInt<Digit, SEPARATOR, SHIFT>
+    Mul<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Fraction<Self>;
 
@@ -420,7 +417,7 @@ impl<
 
 macro_rules! plain_sub_fraction_impl {
     ($($t:ty)*) => ($(
-    impl Sub<Fraction<$t>> for $t {
+    impl Sub<Fraction<Self>> for $t {
         type Output = Fraction<Self>;
 
         fn sub(self, subtrahend: Fraction<Self>) -> Self::Output {
@@ -440,7 +437,7 @@ macro_rules! plain_sub_fraction_impl {
 plain_sub_fraction_impl!(i8 i16 i32 i64 i128 isize);
 
 impl<Digit: AdditiveDigit + Eq + GcdDigit, const SEPARATOR: char, const SHIFT: usize>
-    Sub<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>> for BigInt<Digit, SEPARATOR, SHIFT>
+    Sub<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Fraction<Self>;
 

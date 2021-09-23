@@ -8,9 +8,11 @@ try:
 except ImportError:
     from math import gcd as _gcd
     from operator import mul as _mul
-    from typing import (Optional as _Optional,
+    from typing import (Any as _Any,
+                        Optional as _Optional,
                         Tuple as _Tuple,
-                        Union as _Union)
+                        Union as _Union,
+                        overload as _overload)
 
 
     class Int:
@@ -219,7 +221,16 @@ except ImportError:
                     if isinstance(other, Fraction)
                     else NotImplemented)
 
-        def __mul__(self, other: 'Fraction') -> 'Fraction':
+        @_overload
+        def __mul__(self, other: _Any) -> _Any:
+            ...
+
+        @_overload
+        def __mul__(self, other: _Union['Fraction', Int]) -> 'Fraction':
+            ...
+
+        def __mul__(self, other: _Union['Fraction', Int, _Any]
+                    ) -> _Union['Fraction', _Any]:
             return (self._mul_by_fraction(other)
                     if isinstance(other, Fraction)
                     else (self._mul_by_int(other)
@@ -246,7 +257,16 @@ except ImportError:
         def __repr__(self) -> str:
             return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'
 
+        @_overload
+        def __rmul__(self, other: _Any) -> _Any:
+            ...
+
+        @_overload
         def __rmul__(self, other: Int) -> 'Fraction':
+            ...
+
+        def __rmul__(self, other: _Union[Int, _Any]
+                     ) -> _Union['Fraction', _Any]:
             return (self._mul_by_int(other)
                     if isinstance(other, Int)
                     else NotImplemented)

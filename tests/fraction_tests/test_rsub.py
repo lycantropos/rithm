@@ -6,5 +6,5 @@ from . import strategies
 
 
 @given(strategies.fractions, strategies.ints)
-def test_connection_with_add(fraction: Fraction, int_: Int) -> None:
+def test_connection_with_sub(fraction: Fraction, int_: Int) -> None:
     assert int_ - fraction == -(fraction - int_)

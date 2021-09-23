@@ -71,6 +71,30 @@ impl<
             + GcdMagma
             + Oppositive
             + MultiplicativeMonoid,
+    > Add<Component> for Fraction<Component>
+{
+    type Output = Self;
+
+    fn add(self, other: Component) -> Self::Output {
+        let (numerator, denominator) = normalize_components_moduli::<Component>(
+            self.numerator + other * self.denominator.clone(),
+            self.denominator,
+        );
+        Self {
+            numerator,
+            denominator,
+        }
+    }
+}
+
+impl<
+        Component: AdditiveMonoid
+            + Clone
+            + DivisivePartialMagma
+            + Eq
+            + GcdMagma
+            + Oppositive
+            + MultiplicativeMonoid,
     > AddAssign for Fraction<Component>
 {
     fn add_assign(&mut self, other: Self) {

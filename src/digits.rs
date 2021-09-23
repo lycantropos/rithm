@@ -6,7 +6,7 @@ use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
     AssigningDivisivePartialMagma, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
     AssigningShiftingRightMonoid, AssigningSubtractiveMagma, DivisivePartialMagma, DoublePrecision,
-    DoublePrecisionOf, ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Unitary,
+    DoublePrecisionOf, ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf,
     Zeroable,
 };
 use crate::utils;
@@ -19,8 +19,7 @@ pub trait BinaryDigit = AssigningAdditiveMonoid
     + AssigningShiftingRightMonoid<usize>
     + AssigningSubtractiveMagma
     + Copy
-    + PartialOrd
-    + Unitary;
+    + PartialOrd;
 
 pub(crate) type Sign = i8;
 

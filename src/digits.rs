@@ -7,10 +7,19 @@ use crate::traits::{
     AssigningDivisivePartialMagma, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
     AssigningShiftingRightMonoid, AssigningSubtractiveMagma, DivisivePartialMagma, DoublePrecision,
     DoublePrecisionOf, ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf,
-    Zeroable,
+    ShiftingLeftMonoid, SubtractiveMagma, Unitary, Zeroable,
 };
 use crate::utils;
 
+pub trait AdditiveDigit = AssigningAdditiveMonoid
+    + AssigningBitwiseConjunctiveMagma
+    + AssigningShiftingLeftMonoid<usize>
+    + AssigningShiftingRightMonoid<usize>
+    + AssigningSubtractiveMagma
+    + Copy
+    + PartialOrd
+    + ModularSubtractiveMagma
+    + Unitary;
 pub trait BinaryDigit = AssigningAdditiveMonoid
     + AssigningBitwiseConjunctiveMagma
     + AssigningBitwiseDisjunctiveMonoid
@@ -966,15 +975,12 @@ where
     (high, low)
 }
 
-pub(crate) fn subtract_signed_digits<Digit, const SHIFT: usize>(
+pub(crate) fn subtract_signed_digits<Digit: AdditiveDigit, const SHIFT: usize>(
     minuend: &[Digit],
     minuend_sign: Sign,
     subtrahend: &[Digit],
     subtrahend_sign: Sign,
-) -> (Sign, Vec<Digit>)
-where
-    Digit: BinaryDigit + ModularSubtractiveMagma,
-{
+) -> (Sign, Vec<Digit>) {
     if minuend_sign.is_negative() {
         if subtrahend_sign.is_negative() {
             let mut sign = Sign::one();
@@ -995,14 +1001,11 @@ where
     }
 }
 
-fn subtract_digits<Digit, const SHIFT: usize>(
+fn subtract_digits<Digit: AdditiveDigit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
     sign: &mut Sign,
-) -> Vec<Digit>
-where
-    Digit: BinaryDigit + ModularSubtractiveMagma,
-{
+) -> Vec<Digit> {
     let mut longest = &first;
     let mut shortest = &second;
     let mut size_longest = longest.len();
@@ -1055,13 +1058,10 @@ where
     result
 }
 
-fn subtract_digits_in_place<Digit, const SHIFT: usize>(
+fn subtract_digits_in_place<Digit: AdditiveDigit, const SHIFT: usize>(
     longest: &mut [Digit],
     shortest: &[Digit],
-) -> Digit
-where
-    Digit: BinaryDigit + ModularSubtractiveMagma,
-{
+) -> Digit {
     let mut accumulator = Digit::zero();
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for index in 0..shortest.len() {
@@ -1082,15 +1082,12 @@ where
     accumulator
 }
 
-pub(crate) fn sum_signed_digits<Digit, const SHIFT: usize>(
+pub(crate) fn sum_signed_digits<Digit: AdditiveDigit, const SHIFT: usize>(
     first: &[Digit],
     first_sign: Sign,
     second: &[Digit],
     second_sign: Sign,
-) -> (Sign, Vec<Digit>)
-where
-    Digit: BinaryDigit + ModularSubtractiveMagma,
-{
+) -> (Sign, Vec<Digit>) {
     if first_sign.is_negative() {
         if second_sign.is_negative() {
             (-Sign::one(), sum_digits::<Digit, SHIFT>(first, second))
@@ -1111,10 +1108,10 @@ where
     }
 }
 
-fn sum_digits<Digit, const SHIFT: usize>(first: &[Digit], second: &[Digit]) -> Vec<Digit>
-where
-    Digit: BinaryDigit,
-{
+fn sum_digits<Digit: AdditiveDigit, const SHIFT: usize>(
+    first: &[Digit],
+    second: &[Digit],
+) -> Vec<Digit> {
     let mut longest = &first;
     let mut shortest = &second;
     let mut size_longest = longest.len();
@@ -1141,13 +1138,10 @@ where
     result
 }
 
-fn sum_digits_in_place<Digit, const SHIFT: usize>(
+fn sum_digits_in_place<Digit: AdditiveDigit, const SHIFT: usize>(
     longest: &mut [Digit],
     shortest: &[Digit],
-) -> Digit
-where
-    Digit: BinaryDigit,
-{
+) -> Digit {
     let mut accumulator = Digit::zero();
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for index in 0..shortest.len() {
@@ -1167,9 +1161,8 @@ where
 }
 
 #[inline]
-pub(crate) fn to_digit_mask<Digit>(shift: usize) -> Digit
-where
-    Digit: BinaryDigit,
-{
+pub(crate) fn to_digit_mask<Digit: ShiftingLeftMonoid<usize> + SubtractiveMagma + Unitary>(
+    shift: usize,
+) -> Digit {
     (Digit::one() << shift) - Digit::one()
 }

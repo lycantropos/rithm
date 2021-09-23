@@ -340,9 +340,8 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> Abs for BigInt<Digit, SEP
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Add for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit + ModularSubtractiveMagma,
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Add
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 
@@ -353,9 +352,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> AddAssign for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit + ModularSubtractiveMagma,
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> AddAssign
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn add_assign(&mut self, other: Self) {
         (self.sign, self.digits) =
@@ -1239,9 +1237,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Sub for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit + ModularSubtractiveMagma,
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Sub
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 
@@ -1256,9 +1253,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> SubAssign for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit + ModularSubtractiveMagma,
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn sub_assign(&mut self, subtrahend: Self) {
         (self.sign, self.digits) = subtract_signed_digits::<Digit, SHIFT>(

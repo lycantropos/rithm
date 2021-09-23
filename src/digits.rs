@@ -101,6 +101,10 @@ pub trait MultiplicativeDigit =
             + AssigningShiftingRightMonoid<usize>
             + AssigningSubtractiveMagma
             + Copy;
+pub trait NonBinaryDigitConvertibleTo<Target> = Copy
+where
+    Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
+    DoublePrecisionOf<Target>: BinaryDigit + From<Self> + From<Target> + TryFrom<usize>;
 
 pub(crate) type Sign = i8;
 pub(crate) type WindowDigit = u8;
@@ -138,24 +142,14 @@ where
     }
 }
 
-pub(crate) fn digits_to_binary_base<SourceDigit, TargetDigit, const TARGET_SHIFT: usize>(
+pub(crate) fn digits_to_binary_base<
+    SourceDigit: BinaryDigitConvertibleTo<TargetDigit> + NonBinaryDigitConvertibleTo<TargetDigit>,
+    TargetDigit,
+    const TARGET_SHIFT: usize,
+>(
     source: &[SourceDigit],
     source_base: usize,
-) -> Vec<TargetDigit>
-where
-    SourceDigit: BinaryDigit + DoublePrecision + From<u8>,
-    TargetDigit: Copy
-        + DoublePrecision
-        + TryFrom<DoublePrecisionOf<TargetDigit>>
-        + TryFrom<SourceDigit>
-        + TryFrom<DoublePrecisionOf<SourceDigit>>
-        + TryFrom<DoublePrecisionOf<TargetDigit>>
-        + Zeroable,
-    DoublePrecisionOf<SourceDigit>: BinaryDigit,
-    DoublePrecisionOf<TargetDigit>:
-        BinaryDigit + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
-    usize: TryFrom<SourceDigit>,
-{
+) -> Vec<TargetDigit> {
     if source_base & (source_base - 1) == 0 {
         binary_digits_to_binary_base::<SourceDigit, TargetDigit>(
             source,
@@ -584,16 +578,14 @@ pub(crate) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usi
     (quotient, remainder)
 }
 
-fn non_binary_digits_to_greater_binary_base<SourceDigit, TargetDigit, const TARGET_SHIFT: usize>(
+fn non_binary_digits_to_greater_binary_base<
+    SourceDigit: NonBinaryDigitConvertibleTo<TargetDigit>,
+    TargetDigit,
+    const TARGET_SHIFT: usize,
+>(
     source: &[SourceDigit],
     source_base: usize,
-) -> Vec<TargetDigit>
-where
-    SourceDigit: Copy,
-    TargetDigit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>> + Zeroable,
-    DoublePrecisionOf<TargetDigit>:
-        BinaryDigit + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
-{
+) -> Vec<TargetDigit> {
     let target_digit_mask = to_digit_mask::<DoublePrecisionOf<TargetDigit>>(TARGET_SHIFT);
     static mut BASES_LOGS: [f64; 37] = [0.0; 37];
     static mut INFIMUM_BASES_EXPONENTS: [usize; 37] = [0; 37];
@@ -660,16 +652,14 @@ where
     result
 }
 
-fn non_binary_digits_to_lesser_binary_base<SourceDigit, TargetDigit, const TARGET_SHIFT: usize>(
+fn non_binary_digits_to_lesser_binary_base<
+    SourceDigit: NonBinaryDigitConvertibleTo<TargetDigit>,
+    TargetDigit,
+    const TARGET_SHIFT: usize,
+>(
     source: &[SourceDigit],
     source_base: usize,
-) -> Vec<TargetDigit>
-where
-    SourceDigit: Copy,
-    TargetDigit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<TargetDigit>> + Zeroable,
-    DoublePrecisionOf<TargetDigit>:
-        BinaryDigit + From<SourceDigit> + From<TargetDigit> + TryFrom<usize>,
-{
+) -> Vec<TargetDigit> {
     let target_digit_mask = to_digit_mask::<DoublePrecisionOf<TargetDigit>>(TARGET_SHIFT);
     static mut BASES_LOGS: [f64; 37] = [0.0; 37];
     if unsafe { BASES_LOGS[source_base] } == 0.0 {

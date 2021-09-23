@@ -61,6 +61,24 @@ pub trait FromStrDigit = Copy
     + TryFrom<DoublePrecisionOf<Self>>
     + Zeroable
 where DoublePrecisionOf<Self>: BinaryDigit + From<u8> + TryFrom<usize>;
+pub trait GcdDigit = BinaryDigit
+    + DoublePrecision
+    + From<u8>
+    + ModularSubtractiveMagma
+    + Oppose
+    + TryFrom<DoublePrecisionOf<Self>>
+    + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>
+    + TryFrom<usize>
+where
+    DoublePrecisionOf<Self>: BinaryDigit + DivisivePartialMagma + ModularPartialMagma + Oppose,
+    OppositionOf<Self>:
+        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Self>>> + TryFrom<Self>,
+    OppositionOf<DoublePrecisionOf<Self>>: BinaryDigit
+        + DivisivePartialMagma
+        + From<Self>
+        + From<OppositionOf<Self>>
+        + ModularPartialMagma,
+    usize: TryFrom<Self>;
 
 pub(crate) type Sign = i8;
 

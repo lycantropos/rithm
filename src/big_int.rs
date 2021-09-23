@@ -743,25 +743,7 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> FromStrRadi
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Gcd for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + From<u8>
-        + ModularSubtractiveMagma
-        + Oppose
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit + DivisivePartialMagma + ModularPartialMagma + Oppose,
-    OppositionOf<Digit>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>> + TryFrom<Digit>,
-    OppositionOf<DoublePrecisionOf<Digit>>: BinaryDigit
-        + DivisivePartialMagma
-        + From<Digit>
-        + From<OppositionOf<Digit>>
-        + ModularPartialMagma,
-    usize: TryFrom<Digit>,
+impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 

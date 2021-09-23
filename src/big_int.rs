@@ -387,8 +387,8 @@ where
     }
 }
 
-impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivEuclid for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDivEuclid
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<Self>;
 
@@ -447,8 +447,8 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDi
     }
 }
 
-impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRemEuclid for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRemEuclid
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<(Self, Self)>;
 
@@ -744,7 +744,8 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> FromStrRadi
     }
 }
 
-impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 
@@ -895,14 +896,8 @@ impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd for BigInt<
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Mul for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + ModularSubtractiveMagma
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
+impl<Digit: MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize> Mul
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 
@@ -914,14 +909,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> MulAssign for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + ModularSubtractiveMagma
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
+impl<Digit: MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize> MulAssign
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn mul_assign(&mut self, other: Self) {
         self.sign *= other.sign;

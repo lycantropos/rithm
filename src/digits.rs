@@ -90,6 +90,16 @@ where
         + From<OppositionOf<Self>>
         + ModularPartialMagma,
     usize: TryFrom<Self>;
+pub trait MultiplicativeDigit =
+    AdditiveDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + TryFrom<usize>
+    where
+        DoublePrecisionOf<Self>: AssigningAdditiveMonoid
+            + AssigningBitwiseConjunctiveMagma
+            + AssigningMultiplicativeMonoid
+            + AssigningShiftingLeftMonoid<usize>
+            + AssigningShiftingRightMonoid<usize>
+            + AssigningSubtractiveMagma
+            + Copy;
 
 pub(crate) type Sign = i8;
 
@@ -690,18 +700,10 @@ where
     result
 }
 
-pub(crate) fn multiply_digits<Digit, const SHIFT: usize>(
+pub(crate) fn multiply_digits<Digit: MultiplicativeDigit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
-) -> Vec<Digit>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + ModularSubtractiveMagma
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
-{
+) -> Vec<Digit> {
     let mut shortest = &first;
     let mut longest = &second;
     let mut size_shortest = shortest.len();
@@ -759,18 +761,10 @@ where
     result
 }
 
-fn multiply_digits_lopsided<Digit, const SHIFT: usize>(
+fn multiply_digits_lopsided<Digit: MultiplicativeDigit, const SHIFT: usize>(
     shortest: &[Digit],
     longest: &[Digit],
-) -> Vec<Digit>
-where
-    Digit: BinaryDigit
-        + DoublePrecision
-        + ModularSubtractiveMagma
-        + TryFrom<DoublePrecisionOf<Digit>>
-        + TryFrom<usize>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
-{
+) -> Vec<Digit> {
     let size_shortest = shortest.len();
     let mut size_longest = longest.len();
     let mut result = vec![Digit::zero(); size_shortest + size_longest];
@@ -789,14 +783,10 @@ where
     result
 }
 
-fn multiply_digits_plain<Digit, const SHIFT: usize>(
+fn multiply_digits_plain<Digit: MultiplicativeDigit, const SHIFT: usize>(
     shortest: &[Digit],
     longest: &[Digit],
-) -> Vec<Digit>
-where
-    Digit: BinaryDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
-{
+) -> Vec<Digit> {
     let size_shortest = shortest.len();
     let size_longest = longest.len();
     let mut result = vec![Digit::zero(); size_shortest + size_longest];

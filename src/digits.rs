@@ -285,7 +285,7 @@ pub(crate) fn binary_digits_to_lesser_binary_base<
     let mut result = Vec::<TargetDigit>::with_capacity(digits_count);
     let mut accumulator = DoublePrecisionOf::<SourceDigit>::from(source[0]);
     let mut accumulator_bits_count = source_shift;
-    for index in 1usize..source.len() {
+    for &digit in source.iter().skip(1usize) {
         loop {
             result.push(unsafe {
                 TargetDigit::try_from(accumulator & target_digit_mask).unwrap_unchecked()
@@ -296,8 +296,7 @@ pub(crate) fn binary_digits_to_lesser_binary_base<
                 break;
             }
         }
-        accumulator |=
-            DoublePrecisionOf::<SourceDigit>::from(source[index]) << accumulator_bits_count;
+        accumulator |= DoublePrecisionOf::<SourceDigit>::from(digit) << accumulator_bits_count;
         accumulator_bits_count += source_shift;
     }
     loop {

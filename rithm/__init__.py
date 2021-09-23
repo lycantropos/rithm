@@ -290,7 +290,16 @@ except ImportError:
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __rsub__(self, other: 'Fraction') -> 'Fraction':
+        @_overload
+        def __rsub__(self, other: _Any) -> _Any:
+            ...
+
+        @_overload
+        def __rsub__(self, other: Int) -> 'Fraction':
+            ...
+
+        def __rsub__(self, other: _Union[Int, _Any]
+                     ) -> _Union['Fraction', _Any]:
             return (
                 Fraction(
                     *_normalize_components_moduli(other * self.denominator
@@ -308,7 +317,16 @@ except ImportError:
                     if self.denominator == _ONE
                     else f'{self.numerator}/{self.denominator}')
 
-        def __sub__(self, other: 'Fraction') -> 'Fraction':
+        @_overload
+        def __sub__(self, other: _Any) -> _Any:
+            ...
+
+        @_overload
+        def __sub__(self, other: _Union['Fraction', Int]) -> 'Fraction':
+            ...
+
+        def __sub__(self, other: _Union['Fraction', Int, _Any]
+                    ) -> _Union['Fraction', _Any]:
             return (
                 Fraction(
                     *_normalize_components_moduli(

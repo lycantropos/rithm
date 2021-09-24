@@ -197,13 +197,18 @@ except ImportError:
             return (self.numerator == other.numerator
                     and self.denominator == other.denominator
                     if isinstance(other, Fraction)
-                    else NotImplemented)
+                    else (self.denominator == _ONE
+                          and self.numerator == other
+                          if isinstance(other, Int)
+                          else NotImplemented))
 
         def __ge__(self, other: 'Fraction') -> bool:
             return (self.numerator * other.denominator
                     >= other.numerator * self.denominator
                     if isinstance(other, Fraction)
-                    else NotImplemented)
+                    else (self.numerator >= other * self.denominator
+                          if isinstance(other, Int)
+                          else NotImplemented))
 
         def __getstate__(self) -> _Tuple[Int, Int]:
             return self._numerator, self._denominator
@@ -212,19 +217,25 @@ except ImportError:
             return (self.numerator * other.denominator
                     > other.numerator * self.denominator
                     if isinstance(other, Fraction)
-                    else NotImplemented)
+                    else (self.numerator > other * self.denominator
+                          if isinstance(other, Int)
+                          else NotImplemented))
 
         def __le__(self, other: 'Fraction') -> bool:
             return (self.numerator * other.denominator
                     <= other.numerator * self.denominator
                     if isinstance(other, Fraction)
-                    else NotImplemented)
+                    else (self.numerator <= other * self.denominator
+                          if isinstance(other, Int)
+                          else NotImplemented))
 
         def __lt__(self, other: 'Fraction') -> bool:
             return (self.numerator * other.denominator
                     < other.numerator * self.denominator
                     if isinstance(other, Fraction)
-                    else NotImplemented)
+                    else (self.numerator < other * self.denominator
+                          if isinstance(other, Int)
+                          else NotImplemented))
 
         @_overload
         def __mul__(self, other: _Any) -> _Any:

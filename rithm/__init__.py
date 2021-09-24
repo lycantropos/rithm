@@ -355,7 +355,30 @@ except ImportError:
                  if isinstance(other, Int)
                  else NotImplemented))
 
-        def __truediv__(self, other: 'Fraction') -> 'Fraction':
+        @_overload
+        def __rtruediv__(self, other: _Any) -> _Any:
+            ...
+
+        @_overload
+        def __rtruediv__(self, other: Int) -> 'Fraction':
+            ...
+
+        def __rtruediv__(self, other: _Union[Int, _Any]
+                         ) -> _Union['Fraction', _Any]:
+            return (self._rtruediv_by_int(other)
+                    if isinstance(other, Int)
+                    else NotImplemented)
+
+        @_overload
+        def __truediv__(self, other: _Any) -> _Any:
+            ...
+
+        @_overload
+        def __truediv__(self, other: _Union['Fraction', Int]) -> 'Fraction':
+            ...
+
+        def __truediv__(self, other: _Union['Fraction', Int, _Any]
+                        ) -> _Union['Fraction', _Any]:
             return (
                 Fraction(*_normalize_components_sign(
                     *map(_mul,
@@ -365,7 +388,9 @@ except ImportError:
                                                       self.denominator))),
                          _normalize=False)
                 if isinstance(other, Fraction)
-                else NotImplemented)
+                else (self._truediv_by_int(other)
+                      if isinstance(other, Int)
+                      else NotImplemented))
 
         def _add_fraction(self, other: 'Fraction') -> 'Fraction':
             return Fraction(
@@ -396,6 +421,22 @@ except ImportError:
                                                               self.denominator)
             return Fraction(self.numerator * other, denominator,
                             _normalize=False)
+
+        def _rtruediv_by_int(self, other: Int) -> 'Fraction':
+            other, numerator = _normalize_components_moduli(other,
+                                                            self.numerator)
+            return Fraction(
+                *_normalize_components_sign(other * self.denominator,
+                                            numerator),
+                _normalize=False)
+
+        def _truediv_by_int(self, other: Int) -> 'Fraction':
+            numerator, other = _normalize_components_moduli(self.numerator,
+                                                            other)
+            return Fraction(
+                *_normalize_components_sign(numerator,
+                                            other * self.denominator),
+                _normalize=False)
 
 
     def _normalize_components_moduli(numerator: Int,

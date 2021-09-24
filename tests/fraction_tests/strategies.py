@@ -10,6 +10,7 @@ ints = integers.map(Int)
 non_zero_ints = ints.filter(bool)
 zero_ints = strategies.builds(Int)
 fractions = strategies.builds(Fraction, ints, non_zero_ints)
+non_zero_fractions = strategies.builds(Fraction, non_zero_ints, non_zero_ints)
 ints_with_builtins = strategies.builds(to_int_with_builtin, integers.map(str))
 non_zero_ints_with_builtins = ints_with_builtins.filter(all)
 fractions_with_builtins = strategies.builds(to_fraction_with_builtin,

@@ -368,6 +368,44 @@ impl<Component: Clone + Eq + NegatableUnaryAlgebra> Neg for Fraction<Component> 
     }
 }
 
+impl<Component: Clone + Eq + Unitary> PartialEq<Component> for Fraction<Component> {
+    fn eq(&self, other: &Component) -> bool {
+        self.denominator.is_one() && self.numerator.eq(other)
+    }
+
+    fn ne(&self, other: &Component) -> bool {
+        !self.denominator.is_one() || self.numerator.ne(other)
+    }
+}
+
+macro_rules! plain_partial_eq_fraction_impl {
+    ($($t:ty)*) => ($(
+    impl PartialEq<Fraction<Self>> for $t {
+        fn eq(&self, other: &Fraction<Self>) -> bool {
+            other.denominator.is_one() && other.numerator.eq(self)
+        }
+
+        fn ne(&self, other: &Fraction<Self>) -> bool {
+            !other.denominator.is_one() || other.numerator.ne(self)
+        }
+    }
+    )*)
+}
+
+plain_partial_eq_fraction_impl!(i8 i16 i32 i64 i128 isize);
+
+impl<Digit: Clone + Eq + Unitary + Zeroable, const SEPARATOR: char, const SHIFT: usize>
+    PartialEq<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    fn eq(&self, other: &Fraction<Self>) -> bool {
+        other.denominator.is_one() && other.numerator.eq(self)
+    }
+
+    fn ne(&self, other: &Fraction<Self>) -> bool {
+        !other.denominator.is_one() || other.numerator.ne(self)
+    }
+}
+
 impl<Component: Clone + Eq + MultiplicativeMonoid + PartialOrd> PartialOrd for Fraction<Component> {
     fn ge(&self, other: &Self) -> bool {
         self.numerator.clone() * other.denominator.clone()

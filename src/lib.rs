@@ -456,8 +456,15 @@ impl PyObjectProtocol for PyFraction {
         )
     }
 
-    fn __richcmp__(&self, other: PyFraction, op: CompareOp) -> bool {
-        compare(&self.0, &other.0, op)
+    fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance::<PyFraction>()? {
+            Ok(compare(&self.0, &other.extract::<PyFraction>()?.0, op).into_py(py))
+        } else if other.is_instance::<PyInt>()? {
+            Ok(compare(&self.0, &other.extract::<PyInt>()?.0, op).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
     }
 
     fn __str__(&self) -> String {

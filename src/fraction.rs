@@ -167,6 +167,70 @@ impl<
 }
 
 impl<
+        Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
+    > CheckedDiv<Component> for Fraction<Component>
+{
+    type Output = Option<Self>;
+
+    fn checked_div(self, divisor: Component) -> Self::Output {
+        if divisor.is_zero() {
+            return None;
+        }
+        let (dividend_numerator, divisor_numerator) =
+            normalize_components_moduli(self.numerator, divisor);
+        let (numerator, denominator) =
+            normalize_components_sign(dividend_numerator, self.denominator * divisor_numerator);
+        Some(Self {
+            numerator,
+            denominator,
+        })
+    }
+}
+
+macro_rules! plain_checked_div_fraction_impl {
+    ($($t:ty)*) => ($(
+    impl CheckedDiv<Fraction<Self>> for $t
+    {
+        type Output = Option<Fraction<Self>>;
+
+        fn checked_div(self, divisor: Fraction<Self>) -> Self::Output {
+            if divisor.is_zero() {
+                return None;
+            }
+            let (dividend, divisor_numerator) = normalize_components_moduli(self, divisor.numerator);
+            let (numerator, denominator) =
+                normalize_components_sign(dividend * divisor.denominator, divisor_numerator);
+            Some(Fraction::<Self> {
+                numerator,
+                denominator,
+            })
+        }
+    }
+    )*)
+}
+
+plain_checked_div_fraction_impl!(i8 i16 i32 i64 i128 isize);
+
+impl<Digit: Eq + GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDiv<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Option<Fraction<Self>>;
+
+    fn checked_div(self, divisor: Fraction<Self>) -> Self::Output {
+        if divisor.is_zero() {
+            return None;
+        }
+        let (dividend, divisor_numerator) = normalize_components_moduli(self, divisor.numerator);
+        let (numerator, denominator) =
+            normalize_components_sign(dividend * divisor.denominator, divisor_numerator);
+        Some(Fraction::<Self> {
+            numerator,
+            denominator,
+        })
+    }
+}
+
+impl<
         Component: Clone
             + Eq
             + Oppositive

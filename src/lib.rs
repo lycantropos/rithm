@@ -465,7 +465,7 @@ impl PyObjectProtocol for PyFraction {
     }
 }
 
-fn compare<T: PartialOrd>(left: &T, right: &T, op: CompareOp) -> bool {
+fn compare<T: PartialOrd<U>, U>(left: &T, right: &U, op: CompareOp) -> bool {
     match op {
         CompareOp::Eq => left == right,
         CompareOp::Ge => left >= right,

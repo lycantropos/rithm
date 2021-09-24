@@ -874,7 +874,7 @@ impl<Digit: Clone + Eq + PartialOrd + Zeroable, const SEPARATOR: char, const SHI
     fn cmp(&self, other: &Self) -> Ordering {
         if self.lt(other) {
             Ordering::Less
-        } else if other.lt(self) {
+        } else if self.gt(other) {
             Ordering::Greater
         } else {
             Ordering::Equal

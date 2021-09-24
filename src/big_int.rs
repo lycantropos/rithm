@@ -932,7 +932,7 @@ impl<Digit: Clone + PartialOrd + Zeroable, const SEPARATOR: char, const SHIFT: u
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(if self.lt(other) {
             Ordering::Less
-        } else if other.lt(self) {
+        } else if self.gt(other) {
             Ordering::Greater
         } else {
             Ordering::Equal

@@ -3,10 +3,10 @@
 #![feature(specialization)]
 #![feature(trait_alias)]
 
-use crate::traits::{
-    Abs, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow, CheckedRemEuclid,
-    FromStrRadix, Gcd, Oppositive, Pow, Unitary, Zeroable,
-};
+use std::cmp::Ordering;
+use std::convert::TryFrom;
+use std::os::raw::c_uchar;
+
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
@@ -14,9 +14,12 @@ use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, P
 use pyo3::types::{PyBytes, PyLong, PyString};
 use pyo3::{ffi, AsPyPointer, Py, PyAny, PyErr, PyNativeType, ToPyObject};
 use pyo3::{IntoPy, PyNumberProtocol, PyObject};
-use std::cmp::Ordering;
-use std::convert::TryFrom;
-use std::os::raw::c_uchar;
+
+use crate::traits::{
+    Abs, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow, CheckedRemEuclid,
+    FromStrRadix, Gcd, Oppositive, Pow, Unitary, Zeroable,
+};
+use crate::utils::rem_euclid_inv;
 
 pub mod big_int;
 mod digits;

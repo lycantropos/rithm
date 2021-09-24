@@ -288,6 +288,42 @@ impl<
 
 impl<
         Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
+    > Div<Component> for Fraction<Component>
+{
+    type Output = Self;
+
+    fn div(self, divisor: Component) -> Self::Output {
+        self.checked_div(divisor).unwrap()
+    }
+}
+
+macro_rules! plain_div_fraction_impl {
+    ($($t:ty)*) => ($(
+    impl Div<Fraction<Self>> for $t
+    {
+        type Output = Fraction<Self>;
+
+        fn div(self, divisor: Fraction<Self>) -> Self::Output {
+            <$t as CheckedDiv<Fraction<Self>>>::checked_div(self, divisor).unwrap()
+        }
+    }
+    )*)
+}
+
+plain_div_fraction_impl!(i8 i16 i32 i64 i128 isize);
+
+impl<Digit: Eq + GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
+    Div<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Fraction<Self>;
+
+    fn div(self, divisor: Fraction<Self>) -> Self::Output {
+        self.checked_div(divisor).unwrap()
+    }
+}
+
+impl<
+        Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
     > Mul for Fraction<Component>
 {
     type Output = Self;

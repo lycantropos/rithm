@@ -368,6 +368,18 @@ impl<Component: Clone + Eq + NegatableUnaryAlgebra> Neg for Fraction<Component> 
     }
 }
 
+impl<Component: Clone + Eq + MultiplicativeMonoid + PartialOrd> Ord for Fraction<Component> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.lt(other) {
+            Ordering::Less
+        } else if self.gt(other) {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
+        }
+    }
+}
+
 impl<Component: Clone + Eq + Unitary> PartialEq<Component> for Fraction<Component> {
     fn eq(&self, other: &Component) -> bool {
         self.denominator.is_one() && self.numerator.eq(other)

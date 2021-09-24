@@ -5,6 +5,11 @@ from rithm import (Fraction,
 from . import strategies
 
 
-@given(strategies.non_zero_fractions, strategies.ints)
+@given(strategies.fractions, strategies.ints)
 def test_properties(fraction: Fraction, int_: Int) -> None:
-    assert (int_ / fraction) * fraction == int_
+    try:
+        result = int_ / fraction
+    except ZeroDivisionError:
+        assert not fraction
+    else:
+        assert result * fraction == int_

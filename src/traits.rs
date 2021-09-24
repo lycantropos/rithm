@@ -228,6 +228,28 @@ macro_rules! plain_checked_rem_impl {
 
 plain_checked_rem_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
+pub trait CheckedRemEuclidInv<Divisor = Self> {
+    type Output;
+
+    fn checked_rem_euclid_inv(self, divisor: Divisor) -> Self::Output;
+}
+
+macro_rules! plain_checked_rem_inv_impl {
+    ($($t:ty)*) => ($(
+        impl CheckedRemEuclidInv for $t {
+            type Output = Option<Self>;
+
+            #[inline(always)]
+            fn checked_rem_euclid_inv(self, divisor: Self) -> Self::Output {
+                use crate::utils;
+                utils::rem_euclid_inv::<$t>(self, divisor)
+            }
+        }
+    )*)
+}
+
+plain_checked_rem_inv_impl!(i8 i16 i32 i64 i128 isize);
+
 pub trait CheckedRemEuclid<Divisor = Self> {
     type Output;
 

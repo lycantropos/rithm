@@ -41,7 +41,7 @@ type _Fraction = fraction::Fraction<_BigInt>;
 struct PyInt(_BigInt);
 
 #[pyclass(name = "Fraction", module = "rithm", subclass)]
-#[pyo3(text_signature = "(numerator, denominator, /)")]
+#[pyo3(text_signature = "(numerator=None, denominator=None, /)")]
 #[derive(Clone)]
 struct PyFraction(_Fraction);
 

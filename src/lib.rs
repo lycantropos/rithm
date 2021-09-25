@@ -37,7 +37,7 @@ type _BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
 type _Fraction = fraction::Fraction<_BigInt>;
 
 #[pyclass(name = "Int", module = "rithm", subclass)]
-#[pyo3(text_signature = "(value, base=None, /)")]
+#[pyo3(text_signature = "(value=None, base=None, /)")]
 #[derive(Clone)]
 struct PyInt(_BigInt);
 

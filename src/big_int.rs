@@ -9,8 +9,8 @@ use std::str::Chars;
 use crate::digits::*;
 use crate::traits::{
     Abs, CheckedDiv, CheckedDivEuclid, CheckedDivRem, CheckedDivRemEuclid, CheckedPow, CheckedRem,
-    CheckedRemEuclid, DivEuclid, DivRem, DivRemEuclid, DoublePrecisionOf, FromStrRadix, Gcd,
-    Oppose, OppositionOf, Oppositive, Pow, RemEuclid, Unitary, Zeroable,
+    CheckedRemEuclid, CheckedRemEuclidInv, DivEuclid, DivRem, DivRemEuclid, DoublePrecisionOf,
+    FromStrRadix, Gcd, Oppose, OppositionOf, Oppositive, Pow, RemEuclid, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -527,6 +527,16 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     fn checked_rem_euclid(self, divisor: Self) -> Self::Output {
         checked_rem_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
             .map(|(sign, digits)| Self { sign, digits })
+    }
+}
+
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclidInv
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Option<Self>;
+
+    fn checked_rem_euclid_inv(self, divisor: Self) -> Self::Output {
+        utils::rem_euclid_inv(self, divisor)
     }
 }
 

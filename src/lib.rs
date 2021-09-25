@@ -75,7 +75,7 @@ impl PyInt {
                             Ordering::Equal => Ok(PyInt(_BigInt::zero())),
                             Ordering::Greater => {
                                 let bytes_count =
-                                    bits_count as usize / (c_uchar::BITS as usize) + 1;
+                                    (bits_count as usize) / (c_uchar::BITS as usize) + 1;
                                 let mut buffer = vec![0u8; bytes_count];
                                 if ffi::_PyLong_AsByteArray(
                                     Py::<PyLong>::from_owned_ptr(py, value).as_ptr()

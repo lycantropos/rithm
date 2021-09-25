@@ -536,7 +536,25 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     type Output = Option<Self>;
 
     fn checked_rem_euclid_inv(self, divisor: Self) -> Self::Output {
-        utils::rem_euclid_inv(self, divisor)
+        let mut candidate = Self::zero();
+        let mut result = Self::one();
+        let mut step_dividend = self;
+        let mut step_divisor = divisor.clone();
+        while !step_divisor.is_zero() {
+            let (quotient, remainder) = step_dividend.div_rem_euclid(step_divisor.clone());
+            step_dividend = step_divisor;
+            step_divisor = remainder;
+            (result, candidate) = (candidate.clone(), result - quotient * candidate);
+        }
+        if step_dividend.is_one() {
+            Some(if result.is_negative() {
+                divisor + result
+            } else {
+                result
+            })
+        } else {
+            None
+        }
     }
 }
 

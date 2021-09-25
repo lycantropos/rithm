@@ -1,9 +1,6 @@
 use std::convert::TryFrom;
 
-use crate::traits::{
-    AssigningShiftingRightMonoid, DivRemEuclid, ModularPartialMagma, MultiplicativeMonoid,
-    Oppositive, RemEuclid, SubtractiveMagma, Zeroable,
-};
+use crate::traits::{AssigningShiftingRightMonoid, ModularPartialMagma, Zeroable};
 
 pub(crate) const fn are_same<T, U>() -> bool {
     trait SameTo<U> {
@@ -75,35 +72,5 @@ pub(crate) const fn power(base: usize, exponent: usize) -> usize {
     match exponent {
         0 => 1,
         _ => base * power(base, exponent - 1),
-    }
-}
-
-pub(crate) fn rem_euclid_inv<T>(dividend: T, divisor: T) -> Option<T>
-where
-    T: Clone
-        + DivRemEuclid<Output = (T, T)>
-        + MultiplicativeMonoid
-        + Oppositive
-        + RemEuclid<Output = T>
-        + SubtractiveMagma,
-{
-    let mut candidate = T::zero();
-    let mut result = T::one();
-    let mut step_dividend = dividend;
-    let mut step_divisor = divisor.clone();
-    while !step_divisor.is_zero() {
-        let (quotient, remainder) = step_dividend.div_rem_euclid(step_divisor.clone());
-        step_dividend = step_divisor;
-        step_divisor = remainder;
-        (result, candidate) = (candidate.clone(), result - quotient * candidate);
-    }
-    if step_dividend.is_one() {
-        Some(if result.is_negative() {
-            result.rem_euclid(divisor)
-        } else {
-            result
-        })
-    } else {
-        None
     }
 }

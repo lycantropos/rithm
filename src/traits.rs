@@ -234,21 +234,100 @@ pub trait CheckedRemEuclidInv<Divisor = Self> {
     fn checked_rem_euclid_inv(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_checked_rem_inv_impl {
+macro_rules! plain_signed_checked_rem_euclid_inv_impl {
     ($($t:ty)*) => ($(
         impl CheckedRemEuclidInv for $t {
             type Output = Option<Self>;
 
             #[inline(always)]
             fn checked_rem_euclid_inv(self, divisor: Self) -> Self::Output {
-                use crate::utils;
-                utils::rem_euclid_inv::<$t>(self, divisor)
+                let mut candidate = Self::zero();
+                let mut result = Self::one();
+                let mut step_dividend = self;
+                let mut step_divisor = divisor;
+                while !step_divisor.is_zero() {
+                    let (quotient, remainder) = step_dividend.div_rem_euclid(step_divisor);
+                    step_dividend = step_divisor;
+                    step_divisor = remainder;
+                    (result, candidate) = (candidate, result - quotient * candidate);
+                }
+                if step_dividend.is_one() {
+                    Some(if result.is_negative() {
+                        divisor + result
+                    } else {
+                        result
+                    })
+                } else {
+                    None
+                }
             }
         }
     )*)
 }
 
-plain_checked_rem_inv_impl!(i8 i16 i32 i64 i128 isize);
+plain_signed_checked_rem_euclid_inv_impl!(i8 i16 i32 i64 i128 isize);
+
+macro_rules! plain_unsigned_checked_rem_euclid_inv_impl {
+    ($($t:ty)*) => ($(
+        impl CheckedRemEuclidInv for $t {
+            type Output = Option<Self>;
+
+            #[inline(always)]
+            fn checked_rem_euclid_inv(self, divisor: Self) -> Self::Output {
+                let mut candidate_modulus = Self::zero();
+                let mut result_modulus = Self::one();
+                let mut is_result_negative = false;
+                let mut is_candidate_negative = false;
+                let mut step_dividend = self;
+                let mut step_divisor = divisor;
+                while !step_divisor.is_zero() {
+                    let (quotient, remainder) = step_dividend.div_rem_euclid(step_divisor);
+                    step_dividend = step_divisor;
+                    step_divisor = remainder;
+                    let subtrahend_modulus = quotient * candidate_modulus;
+                    (is_result_negative, result_modulus, candidate_modulus) = (
+                        is_candidate_negative,
+                        candidate_modulus,
+                        if is_result_negative {
+                            if is_candidate_negative {
+                                if result_modulus > subtrahend_modulus {
+                                    is_candidate_negative = true;
+                                    result_modulus - subtrahend_modulus
+                                } else {
+                                    is_candidate_negative = false;
+                                    subtrahend_modulus - result_modulus
+                                }
+                            } else {
+                                is_candidate_negative = true;
+                                subtrahend_modulus + result_modulus
+                            }
+                        } else if is_candidate_negative {
+                            is_candidate_negative = false;
+                            subtrahend_modulus + result_modulus
+                        } else if result_modulus > subtrahend_modulus {
+                            is_candidate_negative = false;
+                            result_modulus - subtrahend_modulus
+                        } else {
+                            is_candidate_negative = true;
+                            subtrahend_modulus - result_modulus
+                        },
+                    );
+                }
+                if step_dividend.is_one() {
+                    Some(if is_result_negative {
+                        divisor - result_modulus
+                    } else {
+                        result_modulus
+                    })
+                } else {
+                    None
+                }
+            }
+        }
+    )*)
+}
+
+plain_unsigned_checked_rem_euclid_inv_impl!(u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedRemEuclid<Divisor = Self> {
     type Output;

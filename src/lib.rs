@@ -19,7 +19,6 @@ use crate::traits::{
     Abs, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow, CheckedRemEuclid,
     FromStrRadix, Gcd, Oppositive, Pow, Unitary, Zeroable,
 };
-use crate::utils::rem_euclid_inv;
 
 pub mod big_int;
 mod digits;

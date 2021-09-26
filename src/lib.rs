@@ -16,7 +16,7 @@ use pyo3::{IntoPy, PyNumberProtocol, PyObject};
 
 use crate::traits::{
     Abs, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow, CheckedPowRemEuclid,
-    CheckedRemEuclid, CheckedRemEuclidInv, FromStrRadix, Gcd, Oppositive, Pow, Unitary, Zeroable,
+    CheckedRemEuclid, FromStrRadix, Gcd, Oppositive, Pow, Unitary, Zeroable,
 };
 
 pub mod big_int;

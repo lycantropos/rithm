@@ -207,6 +207,100 @@ macro_rules! plain_checked_pow_impl {
 
 plain_checked_pow_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
+pub trait CheckedPowRemEuclid<Exponent, Divisor> {
+    type Output;
+
+    fn checked_pow_rem_euclid(self, exponent: Exponent, divisor: Divisor) -> Self::Output;
+}
+
+macro_rules! plain_signed_checked_pow_rem_euclid_impl {
+    ($($t:ty)*) => ($(
+        impl CheckedPowRemEuclid<u32, $t> for $t {
+            type Output = Option<$t>;
+
+            #[inline]
+            fn checked_pow_rem_euclid(self, exponent: u32, divisor: $t) -> Self::Output {
+                if divisor.is_zero() {
+                    return None;
+                }
+                let is_negative = divisor < 0;
+                let divisor = divisor.abs();
+                if divisor.is_one() {
+                    return Some(Self::zero());
+                }
+                let base = if self < 0 || self > divisor {
+                    self.rem_euclid(divisor)
+                } else {
+                    self
+                };
+                let mut result = base;
+                let mut exponent_mask = 2u32;
+                loop {
+                    if exponent_mask > exponent {
+                        exponent_mask >>= 1;
+                        break;
+                    }
+                    exponent_mask <<= 1;
+                }
+                exponent_mask >>= 1;
+                while !exponent_mask.is_zero() {
+                    result = (result * result).rem_euclid(divisor);
+                    if !(exponent & exponent_mask).is_zero() {
+                        result = (result * base).rem_euclid(divisor);
+                    }
+                    exponent_mask >>= 1;
+                }
+                Some(if is_negative && !result.is_zero() {
+                    result - divisor
+                } else {
+                    result
+                })
+            }
+        }
+    )*)
+}
+
+plain_signed_checked_pow_rem_euclid_impl!(i8 i16 i32 i64 i128 isize);
+
+macro_rules! plain_unsigned_checked_pow_rem_euclid_impl {
+    ($($t:ty)*) => ($(
+        impl CheckedPowRemEuclid<u32, $t> for $t {
+            type Output = Option<$t>;
+
+            #[inline]
+            fn checked_pow_rem_euclid(self, exponent: u32, divisor: $t) -> Self::Output {
+                if divisor.is_zero() {
+                    None
+                } else if divisor.is_one() {
+                    Some(Self::zero())
+                } else {
+                    let base = if self > divisor { self.rem_euclid(divisor) } else { self };
+                    let mut result = base;
+                    let mut exponent_mask = 2u32;
+                    loop {
+                        if exponent_mask > exponent {
+                            exponent_mask >>= 1;
+                            break;
+                        }
+                        exponent_mask <<= 1;
+                    }
+                    exponent_mask >>= 1;
+                    while !exponent_mask.is_zero() {
+                        result = (result * result).rem_euclid(divisor);
+                        if !(exponent & exponent_mask).is_zero() {
+                            result = (result * base).rem_euclid(divisor);
+                        }
+                        exponent_mask >>= 1;
+                    }
+                    Some(result)
+                }
+            }
+        }
+    )*)
+}
+
+plain_unsigned_checked_pow_rem_euclid_impl!(u8 u16 u32 u64 u128 usize);
+
 pub trait CheckedRem<Divisor = Self> {
     type Output;
 

@@ -460,29 +460,29 @@ impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize> Chec
             }
         } else if exponent.digits.len() <= WINDOW_CUTOFF {
             result = self.clone();
-            let mut bit = Digit::from(2);
+            let mut exponent_digit_mask = Digit::from(2);
             loop {
-                if bit > exponent_digit {
-                    bit >>= 1;
+                if exponent_digit_mask > exponent_digit {
+                    exponent_digit_mask >>= 1;
                     break;
                 }
-                bit <<= 1;
+                exponent_digit_mask <<= 1;
             }
-            bit >>= 1;
+            exponent_digit_mask >>= 1;
             let mut exponent_digits_iterator = exponent.digits.iter().rev().skip(1).peekable();
             loop {
-                while !bit.is_zero() {
+                while !exponent_digit_mask.is_zero() {
                     result *= result.clone();
-                    if !(exponent_digit & bit).is_zero() {
+                    if !(exponent_digit & exponent_digit_mask).is_zero() {
                         result *= self.clone();
                     }
-                    bit >>= 1;
+                    exponent_digit_mask >>= 1;
                 }
                 if exponent_digits_iterator.peek().is_none() {
                     break;
                 }
                 exponent_digit = unsafe { *exponent_digits_iterator.next().unwrap_unchecked() };
-                bit = Digit::one() << (SHIFT - 1);
+                exponent_digit_mask = Digit::one() << (SHIFT - 1);
             }
         } else {
             let mut cache = vec![Self::zero(); WINDOW_BASE];

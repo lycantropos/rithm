@@ -370,13 +370,16 @@ impl PyNumberProtocol for PyFraction {
         PyFraction(-self.0.clone())
     }
 
-    fn __pow__(lhs: PyFraction, rhs: PyInt, _modulo: Option<PyInt>) -> PyResult<PyFraction> {
-        debug_assert!(_modulo.is_none());
-        match lhs.0.checked_pow(rhs.0) {
-            Some(value) => Ok(PyFraction(value)),
-            None => Err(PyZeroDivisionError::new_err(
-                UNDEFINED_DIVISION_ERROR_MESSAGE,
-            )),
+    fn __pow__(lhs: PyFraction, rhs: PyInt, modulo: Option<PyInt>) -> PyResult<PyObject> {
+        if modulo.is_some() {
+            Ok(Python::with_gil(|py| py.NotImplemented()))
+        } else {
+            match lhs.0.checked_pow(rhs.0) {
+                Some(value) => Ok(to_py_object(PyFraction(value))),
+                None => Err(PyZeroDivisionError::new_err(
+                    UNDEFINED_DIVISION_ERROR_MESSAGE,
+                )),
+            }
         }
     }
 

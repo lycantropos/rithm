@@ -265,7 +265,7 @@ except ImportError:
             return Fraction(-self.numerator, self.denominator,
                             _normalize=False)
 
-        def __pow__(self, exponent: 'Int') -> 'Fraction':
+        def __pow__(self, exponent: 'Int', divisor: None = None) -> 'Fraction':
             return (
                 (Fraction(self.numerator ** exponent,
                           self.denominator ** exponent,
@@ -275,7 +275,7 @@ except ImportError:
                     *_normalize_components_sign(self.denominator ** -exponent,
                                                 self.numerator ** -exponent),
                     _normalize=False))
-                if isinstance(exponent, Int)
+                if isinstance(exponent, Int) and divisor is None
                 else NotImplemented)
 
         def __repr__(self) -> str:

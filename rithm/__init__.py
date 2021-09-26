@@ -105,10 +105,17 @@ except ImportError:
         def __neg__(self) -> 'Int':
             return Int(-self._value)
 
-        def __pow__(self, exponent: 'Int') -> _Union['Fraction', 'Int']:
-            return ((Int(self._value ** exponent._value)
-                     if exponent >= _ZERO
-                     else Fraction(_ONE, self) ** -exponent)
+        def __pow__(self,
+                    exponent: 'Int',
+                    divisor: _Optional['Int']) -> _Union['Fraction', 'Int']:
+            return (((Int(self._value ** exponent._value)
+                      if exponent >= _ZERO
+                      else Fraction(_ONE, self) ** -exponent)
+                     if divisor is None
+                     else (Int(pow(self._value, exponent._value,
+                                   divisor._value))
+                           if isinstance(divisor, Int)
+                           else NotImplemented))
                     if isinstance(exponent, Int)
                     else NotImplemented)
 

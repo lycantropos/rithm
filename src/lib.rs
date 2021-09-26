@@ -15,8 +15,8 @@ use pyo3::{ffi, AsPyPointer, Py, PyAny, PyErr, PyNativeType, ToPyObject};
 use pyo3::{IntoPy, PyNumberProtocol, PyObject};
 
 use crate::traits::{
-    Abs, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow, CheckedRemEuclid,
-    FromStrRadix, Gcd, Oppositive, Pow, Unitary, Zeroable,
+    Abs, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow, CheckedPowRemEuclid,
+    CheckedRemEuclid, CheckedRemEuclidInv, FromStrRadix, Gcd, Oppositive, Pow, Unitary, Zeroable,
 };
 
 pub mod big_int;
@@ -235,24 +235,36 @@ impl PyNumberProtocol for PyInt {
         PyInt(-self.0.clone())
     }
 
-    fn __pow__(lhs: PyInt, rhs: PyInt, _modulo: Option<PyInt>) -> PyResult<PyObject> {
-        debug_assert!(_modulo.is_none());
-        Ok({
-            if rhs.0.is_negative() {
-                to_py_object(match unsafe {
-                    _Fraction::new(lhs.0, _BigInt::one()).unwrap_unchecked()
+    fn __pow__(lhs: PyInt, rhs: PyInt, divisor: Option<PyInt>) -> PyResult<PyObject> {
+        match divisor {
+            Some(value) => {
+                let is_zero_divisor = value.0.is_zero();
+                match lhs.0.checked_pow_rem_euclid(rhs.0, value.0) {
+                    Some(value) => Ok(to_py_object(PyInt(value))),
+                    None => Err(PyValueError::new_err(if is_zero_divisor {
+                        "Divisor cannot be zero."
+                    } else {
+                        "Base is not invertible for the given divisor."
+                    })),
                 }
-                .checked_pow(rhs.0)
-                {
-                    Some(value) => Ok(PyFraction(value)),
-                    None => Err(PyZeroDivisionError::new_err(
-                        UNDEFINED_DIVISION_ERROR_MESSAGE,
-                    )),
-                }?)
-            } else {
-                to_py_object(PyInt(lhs.0.pow(rhs.0)))
             }
-        })
+            None => Ok({
+                if rhs.0.is_negative() {
+                    to_py_object(match unsafe {
+                        _Fraction::new(lhs.0, _BigInt::one()).unwrap_unchecked()
+                    }
+                    .checked_pow(rhs.0)
+                    {
+                        Some(value) => Ok(PyFraction(value)),
+                        None => Err(PyZeroDivisionError::new_err(
+                            UNDEFINED_DIVISION_ERROR_MESSAGE,
+                        )),
+                    }?)
+                } else {
+                    to_py_object(PyInt(lhs.0.pow(rhs.0)))
+                }
+            }),
+        }
     }
 
     fn __sub__(lhs: PyInt, rhs: PyInt) -> PyInt {

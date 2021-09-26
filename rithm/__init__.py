@@ -107,7 +107,8 @@ except ImportError:
 
         def __pow__(self,
                     exponent: 'Int',
-                    divisor: _Optional['Int']) -> _Union['Fraction', 'Int']:
+                    divisor: _Optional['Int'] = None
+                    ) -> _Union['Fraction', 'Int']:
             return (((Int(self._value ** exponent._value)
                       if exponent >= _ZERO
                       else Fraction(_ONE, self) ** -exponent)

@@ -1,4 +1,5 @@
 import fractions
+import sys
 
 import pytest
 from hypothesis import given
@@ -38,7 +39,10 @@ def test_negative_exponent_no_modulo_connection_with_builtin(
             result, fractions.Fraction(base_builtin) ** exponent_builtin)
 
 
-@given(strategies.ints_with_builtins, strategies.ints_with_builtins,
+@given(strategies.ints_with_builtins,
+       strategies.non_negative_ints_with_builtins
+       if sys.version_info < (3, 8)
+       else strategies.ints_with_builtins,
        strategies.ints_with_builtins)
 def test_with_modulo_connection_with_builtin(
         base_with_builtin: IntWithBuiltin,

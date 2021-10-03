@@ -624,7 +624,7 @@ pub(crate) fn fraction_exponent_digits<
         return None;
     }
     bits_count += (size - 1) * SHIFT;
-    let mut result_size = if bits_count <= Fraction::MANTISSA_DIGITS + 2 {
+    let mut result_digits_count = if bits_count <= Fraction::MANTISSA_DIGITS + 2 {
         let shift_digits = (Fraction::MANTISSA_DIGITS + 2 - bits_count) / SHIFT;
         let shift_bits = (Fraction::MANTISSA_DIGITS + 2 - bits_count) % SHIFT;
         let mut result_size = shift_digits;
@@ -670,26 +670,26 @@ pub(crate) fn fraction_exponent_digits<
         )
         .unwrap_unchecked()
     };
-    result_size -= 1;
-    let mut result = Fraction::from(result_digits[result_size]);
-    while result_size > 0 {
-        result_size -= 1;
-        result = result * Fraction::from((1usize << SHIFT) as f32)
-            + Fraction::from(result_digits[result_size]);
+    result_digits_count -= 1;
+    let mut fraction = Fraction::from(result_digits[result_digits_count]);
+    while result_digits_count > 0 {
+        result_digits_count -= 1;
+        fraction = fraction * Fraction::from((1usize << SHIFT) as f32)
+            + Fraction::from(result_digits[result_digits_count]);
     }
-    result /= Fraction::from((1u64 << (Fraction::MANTISSA_DIGITS + 2)) as f32);
-    if result.is_one() {
+    fraction /= Fraction::from((1u64 << (Fraction::MANTISSA_DIGITS + 2)) as f32);
+    if fraction.is_one() {
         if bits_count == usize::MAX {
             return None;
         }
-        result = Fraction::from(0.5);
+        fraction = Fraction::from(0.5);
         bits_count += 1;
     }
     let exponent = unsafe { i32::try_from(bits_count).unwrap_unchecked() };
     if exponent > Fraction::MAX_EXP {
         None
     } else {
-        Some((result, exponent))
+        Some((fraction, exponent))
     }
 }
 

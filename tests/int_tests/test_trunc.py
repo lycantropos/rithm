@@ -2,9 +2,15 @@ import math
 
 from hypothesis import given
 
+from rithm import Int
 from tests.utils import (IntWithBuiltin,
                          is_equivalent_to_builtin_int)
 from . import strategies
+
+
+@given(strategies.ints)
+def test_basic(int_: Int) -> None:
+    assert isinstance(math.trunc(int_), Int)
 
 
 @given(strategies.ints_with_builtins)

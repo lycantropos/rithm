@@ -11,7 +11,7 @@ use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
 use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, Python};
 use pyo3::types::{PyBytes, PyLong, PyString};
-use pyo3::{ffi, AsPyPointer, Py, PyAny, PyErr, PyNativeType, ToPyObject};
+use pyo3::{ffi, AsPyPointer, Py, PyAny, PyErr, PyNativeType, PyRef, ToPyObject};
 use pyo3::{IntoPy, PyNumberProtocol, PyObject};
 
 use crate::traits::{
@@ -101,12 +101,12 @@ impl PyInt {
         PyInt(self.0.clone().gcd(other.0))
     }
 
-    fn __ceil__(&self) -> PyObject {
-        big_int_to_py_long(&self.0)
+    fn __ceil__(slf: PyRef<Self>) -> PyRef<Self> {
+        slf
     }
 
-    fn __floor__(&self) -> PyObject {
-        big_int_to_py_long(&self.0)
+    fn __floor__(slf: PyRef<Self>) -> PyRef<Self> {
+        slf
     }
 
     fn __getstate__(&self, py: Python) -> PyObject {
@@ -119,8 +119,8 @@ impl PyInt {
         })
     }
 
-    fn __trunc__(&self) -> PyObject {
-        big_int_to_py_long(&self.0)
+    fn __trunc__(slf: PyRef<Self>) -> PyRef<Self> {
+        slf
     }
 }
 
@@ -212,6 +212,10 @@ impl PyNumberProtocol for PyInt {
                 UNDEFINED_DIVISION_ERROR_MESSAGE,
             )),
         }
+    }
+
+    fn __int__(&self) -> PyObject {
+        big_int_to_py_long(&self.0)
     }
 
     fn __invert__(&self) -> PyInt {

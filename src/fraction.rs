@@ -420,10 +420,6 @@ impl<Component: Clone + Eq + Unitary> PartialEq<Component> for Fraction<Componen
     fn eq(&self, other: &Component) -> bool {
         self.denominator.is_one() && self.numerator.eq(other)
     }
-
-    fn ne(&self, other: &Component) -> bool {
-        !self.denominator.is_one() || self.numerator.ne(other)
-    }
 }
 
 macro_rules! plain_partial_eq_fraction_impl {
@@ -431,10 +427,6 @@ macro_rules! plain_partial_eq_fraction_impl {
     impl PartialEq<Fraction<Self>> for $t {
         fn eq(&self, other: &Fraction<Self>) -> bool {
             other.denominator.is_one() && other.numerator.eq(self)
-        }
-
-        fn ne(&self, other: &Fraction<Self>) -> bool {
-            !other.denominator.is_one() || other.numerator.ne(self)
         }
     }
     )*)
@@ -447,10 +439,6 @@ impl<Digit: Clone + Eq + Unitary + Zeroable, const SEPARATOR: char, const SHIFT:
 {
     fn eq(&self, other: &Fraction<Self>) -> bool {
         other.denominator.is_one() && other.numerator.eq(self)
-    }
-
-    fn ne(&self, other: &Fraction<Self>) -> bool {
-        !other.denominator.is_one() || other.numerator.ne(self)
     }
 }
 

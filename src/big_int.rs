@@ -1171,13 +1171,30 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&st
     }
 }
 
-impl<Digit: BinaryDigitConvertibleToF64, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: BinaryDigitConvertibleToFloat<f32>, const SEPARATOR: char, const SHIFT: usize>
+    TryFrom<BigInt<Digit, SEPARATOR, SHIFT>> for f32
+{
+    type Error = BigIntConversionError;
+
+    fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
+        match fraction_exponent_digits::<Digit, f32, SHIFT>(&value.digits) {
+            Some((fraction_modulus, exponent)) => {
+                Ok(((value.sign as f32) * fraction_modulus) * 2.0f32.powi(exponent))
+            }
+            None => Err(BigIntConversionError {
+                kind: BigIntConversionErrorKind::TooLarge,
+            }),
+        }
+    }
+}
+
+impl<Digit: BinaryDigitConvertibleToFloat<f64>, const SEPARATOR: char, const SHIFT: usize>
     TryFrom<BigInt<Digit, SEPARATOR, SHIFT>> for f64
 {
     type Error = BigIntConversionError;
 
     fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
-        match frexp_digits::<Digit, SHIFT>(&value.digits) {
+        match fraction_exponent_digits::<Digit, f64, SHIFT>(&value.digits) {
             Some((fraction_modulus, exponent)) => {
                 Ok(((value.sign as f64) * fraction_modulus) * 2.0f64.powi(exponent))
             }

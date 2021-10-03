@@ -5,8 +5,8 @@ use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
     AssigningDivisivePartialMagma, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
     AssigningShiftingRightMonoid, AssigningSubtractiveMagma, DivisivePartialMagma, DoublePrecision,
-    DoublePrecisionOf, ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf,
-    ShiftingLeftMonoid, SubtractiveMagma, Unitary, Zeroable,
+    DoublePrecisionOf, MantissaDigits, ModularPartialMagma, ModularSubtractiveMagma, Oppose,
+    OppositionOf, ShiftingLeftMonoid, SubtractiveMagma, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -36,16 +36,16 @@ pub trait BinaryDigitConvertibleTo<Target> =
 pub trait BinaryDigitConvertibleToBinary<Target> =
     BinaryDigitDowncastableTo<Target> + BinaryDigitUpcastableTo<Target> where Target: TryFrom<Self>;
 
-pub trait BinaryDigitConvertibleToF64 = BinaryDigit
+pub trait BinaryDigitConvertibleToFloat<Target> = BinaryDigit
     + DoublePrecision
     + From<u8>
     + Oppose
     + TryFrom<DoublePrecisionOf<Self>>
     + TryFrom<OppositionOf<Self>>
 where
-    OppositionOf<Self>: AssigningAdditiveMonoid + From<i8> + TryFrom<Self>,
     DoublePrecisionOf<Self>: BinaryDigit,
-    f64: From<Self>,
+    OppositionOf<Self>: AssigningAdditiveMonoid + From<i8> + TryFrom<Self>,
+    Target: From<Self>,
     usize: TryFrom<Self>;
 
 pub trait BinaryDigitConvertibleToNonBinary<Target> = Copy + DoublePrecision
@@ -103,6 +103,13 @@ where
 pub trait EuclidDivisibleDigit = AdditiveDigit + DivisibleDigit;
 
 pub trait ExponentiativeDigit = MultiplicativeDigit + BinaryDigitDowncastableTo<WindowDigit>;
+
+pub trait Float = AssigningAdditiveMonoid
+    + AssigningDivisivePartialMagma
+    + AssigningMultiplicativeMonoid
+    + From<f32>
+    + MantissaDigits
+    + PartialEq;
 
 pub trait FromStrDigit = Copy
     + DoublePrecision
@@ -599,13 +606,15 @@ pub(crate) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usi
     (quotient, remainder)
 }
 
-const MANTISSA_BITS: usize = f64::MANTISSA_DIGITS as usize;
-const MANTISSA_BITS_POWER_OF_TWO: f64 = (1usize << MANTISSA_BITS) as f64;
-
-pub(crate) fn frexp_digits<Digit: BinaryDigitConvertibleToF64, const SHIFT: usize>(
+pub(crate) fn fraction_exponent_digits<
+    Digit: BinaryDigitConvertibleToFloat<Fraction>,
+    Fraction: Float,
+    const SHIFT: usize,
+>(
     digits: &[Digit],
-) -> Option<(f64, i32)> {
-    let mut result_digits = vec![Digit::zero(); 2usize + (MANTISSA_BITS + 1usize) / SHIFT];
+) -> Option<(Fraction, i32)> {
+    let mut result_digits =
+        vec![Digit::zero(); 2usize + (Fraction::MANTISSA_DIGITS + 1usize) / SHIFT];
     let size = digits.len();
     let mut bits_count = utils::bit_length(digits[digits.len() - 1]);
     if size > (usize::MAX - 1) / SHIFT
@@ -614,9 +623,9 @@ pub(crate) fn frexp_digits<Digit: BinaryDigitConvertibleToF64, const SHIFT: usiz
         return None;
     }
     bits_count += (size - 1) * SHIFT;
-    let mut result_size = if bits_count <= MANTISSA_BITS + 2 {
-        let shift_digits = (MANTISSA_BITS + 2 - bits_count) / SHIFT;
-        let shift_bits = (MANTISSA_BITS + 2 - bits_count) % SHIFT;
+    let mut result_size = if bits_count <= Fraction::MANTISSA_DIGITS + 2 {
+        let shift_digits = (Fraction::MANTISSA_DIGITS + 2 - bits_count) / SHIFT;
+        let shift_bits = (Fraction::MANTISSA_DIGITS + 2 - bits_count) % SHIFT;
         let mut result_size = shift_digits;
         let remainder = shift_digits_left::<Digit, SHIFT>(
             digits,
@@ -628,8 +637,8 @@ pub(crate) fn frexp_digits<Digit: BinaryDigitConvertibleToF64, const SHIFT: usiz
         result_size += 1;
         result_size
     } else {
-        let mut shift_digits = (bits_count - MANTISSA_BITS - 2) / SHIFT;
-        let shift_bits = (bits_count - MANTISSA_BITS - 2) % SHIFT;
+        let mut shift_digits = (bits_count - Fraction::MANTISSA_DIGITS - 2) / SHIFT;
+        let shift_bits = (bits_count - Fraction::MANTISSA_DIGITS - 2) % SHIFT;
         let remainder = shift_digits_right::<Digit, SHIFT>(
             &digits[shift_digits..],
             shift_bits,
@@ -661,17 +670,18 @@ pub(crate) fn frexp_digits<Digit: BinaryDigitConvertibleToF64, const SHIFT: usiz
         .unwrap_unchecked()
     };
     result_size -= 1;
-    let mut result = f64::from(result_digits[result_size]);
+    let mut result = Fraction::from(result_digits[result_size]);
     while result_size > 0 {
         result_size -= 1;
-        result = result * ((1usize << SHIFT) as f64) + f64::from(result_digits[result_size]);
+        result = result * Fraction::from((1usize << SHIFT) as f32)
+            + Fraction::from(result_digits[result_size]);
     }
-    result /= 4.0 * MANTISSA_BITS_POWER_OF_TWO;
-    if result == 1.0 {
+    result /= Fraction::from((1u64 << (Fraction::MANTISSA_DIGITS + 2)) as f32);
+    if result.is_one() {
         if bits_count == usize::MAX {
             return None;
         }
-        result = 0.5;
+        result = Fraction::from(0.5);
         bits_count += 1;
     }
     let exponent = unsafe { i32::try_from(bits_count).unwrap_unchecked() };

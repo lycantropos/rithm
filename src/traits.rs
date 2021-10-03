@@ -563,6 +563,20 @@ macro_rules! plain_gcd_impl {
 
 plain_gcd_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
+pub trait MantissaDigits {
+    const MANTISSA_DIGITS: usize;
+}
+
+macro_rules! plain_mantissa_digits_impl {
+    ($($t:ty)*) => ($(
+        impl MantissaDigits for $t {
+            const MANTISSA_DIGITS: usize = <$t>::MANTISSA_DIGITS as usize;
+        }
+    )*)
+}
+
+plain_mantissa_digits_impl!(f32 f64);
+
 pub trait Pow<Exponent> {
     type Output;
 
@@ -690,7 +704,7 @@ macro_rules! plain_unitary_impl {
     ($($t:ty)*) => ($(
         impl Unitary for $t {
             #[inline(always)]
-            fn one() -> $t {1}
+            fn one() -> $t {1 as $t}
 
             #[inline(always)]
             fn is_one(&self) -> bool {
@@ -700,7 +714,7 @@ macro_rules! plain_unitary_impl {
     )*)
 }
 
-plain_unitary_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+plain_unitary_impl!(f32 f64 i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait WrappingSub<Subtrahend = Self> {
     type Output;
@@ -733,7 +747,7 @@ macro_rules! plain_zero_impl {
     ($($t:ty)*) => ($(
         impl Zeroable for $t {
             #[inline(always)]
-            fn zero() -> $t {0}
+            fn zero() -> $t {0 as $t}
 
             #[inline(always)]
             fn is_zero(&self) -> bool {
@@ -743,7 +757,7 @@ macro_rules! plain_zero_impl {
     )*)
 }
 
-plain_zero_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+plain_zero_impl!(f32 f64 i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub type DoublePrecisionOf<T> = <T as DoublePrecision>::Result;
 pub type OppositionOf<T> = <T as Oppose>::Result;

@@ -63,6 +63,9 @@ except ImportError:
                     if isinstance(other, Int)
                     else NotImplemented)
 
+        def __float__(self) -> float:
+            return float(self._value)
+
         def __ge__(self, other: 'Int') -> bool:
             return (self._value >= other._value
                     if isinstance(other, Int)

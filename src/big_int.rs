@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryFrom;
 use std::fmt::{Debug, Display, Formatter};
 use std::iter::Peekable;
 use std::mem::size_of;
@@ -1171,15 +1171,15 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&st
     }
 }
 
-impl<Digit: BinaryDigitConvertibleToF64, const SEPARATOR: char, const SHIFT: usize> TryInto<f64>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: BinaryDigitConvertibleToF64, const SEPARATOR: char, const SHIFT: usize> TryFrom<BigInt<Digit, SEPARATOR, SHIFT>>
+    for f64
 {
     type Error = BigIntConversionError;
 
-    fn try_into(self) -> Result<f64, Self::Error> {
-        match frexp_digits::<Digit, SHIFT>(&self.digits) {
+    fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
+        match frexp_digits::<Digit, SHIFT>(&value.digits) {
             Some((fraction_modulus, exponent)) => {
-                Ok(((self.sign as f64) * fraction_modulus) * 2.0f64.powi(exponent))
+                Ok(((value.sign as f64) * fraction_modulus) * 2.0f64.powi(exponent))
             }
             None => Err(BigIntConversionError {
                 kind: BigIntConversionErrorKind::TooLarge,

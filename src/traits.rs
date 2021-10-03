@@ -379,31 +379,29 @@ macro_rules! plain_unsigned_checked_rem_euclid_inv_impl {
                     step_dividend = step_divisor;
                     step_divisor = remainder;
                     let subtrahend_modulus = quotient * candidate_modulus;
-                    (is_result_negative, result_modulus, candidate_modulus) = (
+                    (
+                        is_result_negative,
+                        result_modulus,
+                        (is_candidate_negative, candidate_modulus),
+                    ) = (
                         is_candidate_negative,
                         candidate_modulus,
                         if is_result_negative {
                             if is_candidate_negative {
                                 if result_modulus > subtrahend_modulus {
-                                    is_candidate_negative = true;
-                                    result_modulus - subtrahend_modulus
+                                    (true, result_modulus - subtrahend_modulus)
                                 } else {
-                                    is_candidate_negative = false;
-                                    subtrahend_modulus - result_modulus
+                                    (false, subtrahend_modulus - result_modulus)
                                 }
                             } else {
-                                is_candidate_negative = true;
-                                subtrahend_modulus + result_modulus
+                                (true, subtrahend_modulus + result_modulus)
                             }
                         } else if is_candidate_negative {
-                            is_candidate_negative = false;
-                            subtrahend_modulus + result_modulus
+                            (false, subtrahend_modulus + result_modulus)
                         } else if result_modulus > subtrahend_modulus {
-                            is_candidate_negative = false;
-                            result_modulus - subtrahend_modulus
+                            (false, result_modulus - subtrahend_modulus)
                         } else {
-                            is_candidate_negative = true;
-                            subtrahend_modulus - result_modulus
+                            (true, subtrahend_modulus - result_modulus)
                         },
                     );
                 }

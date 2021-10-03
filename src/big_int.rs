@@ -1171,8 +1171,8 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&st
     }
 }
 
-impl<Digit: BinaryDigitConvertibleToF64, const SEPARATOR: char, const SHIFT: usize> TryFrom<BigInt<Digit, SEPARATOR, SHIFT>>
-    for f64
+impl<Digit: BinaryDigitConvertibleToF64, const SEPARATOR: char, const SHIFT: usize>
+    TryFrom<BigInt<Digit, SEPARATOR, SHIFT>> for f64
 {
     type Error = BigIntConversionError;
 

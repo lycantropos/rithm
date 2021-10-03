@@ -577,6 +577,20 @@ macro_rules! plain_mantissa_digits_impl {
 
 plain_mantissa_digits_impl!(f32 f64);
 
+pub trait MaxExp {
+    const MAX_EXP: i32;
+}
+
+macro_rules! plain_max_exp_impl {
+    ($($t:ty)*) => ($(
+        impl MaxExp for $t {
+            const MAX_EXP: i32 = <$t>::MAX_EXP;
+        }
+    )*)
+}
+
+plain_max_exp_impl!(f32 f64);
+
 pub trait Pow<Exponent> {
     type Output;
 

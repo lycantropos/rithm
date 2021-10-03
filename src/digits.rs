@@ -5,8 +5,8 @@ use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
     AssigningDivisivePartialMagma, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
     AssigningShiftingRightMonoid, AssigningSubtractiveMagma, DivisivePartialMagma, DoublePrecision,
-    DoublePrecisionOf, MantissaDigits, ModularPartialMagma, ModularSubtractiveMagma, Oppose,
-    OppositionOf, ShiftingLeftMonoid, SubtractiveMagma, Unitary, Zeroable,
+    DoublePrecisionOf, MantissaDigits, MaxExp, ModularPartialMagma, ModularSubtractiveMagma,
+    Oppose, OppositionOf, ShiftingLeftMonoid, SubtractiveMagma, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -109,6 +109,7 @@ pub trait Float = AssigningAdditiveMonoid
     + AssigningMultiplicativeMonoid
     + From<f32>
     + MantissaDigits
+    + MaxExp
     + PartialEq;
 
 pub trait FromStrDigit = Copy
@@ -685,7 +686,7 @@ pub(crate) fn fraction_exponent_digits<
         bits_count += 1;
     }
     let exponent = unsafe { i32::try_from(bits_count).unwrap_unchecked() };
-    if exponent > f64::MAX_EXP {
+    if exponent > Fraction::MAX_EXP {
         None
     } else {
         Some((result, exponent))

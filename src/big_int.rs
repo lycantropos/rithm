@@ -1178,13 +1178,10 @@ impl<Digit: BinaryDigitConvertibleToFloat<f32>, const SEPARATOR: char, const SHI
 
     fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
         match fraction_exponent_digits::<Digit, f32, SHIFT>(&value.digits) {
-            Some((fraction_modulus, exponent)) => {
-                let is_max_exponent = (exponent == f32::MAX_EXP) as i32;
-                Ok(
-                    ((value.sign as f32) * fraction_modulus * ((1 + is_max_exponent) as f32))
-                        * 2.0f32.powi(exponent - is_max_exponent),
-                )
-            }
+            Some((fraction_modulus, exponent)) => Ok(utils::load_exponent(
+                (value.sign as f32) * fraction_modulus,
+                exponent,
+            )),
             None => Err(BigIntConversionError {
                 kind: BigIntConversionErrorKind::TooLarge,
             }),
@@ -1199,13 +1196,10 @@ impl<Digit: BinaryDigitConvertibleToFloat<f64>, const SEPARATOR: char, const SHI
 
     fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
         match fraction_exponent_digits::<Digit, f64, SHIFT>(&value.digits) {
-            Some((fraction_modulus, exponent)) => {
-                let is_max_exponent = (exponent == f64::MAX_EXP) as i32;
-                Ok(
-                    ((value.sign as f64) * fraction_modulus * ((1 + is_max_exponent) as f64))
-                        * 2.0f64.powi(exponent - is_max_exponent),
-                )
-            }
+            Some((fraction_modulus, exponent)) => Ok(utils::load_exponent(
+                (value.sign as f64) * fraction_modulus,
+                exponent,
+            )),
             None => Err(BigIntConversionError {
                 kind: BigIntConversionErrorKind::TooLarge,
             }),

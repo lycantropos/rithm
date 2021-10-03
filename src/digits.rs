@@ -5,8 +5,8 @@ use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
     AssigningDivisivePartialMagma, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
     AssigningShiftingRightMonoid, AssigningSubtractiveMagma, DivisivePartialMagma, DoublePrecision,
-    DoublePrecisionOf, MantissaDigits, MaxExp, ModularPartialMagma, ModularSubtractiveMagma,
-    Oppose, OppositionOf, ShiftingLeftMonoid, SubtractiveMagma, Unitary, Zeroable,
+    DoublePrecisionOf, Float, ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf,
+    ShiftingLeftMonoid, SubtractiveMagma, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -103,14 +103,6 @@ where
 pub trait EuclidDivisibleDigit = AdditiveDigit + DivisibleDigit;
 
 pub trait ExponentiativeDigit = MultiplicativeDigit + BinaryDigitDowncastableTo<WindowDigit>;
-
-pub trait Float = AssigningAdditiveMonoid
-    + AssigningDivisivePartialMagma
-    + AssigningMultiplicativeMonoid
-    + From<f32>
-    + MantissaDigits
-    + MaxExp
-    + PartialEq;
 
 pub trait FromStrDigit = Copy
     + DoublePrecision

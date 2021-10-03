@@ -2,7 +2,8 @@ import math
 
 from hypothesis import given
 
-from tests.utils import IntWithBuiltin
+from tests.utils import (IntWithBuiltin,
+                         is_equivalent_to_builtin_int)
 from . import strategies
 
 
@@ -10,4 +11,5 @@ from . import strategies
 def test_connection_with_builtin(int_with_builtin_int: IntWithBuiltin) -> None:
     int_, builtin_int = int_with_builtin_int
 
-    assert math.trunc(int_) == math.trunc(builtin_int)
+    assert is_equivalent_to_builtin_int(math.trunc(int_),
+                                        math.trunc(builtin_int))

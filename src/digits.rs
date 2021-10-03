@@ -608,7 +608,7 @@ pub(crate) fn frexp_digits<Digit: BinaryDigitConvertibleToF64, const SHIFT: usiz
     let mut result_digits = vec![Digit::zero(); 2usize + (MANTISSA_BITS + 1usize) / SHIFT];
     let size = digits.len();
     let mut bits_count = utils::bit_length(digits[digits.len() - 1]);
-    if size >= (usize::MAX - 1) / SHIFT + 1
+    if size > (usize::MAX - 1) / SHIFT
         && (size > (usize::MAX - 1) / SHIFT + 1 || bits_count > (usize::MAX - 1) % SHIFT + 1)
     {
         return None;
@@ -618,7 +618,11 @@ pub(crate) fn frexp_digits<Digit: BinaryDigitConvertibleToF64, const SHIFT: usiz
         let shift_digits = (MANTISSA_BITS + 2 - bits_count) / SHIFT;
         let shift_bits = (MANTISSA_BITS + 2 - bits_count) % SHIFT;
         let mut result_size = shift_digits;
-        let remainder = shift_digits_left::<Digit, SHIFT>(&digits, shift_bits, &mut result_digits[result_size..]);
+        let remainder = shift_digits_left::<Digit, SHIFT>(
+            digits,
+            shift_bits,
+            &mut result_digits[result_size..],
+        );
         result_size += size;
         result_digits[result_size] = remainder;
         result_size += 1;

@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::fmt::{Debug, Display, Formatter};
 use std::iter::Peekable;
 use std::mem::size_of;
@@ -22,6 +22,40 @@ pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
 }
 
 const MAX_REPRESENTABLE_BASE: u8 = 36;
+
+pub struct BigIntConversionError {
+    kind: BigIntConversionErrorKind,
+}
+
+impl Debug for BigIntConversionError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(self.kind.description())
+    }
+}
+
+impl Display for BigIntConversionError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.kind.description(), formatter)
+    }
+}
+
+impl BigIntConversionError {
+    pub fn kind(&self) -> &BigIntConversionErrorKind {
+        &self.kind
+    }
+}
+
+pub enum BigIntConversionErrorKind {
+    TooLarge,
+}
+
+impl BigIntConversionErrorKind {
+    fn description(&self) -> &str {
+        match self {
+            BigIntConversionErrorKind::TooLarge => "Too large to convert to floating point.",
+        }
+    }
+}
 
 pub struct BigIntParsingError {
     kind: BigIntParsingErrorKind,
@@ -1134,6 +1168,23 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&st
 
     fn try_from(string: &str) -> Result<Self, Self::Error> {
         Self::new(string, 0)
+    }
+}
+
+impl<Digit: BinaryDigitConvertibleToF64, const SEPARATOR: char, const SHIFT: usize> TryInto<f64>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Error = BigIntConversionError;
+
+    fn try_into(self) -> Result<f64, Self::Error> {
+        match frexp_digits::<Digit, SHIFT>(&self.digits) {
+            Some((fraction_modulus, exponent)) => {
+                Ok(((self.sign as f64) * fraction_modulus) * 2.0f64.powi(exponent))
+            }
+            None => Err(BigIntConversionError {
+                kind: BigIntConversionErrorKind::TooLarge,
+            }),
+        }
     }
 }
 

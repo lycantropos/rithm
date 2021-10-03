@@ -4,7 +4,7 @@
 #![feature(trait_alias)]
 
 use std::cmp::Ordering;
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryFrom;
 
 use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
@@ -206,7 +206,7 @@ impl PyNumberProtocol for PyInt {
     }
 
     fn __float__(&self) -> PyResult<PyObject> {
-        match <_BigInt as TryInto<f64>>::try_into(self.0.clone()) {
+        match f64::try_from(self.0.clone()) {
             Ok(value) => Ok(Python::with_gil(|py| value.into_py(py))),
             Err(reason) => Err(PyOverflowError::new_err(reason.to_string())),
         }

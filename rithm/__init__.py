@@ -41,16 +41,8 @@ except ImportError:
         def __bool__(self) -> bool:
             return bool(self._value)
 
-        def __ceil__(self) -> int:
-            return self._value
-
-        def __floor__(self) -> int:
-            return self._value
-
-        def __floordiv__(self, other: 'Int') -> 'Int':
-            return (Int(self._value // other._value)
-                    if isinstance(other, Int)
-                    else NotImplemented)
+        def __ceil__(self) -> 'Int':
+            return self
 
         def __divmod__(self, other: 'Int') -> _Tuple['Int', 'Int']:
             return (tuple(Int(value)
@@ -65,6 +57,14 @@ except ImportError:
 
         def __float__(self) -> float:
             return float(self._value)
+
+        def __floor__(self) -> 'Int':
+            return self
+
+        def __floordiv__(self, other: 'Int') -> 'Int':
+            return (Int(self._value // other._value)
+                    if isinstance(other, Int)
+                    else NotImplemented)
 
         def __ge__(self, other: 'Int') -> bool:
             return (self._value >= other._value
@@ -84,6 +84,9 @@ except ImportError:
 
         def __invert__(self) -> 'Int':
             return Int(~self._value)
+
+        def __int__(self) -> int:
+            return self._value
 
         def __le__(self, other: 'Int') -> bool:
             return (self._value <= other._value
@@ -142,8 +145,8 @@ except ImportError:
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __trunc__(self) -> int:
-            return self._value
+        def __trunc__(self) -> 'Int':
+            return self
 
 
     _ONE = Int('1')

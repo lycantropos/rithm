@@ -109,11 +109,11 @@ impl PyInt {
         big_int_to_py_long(&self.0)
     }
 
-    pub fn __getstate__(&self, py: Python) -> PyObject {
+    fn __getstate__(&self, py: Python) -> PyObject {
         PyBytes::new(py, &self.0.as_bytes()).to_object(py)
     }
 
-    pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
+    fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         state.extract::<&PyBytes>(py).map(|py_bytes| {
             self.0 = _BigInt::from_bytes(py_bytes.extract().unwrap());
         })
@@ -164,7 +164,7 @@ impl PyFraction {
         PyInt(self.0.numerator().clone())
     }
 
-    pub fn __getstate__(&self, py: Python) -> PyObject {
+    fn __getstate__(&self, py: Python) -> PyObject {
         (
             self.numerator().__getstate__(py),
             self.denominator().__getstate__(py),
@@ -172,7 +172,7 @@ impl PyFraction {
             .to_object(py)
     }
 
-    pub fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
+    fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         state.extract::<(PyObject, PyObject)>(py).and_then(
             |(numerator_state, denominator_state)| {
                 let mut numerator = PyInt { 0: _BigInt::zero() };

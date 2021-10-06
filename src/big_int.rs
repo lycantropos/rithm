@@ -8,10 +8,10 @@ use std::str::Chars;
 
 use crate::digits::*;
 use crate::traits::{
-    Abs, CheckedDiv, CheckedDivEuclid, CheckedDivRem, CheckedDivRemEuclid, CheckedPow,
-    CheckedPowRemEuclid, CheckedRem, CheckedRemEuclid, CheckedRemEuclidInv, DivEuclid, DivRem,
-    DivRemEuclid, DoublePrecisionOf, FromStrRadix, Gcd, Oppose, OppositionOf, Oppositive, Pow,
-    RemEuclid, Unitary, Zeroable,
+    Abs, BitwiseNegatableUnaryAlgebra, CheckedDiv, CheckedDivAsF64, CheckedDivEuclid,
+    CheckedDivRem, CheckedDivRemEuclid, CheckedPow, CheckedPowRemEuclid, CheckedRem,
+    CheckedRemEuclid, CheckedRemEuclidInv, DivEuclid, DivRem, DivRemEuclid, DoublePrecisionOf,
+    FromStrRadix, Gcd, Oppose, OppositionOf, Oppositive, Pow, RemEuclid, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -703,6 +703,20 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
         )
         .unwrap();
         Self { sign, digits }
+    }
+}
+
+impl<
+        Digit: BinaryDigitConvertibleToFloat<f64> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivAsF64 for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Result<f64, CheckedDivApproximationError>;
+
+    fn checked_div_as_f64(self, divisor: Self) -> Self::Output {
+        checked_div_approximation::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
+            .map(|modulus| ((self.sign * divisor.sign) as f64) * modulus)
     }
 }
 

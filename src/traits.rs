@@ -1,7 +1,8 @@
+use std::fmt::Debug;
 use std::num::ParseIntError;
 use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, Div, DivAssign, Mul, MulAssign, Neg,
-    Rem, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
+    Not, Rem, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
 };
 
 pub trait AdditiveMonoid<Other = Self> = Add<Other, Output = Self> + Zeroable;
@@ -32,6 +33,8 @@ pub trait BitwiseConjunctiveMagma<Other = Self> = BitAnd<Other, Output = Self> +
 
 pub trait BitwiseDisjunctiveMonoid<Other = Self> = BitOr<Other, Output = Self> + Zeroable;
 
+pub trait BitwiseNegatableUnaryAlgebra = Not<Output = Self>;
+
 pub trait DivisivePartialMagma<Divisor = Self> = Div<Divisor, Output = Self>;
 
 pub trait Float = AssigningAdditiveMonoid
@@ -40,6 +43,7 @@ pub trait Float = AssigningAdditiveMonoid
     + From<f32>
     + MantissaDigits
     + MaxExp
+    + MinExp
     + PartialEq
     + Pow<i32, Output = Self>;
 
@@ -125,7 +129,7 @@ macro_rules! plain_checked_div_impl {
 plain_checked_div_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedDivAsF64<Divisor = Self> {
-    type Output;
+    type Output: Maybe<Result = f64>;
 
     fn checked_div_as_f64(self, divisor: Divisor) -> Self::Output;
 }
@@ -649,6 +653,69 @@ macro_rules! plain_max_exp_impl {
 }
 
 plain_max_exp_impl!(f32 f64);
+
+pub trait Maybe {
+    type Result;
+    type Error;
+
+    fn error(self) -> Self::Error;
+    fn is_error(&self) -> bool;
+    fn is_result(&self) -> bool;
+    fn result(self) -> Self::Result;
+}
+
+impl<T: Debug> Maybe for Option<T> {
+    type Result = T;
+    type Error = Option<T>;
+
+    #[inline(always)]
+    fn error(self) -> Self::Error {
+        match self {
+            Some(value) => panic!("called `Option::error()` on `Some{:?}` value", value),
+            None => None,
+        }
+    }
+
+    #[inline(always)]
+    fn is_error(&self) -> bool {
+        Option::<T>::is_none(self)
+    }
+
+    #[inline(always)]
+    fn is_result(&self) -> bool {
+        Option::<T>::is_some(self)
+    }
+
+    #[inline(always)]
+    fn result(self) -> Self::Result {
+        Option::<T>::unwrap(self)
+    }
+}
+
+impl<T: Debug, E: Debug> Maybe for Result<T, E> {
+    type Result = T;
+    type Error = E;
+
+    #[inline(always)]
+    fn error(self) -> Self::Error {
+        Result::<T, E>::unwrap_err(self)
+    }
+
+    #[inline(always)]
+    fn is_error(&self) -> bool {
+        Result::<T, E>::is_err(self)
+    }
+
+    #[inline(always)]
+    fn is_result(&self) -> bool {
+        Result::<T, E>::is_ok(self)
+    }
+
+    #[inline(always)]
+    fn result(self) -> Self::Result {
+        Result::<T, E>::unwrap(self)
+    }
+}
 
 pub trait MinExp {
     const MIN_EXP: i32;

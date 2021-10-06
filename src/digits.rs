@@ -1,12 +1,14 @@
 use std::cmp::Ordering;
 use std::convert::TryFrom;
+use std::fmt::{Debug, Display, Formatter};
 
 use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
     AssigningDivisivePartialMagma, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
-    AssigningShiftingRightMonoid, AssigningSubtractiveMagma, DivisivePartialMagma, DoublePrecision,
-    DoublePrecisionOf, Float, ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf,
-    ShiftingLeftMonoid, SubtractiveMagma, Unitary, Zeroable,
+    AssigningShiftingRightMonoid, AssigningSubtractiveMagma, BitwiseNegatableUnaryAlgebra,
+    DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Float, ModularPartialMagma,
+    ModularSubtractiveMagma, Oppose, OppositionOf, ShiftingLeftMonoid, SubtractiveMagma, Unitary,
+    Zeroable,
 };
 use crate::utils;
 
@@ -336,6 +338,180 @@ pub(crate) fn binary_digits_to_lesser_binary_base<
         }
     }
     result
+}
+
+pub struct CheckedDivApproximationError {
+    kind: CheckedDivApproximationErrorKind,
+}
+
+impl Debug for CheckedDivApproximationError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(self.kind.description())
+    }
+}
+
+impl Display for CheckedDivApproximationError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.kind.description(), formatter)
+    }
+}
+
+impl CheckedDivApproximationError {
+    pub fn kind(&self) -> &CheckedDivApproximationErrorKind {
+        &self.kind
+    }
+}
+
+pub enum CheckedDivApproximationErrorKind {
+    TooLarge,
+    ZeroDivision,
+}
+
+impl CheckedDivApproximationErrorKind {
+    fn description(&self) -> &str {
+        match self {
+            CheckedDivApproximationErrorKind::TooLarge => {
+                "Division result too large to be expressed as floating point."
+            }
+            CheckedDivApproximationErrorKind::ZeroDivision => "Division by zero is undefined.",
+        }
+    }
+}
+
+pub(crate) fn checked_div_approximation<
+    Digit: BinaryDigitConvertibleToFloat<Output> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
+    Output: Float,
+    const SHIFT: usize,
+>(
+    dividend_digits: &[Digit],
+    divisor_digits: &[Digit],
+) -> Result<Output, CheckedDivApproximationError> {
+    if divisor_digits.len() == 1 && divisor_digits[0].is_zero() {
+        return Err(CheckedDivApproximationError {
+            kind: CheckedDivApproximationErrorKind::ZeroDivision,
+        });
+    }
+    if dividend_digits.len() == 1 && dividend_digits[0].is_zero() {
+        return Ok(Output::zero());
+    }
+    let dividend_digits_count = dividend_digits.len();
+    let divisor_digits_count = divisor_digits.len();
+    let dividend_is_small = dividend_digits_count <= (Output::MANTISSA_DIGITS / SHIFT)
+        || (dividend_digits_count == (Output::MANTISSA_DIGITS / SHIFT) + 1
+            && (dividend_digits[(Output::MANTISSA_DIGITS / SHIFT)]
+                >> (Output::MANTISSA_DIGITS % SHIFT))
+                .is_zero());
+    let divisor_is_small = divisor_digits_count <= (Output::MANTISSA_DIGITS / SHIFT)
+        || (divisor_digits_count == (Output::MANTISSA_DIGITS / SHIFT) + 1
+            && (divisor_digits[(Output::MANTISSA_DIGITS / SHIFT)]
+                >> (Output::MANTISSA_DIGITS % SHIFT))
+                .is_zero());
+    if dividend_is_small && divisor_is_small {
+        let reduced_dividend = reduce_digits_to_float::<Digit, Output, SHIFT>(dividend_digits);
+        let reduced_divisor = reduce_digits_to_float::<Digit, Output, SHIFT>(divisor_digits);
+        return Ok(reduced_dividend / reduced_divisor);
+    }
+    let digits_count_difference =
+        (dividend_digits_count as isize) - (divisor_digits_count as isize);
+    if digits_count_difference > (((usize::MAX / SHIFT) - 1) as isize) {
+        return Err(CheckedDivApproximationError {
+            kind: CheckedDivApproximationErrorKind::TooLarge,
+        });
+    } else if digits_count_difference < 1isize - ((usize::MAX / SHIFT) as isize) {
+        return Ok(Output::zero());
+    }
+    let bit_lengths_difference = digits_count_difference * (SHIFT as isize)
+        + (((utils::bit_length(dividend_digits[dividend_digits.len() - 1])) as isize)
+            - (utils::bit_length(divisor_digits[divisor_digits.len() - 1]) as isize));
+    if bit_lengths_difference > (Output::MAX_EXP as isize) {
+        return Err(CheckedDivApproximationError {
+            kind: CheckedDivApproximationErrorKind::TooLarge,
+        });
+    } else if bit_lengths_difference
+        < (Output::MIN_EXP as isize) - ((Output::MANTISSA_DIGITS as isize) - 1)
+    {
+        return Ok(Output::zero());
+    }
+    let shift = bit_lengths_difference.max(Output::MIN_EXP as isize)
+        - (Output::MANTISSA_DIGITS as isize)
+        - 2;
+    let mut inexact = false;
+    let mut quotient_digits = if shift <= 0 {
+        let shift_digits = ((-shift) as usize) / SHIFT;
+        if dividend_digits_count >= ((isize::MAX - 1) as usize) - shift_digits {
+            return Err(CheckedDivApproximationError {
+                kind: CheckedDivApproximationErrorKind::TooLarge,
+            });
+        }
+        let quotient_digits_count = dividend_digits_count + shift_digits + 1;
+        let mut quotient_data = vec![Digit::zero(); quotient_digits_count];
+        let remainder = shift_digits_left::<Digit, SHIFT>(
+            dividend_digits,
+            ((-shift) as usize) % SHIFT,
+            &mut quotient_data[shift_digits..],
+        );
+        quotient_data[dividend_digits_count + shift_digits] = remainder;
+        quotient_data
+    } else {
+        let mut shift_digits = (shift as usize) / SHIFT;
+        let quotient_digits_count = dividend_digits_count - shift_digits;
+        let mut quotient_data = vec![Digit::zero(); quotient_digits_count];
+        let remainder = shift_digits_right::<Digit, SHIFT>(
+            &dividend_digits[shift_digits..],
+            (shift as usize) % SHIFT,
+            &mut quotient_data,
+        );
+        if !remainder.is_zero() {
+            inexact = true;
+        }
+        while !inexact && shift_digits > 0 {
+            shift_digits -= 1;
+            if !dividend_digits[shift_digits].is_zero() {
+                inexact = true;
+            }
+        }
+        quotient_data
+    };
+    trim_leading_zeros(&mut quotient_digits);
+    if divisor_digits_count == 1 {
+        let (next_quotient_digits, remainder) =
+            div_rem_digits_by_digit::<Digit, SHIFT>(&quotient_digits, divisor_digits[0]);
+        quotient_digits = next_quotient_digits;
+        if !remainder.is_zero() {
+            inexact = true;
+        }
+    } else {
+        let (next_quotient_digits, remainder) =
+            div_rem_two_or_more_digits::<Digit, SHIFT>(&quotient_digits, divisor_digits);
+        quotient_digits = next_quotient_digits;
+        if remainder.len() > 1 || !remainder[0].is_zero() {
+            inexact = true;
+        }
+    }
+    let quotient_bit_length = ((quotient_digits.len() - 1) * SHIFT
+        + utils::bit_length(quotient_digits[quotient_digits.len() - 1]))
+        as isize;
+    let extra_bits = quotient_bit_length.max((Output::MIN_EXP as isize) - shift)
+        - (Output::MANTISSA_DIGITS as isize);
+    let mask = Digit::one() << ((extra_bits as usize) - 1);
+    let mut quotient_low_digit = quotient_digits[0] | Digit::from(inexact as u8);
+    if !(quotient_low_digit & mask).is_zero()
+        && !(quotient_low_digit & (Digit::from(3u8) * mask - Digit::from(1u8))).is_zero()
+    {
+        quotient_low_digit += mask;
+    }
+    quotient_digits[0] = quotient_low_digit & !(Digit::from(2u8) * mask - Digit::from(1u8));
+    let reduced_quotient = reduce_digits_to_float::<Digit, Output, SHIFT>(&quotient_digits);
+    if shift + quotient_bit_length >= (Output::MAX_EXP as isize)
+        && (shift + quotient_bit_length > (Output::MAX_EXP as isize)
+            || reduced_quotient == utils::load_exponent(Output::one(), quotient_bit_length as i32))
+    {
+        return Err(CheckedDivApproximationError {
+            kind: CheckedDivApproximationErrorKind::TooLarge,
+        });
+    } else {
+        Ok(utils::load_exponent(reduced_quotient, shift as i32))
+    }
 }
 
 pub(crate) fn checked_div<Digit: DivisibleDigit, const SHIFT: usize>(
@@ -964,6 +1140,18 @@ where
     let mut result = Output::zero();
     for &digit in digits.iter().rev() {
         result = (result << SHIFT) | Output::from(digit);
+    }
+    result
+}
+
+pub(crate) fn reduce_digits_to_float<Digit, Output, const SHIFT: usize>(digits: &[Digit]) -> Output
+where
+    Digit: Copy,
+    Output: Float + From<Digit>,
+{
+    let mut result = Output::zero();
+    for &digit in digits.iter().rev() {
+        result = result * Output::from((1u64 << SHIFT) as f32) + Output::from(digit);
     }
     result
 }

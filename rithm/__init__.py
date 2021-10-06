@@ -216,6 +216,9 @@ except ImportError:
                           if isinstance(other, Int)
                           else NotImplemented))
 
+        def __float__(self) -> float:
+            return self._numerator._value / self._denominator._value
+
         def __ge__(self, other: 'Fraction') -> bool:
             return (self.numerator * other.denominator
                     >= other.numerator * self.denominator

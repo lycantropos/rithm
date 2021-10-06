@@ -600,6 +600,20 @@ macro_rules! plain_max_exp_impl {
 
 plain_max_exp_impl!(f32 f64);
 
+pub trait MinExp {
+    const MIN_EXP: i32;
+}
+
+macro_rules! plain_min_exp_impl {
+    ($($t:ty)*) => ($(
+        impl MinExp for $t {
+            const MIN_EXP: i32 = <$t>::MIN_EXP;
+        }
+    )*)
+}
+
+plain_min_exp_impl!(f32 f64);
+
 pub trait Pow<Exponent> {
     type Output;
 

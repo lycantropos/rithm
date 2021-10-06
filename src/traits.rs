@@ -149,6 +149,31 @@ macro_rules! plain_checked_div_as_f64_impl {
 
 plain_checked_div_as_f64_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
+pub trait CheckedDivAsF32<Divisor = Self> {
+    type Output;
+
+    fn checked_div_as_f32(self, divisor: Divisor) -> Self::Output;
+}
+
+macro_rules! plain_checked_div_as_f32_impl {
+    ($($t:ty)*) => ($(
+        impl CheckedDivAsF32 for $t {
+            type Output = Option<f32>;
+
+            #[inline(always)]
+            fn checked_div_as_f32(self, divisor: Self) -> Self::Output {
+                if divisor.is_zero() {
+                    None
+                } else {
+                    Some((self as f32) / (divisor as f32))
+                }
+            }
+        }
+    )*)
+}
+
+plain_checked_div_as_f32_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
 pub trait CheckedDivEuclid<Divisor = Self> {
     type Output;
 

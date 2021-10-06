@@ -664,6 +664,81 @@ macro_rules! plain_min_exp_impl {
 
 plain_min_exp_impl!(f32 f64);
 
+pub trait Oppose {
+    type Result: Oppositive;
+}
+
+impl Oppose for i8 {
+    type Result = i8;
+}
+
+impl Oppose for isize {
+    type Result = isize;
+}
+
+impl Oppose for i16 {
+    type Result = i16;
+}
+
+impl Oppose for i32 {
+    type Result = i32;
+}
+
+impl Oppose for i64 {
+    type Result = i64;
+}
+
+impl Oppose for i128 {
+    type Result = i128;
+}
+
+impl Oppose for u8 {
+    type Result = i8;
+}
+
+impl Oppose for u16 {
+    type Result = i16;
+}
+
+impl Oppose for u32 {
+    type Result = i32;
+}
+
+impl Oppose for u64 {
+    type Result = i64;
+}
+
+impl Oppose for u128 {
+    type Result = i128;
+}
+
+impl Oppose for usize {
+    type Result = isize;
+}
+
+pub trait Oppositive: NegatableUnaryAlgebra + Zeroable {
+    fn is_negative(&self) -> bool;
+    fn is_positive(&self) -> bool;
+}
+
+macro_rules! plain_oppositive_impl {
+    ($($t:ty)*) => ($(
+        impl Oppositive for $t {
+            #[inline(always)]
+            fn is_negative(&self) -> bool {
+                <$t>::is_negative(*self)
+            }
+
+            #[inline(always)]
+            fn is_positive(&self) -> bool {
+                <$t>::is_positive(*self)
+            }
+        }
+    )*)
+}
+
+plain_oppositive_impl!(i8 i16 i32 i64 i128 isize);
+
 pub trait Pow<Exponent> {
     type Output;
 
@@ -720,81 +795,6 @@ macro_rules! plain_rem_euclid_impl {
 }
 
 plain_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
-
-pub trait Oppositive: NegatableUnaryAlgebra + Zeroable {
-    fn is_negative(&self) -> bool;
-    fn is_positive(&self) -> bool;
-}
-
-macro_rules! plain_oppositive_impl {
-    ($($t:ty)*) => ($(
-        impl Oppositive for $t {
-            #[inline(always)]
-            fn is_negative(&self) -> bool {
-                <$t>::is_negative(*self)
-            }
-
-            #[inline(always)]
-            fn is_positive(&self) -> bool {
-                <$t>::is_positive(*self)
-            }
-        }
-    )*)
-}
-
-plain_oppositive_impl!(i8 i16 i32 i64 i128 isize);
-
-pub trait Oppose {
-    type Result: Oppositive;
-}
-
-impl Oppose for i8 {
-    type Result = i8;
-}
-
-impl Oppose for isize {
-    type Result = isize;
-}
-
-impl Oppose for i16 {
-    type Result = i16;
-}
-
-impl Oppose for i32 {
-    type Result = i32;
-}
-
-impl Oppose for i64 {
-    type Result = i64;
-}
-
-impl Oppose for i128 {
-    type Result = i128;
-}
-
-impl Oppose for u8 {
-    type Result = i8;
-}
-
-impl Oppose for u16 {
-    type Result = i16;
-}
-
-impl Oppose for u32 {
-    type Result = i32;
-}
-
-impl Oppose for u64 {
-    type Result = i64;
-}
-
-impl Oppose for u128 {
-    type Result = i128;
-}
-
-impl Oppose for usize {
-    type Result = isize;
-}
 
 pub trait Unitary {
     fn one() -> Self;

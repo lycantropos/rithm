@@ -505,6 +505,62 @@ macro_rules! plain_checked_rem_euclid_impl {
 
 plain_checked_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
+pub trait CheckedShl<Shift = Self> {
+    type Output;
+
+    fn checked_shl(self, shift: Shift) -> Self::Output;
+}
+
+macro_rules! signed_checked_shl_impl {
+    ($t:ty, $f:ty) => {
+        impl CheckedShl<$f> for $t {
+            type Output = Option<$t>;
+
+            #[inline(always)]
+            fn checked_shl(self, other: $f) -> Self::Output {
+                if other < 0 {
+                    None
+                } else {
+                    Some(<$t>::shl(self, other))
+                }
+            }
+        }
+    };
+}
+
+macro_rules! unsigned_checked_shl_impl {
+    ($t:ty, $f:ty) => {
+        impl CheckedShl<$f> for $t {
+            type Output = Option<Self>;
+
+            #[inline(always)]
+            fn checked_shl(self, other: $f) -> Self::Output {
+                Some(<$t>::shl(self, other))
+            }
+        }
+    };
+}
+
+macro_rules! plain_checked_shl_impl {
+    ($($t:ty)*) => ($(
+        signed_checked_shl_impl! { $t, i8 }
+        signed_checked_shl_impl! { $t, i16 }
+        signed_checked_shl_impl! { $t, i32 }
+        signed_checked_shl_impl! { $t, i64 }
+        signed_checked_shl_impl! { $t, i128 }
+        signed_checked_shl_impl! { $t, isize }
+
+        unsigned_checked_shl_impl! { $t, u8 }
+        unsigned_checked_shl_impl! { $t, u16 }
+        unsigned_checked_shl_impl! { $t, u32 }
+        unsigned_checked_shl_impl! { $t, u64 }
+        unsigned_checked_shl_impl! { $t, u128 }
+        unsigned_checked_shl_impl! { $t, usize }
+    )*)
+}
+
+plain_checked_shl_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
 pub trait DivRem<Divisor = Self> {
     type Output;
 

@@ -129,7 +129,7 @@ macro_rules! plain_checked_div_impl {
 plain_checked_div_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedDivAsF32<Divisor = Self> {
-    type Output;
+    type Output: Maybe<Result = f32>;
 
     fn checked_div_as_f32(self, divisor: Divisor) -> Self::Output;
 }

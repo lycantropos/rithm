@@ -6,9 +6,9 @@ use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 use crate::big_int::BigInt;
 use crate::digits::{AdditiveDigit, GcdDigit, MultiplicativeDigit};
 use crate::traits::{
-    Abs, AdditiveMonoid, CheckedDiv, CheckedDivAsF64, CheckedPow, DivisivePartialMagma, GcdMagma,
-    Maybe, ModularUnaryAlgebra, MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, Pow,
-    SubtractiveMagma, Unitary, Zeroable,
+    Abs, AdditiveMonoid, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedPow,
+    DivisivePartialMagma, GcdMagma, Maybe, ModularUnaryAlgebra, MultiplicativeMonoid,
+    NegatableUnaryAlgebra, Oppositive, Pow, SubtractiveMagma, Unitary, Zeroable,
 };
 
 #[derive(Clone, Eq, PartialEq)]
@@ -706,6 +706,19 @@ impl<
                 - subtrahend.numerator * self.denominator.clone(),
             self.denominator.clone() * subtrahend.denominator,
         );
+    }
+}
+
+impl<Component: Clone + Eq + CheckedDivAsF32> TryInto<f32> for Fraction<Component> {
+    type Error = <<Component as CheckedDivAsF32>::Output as Maybe>::Error;
+
+    fn try_into(self) -> Result<f32, Self::Error> {
+        let maybe = self.numerator.checked_div_as_f32(self.denominator);
+        if maybe.is_result() {
+            Ok(maybe.result())
+        } else {
+            Err(maybe.error())
+        }
     }
 }
 

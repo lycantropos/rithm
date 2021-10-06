@@ -128,31 +128,6 @@ macro_rules! plain_checked_div_impl {
 
 plain_checked_div_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-pub trait CheckedDivAsF64<Divisor = Self> {
-    type Output: Maybe<Result = f64>;
-
-    fn checked_div_as_f64(self, divisor: Divisor) -> Self::Output;
-}
-
-macro_rules! plain_checked_div_as_f64_impl {
-    ($($t:ty)*) => ($(
-        impl CheckedDivAsF64 for $t {
-            type Output = Option<f64>;
-
-            #[inline(always)]
-            fn checked_div_as_f64(self, divisor: Self) -> Self::Output {
-                if divisor.is_zero() {
-                    None
-                } else {
-                    Some((self as f64) / (divisor as f64))
-                }
-            }
-        }
-    )*)
-}
-
-plain_checked_div_as_f64_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
-
 pub trait CheckedDivAsF32<Divisor = Self> {
     type Output;
 
@@ -177,6 +152,31 @@ macro_rules! plain_checked_div_as_f32_impl {
 }
 
 plain_checked_div_as_f32_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
+pub trait CheckedDivAsF64<Divisor = Self> {
+    type Output: Maybe<Result = f64>;
+
+    fn checked_div_as_f64(self, divisor: Divisor) -> Self::Output;
+}
+
+macro_rules! plain_checked_div_as_f64_impl {
+    ($($t:ty)*) => ($(
+        impl CheckedDivAsF64 for $t {
+            type Output = Option<f64>;
+
+            #[inline(always)]
+            fn checked_div_as_f64(self, divisor: Self) -> Self::Output {
+                if divisor.is_zero() {
+                    None
+                } else {
+                    Some((self as f64) / (divisor as f64))
+                }
+            }
+        }
+    )*)
+}
+
+plain_checked_div_as_f64_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedDivEuclid<Divisor = Self> {
     type Output;

@@ -1,12 +1,13 @@
 use std::cmp::Ordering;
+use std::convert::TryInto;
 use std::fmt::{Display, Formatter};
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use crate::big_int::BigInt;
 use crate::digits::{AdditiveDigit, GcdDigit, MultiplicativeDigit};
 use crate::traits::{
-    Abs, AdditiveMonoid, CheckedDiv, CheckedPow, DivisivePartialMagma, GcdMagma,
-    ModularUnaryAlgebra, MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, Pow,
+    Abs, AdditiveMonoid, CheckedDiv, CheckedDivAsF64, CheckedPow, DivisivePartialMagma, GcdMagma,
+    Maybe, ModularUnaryAlgebra, MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, Pow,
     SubtractiveMagma, Unitary, Zeroable,
 };
 
@@ -705,6 +706,19 @@ impl<
                 - subtrahend.numerator * self.denominator.clone(),
             self.denominator.clone() * subtrahend.denominator,
         );
+    }
+}
+
+impl<Component: Clone + Eq + CheckedDivAsF64> TryInto<f64> for Fraction<Component> {
+    type Error = <<Component as CheckedDivAsF64>::Output as Maybe>::Error;
+
+    fn try_into(self) -> Result<f64, Self::Error> {
+        let maybe = self.numerator.checked_div_as_f64(self.denominator);
+        if maybe.is_result() {
+            Ok(maybe.result())
+        } else {
+            Err(maybe.error())
+        }
     }
 }
 

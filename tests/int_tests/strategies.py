@@ -14,3 +14,5 @@ small_negative_ints_with_builtins = strategies.builds(
     to_int_with_builtin, strategies.integers(-100, -1).map(str))
 small_non_negative_ints_with_builtins = strategies.builds(
     to_int_with_builtin, strategies.integers(0, 100).map(str))
+small_ints_with_builtins = (small_non_negative_ints_with_builtins
+                            | small_negative_ints_with_builtins)

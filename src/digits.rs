@@ -125,14 +125,19 @@ pub trait GcdDigit = BinaryDigit
     + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>
     + TryFrom<usize>
 where
-    DoublePrecisionOf<Self>: BinaryDigit + DivisivePartialMagma + ModularPartialMagma + Oppose,
+    DoublePrecisionOf<Self>: BinaryDigit
+        + DivisivePartialMagma
+        + ModularPartialMagma
+        + Oppose
+        + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>,
     OppositionOf<Self>:
         BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Self>>> + TryFrom<Self>,
     OppositionOf<DoublePrecisionOf<Self>>: BinaryDigit
         + DivisivePartialMagma
         + From<Self>
         + From<OppositionOf<Self>>
-        + ModularPartialMagma,
+        + ModularPartialMagma
+        + TryFrom<DoublePrecisionOf<Self>>,
     usize: TryFrom<Self>;
 
 pub trait MultiplicativeDigit =

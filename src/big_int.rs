@@ -780,10 +780,11 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
 impl<SourceDigit, TargetDigit, const SEPARATOR: char, const SHIFT: usize> From<SourceDigit>
     for BigInt<TargetDigit, SEPARATOR, SHIFT>
 where
-    SourceDigit: BinaryDigit + Oppose,
+    SourceDigit: BinaryDigit + Oppose + TryFrom<OppositionOf<SourceDigit>>,
     TargetDigit: BinaryDigit + Oppose + TryFrom<SourceDigit>,
+    OppositionOf<SourceDigit>: TryFrom<SourceDigit>,
 {
-    fn from(mut value: SourceDigit) -> Self {
+    fn from(value: SourceDigit) -> Self {
         if value.is_zero() {
             Self::zero()
         } else if size_of::<SourceDigit>() < size_of::<TargetDigit>()
@@ -791,8 +792,25 @@ where
                 && utils::are_same::<SourceDigit, OppositionOf<SourceDigit>>()
                 && !utils::are_same::<TargetDigit, OppositionOf<TargetDigit>>())
         {
-            let mut value = unsafe { TargetDigit::try_from(value).unwrap_unchecked() };
-            let sign = Sign::one();
+            let mut sign = Sign::one();
+            let mut value = if utils::are_same::<SourceDigit, OppositionOf<SourceDigit>>() {
+                let value =
+                    unsafe { OppositionOf::<SourceDigit>::try_from(value).unwrap_unchecked() };
+                if value.is_negative() {
+                    sign = -sign;
+                    unsafe {
+                        TargetDigit::try_from(SourceDigit::try_from(-value).unwrap_unchecked())
+                            .unwrap_unchecked()
+                    }
+                } else {
+                    unsafe {
+                        TargetDigit::try_from(SourceDigit::try_from(value).unwrap_unchecked())
+                            .unwrap_unchecked()
+                    }
+                }
+            } else {
+                unsafe { TargetDigit::try_from(value).unwrap_unchecked() }
+            };
             let mut digits = Vec::<TargetDigit>::new();
             let digit_mask = to_digit_mask::<TargetDigit>(SHIFT);
             while !value.is_zero() {
@@ -801,7 +819,19 @@ where
             }
             Self { sign, digits }
         } else {
-            let sign = Sign::one();
+            let mut sign = Sign::one();
+            let mut value = if utils::are_same::<SourceDigit, OppositionOf<SourceDigit>>() {
+                let value =
+                    unsafe { OppositionOf::<SourceDigit>::try_from(value).unwrap_unchecked() };
+                if value.is_negative() {
+                    sign = -sign;
+                    unsafe { SourceDigit::try_from(-value).unwrap_unchecked() }
+                } else {
+                    unsafe { SourceDigit::try_from(value).unwrap_unchecked() }
+                }
+            } else {
+                value
+            };
             let mut digits = Vec::<TargetDigit>::new();
             let digit_mask = to_digit_mask::<SourceDigit>(SHIFT);
             while !value.is_zero() {

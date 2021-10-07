@@ -58,51 +58,39 @@ impl BigIntConversionErrorKind {
     }
 }
 
-pub struct BigIntParsingError {
-    kind: BigIntParsingErrorKind,
-}
-
-impl Debug for BigIntParsingError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(&self.kind.description())
-    }
-}
-
-impl Display for BigIntParsingError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.kind.description(), formatter)
-    }
-}
-
-impl BigIntParsingError {
-    pub fn kind(&self) -> &BigIntParsingErrorKind {
-        &self.kind
-    }
-}
-
-pub enum BigIntParsingErrorKind {
+pub enum BigIntParsingError {
     StartsWithSeparator,
     ConsecutiveSeparators,
     InvalidDigit(char, u8),
     EndsWithSeparator,
 }
 
-impl BigIntParsingErrorKind {
+impl BigIntParsingError {
     fn description(&self) -> String {
         match self {
-            BigIntParsingErrorKind::StartsWithSeparator => {
+            BigIntParsingError::StartsWithSeparator => {
                 String::from("Should not start with separator.")
             }
-            BigIntParsingErrorKind::InvalidDigit(character, base) => {
+            BigIntParsingError::InvalidDigit(character, base) => {
                 format!("Invalid digit in base {}: {}.", base, character)
             }
-            BigIntParsingErrorKind::ConsecutiveSeparators => {
+            BigIntParsingError::ConsecutiveSeparators => {
                 String::from("Consecutive separators found.")
             }
-            BigIntParsingErrorKind::EndsWithSeparator => {
-                String::from("Should not end with separator.")
-            }
+            BigIntParsingError::EndsWithSeparator => String::from("Should not end with separator."),
         }
+    }
+}
+
+impl Debug for BigIntParsingError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(&self.description())
+    }
+}
+
+impl Display for BigIntParsingError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.description(), formatter)
     }
 }
 
@@ -161,9 +149,7 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
         base: u8,
     ) -> Result<Vec<u8>, BigIntParsingError> {
         if characters.peek() == Some(&SEPARATOR) {
-            return Err(BigIntParsingError {
-                kind: BigIntParsingErrorKind::StartsWithSeparator,
-            });
+            return Err(BigIntParsingError::StartsWithSeparator);
         }
         let mut result: Vec<u8> = Vec::new();
         let mut prev: char = SEPARATOR;
@@ -171,22 +157,16 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
             if character != SEPARATOR {
                 let digit = Self::ASCII_CODES_DIGIT_VALUES[character as usize];
                 if digit >= base {
-                    return Err(BigIntParsingError {
-                        kind: BigIntParsingErrorKind::InvalidDigit(character, base),
-                    });
+                    return Err(BigIntParsingError::InvalidDigit(character, base));
                 }
                 result.push(digit);
             } else if prev == SEPARATOR {
-                return Err(BigIntParsingError {
-                    kind: BigIntParsingErrorKind::ConsecutiveSeparators,
-                });
+                return Err(BigIntParsingError::ConsecutiveSeparators);
             }
             prev = character;
         }
         if prev == SEPARATOR {
-            return Err(BigIntParsingError {
-                kind: BigIntParsingErrorKind::EndsWithSeparator,
-            });
+            return Err(BigIntParsingError::EndsWithSeparator);
         }
         result.reverse();
         Ok(result)

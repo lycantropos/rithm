@@ -64,7 +64,7 @@ pub struct BigIntParsingError {
 
 impl Debug for BigIntParsingError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(self.kind.description().as_str())
+        formatter.write_str(&self.kind.description())
     }
 }
 
@@ -686,7 +686,7 @@ impl<Digit: DisplayDigit, const SEPARATOR: char, const SHIFT: usize> Display
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
-        formatter.write_str(self.to_base_string(10).as_str())
+        formatter.write_str(&self.to_base_string(10))
     }
 }
 

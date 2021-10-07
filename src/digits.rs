@@ -1189,8 +1189,8 @@ where
 
 pub(crate) fn right_shift_digits<Digit: RightShiftableDigit, const SHIFT: usize>(
     digits: &[Digit],
-    shift_remainder: Digit,
     shift_quotient: usize,
+    shift_remainder: Digit,
 ) -> Vec<Digit> {
     if digits.len() <= shift_quotient {
         return vec![Digit::zero()];

@@ -1286,8 +1286,8 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
                 let inverted = !self;
                 let digits = right_shift_digits::<Digit, SHIFT>(
                     &inverted.digits,
-                    shift_remainder,
                     shift_quotient,
+                    shift_remainder,
                 );
                 Ok(!Self {
                     sign: inverted.sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
@@ -1296,8 +1296,8 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
             } else {
                 let digits = right_shift_digits::<Digit, SHIFT>(
                     &self.digits,
-                    shift_remainder,
                     shift_quotient,
+                    shift_remainder,
                 );
                 Ok(Self {
                     sign: self.sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
@@ -1307,6 +1307,91 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
         }
     }
 }
+
+macro_rules! plain_signed_checked_shr_impl {
+    ($($t:ty)*) => ($(
+        impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr<$t>
+            for BigInt<Digit, SEPARATOR, SHIFT>
+        {
+            type Output = Result<Self, ShiftError>;
+
+            fn checked_shr(self, shift: $t) -> Self::Output {
+                assert!(usize::BITS < <$t>::BITS || SHIFT < <$t>::MAX as usize);
+                if shift.is_negative() {
+                    Err(ShiftError::NegativeShift)
+                } else if self.is_zero() {
+                    Ok(self)
+                } else {
+                    let (shift_quotient, shift_remainder) = shift.div_rem(SHIFT as $t);
+                    if (<$t>::BITS as usize) + 8 * size_of::<Digit>() >= (usize::BITS as usize)
+                        && shift_quotient >= ((usize::MAX / size_of::<Digit>()) as $t)
+                    {
+                        Err(ShiftError::TooLarge)
+                    } else if self.is_negative() {
+                        let inverted = !self;
+                        let digits = right_shift_digits::<Digit, SHIFT>(
+                            &inverted.digits,
+                            shift_quotient as usize,
+                            unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
+                        );
+                        Ok(!Self {
+                            sign: inverted.sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+                            digits,
+                        })
+                    } else {
+                        let digits = right_shift_digits::<Digit, SHIFT>(
+                            &self.digits,
+                            shift_quotient as usize,
+                            unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
+                        );
+                        Ok(Self {
+                            sign: self.sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+                            digits,
+                        })
+                    }
+                }
+            }
+        }
+    )*)
+}
+
+plain_signed_checked_shr_impl!(i8 i16 i32 i64 i128 isize);
+
+macro_rules! plain_unsigned_checked_shr_impl {
+    ($($t:ty)*) => ($(
+        impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr<$t>
+            for BigInt<Digit, SEPARATOR, SHIFT>
+        {
+            type Output = Result<Self, ShiftError>;
+
+            fn checked_shr(self, shift: $t) -> Self::Output {
+                assert!(usize::BITS < <$t>::BITS || SHIFT < <$t>::MAX as usize);
+                if self.is_zero() {
+                    Ok(self)
+                } else {
+                    let (shift_quotient, shift_remainder) = shift.div_rem(SHIFT as $t);
+                    if (<$t>::BITS as usize) + 8 * size_of::<Digit>() >= (usize::BITS as usize)
+                        && shift_quotient >= ((usize::MAX / size_of::<Digit>()) as $t)
+                    {
+                        Err(ShiftError::TooLarge)
+                    } else {
+                        let digits = right_shift_digits::<Digit, SHIFT>(
+                            &self.digits,
+                            shift_quotient as usize,
+                            unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
+                        );
+                        Ok(Self {
+                            sign: self.sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+                            digits,
+                        })
+                    }
+                }
+            }
+        }
+    )*)
+}
+
+plain_unsigned_checked_shr_impl!(u8 u16 u32 u64 u128 usize);
 
 impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Sub
     for BigInt<Digit, SEPARATOR, SHIFT>

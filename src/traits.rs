@@ -2,8 +2,8 @@ use std::convert::TryFrom;
 use std::fmt::Debug;
 use std::num::ParseIntError;
 use std::ops::{
-    Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, Div, DivAssign, Mul, MulAssign, Neg,
-    Not, Rem, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
+    Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Div, DivAssign,
+    Mul, MulAssign, Neg, Not, Rem, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
 };
 pub trait AdditiveMonoid<Other = Self> = Add<Other, Output = Self> + Zeroable;
 
@@ -14,6 +14,9 @@ pub trait AssigningBitwiseConjunctiveMagma<Other = Self> =
 
 pub trait AssigningBitwiseDisjunctiveMonoid<Other = Self> =
     BitwiseDisjunctiveMonoid<Other> + BitOrAssign<Other>;
+
+pub trait AssigningBitwiseExclusiveDisjunctiveMonoid<Other = Self> =
+    BitwiseExclusiveDisjunctiveMonoid<Other> + BitXorAssign<Other>;
 
 pub trait AssigningDivisivePartialMagma<Divisor = Self> =
     DivisivePartialMagma<Divisor> + DivAssign<Divisor>;
@@ -32,6 +35,8 @@ pub trait AssigningSubtractiveMagma<Subtrahend = Self> =
 pub trait BitwiseConjunctiveMagma<Other = Self> = BitAnd<Other, Output = Self> + Zeroable;
 
 pub trait BitwiseDisjunctiveMonoid<Other = Self> = BitOr<Other, Output = Self> + Zeroable;
+
+pub trait BitwiseExclusiveDisjunctiveMonoid<Other = Self> = BitXor<Other, Output = Self> + Zeroable;
 
 pub trait BitwiseNegatableUnaryAlgebra = Not<Output = Self>;
 

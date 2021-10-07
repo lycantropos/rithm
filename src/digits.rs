@@ -1,14 +1,15 @@
 use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt::{Debug, Display, Formatter};
+use std::ops::Shr;
 
 use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
-    AssigningDivisivePartialMagma, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
-    AssigningShiftingRightMonoid, AssigningSubtractiveMagma, BitwiseNegatableUnaryAlgebra,
-    CheckedShl, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Float,
-    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, ShiftingLeftMonoid,
-    SubtractiveMagma, Unitary, Zeroable,
+    AssigningBitwiseExclusiveDisjunctiveMonoid, AssigningDivisivePartialMagma,
+    AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid, AssigningShiftingRightMonoid,
+    AssigningSubtractiveMagma, BitwiseNegatableUnaryAlgebra, CheckedShl, DivisivePartialMagma,
+    DoublePrecision, DoublePrecisionOf, Float, ModularPartialMagma, ModularSubtractiveMagma,
+    Oppose, OppositionOf, ShiftingLeftMonoid, SubtractiveMagma, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -151,6 +152,13 @@ where
     DoublePrecisionOf<Target>: BinaryDigit + From<Self> + From<Target> + TryFrom<usize>;
 
 pub trait LeftShiftableDigit = EuclidDivisibleDigit + TryFrom<usize>
+where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
+
+pub trait RightShiftableDigit = AdditiveDigit
+    + AssigningBitwiseExclusiveDisjunctiveMonoid
+    + EuclidDivisibleDigit
+    + Shr<Self, Output = Self>
+    + TryFrom<usize>
 where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
 
 pub(crate) type Sign = i8;

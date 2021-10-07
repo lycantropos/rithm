@@ -94,31 +94,33 @@ impl Display for BigIntParsingError {
     }
 }
 
-pub enum BigIntShiftingError {
-    Negative,
+pub enum BigIntLeftShiftError {
+    NegativeShift,
     OutOfMemory,
-    TooLong,
+    TooLarge,
 }
 
-impl BigIntShiftingError {
+impl BigIntLeftShiftError {
     fn description(&self) -> String {
         match self {
-            BigIntShiftingError::Negative => String::from("Negative shift left is undefined."),
-            BigIntShiftingError::OutOfMemory => {
-                String::from("Not enough memory for shift left result digits.")
+            BigIntLeftShiftError::NegativeShift => {
+                String::from("Negative left shift is undefined.")
             }
-            BigIntShiftingError::TooLong => String::from("Too many digits in shift left result."),
+            BigIntLeftShiftError::OutOfMemory => {
+                String::from("Not enough memory for left shift result.")
+            }
+            BigIntLeftShiftError::TooLarge => String::from("Too large left shift result."),
         }
     }
 }
 
-impl Debug for BigIntShiftingError {
+impl Debug for BigIntLeftShiftError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         formatter.write_str(&self.description())
     }
 }
 
-impl Display for BigIntShiftingError {
+impl Display for BigIntLeftShiftError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self.description(), formatter)
     }
@@ -1176,11 +1178,11 @@ impl<Digit: EuclidDivisibleDigit + TryFrom<usize>, const SEPARATOR: char, const 
 where
     DoublePrecisionOf<Digit>: AssigningShiftingLeftMonoid<Digit>,
 {
-    type Output = Result<Self, BigIntShiftingError>;
+    type Output = Result<Self, BigIntLeftShiftError>;
 
     fn checked_shl(self, shift: Self) -> Self::Output {
         if shift.is_negative() {
-            Err(BigIntShiftingError::Negative)
+            Err(BigIntLeftShiftError::NegativeShift)
         } else if self.is_zero() {
             Ok(self)
         } else {
@@ -1190,16 +1192,16 @@ where
                 });
             let shift_quotient =
                 checked_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
-                    .ok_or(BigIntShiftingError::TooLong)?;
+                    .ok_or(BigIntLeftShiftError::TooLarge)?;
             if shift_quotient >= usize::MAX / size_of::<Digit>() {
-                return Err(BigIntShiftingError::TooLong);
+                return Err(BigIntLeftShiftError::TooLarge);
             };
             let mut result = Vec::<Digit>::new();
             result
                 .try_reserve_exact(
                     shift_quotient + ((!shift_remainder.is_zero()) as usize) + self.digits.len(),
                 )
-                .or(Err(BigIntShiftingError::OutOfMemory))?;
+                .or(Err(BigIntLeftShiftError::OutOfMemory))?;
             for _ in 0..shift_quotient {
                 result.push(Digit::zero());
             }

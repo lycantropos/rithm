@@ -315,10 +315,8 @@ fn hash(value: &_BigInt) -> usize {
         return if value.is_negative() {
             usize::MAX
                 - unsafe {
-                    usize::try_from(
-                        value.digits()[0] + <Digit as From<bool>>::from(value.digits()[0].is_one()),
-                    )
-                    .unwrap_unchecked()
+                    usize::try_from(value.digits()[0] + Digit::from(value.digits()[0].is_one()))
+                        .unwrap_unchecked()
                 }
                 + 1
         } else {

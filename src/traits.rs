@@ -569,6 +569,62 @@ macro_rules! plain_checked_shl_impl {
 
 plain_checked_shl_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
+pub trait CheckedShr<Shift = Self> {
+    type Output;
+
+    fn checked_shr(self, shift: Shift) -> Self::Output;
+}
+
+macro_rules! signed_checked_shr_impl {
+    ($t:ty, $f:ty) => {
+        impl CheckedShr<$f> for $t {
+            type Output = Option<$t>;
+
+            #[inline(always)]
+            fn checked_shr(self, other: $f) -> Self::Output {
+                if other < 0 {
+                    None
+                } else {
+                    <$t>::checked_shr(self, u32::try_from(other).ok()?)
+                }
+            }
+        }
+    };
+}
+
+macro_rules! unsigned_checked_shr_impl {
+    ($t:ty, $f:ty) => {
+        impl CheckedShr<$f> for $t {
+            type Output = Option<Self>;
+
+            #[inline(always)]
+            fn checked_shr(self, other: $f) -> Self::Output {
+                <$t>::checked_shr(self, u32::try_from(other).ok()?)
+            }
+        }
+    };
+}
+
+macro_rules! plain_checked_shr_impl {
+    ($($t:ty)*) => ($(
+        signed_checked_shr_impl! { $t, i8 }
+        signed_checked_shr_impl! { $t, i16 }
+        signed_checked_shr_impl! { $t, i32 }
+        signed_checked_shr_impl! { $t, i64 }
+        signed_checked_shr_impl! { $t, i128 }
+        signed_checked_shr_impl! { $t, isize }
+
+        unsigned_checked_shr_impl! { $t, u8 }
+        unsigned_checked_shr_impl! { $t, u16 }
+        unsigned_checked_shr_impl! { $t, u32 }
+        unsigned_checked_shr_impl! { $t, u64 }
+        unsigned_checked_shr_impl! { $t, u128 }
+        unsigned_checked_shr_impl! { $t, usize }
+    )*)
+}
+
+plain_checked_shr_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
 pub trait DivRem<Divisor = Self> {
     type Output;
 

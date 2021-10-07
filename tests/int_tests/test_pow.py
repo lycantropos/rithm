@@ -11,7 +11,7 @@ from . import strategies
 
 
 @given(strategies.ints_with_builtins,
-       strategies.non_negative_ints_with_builtins)
+       strategies.small_non_negative_ints_with_builtins)
 def test_non_negative_exponent_no_modulo_connection_with_builtin(
         base_with_builtin: IntWithBuiltin,
         exponent_with_builtin: IntWithBuiltin) -> None:
@@ -22,7 +22,7 @@ def test_non_negative_exponent_no_modulo_connection_with_builtin(
                                         base_builtin ** exponent_builtin)
 
 
-@given(strategies.ints_with_builtins, strategies.negative_ints_with_builtins)
+@given(strategies.ints_with_builtins, strategies.small_negative_ints_with_builtins)
 def test_negative_exponent_no_modulo_connection_with_builtin(
         base_with_builtin: IntWithBuiltin,
         exponent_with_builtin: IntWithBuiltin) -> None:
@@ -40,7 +40,7 @@ def test_negative_exponent_no_modulo_connection_with_builtin(
 
 
 @given(strategies.ints_with_builtins,
-       strategies.non_negative_ints_with_builtins
+       strategies.small_non_negative_ints_with_builtins
        if sys.version_info < (3, 8)
        else strategies.ints_with_builtins,
        strategies.ints_with_builtins)

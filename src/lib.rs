@@ -233,7 +233,7 @@ impl PyNumberProtocol for PyInt {
     fn __lshift__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {
         lhs.0
             .checked_shl(rhs.0)
-            .map(|value| PyInt(value))
+            .map(PyInt)
             .map_err(|reason| match reason {
                 big_int::LeftShiftError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
                 _ => PyValueError::new_err(reason.to_string()),

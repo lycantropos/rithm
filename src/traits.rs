@@ -1,10 +1,10 @@
+use std::convert::TryFrom;
 use std::fmt::Debug;
 use std::num::ParseIntError;
 use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, Div, DivAssign, Mul, MulAssign, Neg,
     Not, Rem, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
 };
-
 pub trait AdditiveMonoid<Other = Self> = Add<Other, Output = Self> + Zeroable;
 
 pub trait AssigningAdditiveMonoid<Other = Self> = AdditiveMonoid<Other> + AddAssign<Other>;
@@ -521,7 +521,12 @@ macro_rules! signed_checked_shl_impl {
                 if other < 0 {
                     None
                 } else {
-                    Some(<$t>::shl(self, other))
+                    let other = u32::try_from(other).ok()?;
+                    if self.leading_zeros() < other {
+                        None
+                    } else {
+                        Some(self << other)
+                    }
                 }
             }
         }
@@ -535,7 +540,12 @@ macro_rules! unsigned_checked_shl_impl {
 
             #[inline(always)]
             fn checked_shl(self, other: $f) -> Self::Output {
-                Some(<$t>::shl(self, other))
+                let other = u32::try_from(other).ok()?;
+                if self.leading_zeros() < other {
+                    None
+                } else {
+                    Some(self << other)
+                }
             }
         }
     };

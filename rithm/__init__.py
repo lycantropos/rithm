@@ -93,6 +93,11 @@ except ImportError:
                     if isinstance(other, Int)
                     else NotImplemented)
 
+        def __lshift__(self, other: 'Int') -> 'Int':
+            return (Int(self._value << other._value)
+                    if isinstance(other, Int)
+                    else NotImplemented)
+
         def __lt__(self, other: 'Int') -> bool:
             return (self._value < other._value
                     if isinstance(other, Int)

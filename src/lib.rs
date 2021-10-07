@@ -235,7 +235,7 @@ impl PyNumberProtocol for PyInt {
             .checked_shl(rhs.0)
             .map(|value| PyInt(value))
             .map_err(|reason| match reason {
-                big_int::BigIntLeftShiftError::OutOfMemory => {
+                big_int::LeftShiftError::OutOfMemory => {
                     PyMemoryError::new_err(reason.to_string())
                 }
                 _ => PyValueError::new_err(reason.to_string()),

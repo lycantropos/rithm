@@ -24,103 +24,85 @@ pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
 
 const MAX_REPRESENTABLE_BASE: u8 = 36;
 
-pub struct BigIntConversionError {
-    kind: BigIntConversionErrorKind,
-}
-
-impl Debug for BigIntConversionError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(self.kind.description())
-    }
-}
-
-impl Display for BigIntConversionError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.kind.description(), formatter)
-    }
-}
-
-impl BigIntConversionError {
-    pub fn kind(&self) -> &BigIntConversionErrorKind {
-        &self.kind
-    }
-}
-
-pub enum BigIntConversionErrorKind {
+pub enum ConversionError {
     TooLarge,
 }
 
-impl BigIntConversionErrorKind {
+impl ConversionError {
     fn description(&self) -> &str {
         match self {
-            BigIntConversionErrorKind::TooLarge => "Too large to convert to floating point.",
+            ConversionError::TooLarge => "Too large to convert to floating point.",
         }
     }
 }
 
-pub enum BigIntParsingError {
+impl Debug for ConversionError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(self.description())
+    }
+}
+
+impl Display for ConversionError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.description(), formatter)
+    }
+}
+
+pub enum ParsingError {
     StartsWithSeparator,
     ConsecutiveSeparators,
     InvalidDigit(char, u8),
     EndsWithSeparator,
 }
 
-impl BigIntParsingError {
+impl ParsingError {
     fn description(&self) -> String {
         match self {
-            BigIntParsingError::StartsWithSeparator => {
-                String::from("Should not start with separator.")
-            }
-            BigIntParsingError::InvalidDigit(character, base) => {
+            ParsingError::StartsWithSeparator => String::from("Should not start with separator."),
+            ParsingError::InvalidDigit(character, base) => {
                 format!("Invalid digit in base {}: {}.", base, character)
             }
-            BigIntParsingError::ConsecutiveSeparators => {
-                String::from("Consecutive separators found.")
-            }
-            BigIntParsingError::EndsWithSeparator => String::from("Should not end with separator."),
+            ParsingError::ConsecutiveSeparators => String::from("Consecutive separators found."),
+            ParsingError::EndsWithSeparator => String::from("Should not end with separator."),
         }
     }
 }
 
-impl Debug for BigIntParsingError {
+impl Debug for ParsingError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         formatter.write_str(&self.description())
     }
 }
 
-impl Display for BigIntParsingError {
+impl Display for ParsingError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self.description(), formatter)
     }
 }
 
-pub enum BigIntLeftShiftError {
+pub enum LeftShiftError {
     NegativeShift,
     OutOfMemory,
     TooLarge,
 }
 
-impl BigIntLeftShiftError {
+impl LeftShiftError {
     fn description(&self) -> String {
         match self {
-            BigIntLeftShiftError::NegativeShift => {
-                String::from("Negative left shift is undefined.")
-            }
-            BigIntLeftShiftError::OutOfMemory => {
-                String::from("Not enough memory for left shift result.")
-            }
-            BigIntLeftShiftError::TooLarge => String::from("Too large left shift result."),
+            LeftShiftError::NegativeShift => String::from("Negative left shift is undefined."),
+            LeftShiftError::OutOfMemory => String::from("Not enough memory for left shift result."),
+            LeftShiftError::TooLarge => String::from("Too large left shift result."),
         }
     }
 }
 
-impl Debug for BigIntLeftShiftError {
+impl Debug for LeftShiftError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         formatter.write_str(&self.description())
     }
 }
 
-impl Display for BigIntLeftShiftError {
+impl Display for LeftShiftError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self.description(), formatter)
     }
@@ -144,7 +126,7 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
         37,
     ];
 
-    fn new(string: &str, mut base: u8) -> Result<Self, BigIntParsingError> {
+    fn new(string: &str, mut base: u8) -> Result<Self, ParsingError> {
         debug_assert!(Self::ASCII_CODES_DIGIT_VALUES[SEPARATOR as usize] >= MAX_REPRESENTABLE_BASE);
         let mut characters = string.trim().chars().peekable();
         let sign = Self::parse_sign(&mut characters);
@@ -176,12 +158,9 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 
     #[inline]
-    fn parse_digits(
-        mut characters: Peekable<Chars>,
-        base: u8,
-    ) -> Result<Vec<u8>, BigIntParsingError> {
+    fn parse_digits(mut characters: Peekable<Chars>, base: u8) -> Result<Vec<u8>, ParsingError> {
         if characters.peek() == Some(&SEPARATOR) {
-            return Err(BigIntParsingError::StartsWithSeparator);
+            return Err(ParsingError::StartsWithSeparator);
         }
         let mut result: Vec<u8> = Vec::new();
         let mut prev: char = SEPARATOR;
@@ -189,16 +168,16 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
             if character != SEPARATOR {
                 let digit = Self::ASCII_CODES_DIGIT_VALUES[character as usize];
                 if digit >= base {
-                    return Err(BigIntParsingError::InvalidDigit(character, base));
+                    return Err(ParsingError::InvalidDigit(character, base));
                 }
                 result.push(digit);
             } else if prev == SEPARATOR {
-                return Err(BigIntParsingError::ConsecutiveSeparators);
+                return Err(ParsingError::ConsecutiveSeparators);
             }
             prev = character;
         }
         if prev == SEPARATOR {
-            return Err(BigIntParsingError::EndsWithSeparator);
+            return Err(ParsingError::EndsWithSeparator);
         }
         result.reverse();
         Ok(result)
@@ -838,7 +817,7 @@ where
 impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> FromStrRadix
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Error = BigIntParsingError;
+    type Error = ParsingError;
 
     fn from_str_radix(string: &str, radix: u32) -> Result<Self, Self::Error> {
         if (radix != 0 && radix < 2) || radix > (MAX_REPRESENTABLE_BASE as u32) {
@@ -1178,11 +1157,11 @@ impl<Digit: EuclidDivisibleDigit + TryFrom<usize>, const SEPARATOR: char, const 
 where
     DoublePrecisionOf<Digit>: AssigningShiftingLeftMonoid<Digit>,
 {
-    type Output = Result<Self, BigIntLeftShiftError>;
+    type Output = Result<Self, LeftShiftError>;
 
     fn checked_shl(self, shift: Self) -> Self::Output {
         if shift.is_negative() {
-            Err(BigIntLeftShiftError::NegativeShift)
+            Err(LeftShiftError::NegativeShift)
         } else if self.is_zero() {
             Ok(self)
         } else {
@@ -1192,16 +1171,16 @@ where
                 });
             let shift_quotient =
                 checked_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
-                    .ok_or(BigIntLeftShiftError::TooLarge)?;
+                    .ok_or(LeftShiftError::TooLarge)?;
             if shift_quotient >= usize::MAX / size_of::<Digit>() {
-                return Err(BigIntLeftShiftError::TooLarge);
+                return Err(LeftShiftError::TooLarge);
             };
             let mut result = Vec::<Digit>::new();
             result
                 .try_reserve_exact(
                     shift_quotient + ((!shift_remainder.is_zero()) as usize) + self.digits.len(),
                 )
-                .or(Err(BigIntLeftShiftError::OutOfMemory))?;
+                .or(Err(LeftShiftError::OutOfMemory))?;
             for _ in 0..shift_quotient {
                 result.push(Digit::zero());
             }
@@ -1256,7 +1235,7 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign
 impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&str>
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Error = BigIntParsingError;
+    type Error = ParsingError;
 
     fn try_from(string: &str) -> Result<Self, Self::Error> {
         Self::new(string, 0)
@@ -1266,7 +1245,7 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&st
 impl<Digit: BinaryDigitConvertibleToFloat<f32>, const SEPARATOR: char, const SHIFT: usize>
     TryFrom<BigInt<Digit, SEPARATOR, SHIFT>> for f32
 {
-    type Error = BigIntConversionError;
+    type Error = ConversionError;
 
     fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
         match fraction_exponent_digits::<Digit, f32, SHIFT>(&value.digits) {
@@ -1274,9 +1253,7 @@ impl<Digit: BinaryDigitConvertibleToFloat<f32>, const SEPARATOR: char, const SHI
                 (value.sign as f32) * fraction_modulus,
                 exponent,
             )),
-            None => Err(BigIntConversionError {
-                kind: BigIntConversionErrorKind::TooLarge,
-            }),
+            None => Err(ConversionError::TooLarge),
         }
     }
 }
@@ -1284,7 +1261,7 @@ impl<Digit: BinaryDigitConvertibleToFloat<f32>, const SEPARATOR: char, const SHI
 impl<Digit: BinaryDigitConvertibleToFloat<f64>, const SEPARATOR: char, const SHIFT: usize>
     TryFrom<BigInt<Digit, SEPARATOR, SHIFT>> for f64
 {
-    type Error = BigIntConversionError;
+    type Error = ConversionError;
 
     fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
         match fraction_exponent_digits::<Digit, f64, SHIFT>(&value.digits) {
@@ -1292,9 +1269,7 @@ impl<Digit: BinaryDigitConvertibleToFloat<f64>, const SEPARATOR: char, const SHI
                 (value.sign as f64) * fraction_modulus,
                 exponent,
             )),
-            None => Err(BigIntConversionError {
-                kind: BigIntConversionErrorKind::TooLarge,
-            }),
+            None => Err(ConversionError::TooLarge),
         }
     }
 }

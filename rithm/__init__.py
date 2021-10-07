@@ -134,6 +134,11 @@ except ImportError:
         def __repr__(self) -> str:
             return f'rithm.Int(\'{self._value}\')'
 
+        def __rshift__(self, other: 'Int') -> 'Int':
+            return (Int(self._value >> other._value)
+                    if isinstance(other, Int)
+                    else NotImplemented)
+
         def __setstate__(self, state: int) -> None:
             self._value = state
 

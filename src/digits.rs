@@ -340,41 +340,31 @@ pub(crate) fn binary_digits_to_lesser_binary_base<
     result
 }
 
-pub struct CheckedDivApproximationError {
-    kind: CheckedDivApproximationErrorKind,
+pub enum CheckedDivApproximationError {
+    TooLarge,
+    ZeroDivision,
+}
+
+impl CheckedDivApproximationError {
+    fn description(&self) -> &str {
+        match self {
+            CheckedDivApproximationError::TooLarge => {
+                "Division result too large to be expressed as floating point."
+            }
+            CheckedDivApproximationError::ZeroDivision => "Division by zero is undefined.",
+        }
+    }
 }
 
 impl Debug for CheckedDivApproximationError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(self.kind.description())
+        formatter.write_str(self.description())
     }
 }
 
 impl Display for CheckedDivApproximationError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.kind.description(), formatter)
-    }
-}
-
-impl CheckedDivApproximationError {
-    pub fn kind(&self) -> &CheckedDivApproximationErrorKind {
-        &self.kind
-    }
-}
-
-pub enum CheckedDivApproximationErrorKind {
-    TooLarge,
-    ZeroDivision,
-}
-
-impl CheckedDivApproximationErrorKind {
-    fn description(&self) -> &str {
-        match self {
-            CheckedDivApproximationErrorKind::TooLarge => {
-                "Division result too large to be expressed as floating point."
-            }
-            CheckedDivApproximationErrorKind::ZeroDivision => "Division by zero is undefined.",
-        }
+        Display::fmt(&self.description(), formatter)
     }
 }
 
@@ -387,9 +377,7 @@ pub(crate) fn checked_div_approximation<
     divisor_digits: &[Digit],
 ) -> Result<Output, CheckedDivApproximationError> {
     if divisor_digits.len() == 1 && divisor_digits[0].is_zero() {
-        return Err(CheckedDivApproximationError {
-            kind: CheckedDivApproximationErrorKind::ZeroDivision,
-        });
+        return Err(CheckedDivApproximationError::ZeroDivision);
     }
     if dividend_digits.len() == 1 && dividend_digits[0].is_zero() {
         return Ok(Output::zero());
@@ -414,9 +402,7 @@ pub(crate) fn checked_div_approximation<
     let digits_count_difference =
         (dividend_digits_count as isize) - (divisor_digits_count as isize);
     if digits_count_difference > (((usize::MAX / SHIFT) - 1) as isize) {
-        return Err(CheckedDivApproximationError {
-            kind: CheckedDivApproximationErrorKind::TooLarge,
-        });
+        return Err(CheckedDivApproximationError::TooLarge);
     } else if digits_count_difference < 1isize - ((usize::MAX / SHIFT) as isize) {
         return Ok(Output::zero());
     }
@@ -424,9 +410,7 @@ pub(crate) fn checked_div_approximation<
         + (((utils::bit_length(dividend_digits[dividend_digits.len() - 1])) as isize)
             - (utils::bit_length(divisor_digits[divisor_digits.len() - 1]) as isize));
     if bit_lengths_difference > (Output::MAX_EXP as isize) {
-        return Err(CheckedDivApproximationError {
-            kind: CheckedDivApproximationErrorKind::TooLarge,
-        });
+        return Err(CheckedDivApproximationError::TooLarge);
     } else if bit_lengths_difference
         < (Output::MIN_EXP as isize) - ((Output::MANTISSA_DIGITS as isize) - 1)
     {
@@ -439,9 +423,7 @@ pub(crate) fn checked_div_approximation<
     let mut quotient_digits = if shift <= 0 {
         let shift_digits = ((-shift) as usize) / SHIFT;
         if dividend_digits_count >= ((isize::MAX - 1) as usize) - shift_digits {
-            return Err(CheckedDivApproximationError {
-                kind: CheckedDivApproximationErrorKind::TooLarge,
-            });
+            return Err(CheckedDivApproximationError::TooLarge);
         }
         let quotient_digits_count = dividend_digits_count + shift_digits + 1;
         let mut quotient_data = vec![Digit::zero(); quotient_digits_count];
@@ -506,9 +488,7 @@ pub(crate) fn checked_div_approximation<
         && (shift + quotient_bit_length > (Output::MAX_EXP as isize)
             || reduced_quotient == utils::load_exponent(Output::one(), quotient_bit_length as i32))
     {
-        Err(CheckedDivApproximationError {
-            kind: CheckedDivApproximationErrorKind::TooLarge,
-        })
+        Err(CheckedDivApproximationError::TooLarge)
     } else {
         Ok(utils::load_exponent(reduced_quotient, shift as i32))
     }

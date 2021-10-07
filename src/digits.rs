@@ -506,9 +506,9 @@ pub(crate) fn checked_div_approximation<
         && (shift + quotient_bit_length > (Output::MAX_EXP as isize)
             || reduced_quotient == utils::load_exponent(Output::one(), quotient_bit_length as i32))
     {
-        return Err(CheckedDivApproximationError {
+        Err(CheckedDivApproximationError {
             kind: CheckedDivApproximationErrorKind::TooLarge,
-        });
+        })
     } else {
         Ok(utils::load_exponent(reduced_quotient, shift as i32))
     }

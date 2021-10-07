@@ -127,6 +127,7 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
     ];
 
     fn new(string: &str, mut base: u8) -> Result<Self, ParsingError> {
+        debug_assert!(is_valid_shift::<Digit, SHIFT>());
         debug_assert!(Self::ASCII_CODES_DIGIT_VALUES[SEPARATOR as usize] >= MAX_REPRESENTABLE_BASE);
         let mut characters = string.trim().chars().peekable();
         let sign = Self::parse_sign(&mut characters);
@@ -315,11 +316,12 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
 where
     u8: BinaryDigitConvertibleToBinary<Digit>,
 {
     pub(crate) fn from_bytes(mut bytes: Vec<u8>) -> Self {
+        debug_assert!(is_valid_shift::<Digit, SHIFT>());
         let most_significant_byte = bytes[bytes.len() - 1];
         let sign = if most_significant_byte >= MIDDLE_BYTE {
             negate_digits(&mut bytes);
@@ -785,6 +787,7 @@ where
     OppositionOf<SourceDigit>: TryFrom<SourceDigit>,
 {
     fn from(value: SourceDigit) -> Self {
+        debug_assert!(is_valid_shift::<TargetDigit, SHIFT>());
         if value.is_zero() {
             Self::zero()
         } else if size_of::<SourceDigit>() < size_of::<TargetDigit>()
@@ -1226,7 +1229,7 @@ macro_rules! plain_signed_checked_shl_impl {
             type Output = Result<Self, ShiftError>;
 
             fn checked_shl(self, shift: $t) -> Self::Output {
-                assert!(usize::BITS < <$t>::BITS || SHIFT < <$t>::MAX as usize);
+                debug_assert!(usize::BITS < <$t>::BITS || SHIFT < <$t>::MAX as usize);
                 if shift.is_negative() {
                     Err(ShiftError::NegativeShift)
                 } else if self.is_zero() {
@@ -1264,7 +1267,7 @@ macro_rules! plain_unsigned_checked_shl_impl {
             type Output = Result<Self, ShiftError>;
 
             fn checked_shl(self, shift: $t) -> Self::Output {
-                assert!(usize::BITS < <$t>::BITS || SHIFT < <$t>::MAX as usize);
+                debug_assert!(usize::BITS < <$t>::BITS || SHIFT < <$t>::MAX as usize);
                 if self.is_zero() {
                     Ok(self)
                 } else {
@@ -1346,7 +1349,7 @@ macro_rules! plain_signed_checked_shr_impl {
             type Output = Result<Self, ShiftError>;
 
             fn checked_shr(self, shift: $t) -> Self::Output {
-                assert!(usize::BITS < <$t>::BITS || SHIFT < <$t>::MAX as usize);
+                debug_assert!(usize::BITS < <$t>::BITS || SHIFT < <$t>::MAX as usize);
                 if shift.is_negative() {
                     Err(ShiftError::NegativeShift)
                 } else if self.is_zero() {
@@ -1395,7 +1398,7 @@ macro_rules! plain_unsigned_checked_shr_impl {
             type Output = Result<Self, ShiftError>;
 
             fn checked_shr(self, shift: $t) -> Self::Output {
-                assert!(usize::BITS < <$t>::BITS || SHIFT < <$t>::MAX as usize);
+                debug_assert!(usize::BITS < <$t>::BITS || SHIFT < <$t>::MAX as usize);
                 if self.is_zero() {
                     Ok(self)
                 } else {
@@ -1522,4 +1525,8 @@ impl<Digit: Zeroable, const SEPARATOR: char, const SHIFT: usize> Zeroable
     fn is_zero(&self) -> bool {
         self.sign.is_zero()
     }
+}
+
+const fn is_valid_shift<Digit: Oppose, const SHIFT: usize>() -> bool {
+    SHIFT < 8 * size_of::<Digit>() - (utils::are_same::<Digit, OppositionOf<Digit>>() as usize)
 }

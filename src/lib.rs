@@ -1,3 +1,4 @@
+#![feature(const_fn_trait_bound)]
 #![feature(destructuring_assignment)]
 #![feature(option_result_unwrap_unchecked)]
 #![feature(specialization)]

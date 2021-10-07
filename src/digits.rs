@@ -109,6 +109,7 @@ pub trait ExponentiativeDigit = MultiplicativeDigit + BinaryDigitDowncastableTo<
 
 pub trait FromStrDigit = Copy
     + DoublePrecision
+    + Oppose
     + TryFrom<DoublePrecisionOf<Self>>
     + TryFrom<u8>
     + TryFrom<DoublePrecisionOf<u8>>

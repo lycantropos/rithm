@@ -8,11 +8,11 @@ use std::str::Chars;
 
 use crate::digits::*;
 use crate::traits::{
-    Abs, BitwiseNegatableUnaryAlgebra, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64,
-    CheckedDivEuclid, CheckedDivRem, CheckedDivRemEuclid, CheckedPow, CheckedPowRemEuclid,
-    CheckedRem, CheckedRemEuclid, CheckedRemEuclidInv, DivEuclid, DivRem, DivRemEuclid,
-    DoublePrecisionOf, FromStrRadix, Gcd, Oppose, OppositionOf, Oppositive, Pow, RemEuclid,
-    Unitary, Zeroable,
+    Abs, AssigningShiftingLeftMonoid, BitwiseNegatableUnaryAlgebra, CheckedDiv, CheckedDivAsF32,
+    CheckedDivAsF64, CheckedDivEuclid, CheckedDivRem, CheckedDivRemEuclid, CheckedPow,
+    CheckedPowRemEuclid, CheckedRem, CheckedRemEuclid, CheckedRemEuclidInv, CheckedShl, DivEuclid,
+    DivRem, DivRemEuclid, DoublePrecisionOf, FromStrRadix, Gcd, Oppose, OppositionOf, Oppositive,
+    Pow, RemEuclid, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -89,6 +89,36 @@ impl Debug for BigIntParsingError {
 }
 
 impl Display for BigIntParsingError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.description(), formatter)
+    }
+}
+
+pub enum BigIntShiftingError {
+    Negative,
+    OutOfMemory,
+    TooLong,
+}
+
+impl BigIntShiftingError {
+    fn description(&self) -> String {
+        match self {
+            BigIntShiftingError::Negative => String::from("Negative shift left is undefined."),
+            BigIntShiftingError::OutOfMemory => {
+                String::from("Not enough memory for shift left result digits.")
+            }
+            BigIntShiftingError::TooLong => String::from("Too many digits in shift left result."),
+        }
+    }
+}
+
+impl Debug for BigIntShiftingError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(&self.description())
+    }
+}
+
+impl Display for BigIntShiftingError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self.description(), formatter)
     }
@@ -1138,6 +1168,57 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Rem
         )
         .unwrap();
         Self { sign, digits }
+    }
+}
+
+impl<Digit: EuclidDivisibleDigit + TryFrom<usize>, const SEPARATOR: char, const SHIFT: usize>
+    CheckedShl for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    DoublePrecisionOf<Digit>: AssigningShiftingLeftMonoid<Digit>,
+{
+    type Output = Result<Self, BigIntShiftingError>;
+
+    fn checked_shl(self, shift: Self) -> Self::Output {
+        if shift.is_negative() {
+            Err(BigIntShiftingError::Negative)
+        } else if self.is_zero() {
+            Ok(self)
+        } else {
+            let (shift_quotient_digits, shift_remainder) =
+                div_rem_digits_by_digit::<Digit, SHIFT>(&shift.digits, unsafe {
+                    Digit::try_from(SHIFT).unwrap_unchecked()
+                });
+            let shift_quotient =
+                checked_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
+                    .ok_or(BigIntShiftingError::TooLong)?;
+            if shift_quotient >= usize::MAX / size_of::<Digit>() {
+                return Err(BigIntShiftingError::TooLong);
+            };
+            let mut result = Vec::<Digit>::new();
+            result
+                .try_reserve_exact(
+                    shift_quotient + ((!shift_remainder.is_zero()) as usize) + self.digits.len(),
+                )
+                .or(Err(BigIntShiftingError::OutOfMemory))?;
+            for _ in 0..shift_quotient {
+                result.push(Digit::zero());
+            }
+            let mut accum = DoublePrecisionOf::<Digit>::zero();
+            let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
+            for digit in self.digits {
+                accum |= DoublePrecisionOf::<Digit>::from(digit) << shift_remainder;
+                result.push(unsafe { Digit::try_from(accum & digit_mask).unwrap_unchecked() });
+                accum >>= SHIFT;
+            }
+            if !shift_remainder.is_zero() {
+                result.push(unsafe { Digit::try_from(accum).unwrap_unchecked() });
+            }
+            trim_leading_zeros(&mut result);
+            Ok(Self {
+                sign: self.sign,
+                digits: result,
+            })
+        }
     }
 }
 

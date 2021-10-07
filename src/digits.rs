@@ -6,9 +6,9 @@ use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
     AssigningDivisivePartialMagma, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
     AssigningShiftingRightMonoid, AssigningSubtractiveMagma, BitwiseNegatableUnaryAlgebra,
-    DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Float, ModularPartialMagma,
-    ModularSubtractiveMagma, Oppose, OppositionOf, ShiftingLeftMonoid, SubtractiveMagma, Unitary,
-    Zeroable,
+    CheckedShl, DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Float,
+    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, ShiftingLeftMonoid,
+    SubtractiveMagma, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -1122,6 +1122,20 @@ where
         result = (result << SHIFT) | Output::from(digit);
     }
     result
+}
+
+pub(crate) fn checked_reduce_digits<Digit, Output, const SHIFT: usize>(
+    digits: &[Digit],
+) -> Option<Output>
+where
+    Digit: Copy,
+    Output: BinaryDigit + Display + CheckedShl<usize, Output = Option<Output>> + TryFrom<Digit>,
+{
+    let mut result = Output::zero();
+    for &digit in digits.iter().rev() {
+        result = result.checked_shl(SHIFT)? | Output::try_from(digit).ok()?;
+    }
+    Some(result)
 }
 
 pub(crate) fn reduce_digits_to_float<Digit, Output, const SHIFT: usize>(digits: &[Digit]) -> Output

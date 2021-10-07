@@ -17,7 +17,7 @@ use pyo3::{IntoPy, PyNumberProtocol, PyObject};
 
 use crate::traits::{
     Abs, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow, CheckedPowRemEuclid,
-    CheckedRemEuclid, FromStrRadix, Gcd, Oppositive, Pow, Unitary, Zeroable,
+    CheckedRemEuclid, CheckedShl, FromStrRadix, Gcd, Oppositive, Pow, Unitary, Zeroable,
 };
 
 pub mod big_int;
@@ -228,6 +228,18 @@ impl PyNumberProtocol for PyInt {
 
     fn __invert__(&self) -> PyInt {
         PyInt(!self.0.clone())
+    }
+
+    fn __lshift__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {
+        lhs.0
+            .checked_shl(rhs.0)
+            .map(|value| PyInt(value))
+            .map_err(|reason| match reason {
+                big_int::BigIntShiftingError::OutOfMemory => {
+                    PyMemoryError::new_err(reason.to_string())
+                }
+                _ => PyValueError::new_err(reason.to_string()),
+            })
     }
 
     fn __mod__(lhs: PyInt, rhs: PyInt) -> PyResult<PyInt> {

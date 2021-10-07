@@ -521,8 +521,7 @@ macro_rules! signed_checked_shl_impl {
                 if other < 0 {
                     None
                 } else {
-                    let other = u32::try_from(other).ok()?;
-                    if self.leading_zeros() < other {
+                    if self.leading_zeros() < u32::try_from(other).ok()? {
                         None
                     } else {
                         Some(self << other)
@@ -540,8 +539,7 @@ macro_rules! unsigned_checked_shl_impl {
 
             #[inline(always)]
             fn checked_shl(self, other: $f) -> Self::Output {
-                let other = u32::try_from(other).ok()?;
-                if self.leading_zeros() < other {
+                if self.leading_zeros() < u32::try_from(other).ok()? {
                     None
                 } else {
                     Some(self << other)

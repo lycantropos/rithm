@@ -1152,10 +1152,8 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Rem
     }
 }
 
-impl<Digit: EuclidDivisibleDigit + TryFrom<usize>, const SEPARATOR: char, const SHIFT: usize>
-    CheckedShl for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    DoublePrecisionOf<Digit>: AssigningShiftingLeftMonoid<Digit>,
+impl<Digit: LeftShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShl
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<Self, LeftShiftError>;
 
@@ -1184,15 +1182,16 @@ where
             for _ in 0..shift_quotient {
                 result.push(Digit::zero());
             }
-            let mut accum = DoublePrecisionOf::<Digit>::zero();
+            let mut accumulator = DoublePrecisionOf::<Digit>::zero();
             let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
             for digit in self.digits {
-                accum |= DoublePrecisionOf::<Digit>::from(digit) << shift_remainder;
-                result.push(unsafe { Digit::try_from(accum & digit_mask).unwrap_unchecked() });
-                accum >>= SHIFT;
+                accumulator |= DoublePrecisionOf::<Digit>::from(digit) << shift_remainder;
+                result
+                    .push(unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() });
+                accumulator >>= SHIFT;
             }
             if !shift_remainder.is_zero() {
-                result.push(unsafe { Digit::try_from(accum).unwrap_unchecked() });
+                result.push(unsafe { Digit::try_from(accumulator).unwrap_unchecked() });
             }
             trim_leading_zeros(&mut result);
             Ok(Self {

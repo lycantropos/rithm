@@ -150,6 +150,9 @@ where
     Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
     DoublePrecisionOf<Target>: BinaryDigit + From<Self> + From<Target> + TryFrom<usize>;
 
+pub trait LeftShiftableDigit = EuclidDivisibleDigit + TryFrom<usize>
+where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
+
 pub(crate) type Sign = i8;
 pub(crate) type WindowDigit = u8;
 

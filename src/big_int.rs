@@ -836,10 +836,10 @@ where
                 value
             };
             let mut digits = Vec::<TargetDigit>::new();
-            let digit_mask = to_digit_mask::<SourceDigit>(SHIFT);
+            let digit_mask = to_digit_mask::<TargetDigit>(SHIFT);
             while !value.is_zero() {
                 digits
-                    .push(unsafe { TargetDigit::try_from(value & digit_mask).unwrap_unchecked() });
+                    .push(unsafe { TargetDigit::try_from(value).unwrap_unchecked() } & digit_mask);
                 value >>= SHIFT;
             }
             Self { sign, digits }

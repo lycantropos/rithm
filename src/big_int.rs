@@ -1171,33 +1171,19 @@ impl<Digit: LeftShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Check
                 checked_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
                     .ok_or(ShiftError::TooLarge)?;
             if shift_quotient >= usize::MAX / size_of::<Digit>() {
-                return Err(ShiftError::TooLarge);
-            };
-            let mut result = Vec::<Digit>::new();
-            result
-                .try_reserve_exact(
-                    shift_quotient + ((!shift_remainder.is_zero()) as usize) + self.digits.len(),
+                Err(ShiftError::TooLarge)
+            } else {
+                let digits = left_shift_digits::<Digit, SHIFT>(
+                    &self.digits,
+                    shift_quotient,
+                    shift_remainder,
                 )
-                .or(Err(ShiftError::OutOfMemory))?;
-            for _ in 0..shift_quotient {
-                result.push(Digit::zero());
+                .ok_or(ShiftError::OutOfMemory)?;
+                Ok(Self {
+                    sign: self.sign,
+                    digits,
+                })
             }
-            let mut accumulator = DoublePrecisionOf::<Digit>::zero();
-            let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
-            for digit in self.digits {
-                accumulator |= DoublePrecisionOf::<Digit>::from(digit) << shift_remainder;
-                result
-                    .push(unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() });
-                accumulator >>= SHIFT;
-            }
-            if !shift_remainder.is_zero() {
-                result.push(unsafe { Digit::try_from(accumulator).unwrap_unchecked() });
-            }
-            trim_leading_zeros(&mut result);
-            Ok(Self {
-                sign: self.sign,
-                digits: result,
-            })
         }
     }
 }
@@ -1246,31 +1232,6 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
             }
         }
     }
-}
-
-fn right_shift_digits<Digit: RightShiftableDigit, const SHIFT: usize>(
-    digits: &[Digit],
-    shift_remainder: Digit,
-    shift_quotient: usize,
-) -> Vec<Digit> {
-    if digits.len() <= shift_quotient {
-        return vec![Digit::zero()];
-    }
-    let result_digits_count = digits.len() - shift_quotient;
-    let high_shift = SHIFT - unsafe { usize::try_from(shift_remainder).unwrap_unchecked() };
-    let low_mask = to_digit_mask::<Digit>(high_shift);
-    let high_mask = to_digit_mask::<Digit>(SHIFT) ^ low_mask;
-    let mut result = vec![Digit::zero(); result_digits_count];
-    let mut position = shift_quotient;
-    for index in 0..result_digits_count {
-        result[index] = (digits[position] >> shift_remainder) & low_mask;
-        if index + 1 < result_digits_count {
-            result[index] |= (digits[position + 1] << high_shift) & high_mask;
-        }
-        position += 1;
-    }
-    trim_leading_zeros(&mut result);
-    result
 }
 
 impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Sub

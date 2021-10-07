@@ -852,6 +852,32 @@ pub(crate) fn fraction_exponent_digits<
     }
 }
 
+pub(crate) fn left_shift_digits<Digit: LeftShiftableDigit, const SHIFT: usize>(
+    digits: &[Digit],
+    shift_quotient: usize,
+    shift_remainder: Digit,
+) -> Option<Vec<Digit>> {
+    let mut result = Vec::<Digit>::new();
+    result
+        .try_reserve_exact(shift_quotient + ((!shift_remainder.is_zero()) as usize) + digits.len())
+        .ok()?;
+    for _ in 0..shift_quotient {
+        result.push(Digit::zero());
+    }
+    let mut accumulator = DoublePrecisionOf::<Digit>::zero();
+    let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
+    for &digit in digits {
+        accumulator |= DoublePrecisionOf::<Digit>::from(digit) << shift_remainder;
+        result.push(unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() });
+        accumulator >>= SHIFT;
+    }
+    if !shift_remainder.is_zero() {
+        result.push(unsafe { Digit::try_from(accumulator).unwrap_unchecked() });
+    }
+    trim_leading_zeros(&mut result);
+    Some(result)
+}
+
 pub(crate) fn multiply_digits<Digit: MultiplicativeDigit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
@@ -1158,6 +1184,31 @@ where
     for &digit in digits.iter().rev() {
         result = result * Output::from((1u64 << SHIFT) as f32) + Output::from(digit);
     }
+    result
+}
+
+pub(crate) fn right_shift_digits<Digit: RightShiftableDigit, const SHIFT: usize>(
+    digits: &[Digit],
+    shift_remainder: Digit,
+    shift_quotient: usize,
+) -> Vec<Digit> {
+    if digits.len() <= shift_quotient {
+        return vec![Digit::zero()];
+    }
+    let result_digits_count = digits.len() - shift_quotient;
+    let high_shift = SHIFT - unsafe { usize::try_from(shift_remainder).unwrap_unchecked() };
+    let low_mask = to_digit_mask::<Digit>(high_shift);
+    let high_mask = to_digit_mask::<Digit>(SHIFT) ^ low_mask;
+    let mut result = vec![Digit::zero(); result_digits_count];
+    let mut position = shift_quotient;
+    for index in 0..result_digits_count {
+        result[index] = (digits[position] >> shift_remainder) & low_mask;
+        if index + 1 < result_digits_count {
+            result[index] |= (digits[position + 1] << high_shift) & high_mask;
+        }
+        position += 1;
+    }
+    trim_leading_zeros(&mut result);
     result
 }
 

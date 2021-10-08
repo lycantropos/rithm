@@ -109,7 +109,7 @@ where
         DivisivePartialMagma + ModularPartialMagma + TryFrom<DoublePrecisionOf<Self>>;
 
 pub trait LeftShiftableDigit =
-    DivisibleDigit where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
+    Debug + DivisibleDigit where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
 
 pub trait MultiplicativeDigit =
     AdditiveDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + TryFrom<usize>
@@ -131,6 +131,7 @@ pub trait OppositiveDigit = ZeroableDigit;
 
 pub trait RightShiftableDigit = AdditiveDigit
     + AssigningBitwiseExclusiveDisjunctiveMonoid
+    + Debug
     + DivisibleDigit
     + ShiftingRightMonoid
     + TryFrom<usize>

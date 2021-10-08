@@ -105,6 +105,9 @@ where
     OppositionOf<DoublePrecisionOf<Self>>:
         DivisivePartialMagma + ModularPartialMagma + TryFrom<DoublePrecisionOf<Self>>;
 
+pub trait LeftShiftableDigit =
+    DivisibleDigit where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
+
 pub trait MultiplicativeDigit =
     AdditiveDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + TryFrom<usize>
     where
@@ -120,9 +123,6 @@ pub trait NonBinaryDigitConvertibleToBinary<Target> = Copy
 where
     Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
     DoublePrecisionOf<Target>: BinaryDigit + From<Self> + From<Target> + TryFrom<usize>;
-
-pub trait LeftShiftableDigit =
-    DivisibleDigit where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
 
 pub trait OppositiveDigit = ZeroableDigit;
 

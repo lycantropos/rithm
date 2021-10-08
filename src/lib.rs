@@ -1,4 +1,5 @@
 #![feature(const_fn_trait_bound)]
+#![feature(convert_float_to_int)]
 #![feature(destructuring_assignment)]
 #![feature(option_result_unwrap_unchecked)]
 #![feature(specialization)]

@@ -805,7 +805,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
     }
 }
 
-impl<Digit: DigitConvertibleFromFloat<f64>, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: DigitConvertibleFromFloat, const SEPARATOR: char, const SHIFT: usize>
     FloatToInt<BigInt<Digit, SEPARATOR, SHIFT>> for f32
 {
     unsafe fn to_int_unchecked(self) -> BigInt<Digit, SEPARATOR, SHIFT> {
@@ -813,7 +813,7 @@ impl<Digit: DigitConvertibleFromFloat<f64>, const SEPARATOR: char, const SHIFT: 
     }
 }
 
-impl<Digit: DigitConvertibleFromFloat<f64>, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: DigitConvertibleFromFloat, const SEPARATOR: char, const SHIFT: usize>
     FloatToInt<BigInt<Digit, SEPARATOR, SHIFT>> for f64
 {
     unsafe fn to_int_unchecked(self) -> BigInt<Digit, SEPARATOR, SHIFT> {
@@ -1495,7 +1495,7 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign
     }
 }
 
-impl<Digit: DigitConvertibleFromFloat<f64>, const SEPARATOR: char, const SHIFT: usize> TryFrom<f64>
+impl<Digit: DigitConvertibleFromFloat, const SEPARATOR: char, const SHIFT: usize> TryFrom<f64>
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Error = FromFloatConversionError;
@@ -1522,7 +1522,7 @@ impl<Digit: DigitConvertibleFromFloat<f64>, const SEPARATOR: char, const SHIFT: 
     }
 }
 
-impl<Digit: DigitConvertibleFromFloat<f64>, const SEPARATOR: char, const SHIFT: usize> TryFrom<f32>
+impl<Digit: DigitConvertibleFromFloat, const SEPARATOR: char, const SHIFT: usize> TryFrom<f32>
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Error = FromFloatConversionError;

@@ -72,7 +72,7 @@ where
     Target: DoublePrecision + TryFrom<DoublePrecisionOf<Target>>,
     DoublePrecisionOf<Target>: BinaryDigit + From<Self>;
 
-pub trait DigitConvertibleFromFloat<Source> =
+pub trait DigitConvertibleFromFloat<Source = f64> =
     Copy + ZeroableDigit where Source: FloatToInt<Self> + From<Self>;
 
 pub trait DisplayDigit = AssigningDivisivePartialMagma

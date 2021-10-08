@@ -820,8 +820,8 @@ impl FrExp for f32 {
         if exponent_bits.is_zero() {
             if !self.is_zero() {
                 const HEX_1P64: f32 = f32::from_bits(0x5f800000);
-                let (fraction, e) = (self * HEX_1P64).frexp();
-                (fraction, e - 64)
+                let (fraction, exponent) = (self * HEX_1P64).frexp();
+                (fraction, exponent - 64)
             } else {
                 (self, 0)
             }

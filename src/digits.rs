@@ -107,14 +107,8 @@ pub trait EuclidDivisibleDigit = AdditiveDigit + DivisibleDigit;
 
 pub trait ExponentiativeDigit = MultiplicativeDigit + BinaryDigitDowncastableTo<WindowDigit>;
 
-pub trait FromStrDigit = Copy
-    + DoublePrecision
-    + TryFrom<DoublePrecisionOf<Self>>
-    + TryFrom<u8>
-    + TryFrom<DoublePrecisionOf<u8>>
-    + TryFrom<DoublePrecisionOf<Self>>
-    + ZeroableDigit
-where DoublePrecisionOf<Self>: BinaryDigit + From<u8> + TryFrom<usize>;
+pub trait FromStrDigit =
+    Oppose where u8: BinaryDigitConvertibleToBinary<Self> + NonBinaryDigitConvertibleToBinary<Self>;
 
 pub trait GcdDigit = BinaryDigit
     + DoublePrecision

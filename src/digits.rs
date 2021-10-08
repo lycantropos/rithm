@@ -1,7 +1,6 @@
 use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt::{Debug, Display, Formatter};
-use std::ops::Shr;
 
 use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
@@ -9,7 +8,8 @@ use crate::traits::{
     AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid, AssigningShiftingRightMonoid,
     AssigningSubtractiveMagma, BitwiseNegatableUnaryAlgebra, CheckedShl, DivisivePartialMagma,
     DoublePrecision, DoublePrecisionOf, Float, ModularPartialMagma, ModularSubtractiveMagma,
-    Oppose, OppositionOf, ShiftingLeftMonoid, SubtractiveMagma, Unitary, Zeroable,
+    Oppose, OppositionOf, ShiftingLeftMonoid, ShiftingRightMonoid, SubtractiveMagma, Unitary,
+    Zeroable,
 };
 use crate::utils;
 
@@ -73,11 +73,10 @@ where
     DoublePrecisionOf<Target>: BinaryDigit + From<Self>;
 
 pub trait DisplayDigit = AssigningDivisivePartialMagma
-    + BinaryDigit
-    + From<u8>
+    + BinaryDigitConvertibleTo<Self>
     + ModularPartialMagma
-    + TryFrom<usize>
-    + BinaryDigitConvertibleTo<Self>;
+    + OppositiveDigit
+    + TryFrom<usize>;
 
 pub trait DivisibleDigit = BinaryDigit
     + DoublePrecision
@@ -90,8 +89,7 @@ where
     DoublePrecisionOf<Self>: BinaryDigit + Oppose + DivisivePartialMagma,
     OppositionOf<Self>:
         BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Self>>> + TryFrom<Self>,
-    OppositionOf<DoublePrecisionOf<Self>>:
-        BinaryDigit + From<Self> + From<OppositionOf<Self>>,
+    OppositionOf<DoublePrecisionOf<Self>>: BinaryDigit + From<Self> + From<OppositionOf<Self>>,
     usize: TryFrom<Self>;
 
 pub trait EuclidDivisibleDigit = AdditiveDigit + DivisibleDigit;
@@ -123,13 +121,15 @@ where
     Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
     DoublePrecisionOf<Target>: BinaryDigit + From<Self> + From<Target> + TryFrom<usize>;
 
-pub trait LeftShiftableDigit = DivisibleDigit + TryFrom<usize>
-where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
+pub trait LeftShiftableDigit =
+    DivisibleDigit where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
+
+pub trait OppositiveDigit = ZeroableDigit;
 
 pub trait RightShiftableDigit = AdditiveDigit
     + AssigningBitwiseExclusiveDisjunctiveMonoid
     + DivisibleDigit
-    + Shr<Self, Output = Self>
+    + ShiftingRightMonoid
     + TryFrom<usize>
 where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
 

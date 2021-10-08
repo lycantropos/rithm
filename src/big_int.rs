@@ -17,7 +17,7 @@ use crate::traits::{
 use crate::utils;
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct BigInt<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> {
+pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
     sign: Sign,
     digits: Vec<Digit>,
 }
@@ -224,13 +224,13 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT> {
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT> {
     pub(crate) fn digits(&self) -> &[Digit] {
         &self.digits
     }
 }
 
-impl<Digit: DisplayDigit + Oppose, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: DisplayDigit, const SEPARATOR: char, const SHIFT: usize>
     BigInt<Digit, SEPARATOR, SHIFT>
 {
     const DIGIT_VALUES_ASCII_CODES: [char; MAX_REPRESENTABLE_BASE as usize] = [
@@ -341,9 +341,7 @@ where
     }
 }
 
-impl<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> Abs
-    for BigInt<Digit, SEPARATOR, SHIFT>
-{
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Abs for BigInt<Digit, SEPARATOR, SHIFT> {
     type Output = Self;
 
     fn abs(self) -> Self {
@@ -677,7 +675,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     }
 }
 
-impl<Digit: DisplayDigit + Oppose, const SEPARATOR: char, const SHIFT: usize> Display
+impl<Digit: DisplayDigit, const SEPARATOR: char, const SHIFT: usize> Display
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
@@ -1039,9 +1037,7 @@ impl<Digit: MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize> MulA
     }
 }
 
-impl<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> Neg
-    for BigInt<Digit, SEPARATOR, SHIFT>
-{
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Neg for BigInt<Digit, SEPARATOR, SHIFT> {
     type Output = Self;
 
     fn neg(self) -> Self::Output {
@@ -1062,10 +1058,8 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Not
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Oppositive
+impl<Digit: OppositiveDigit, const SEPARATOR: char, const SHIFT: usize> Oppositive
     for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Digit: ZeroableDigit,
 {
     fn is_negative(&self) -> bool {
         self.sign.is_negative()

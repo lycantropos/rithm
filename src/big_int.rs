@@ -805,7 +805,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
     }
 }
 
-impl<Digit: DigitConvertibleFromFloat<f32>, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: DigitConvertibleFromFloat<f64>, const SEPARATOR: char, const SHIFT: usize>
     FloatToInt<BigInt<Digit, SEPARATOR, SHIFT>> for f32
 {
     unsafe fn to_int_unchecked(self) -> BigInt<Digit, SEPARATOR, SHIFT> {
@@ -1522,30 +1522,13 @@ impl<Digit: DigitConvertibleFromFloat<f64>, const SEPARATOR: char, const SHIFT: 
     }
 }
 
-impl<Digit: DigitConvertibleFromFloat<f32>, const SEPARATOR: char, const SHIFT: usize> TryFrom<f32>
+impl<Digit: DigitConvertibleFromFloat<f64>, const SEPARATOR: char, const SHIFT: usize> TryFrom<f32>
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Error = FromFloatConversionError;
 
-    fn try_from(mut value: f32) -> Result<Self, Self::Error> {
-        debug_assert!(usize::BITS < i32::BITS || SHIFT < (i32::MAX as usize));
-        if value.is_infinite() {
-            Err(FromFloatConversionError::Infinity)
-        } else if value.is_nan() {
-            Err(FromFloatConversionError::NaN)
-        } else if value.abs() < f32::one() {
-            Ok(Self::zero())
-        } else {
-            let mut sign = Sign::one();
-            if value.is_sign_negative() {
-                sign = -sign;
-                value = -value;
-            }
-            Ok(Self {
-                sign,
-                digits: digits_from_finite_positive_improper_float::<Digit, f32, SHIFT>(value),
-            })
-        }
+    fn try_from(value: f32) -> Result<Self, Self::Error> {
+        Self::try_from(value as f64)
     }
 }
 

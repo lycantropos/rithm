@@ -5,6 +5,7 @@ from rithm import (Fraction,
 from tests.utils import (to_fraction_with_builtin,
                          to_int_with_builtin)
 
+floats = strategies.floats()
 integers = strategies.integers()
 ints = integers.map(Int)
 non_zero_ints = ints.filter(bool)

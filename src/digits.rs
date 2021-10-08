@@ -43,7 +43,6 @@ pub trait BinaryDigitConvertibleToBinary<Target> =
 pub trait BinaryDigitConvertibleToFloat<Target> = BinaryDigit
     + DoublePrecision
     + From<u8>
-    + Oppose
     + TryFrom<DoublePrecisionOf<Self>>
     + TryFrom<OppositionOf<Self>>
 where

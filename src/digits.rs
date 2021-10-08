@@ -99,27 +99,11 @@ pub trait ExponentiativeDigit = MultiplicativeDigit + BinaryDigitDowncastableTo<
 pub trait FromStrDigit =
     Oppose where u8: BinaryDigitConvertibleToBinary<Self> + NonBinaryDigitConvertibleToBinary<Self>;
 
-pub trait GcdDigit = BinaryDigit
-    + DoublePrecision
-    + From<u8>
-    + ModularSubtractiveMagma
-    + TryFrom<DoublePrecisionOf<Self>>
-    + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>
-    + TryFrom<usize>
+pub trait GcdDigit = DivisibleDigit + ModularSubtractiveMagma
 where
-    DoublePrecisionOf<Self>: BinaryDigit
-        + DivisivePartialMagma
-        + ModularPartialMagma
-        + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>,
-    OppositionOf<Self>:
-        BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Self>>> + TryFrom<Self>,
-    OppositionOf<DoublePrecisionOf<Self>>: BinaryDigit
-        + DivisivePartialMagma
-        + From<Self>
-        + From<OppositionOf<Self>>
-        + ModularPartialMagma
-        + TryFrom<DoublePrecisionOf<Self>>,
-    usize: TryFrom<Self>;
+    DoublePrecisionOf<Self>: ModularPartialMagma + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>,
+    OppositionOf<DoublePrecisionOf<Self>>:
+        DivisivePartialMagma + ModularPartialMagma + TryFrom<DoublePrecisionOf<Self>>;
 
 pub trait MultiplicativeDigit =
     AdditiveDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + TryFrom<usize>

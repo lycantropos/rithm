@@ -31,7 +31,6 @@ pub trait BinaryDigit = AssigningAdditiveMonoid
     + AssigningShiftingRightMonoid<usize>
     + AssigningSubtractiveMagma
     + Copy
-    + Oppose
     + PartialOrd;
 
 pub trait BinaryDigitConvertibleTo<Target> =
@@ -41,6 +40,7 @@ pub trait BinaryDigitConvertibleToBinary<Target> =
     BinaryDigitDowncastableTo<Target> + BinaryDigitUpcastableTo<Target> where Target: TryFrom<Self>;
 
 pub trait BinaryDigitConvertibleToFloat<Target> = BinaryDigit
+    + Oppose
     + DoublePrecision
     + From<u8>
     + TryFrom<DoublePrecisionOf<Self>>
@@ -82,14 +82,16 @@ pub trait DisplayDigit = AssigningDivisivePartialMagma
 pub trait DivisibleDigit = BinaryDigit
     + DoublePrecision
     + From<u8>
+    + Oppose
     + TryFrom<DoublePrecisionOf<Self>>
     + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>
     + TryFrom<usize>
 where
-    DoublePrecisionOf<Self>: BinaryDigit + DivisivePartialMagma,
+    DoublePrecisionOf<Self>: BinaryDigit + Oppose + DivisivePartialMagma,
     OppositionOf<Self>:
         BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Self>>> + TryFrom<Self>,
-    OppositionOf<DoublePrecisionOf<Self>>: BinaryDigit + From<Self> + From<OppositionOf<Self>>,
+    OppositionOf<DoublePrecisionOf<Self>>:
+        BinaryDigit + From<Self> + From<OppositionOf<Self>>,
     usize: TryFrom<Self>;
 
 pub trait EuclidDivisibleDigit = AdditiveDigit + DivisibleDigit;
@@ -1126,7 +1128,7 @@ fn non_binary_digits_to_lesser_binary_base<
 pub(crate) fn reduce_digits<Digit, Output, const SHIFT: usize>(digits: &[Digit]) -> Output
 where
     Digit: Copy,
-    Output: BinaryDigit + From<Digit>,
+    Output: BinaryDigit + Oppose + From<Digit>,
 {
     let mut result = Output::zero();
     for &digit in digits.iter().rev() {
@@ -1140,7 +1142,11 @@ pub(crate) fn checked_reduce_digits<Digit, Output, const SHIFT: usize>(
 ) -> Option<Output>
 where
     Digit: Copy,
-    Output: BinaryDigit + Display + CheckedShl<usize, Output = Option<Output>> + TryFrom<Digit>,
+    Output: BinaryDigit
+        + Oppose
+        + Display
+        + CheckedShl<usize, Output = Option<Output>>
+        + TryFrom<Digit>,
 {
     let mut result = Output::zero();
     for &digit in digits.iter().rev() {

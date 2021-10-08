@@ -230,7 +230,7 @@ impl<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEP
     }
 }
 
-impl<Digit: DisplayDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: DisplayDigit + Oppose, const SEPARATOR: char, const SHIFT: usize>
     BigInt<Digit, SEPARATOR, SHIFT>
 {
     const DIGIT_VALUES_ASCII_CODES: [char; MAX_REPRESENTABLE_BASE as usize] = [
@@ -288,7 +288,7 @@ impl<Digit: DisplayDigit, const SEPARATOR: char, const SHIFT: usize>
 const MIDDLE_BYTE: u8 = 1u8 << (u8::BITS - 1);
 
 impl<
-        Digit: BinaryDigitConvertibleToBinary<Digit> + From<u8>,
+        Digit: BinaryDigitConvertibleToBinary<Digit> + From<u8> + Oppose,
         const SEPARATOR: char,
         const SHIFT: usize,
     > BigInt<Digit, SEPARATOR, SHIFT>

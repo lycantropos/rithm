@@ -68,13 +68,6 @@ where
     bit_length(value) - 1
 }
 
-pub(crate) fn load_exponent<Fraction: Float>(fraction: Fraction, exponent: i32) -> Fraction {
-    let is_max_exponent = (exponent == Fraction::MAX_EXP) as i32;
-    fraction
-        * Fraction::from((1 + is_max_exponent) as f32)
-        * Fraction::from(2.0f32).pow(exponent - is_max_exponent)
-}
-
 pub(crate) fn fraction_exponent<Value: Float>(value: Value) -> (Value, i32) {
     if value.is_zero() {
         return (value, 0i32);
@@ -87,6 +80,13 @@ pub(crate) fn fraction_exponent<Value: Float>(value: Value) -> (Value, i32) {
             exponent.to_int_unchecked()
         })
     }
+}
+
+pub(crate) fn load_exponent<Fraction: Float>(fraction: Fraction, exponent: i32) -> Fraction {
+    let is_max_exponent = (exponent == Fraction::MAX_EXP) as i32;
+    fraction
+        * Fraction::from((1 + is_max_exponent) as f32)
+        * Fraction::from(2.0f32).pow(exponent - is_max_exponent)
 }
 
 pub(crate) const fn power(base: usize, exponent: usize) -> usize {

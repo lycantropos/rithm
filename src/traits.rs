@@ -1,4 +1,4 @@
-use std::convert::{FloatToInt, TryFrom};
+use std::convert::TryFrom;
 use std::fmt::Debug;
 use std::num::ParseIntError;
 use std::ops::{
@@ -48,18 +48,14 @@ pub trait Float = AssigningAdditiveMonoid
     + AssigningMultiplicativeMonoid
     + AssigningSubtractiveMagma
     + Copy
-    + Exp2<Output = Self>
-    + FloatToInt<i32>
     + Floor<Output = Self>
+    + FrExp<Output = (Self, i32)>
     + From<f32>
     + MantissaDigits
-    + Log2<Output = Self>
     + MaxExp
     + MinExp
-    + ModularUnaryAlgebra
     + PartialEq
-    + Pow<i32, Output = Self>
-    + Signum<Output = Self>;
+    + Pow<i32, Output = Self>;
 
 pub trait GcdMagma<Other = Self> = Gcd<Other, Output = Self>;
 
@@ -717,27 +713,6 @@ impl DoublePrecision for u64 {
     type Result = u128;
 }
 
-pub trait Exp2 {
-    type Output;
-
-    fn exp2(self) -> Self::Output;
-}
-
-macro_rules! plain_exp2_impl {
-    ($($t:ty)*) => ($(
-        impl Exp2 for $t {
-            type Output = $t;
-
-            #[inline(always)]
-            fn exp2(self) -> Self::Output {
-                <$t>::exp2(self)
-            }
-        }
-    )*)
-}
-
-plain_exp2_impl!(f32 f64);
-
 pub trait Floor {
     type Output;
 
@@ -758,27 +733,6 @@ macro_rules! plain_floor_impl {
 }
 
 plain_floor_impl!(f32 f64);
-
-pub trait Fract {
-    type Output;
-
-    fn fract(self) -> Self::Output;
-}
-
-macro_rules! plain_fract_impl {
-    ($($t:ty)*) => ($(
-        impl Fract for $t {
-            type Output = $t;
-
-            #[inline(always)]
-            fn fract(self) -> Self::Output {
-                <$t>::fract(self)
-            }
-        }
-    )*)
-}
-
-plain_fract_impl!(f32 f64);
 
 pub trait FrExp: Sized {
     type Output;
@@ -878,27 +832,6 @@ macro_rules! plain_gcd_impl {
 }
 
 plain_gcd_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
-
-pub trait Log2 {
-    type Output;
-
-    fn log2(self) -> Self::Output;
-}
-
-macro_rules! plain_log2_impl {
-    ($($t:ty)*) => ($(
-        impl Log2 for $t {
-            type Output = $t;
-
-            #[inline(always)]
-            fn log2(self) -> Self::Output {
-                <$t>::log2(self)
-            }
-        }
-    )*)
-}
-
-plain_log2_impl!(f32 f64);
 
 pub trait MantissaDigits {
     const MANTISSA_DIGITS: usize;
@@ -1136,27 +1069,6 @@ macro_rules! plain_rem_euclid_impl {
 }
 
 plain_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
-
-pub trait Signum {
-    type Output;
-
-    fn signum(self) -> Self::Output;
-}
-
-macro_rules! plain_signum_impl {
-    ($($t:ty)*) => ($(
-        impl Signum for $t {
-            type Output = $t;
-
-            #[inline(always)]
-            fn signum(self) -> Self::Output {
-                <$t>::signum(self)
-            }
-        }
-    )*)
-}
-
-plain_signum_impl!(f32 f64);
 
 pub trait Unitary {
     fn one() -> Self;

@@ -1554,10 +1554,9 @@ impl<Digit: BinaryDigitConvertibleToFloat<f32>, const SEPARATOR: char, const SHI
 
     fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
         match fraction_exponent_digits::<Digit, f32, SHIFT>(&value.digits) {
-            Some((fraction_modulus, exponent)) => Ok(utils::load_exponent(
-                (value.sign as f32) * fraction_modulus,
-                exponent,
-            )),
+            Some((fraction_modulus, exponent)) => {
+                Ok(((value.sign as f32) * fraction_modulus).ldexp(exponent))
+            }
             None => Err(ToFloatConversionError::TooLarge),
         }
     }
@@ -1570,10 +1569,9 @@ impl<Digit: BinaryDigitConvertibleToFloat<f64>, const SEPARATOR: char, const SHI
 
     fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
         match fraction_exponent_digits::<Digit, f64, SHIFT>(&value.digits) {
-            Some((fraction_modulus, exponent)) => Ok(utils::load_exponent(
-                (value.sign as f64) * fraction_modulus,
-                exponent,
-            )),
+            Some((fraction_modulus, exponent)) => {
+                Ok(((value.sign as f64) * fraction_modulus).ldexp(exponent))
+            }
             None => Err(ToFloatConversionError::TooLarge),
         }
     }

@@ -473,11 +473,11 @@ pub(crate) fn checked_div_approximation<
     let reduced_quotient = reduce_digits_to_float::<Digit, Output, SHIFT>(&quotient_digits);
     if shift + quotient_bit_length >= (Output::MAX_EXP as isize)
         && (shift + quotient_bit_length > (Output::MAX_EXP as isize)
-            || reduced_quotient == utils::load_exponent(Output::one(), quotient_bit_length as i32))
+            || reduced_quotient == Output::one().ldexp(quotient_bit_length as i32))
     {
         Err(CheckedDivApproximationError::TooLarge)
     } else {
-        Ok(utils::load_exponent(reduced_quotient, shift as i32))
+        Ok(reduced_quotient.ldexp(shift as i32))
     }
 }
 
@@ -626,12 +626,12 @@ where
 {
     let (fraction, exponent) = value.frexp();
     let mut result = vec![Digit::zero(); ((exponent as usize) - 1) / SHIFT + 1];
-    let mut fraction = utils::load_exponent(fraction, (exponent - 1) % (SHIFT as i32) + 1);
+    let mut fraction = fraction.ldexp((exponent - 1) % (SHIFT as i32) + 1);
     for index in (0..result.len()).rev() {
         let digit = unsafe { Value::to_int_unchecked(fraction) };
         result[index] = digit;
         fraction -= Value::from(digit);
-        fraction = utils::load_exponent(fraction, SHIFT as i32);
+        fraction = fraction.ldexp(SHIFT as i32);
     }
     result
 }

@@ -175,7 +175,7 @@ except ImportError:
         __slots__ = '_denominator', '_numerator'
 
         def __new__(cls,
-                    _numerator: Int = _ZERO,
+                    _numerator: _Union[Int, float] = _ZERO,
                     _denominator: _Optional[Int] = None,
                     *,
                     _normalize: bool = True) -> 'Fraction':

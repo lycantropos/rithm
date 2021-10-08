@@ -4,7 +4,7 @@ use std::fmt::{Display, Formatter};
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use crate::big_int::BigInt;
-use crate::digits::{AdditiveDigit, GcdDigit, MultiplicativeDigit};
+use crate::digits::{AdditiveDigit, GcdDigit, MultiplicativeDigit, UnitaryDigit};
 use crate::traits::{
     Abs, AdditiveMonoid, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedPow,
     DivisivePartialMagma, GcdMagma, Maybe, ModularUnaryAlgebra, MultiplicativeMonoid,
@@ -435,7 +435,7 @@ macro_rules! plain_partial_eq_fraction_impl {
 
 plain_partial_eq_fraction_impl!(i8 i16 i32 i64 i128 isize);
 
-impl<Digit: Clone + Eq + Unitary + Zeroable, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: Clone + Eq + UnitaryDigit, const SEPARATOR: char, const SHIFT: usize>
     PartialEq<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn eq(&self, other: &Fraction<Self>) -> bool {

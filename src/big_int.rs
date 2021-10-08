@@ -17,7 +17,7 @@ use crate::traits::{
 use crate::utils;
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
+pub struct BigInt<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> {
     sign: Sign,
     digits: Vec<Digit>,
 }
@@ -224,7 +224,7 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT> {
+impl<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT> {
     pub(crate) fn digits(&self) -> &[Digit] {
         &self.digits
     }
@@ -341,7 +341,9 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Abs for BigInt<Digit, SEPARATOR, SHIFT> {
+impl<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> Abs
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
     type Output = Self;
 
     fn abs(self) -> Self {
@@ -675,7 +677,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     }
 }
 
-impl<Digit: DisplayDigit, const SEPARATOR: char, const SHIFT: usize> Display
+impl<Digit: DisplayDigit + Oppose, const SEPARATOR: char, const SHIFT: usize> Display
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
@@ -1037,7 +1039,9 @@ impl<Digit: MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize> MulA
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Neg for BigInt<Digit, SEPARATOR, SHIFT> {
+impl<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> Neg
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
     type Output = Self;
 
     fn neg(self) -> Self::Output {
@@ -1061,7 +1065,7 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Not
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Oppositive
     for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Digit: Zeroable,
+    Digit: ZeroableDigit,
 {
     fn is_negative(&self) -> bool {
         self.sign.is_negative()
@@ -1072,7 +1076,7 @@ where
     }
 }
 
-impl<Digit: Clone + Eq + PartialOrd + Zeroable, const SEPARATOR: char, const SHIFT: usize> Ord
+impl<Digit: Clone + Eq + PartialOrd + ZeroableDigit, const SEPARATOR: char, const SHIFT: usize> Ord
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn cmp(&self, other: &Self) -> Ordering {
@@ -1086,8 +1090,8 @@ impl<Digit: Clone + Eq + PartialOrd + Zeroable, const SEPARATOR: char, const SHI
     }
 }
 
-impl<Digit: Clone + PartialOrd + Zeroable, const SEPARATOR: char, const SHIFT: usize> PartialOrd
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: Clone + PartialOrd + ZeroableDigit, const SEPARATOR: char, const SHIFT: usize>
+    PartialOrd for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn ge(&self, other: &Self) -> bool {
         self.sign > other.sign
@@ -1497,10 +1501,11 @@ impl<Digit: BinaryDigitConvertibleToFloat<f64>, const SEPARATOR: char, const SHI
     }
 }
 
-impl<Digit: Unitary + Zeroable, const SEPARATOR: char, const SHIFT: usize> Unitary
+impl<Digit: UnitaryDigit, const SEPARATOR: char, const SHIFT: usize> Unitary
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn one() -> Self {
+        debug_assert!(is_valid_shift::<Digit, SHIFT>());
         Self {
             sign: Sign::one(),
             digits: vec![Digit::one()],
@@ -1512,10 +1517,11 @@ impl<Digit: Unitary + Zeroable, const SEPARATOR: char, const SHIFT: usize> Unita
     }
 }
 
-impl<Digit: Zeroable, const SEPARATOR: char, const SHIFT: usize> Zeroable
+impl<Digit: ZeroableDigit, const SEPARATOR: char, const SHIFT: usize> Zeroable
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn zero() -> Self {
+        debug_assert!(is_valid_shift::<Digit, SHIFT>());
         Self {
             sign: Sign::zero(),
             digits: vec![Digit::zero()],

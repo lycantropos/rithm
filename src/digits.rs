@@ -21,7 +21,7 @@ pub trait AdditiveDigit = AssigningAdditiveMonoid
     + Copy
     + PartialOrd
     + ModularSubtractiveMagma
-    + Unitary;
+    + UnitaryDigit;
 
 pub trait BinaryDigit = AssigningAdditiveMonoid
     + AssigningBitwiseConjunctiveMagma
@@ -31,6 +31,7 @@ pub trait BinaryDigit = AssigningAdditiveMonoid
     + AssigningShiftingRightMonoid<usize>
     + AssigningSubtractiveMagma
     + Copy
+    + Oppose
     + PartialOrd;
 
 pub trait BinaryDigitConvertibleTo<Target> =
@@ -82,7 +83,6 @@ pub trait DisplayDigit = AssigningDivisivePartialMagma
 pub trait DivisibleDigit = BinaryDigit
     + DoublePrecision
     + From<u8>
-    + Oppose
     + TryFrom<DoublePrecisionOf<Self>>
     + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>
     + TryFrom<usize>
@@ -95,9 +95,9 @@ where
         + AssigningShiftingRightMonoid<usize>
         + AssigningSubtractiveMagma
         + Copy
-        + PartialOrd
         + DivisivePartialMagma
-        + Oppose,
+        + Oppose
+        + PartialOrd,
     OppositionOf<Self>:
         BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Self>>> + TryFrom<Self>,
     OppositionOf<DoublePrecisionOf<Self>>: BinaryDigit + From<Self> + From<OppositionOf<Self>>,
@@ -109,19 +109,17 @@ pub trait ExponentiativeDigit = MultiplicativeDigit + BinaryDigitDowncastableTo<
 
 pub trait FromStrDigit = Copy
     + DoublePrecision
-    + Oppose
     + TryFrom<DoublePrecisionOf<Self>>
     + TryFrom<u8>
     + TryFrom<DoublePrecisionOf<u8>>
     + TryFrom<DoublePrecisionOf<Self>>
-    + Zeroable
+    + ZeroableDigit
 where DoublePrecisionOf<Self>: BinaryDigit + From<u8> + TryFrom<usize>;
 
 pub trait GcdDigit = BinaryDigit
     + DoublePrecision
     + From<u8>
     + ModularSubtractiveMagma
-    + Oppose
     + TryFrom<DoublePrecisionOf<Self>>
     + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>
     + TryFrom<usize>
@@ -129,7 +127,6 @@ where
     DoublePrecisionOf<Self>: BinaryDigit
         + DivisivePartialMagma
         + ModularPartialMagma
-        + Oppose
         + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>,
     OppositionOf<Self>:
         BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Self>>> + TryFrom<Self>,
@@ -157,15 +154,19 @@ where
     Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
     DoublePrecisionOf<Target>: BinaryDigit + From<Self> + From<Target> + TryFrom<usize>;
 
-pub trait LeftShiftableDigit = EuclidDivisibleDigit + TryFrom<usize>
+pub trait LeftShiftableDigit = DivisibleDigit + TryFrom<usize>
 where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
 
 pub trait RightShiftableDigit = AdditiveDigit
     + AssigningBitwiseExclusiveDisjunctiveMonoid
-    + EuclidDivisibleDigit
+    + DivisibleDigit
     + Shr<Self, Output = Self>
     + TryFrom<usize>
 where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
+
+pub trait UnitaryDigit = Oppose + Unitary + Zeroable;
+
+pub trait ZeroableDigit = Oppose + Zeroable;
 
 pub(crate) type Sign = i8;
 pub(crate) type WindowDigit = u8;

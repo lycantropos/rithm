@@ -86,17 +86,7 @@ pub trait DivisibleDigit = BinaryDigit
     + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>
     + TryFrom<usize>
 where
-    DoublePrecisionOf<Self>: AssigningAdditiveMonoid
-        + AssigningBitwiseConjunctiveMagma
-        + AssigningBitwiseDisjunctiveMonoid
-        + AssigningMultiplicativeMonoid
-        + AssigningShiftingLeftMonoid<usize>
-        + AssigningShiftingRightMonoid<usize>
-        + AssigningSubtractiveMagma
-        + Copy
-        + DivisivePartialMagma
-        + Oppose
-        + PartialOrd,
+    DoublePrecisionOf<Self>: BinaryDigit + DivisivePartialMagma,
     OppositionOf<Self>:
         BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Self>>> + TryFrom<Self>,
     OppositionOf<DoublePrecisionOf<Self>>: BinaryDigit + From<Self> + From<OppositionOf<Self>>,

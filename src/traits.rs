@@ -55,8 +55,7 @@ pub trait Float = AssigningAdditiveMonoid
     + MantissaDigits
     + MaxExp
     + MinExp
-    + PartialEq
-    + Pow<i32, Output = Self>;
+    + PartialEq;
 
 pub trait GcdMagma<Other = Self> = Gcd<Other, Output = Self>;
 
@@ -1104,21 +1103,6 @@ macro_rules! plain_pow_impl {
 }
 
 plain_pow_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
-
-macro_rules! plain_float_pow_impl {
-    ($($t:ty)*) => ($(
-        impl Pow<i32> for $t {
-            type Output = $t;
-
-            #[inline(always)]
-            fn pow(self, exponent: i32) -> Self::Output {
-                <$t>::powi(self, exponent)
-            }
-        }
-    )*)
-}
-
-plain_float_pow_impl!(f32 f64);
 
 pub trait RemEuclid<Divisor = Self> {
     type Output;

@@ -1479,10 +1479,8 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign
     }
 }
 
-impl<Digit: Copy + ZeroableDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<f64>
+impl<Digit: DigitConvertibleFromFloat<f64>, const SEPARATOR: char, const SHIFT: usize> TryFrom<f64>
     for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    f64: FloatToInt<Digit> + From<Digit>,
 {
     type Error = FromFloatConversionError;
 
@@ -1508,10 +1506,8 @@ where
     }
 }
 
-impl<Digit: Copy + ZeroableDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<f32>
+impl<Digit: DigitConvertibleFromFloat<f32>, const SEPARATOR: char, const SHIFT: usize> TryFrom<f32>
     for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    f32: FloatToInt<Digit> + From<Digit>,
 {
     type Error = FromFloatConversionError;
 

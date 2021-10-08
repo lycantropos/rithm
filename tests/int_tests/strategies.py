@@ -5,6 +5,7 @@ from tests.strategies import (decimal_int_strings_with_leading_zeros,
                               int_strings_with_bases)
 from tests.utils import to_int_with_builtin
 
+floats = strategies.floats()
 decimal_int_strings_with_leading_zeros = decimal_int_strings_with_leading_zeros
 int_strings_with_bases = int_strings_with_bases
 ints = strategies.integers().map(Int)

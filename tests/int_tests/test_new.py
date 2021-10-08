@@ -1,5 +1,6 @@
 from typing import Tuple
 
+import pytest
 from hypothesis import given
 
 from rithm import Int
@@ -18,6 +19,17 @@ def test_decimal_string_connection_with_builtin(string: str) -> None:
     result = Int(string)
 
     assert is_equivalent_to_builtin_int(result, int(string))
+
+
+@given(strategies.floats)
+def test_float_connection_with_builtin(float_: float) -> None:
+    try:
+        result = Int(float_)
+    except (OverflowError, ValueError) as error:
+        with pytest.raises(type(error)):
+            int(float_)
+    else:
+        assert is_equivalent_to_builtin_int(result, int(float_))
 
 
 @given(strategies.int_strings_with_bases)

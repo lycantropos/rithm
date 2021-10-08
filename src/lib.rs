@@ -1,3 +1,4 @@
+#![feature(const_float_bits_conv)]
 #![feature(const_fn_trait_bound)]
 #![feature(convert_float_to_int)]
 #![feature(destructuring_assignment)]

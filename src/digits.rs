@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::convert::TryFrom;
+use std::convert::{FloatToInt, TryFrom};
 use std::fmt::{Debug, Display, Formatter};
 
 use crate::traits::{
@@ -612,6 +612,28 @@ pub(crate) fn checked_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize
         }
         Some((sign, digits))
     }
+}
+
+pub(crate) fn digits_from_finite_positive_improper_float<
+    Digit: Copy + ZeroableDigit,
+    Value: Float,
+    const SHIFT: usize,
+>(
+    value: Value,
+) -> Vec<Digit>
+where
+    Value: FloatToInt<Digit> + From<Digit>,
+{
+    let (fraction, exponent) = value.frexp();
+    let mut result = vec![Digit::zero(); ((exponent as usize) - 1) / SHIFT + 1];
+    let mut fraction = utils::load_exponent(fraction, (exponent - 1) % (SHIFT as i32) + 1);
+    for index in (0..result.len()).rev() {
+        let digit = unsafe { Value::to_int_unchecked(fraction) };
+        result[index] = digit;
+        fraction -= Value::from(digit);
+        fraction = utils::load_exponent(fraction, SHIFT as i32);
+    }
+    result
 }
 
 #[inline]

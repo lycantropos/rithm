@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::convert::TryFrom;
+use std::convert::{FloatToInt, TryFrom};
 use std::fmt::{Debug, Display, Formatter};
 use std::iter::Peekable;
 use std::mem::size_of;
@@ -11,8 +11,8 @@ use crate::traits::{
     Abs, AssigningShiftingLeftMonoid, BitwiseNegatableUnaryAlgebra, CheckedDiv, CheckedDivAsF32,
     CheckedDivAsF64, CheckedDivEuclid, CheckedDivRem, CheckedDivRemEuclid, CheckedPow,
     CheckedPowRemEuclid, CheckedRem, CheckedRemEuclid, CheckedRemEuclidInv, CheckedShl, CheckedShr,
-    DivEuclid, DivRem, DivRemEuclid, DoublePrecisionOf, FromStrRadix, Gcd, Oppose, OppositionOf,
-    Oppositive, Pow, RemEuclid, Unitary, Zeroable,
+    DivEuclid, DivRem, DivRemEuclid, DoublePrecisionOf, Float, FromStrRadix, Gcd, Oppose,
+    OppositionOf, Oppositive, Pow, RemEuclid, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -24,25 +24,27 @@ pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
 
 const MAX_REPRESENTABLE_BASE: u8 = 36;
 
-pub enum ConversionError {
-    TooLarge,
+pub enum FromFloatConversionError {
+    Infinity,
+    NaN,
 }
 
-impl ConversionError {
+impl FromFloatConversionError {
     fn description(&self) -> &str {
         match self {
-            ConversionError::TooLarge => "Too large to convert to floating point.",
+            FromFloatConversionError::Infinity => "Conversion of infinity is undefined.",
+            FromFloatConversionError::NaN => "Conversion of NaN is undefined.",
         }
     }
 }
 
-impl Debug for ConversionError {
+impl Debug for FromFloatConversionError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         formatter.write_str(self.description())
     }
 }
 
-impl Display for ConversionError {
+impl Display for FromFloatConversionError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self.description(), formatter)
     }
@@ -103,6 +105,30 @@ impl Debug for ShiftError {
 }
 
 impl Display for ShiftError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.description(), formatter)
+    }
+}
+
+pub enum ToFloatConversionError {
+    TooLarge,
+}
+
+impl ToFloatConversionError {
+    fn description(&self) -> &str {
+        match self {
+            ToFloatConversionError::TooLarge => "Too large to convert to floating point.",
+        }
+    }
+}
+
+impl Debug for ToFloatConversionError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(self.description())
+    }
+}
+
+impl Display for ToFloatConversionError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self.description(), formatter)
     }
@@ -1453,6 +1479,64 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign
     }
 }
 
+impl<Digit: Copy + ZeroableDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<f64>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    f64: FloatToInt<Digit> + From<Digit>,
+{
+    type Error = FromFloatConversionError;
+
+    fn try_from(mut value: f64) -> Result<Self, Self::Error> {
+        debug_assert!(usize::BITS < i32::BITS || SHIFT < (i32::MAX as usize));
+        if value.is_infinite() {
+            Err(FromFloatConversionError::Infinity)
+        } else if value.is_nan() {
+            Err(FromFloatConversionError::NaN)
+        } else if value.abs() < f64::one() {
+            Ok(Self::zero())
+        } else {
+            let mut sign = Sign::one();
+            if value.is_sign_negative() {
+                sign = -sign;
+                value = -value;
+            }
+            Ok(Self {
+                sign,
+                digits: digits_from_finite_positive_improper_float::<Digit, f64, SHIFT>(value),
+            })
+        }
+    }
+}
+
+impl<Digit: Copy + ZeroableDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<f32>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    f32: FloatToInt<Digit> + From<Digit>,
+{
+    type Error = FromFloatConversionError;
+
+    fn try_from(mut value: f32) -> Result<Self, Self::Error> {
+        debug_assert!(usize::BITS < i32::BITS || SHIFT < (i32::MAX as usize));
+        if value.is_infinite() {
+            Err(FromFloatConversionError::Infinity)
+        } else if value.is_nan() {
+            Err(FromFloatConversionError::NaN)
+        } else if value.abs() < f32::one() {
+            Ok(Self::zero())
+        } else {
+            let mut sign = Sign::one();
+            if value.is_sign_negative() {
+                sign = -sign;
+                value = -value;
+            }
+            Ok(Self {
+                sign,
+                digits: digits_from_finite_positive_improper_float::<Digit, f32, SHIFT>(value),
+            })
+        }
+    }
+}
+
 impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&str>
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
@@ -1466,7 +1550,7 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&st
 impl<Digit: BinaryDigitConvertibleToFloat<f32>, const SEPARATOR: char, const SHIFT: usize>
     TryFrom<BigInt<Digit, SEPARATOR, SHIFT>> for f32
 {
-    type Error = ConversionError;
+    type Error = ToFloatConversionError;
 
     fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
         match fraction_exponent_digits::<Digit, f32, SHIFT>(&value.digits) {
@@ -1474,7 +1558,7 @@ impl<Digit: BinaryDigitConvertibleToFloat<f32>, const SEPARATOR: char, const SHI
                 (value.sign as f32) * fraction_modulus,
                 exponent,
             )),
-            None => Err(ConversionError::TooLarge),
+            None => Err(ToFloatConversionError::TooLarge),
         }
     }
 }
@@ -1482,7 +1566,7 @@ impl<Digit: BinaryDigitConvertibleToFloat<f32>, const SEPARATOR: char, const SHI
 impl<Digit: BinaryDigitConvertibleToFloat<f64>, const SEPARATOR: char, const SHIFT: usize>
     TryFrom<BigInt<Digit, SEPARATOR, SHIFT>> for f64
 {
-    type Error = ConversionError;
+    type Error = ToFloatConversionError;
 
     fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
         match fraction_exponent_digits::<Digit, f64, SHIFT>(&value.digits) {
@@ -1490,7 +1574,7 @@ impl<Digit: BinaryDigitConvertibleToFloat<f64>, const SEPARATOR: char, const SHI
                 (value.sign as f64) * fraction_modulus,
                 exponent,
             )),
-            None => Err(ConversionError::TooLarge),
+            None => Err(ToFloatConversionError::TooLarge),
         }
     }
 }

@@ -1,13 +1,13 @@
 use std::cmp::Ordering;
-use std::convert::TryInto;
-use std::fmt::{Display, Formatter};
+use std::convert::{FloatToInt, TryFrom, TryInto};
+use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use crate::big_int::BigInt;
 use crate::digits::{AdditiveDigit, GcdDigit, MultiplicativeDigit, UnitaryDigit};
 use crate::traits::{
-    Abs, AdditiveMonoid, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedPow,
-    DivisivePartialMagma, GcdMagma, Maybe, ModularUnaryAlgebra, MultiplicativeMonoid,
+    Abs, AdditiveMonoid, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedPow, CheckedShl,
+    DivisivePartialMagma, Float, GcdMagma, Maybe, ModularUnaryAlgebra, MultiplicativeMonoid,
     NegatableUnaryAlgebra, Oppositive, Pow, SubtractiveMagma, Unitary, Zeroable,
 };
 
@@ -15,6 +15,32 @@ use crate::traits::{
 pub struct Fraction<Component: Clone + Eq> {
     numerator: Component,
     denominator: Component,
+}
+
+pub enum FromFloatConversionError {
+    Infinity,
+    NaN,
+}
+
+impl FromFloatConversionError {
+    fn description(&self) -> &str {
+        match self {
+            FromFloatConversionError::Infinity => "Conversion of infinity is undefined.",
+            FromFloatConversionError::NaN => "Conversion of NaN is undefined.",
+        }
+    }
+}
+
+impl Debug for FromFloatConversionError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(self.description())
+    }
+}
+
+impl Display for FromFloatConversionError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.description(), formatter)
+    }
 }
 
 impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fraction<Component> {
@@ -759,6 +785,76 @@ impl<Component: Clone + Eq + Unitary + Zeroable> Zeroable for Fraction<Component
     fn is_zero(&self) -> bool {
         self.numerator.is_zero()
     }
+}
+
+impl<Component: CheckedShl<u32> + Clone + Debug + Eq + Unitary + Zeroable> TryFrom<f32>
+    for Fraction<Component>
+where
+    f32: FloatToInt<Component>,
+{
+    type Error = FromFloatConversionError;
+
+    fn try_from(value: f32) -> Result<Self, Self::Error> {
+        if value.is_infinite() {
+            Err(FromFloatConversionError::Infinity)
+        } else if value.is_nan() {
+            Err(FromFloatConversionError::NaN)
+        } else {
+            let (numerator, denominator) =
+                finite_float_to_fraction_components::<Component, f32>(value);
+            Ok(Self {
+                numerator,
+                denominator,
+            })
+        }
+    }
+}
+
+impl<Component: CheckedShl<u32> + Clone + Debug + Eq + Unitary + Zeroable> TryFrom<f64>
+    for Fraction<Component>
+where
+    f64: FloatToInt<Component>,
+{
+    type Error = FromFloatConversionError;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if value.is_infinite() {
+            Err(FromFloatConversionError::Infinity)
+        } else if value.is_nan() {
+            Err(FromFloatConversionError::NaN)
+        } else {
+            let (numerator, denominator) =
+                finite_float_to_fraction_components::<Component, f64>(value);
+            Ok(Self {
+                numerator,
+                denominator,
+            })
+        }
+    }
+}
+
+fn finite_float_to_fraction_components<
+    Component: Debug + Unitary + CheckedShl<u32>,
+    Value: Float + Display + FloatToInt<Component>,
+>(
+    value: Value,
+) -> (Component, Component) {
+    let (mut fraction, mut exponent) = value.frexp();
+    for _ in 0..300 {
+        if fraction == fraction.floor() {
+            break;
+        }
+        fraction *= Value::from(2.0f32);
+        exponent -= 1;
+    }
+    let mut numerator = unsafe { fraction.to_int_unchecked() };
+    let mut denominator = Component::one();
+    if exponent.is_negative() {
+        denominator = denominator.checked_shl((-exponent) as u32).result();
+    } else {
+        numerator = numerator.checked_shl(exponent as u32).result();
+    }
+    (numerator, denominator)
 }
 
 #[inline]

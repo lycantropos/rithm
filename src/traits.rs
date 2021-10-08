@@ -5,6 +5,8 @@ use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Div, DivAssign,
     Mul, MulAssign, Neg, Not, Rem, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
 };
+use std::os::raw::{c_double, c_float, c_int};
+
 pub trait AdditiveMonoid<Other = Self> = Add<Other, Output = Self> + Zeroable;
 
 pub trait AssigningAdditiveMonoid<Other = Self> = AdditiveMonoid<Other> + AddAssign<Other>;
@@ -757,6 +759,58 @@ macro_rules! plain_floor_impl {
 }
 
 plain_floor_impl!(f32 f64);
+
+pub trait Fract {
+    type Output;
+
+    fn fract(self) -> Self::Output;
+}
+
+macro_rules! plain_fract_impl {
+    ($($t:ty)*) => ($(
+        impl Fract for $t {
+            type Output = $t;
+
+            #[inline(always)]
+            fn fract(self) -> Self::Output {
+                <$t>::fract(self)
+            }
+        }
+    )*)
+}
+
+plain_fract_impl!(f32 f64);
+
+extern "C" {
+    fn frexp(x: c_double, exp: *mut c_int) -> c_double;
+    fn frexpf(x: c_float, exp: *mut c_int) -> c_float;
+}
+
+pub trait FrExp: Sized {
+    type Output;
+
+    fn frexp(self) -> Self::Output;
+}
+
+impl FrExp for f64 {
+    type Output = (Self, i32);
+
+    fn frexp(self) -> Self::Output {
+        let mut exponent: c_int = 0;
+        let result = unsafe { frexp(self, &mut exponent) };
+        (result, exponent)
+    }
+}
+
+impl FrExp for f32 {
+    type Output = (Self, i32);
+
+    fn frexp(self) -> Self::Output {
+        let mut exponent: c_int = 0;
+        let result = unsafe { frexpf(self, &mut exponent) };
+        (result, exponent)
+    }
+}
 
 pub trait FromStrRadix: Sized {
     type Error;

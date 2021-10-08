@@ -1,6 +1,5 @@
 use std::convert::{FloatToInt, TryFrom};
 use std::fmt::Debug;
-use std::libc::{c_double, c_float, c_int};
 use std::num::ParseIntError;
 use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Div, DivAssign,
@@ -781,11 +780,6 @@ macro_rules! plain_fract_impl {
 
 plain_fract_impl!(f32 f64);
 
-extern "C" {
-    fn frexp(x: c_double, exp: *mut c_int) -> c_double;
-    fn frexpf(x: c_float, exp: *mut c_int) -> c_float;
-}
-
 pub trait FrExp: Sized {
     type Output;
 
@@ -796,9 +790,24 @@ impl FrExp for f64 {
     type Output = (Self, i32);
 
     fn frexp(self) -> Self::Output {
-        let mut exponent: c_int = 0;
-        let result = unsafe { frexp(self, &mut exponent) };
-        (result, exponent)
+        let mut bits = self.to_bits();
+        let exponent_bits = ((bits >> 52) & 0x7ff) as i32;
+        if exponent_bits.is_zero() {
+            if !self.is_zero() {
+                const HEX_1P64: f64 = f64::from_bits(0x43f0000000000000);
+                let (fraction, exponent) = (self * HEX_1P64).frexp();
+                (fraction, exponent - 64)
+            } else {
+                (self, 0)
+            }
+        } else if exponent_bits == 0x7ff {
+            (self, 0)
+        } else {
+            let e = exponent_bits - 0x3fe;
+            bits &= 0x800fffffffffffff;
+            bits |= 0x3fe0000000000000;
+            (f64::from_bits(bits), e)
+        }
     }
 }
 
@@ -806,9 +815,24 @@ impl FrExp for f32 {
     type Output = (Self, i32);
 
     fn frexp(self) -> Self::Output {
-        let mut exponent: c_int = 0;
-        let result = unsafe { frexpf(self, &mut exponent) };
-        (result, exponent)
+        let mut bits = self.to_bits();
+        let exponent_bits = ((bits >> 23) & 0xff) as i32;
+        if exponent_bits.is_zero() {
+            if !self.is_zero() {
+                const HEX_1P64: f32 = f32::from_bits(0x5f800000);
+                let (fraction, e) = (self * HEX_1P64).frexp();
+                (fraction, e - 64)
+            } else {
+                (self, 0)
+            }
+        } else if exponent_bits == 0xff {
+            (self, 0)
+        } else {
+            let exponent = exponent_bits - 0x7e;
+            bits &= 0x807fffff;
+            bits |= 0x3f000000;
+            (f32::from_bits(bits), exponent)
+        }
     }
 }
 

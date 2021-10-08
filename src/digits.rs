@@ -81,12 +81,12 @@ pub trait DisplayDigit = AssigningDivisivePartialMagma
 pub trait DivisibleDigit = BinaryDigit
     + DoublePrecision
     + From<u8>
-    + Oppose
     + TryFrom<DoublePrecisionOf<Self>>
     + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>
     + TryFrom<usize>
+    + ZeroableDigit
 where
-    DoublePrecisionOf<Self>: BinaryDigit + Oppose + DivisivePartialMagma,
+    DoublePrecisionOf<Self>: BinaryDigit + DivisivePartialMagma + Oppose,
     OppositionOf<Self>:
         BinaryDigit + TryFrom<OppositionOf<DoublePrecisionOf<Self>>> + TryFrom<Self>,
     OppositionOf<DoublePrecisionOf<Self>>: BinaryDigit + From<Self> + From<OppositionOf<Self>>,

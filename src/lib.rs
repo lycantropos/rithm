@@ -156,19 +156,39 @@ fn big_int_to_py_long(value: &_BigInt) -> PyObject {
 #[pymethods]
 impl PyFraction {
     #[new]
-    fn new(_numerator: Option<PyInt>, _denominator: Option<PyInt>) -> PyResult<Self> {
-        match _Fraction::new(
-            _numerator
-                .map(|value| value.0)
-                .unwrap_or_else(_BigInt::zero),
-            _denominator
-                .map(|value| value.0)
-                .unwrap_or_else(_BigInt::one),
-        ) {
-            Some(value) => Ok(PyFraction(value)),
-            None => Err(PyZeroDivisionError::new_err(
-                UNDEFINED_DIVISION_ERROR_MESSAGE,
-            )),
+    fn new(_numerator: Option<&PyAny>, _denominator: Option<PyInt>) -> PyResult<Self> {
+        match _denominator {
+            Some(denominator) => match _Fraction::new(
+                _numerator
+                    .and_then(|value| value.extract::<PyInt>().ok())
+                    .map(|value| value.0)
+                    .unwrap_or_else(_BigInt::zero),
+                denominator.0,
+            ) {
+                Some(value) => Ok(PyFraction(value)),
+                None => Err(PyZeroDivisionError::new_err(
+                    UNDEFINED_DIVISION_ERROR_MESSAGE,
+                )),
+            },
+            None => Ok(PyFraction(match _numerator {
+                Some(value) => {
+                    if value.is_instance::<PyInt>()? {
+                        _Fraction::new(value.extract::<PyInt>()?.0, _BigInt::one()).unwrap()
+                    } else {
+                        _Fraction::try_from(value.extract::<f64>()?).map_err(
+                            |reason| match reason {
+                                fraction::FromFloatConversionError::Infinity => {
+                                    PyOverflowError::new_err(reason.to_string())
+                                }
+                                fraction::FromFloatConversionError::NaN => {
+                                    PyValueError::new_err(reason.to_string())
+                                }
+                            },
+                        )?
+                    }
+                }
+                None => _Fraction::zero(),
+            })),
         }
     }
 

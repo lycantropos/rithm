@@ -192,11 +192,11 @@ except ImportError:
                     raise TypeError('First argument should be of '
                                     f'type {Int} or {float}, '
                                     f'but found: {type(_numerator)}.')
-            elif not isinstance(_denominator, Int):
+            elif isinstance(_denominator, Int):
+                numerator, denominator = _numerator, _denominator
+            else:
                 raise TypeError(f'Denominator should be of type {Int}, '
                                 f'but found: {type(_denominator)}.')
-            else:
-                numerator, denominator = _numerator, _denominator
             if not denominator:
                 raise ZeroDivisionError('Denominator should not be zero.')
             if _normalize:

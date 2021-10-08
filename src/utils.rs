@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-use crate::traits::{AssigningShiftingRightMonoid, Float, ModularPartialMagma, Zeroable};
+use crate::traits::{AssigningShiftingRightMonoid, ModularPartialMagma, Zeroable};
 
 pub(crate) const fn are_same<T, U>() -> bool {
     trait SameTo<U> {
@@ -66,13 +66,6 @@ where
 {
     debug_assert!(!value.is_zero());
     bit_length(value) - 1
-}
-
-pub(crate) fn load_exponent<Fraction: Float>(fraction: Fraction, exponent: i32) -> Fraction {
-    let is_max_exponent = (exponent == Fraction::MAX_EXP) as i32;
-    fraction
-        * Fraction::from((1 + is_max_exponent) as f32)
-        * Fraction::from(2.0f32).pow(exponent - is_max_exponent)
 }
 
 pub(crate) const fn power(base: usize, exponent: usize) -> usize {

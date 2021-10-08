@@ -51,6 +51,7 @@ pub trait Float = AssigningAdditiveMonoid
     + Floor<Output = Self>
     + FrExp<Output = (Self, i32)>
     + From<f32>
+    + LdExp<i32, Output = Self>
     + MantissaDigits
     + MaxExp
     + MinExp

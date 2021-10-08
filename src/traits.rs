@@ -734,7 +734,7 @@ macro_rules! plain_floor_impl {
 
 plain_floor_impl!(f32 f64);
 
-pub trait FrExp: Sized {
+pub trait FrExp {
     type Output;
 
     fn frexp(self) -> Self::Output;
@@ -748,8 +748,8 @@ impl FrExp for f64 {
         let exponent_bits = ((bits >> 52) & 0x7ff) as i32;
         if exponent_bits.is_zero() {
             if !self.is_zero() {
-                const HEX_1P64: f64 = f64::from_bits(0x43f0000000000000);
-                let (fraction, exponent) = (self * HEX_1P64).frexp();
+                const _0X1P64: f64 = f64::from_bits(0x43f0000000000000);
+                let (fraction, exponent) = (self * _0X1P64).frexp();
                 (fraction, exponent - 64)
             } else {
                 (self, 0)
@@ -773,8 +773,8 @@ impl FrExp for f32 {
         let exponent_bits = ((bits >> 23) & 0xff) as i32;
         if exponent_bits.is_zero() {
             if !self.is_zero() {
-                const HEX_1P64: f32 = f32::from_bits(0x5f800000);
-                let (fraction, exponent) = (self * HEX_1P64).frexp();
+                const _0X1P64: f32 = f32::from_bits(0x5f800000);
+                let (fraction, exponent) = (self * _0X1P64).frexp();
                 (fraction, exponent - 64)
             } else {
                 (self, 0)

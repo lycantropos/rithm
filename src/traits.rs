@@ -833,6 +833,76 @@ macro_rules! plain_gcd_impl {
 
 plain_gcd_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
+pub trait LdExp<Exponent> {
+    type Output;
+
+    fn ldexp(self, exponent: Exponent) -> Self::Output;
+}
+
+impl LdExp<i32> for f32 {
+    type Output = Self;
+
+    fn ldexp(mut self, mut exponent: i32) -> f32 {
+        const _0X1P127: f32 = f32::from_bits(0x7f000000);
+        const _0X1P_126: f32 = f32::from_bits(0x800000);
+        const _0X1P24: f32 = f32::from_bits(0x4b800000);
+        if exponent > 127 {
+            self *= _0X1P127;
+            exponent -= 127;
+            if exponent > 127 {
+                self *= _0X1P127;
+                exponent -= 127;
+                if exponent > 127 {
+                    exponent = 127;
+                }
+            }
+        } else if exponent < -126 {
+            self *= _0X1P_126 * _0X1P24;
+            exponent += 126 - 24;
+            if exponent < -126 {
+                self *= _0X1P_126 * _0X1P24;
+                exponent += 126 - 24;
+                if exponent < -126 {
+                    exponent = -126;
+                }
+            }
+        }
+        self * f32::from_bits(((0x7f + exponent) as u32) << 23)
+    }
+}
+
+impl LdExp<i32> for f64 {
+    type Output = Self;
+
+    fn ldexp(mut self, mut exponent: i32) -> Self::Output {
+        if exponent > 1023 {
+            const _0X1P1023: f64 = f64::from_bits(0x7fe0000000000000);
+            self *= _0X1P1023;
+            exponent -= 1023;
+            if exponent > 1023 {
+                self *= _0X1P1023;
+                exponent -= 1023;
+                if exponent > 1023 {
+                    exponent = 1023;
+                }
+            }
+        } else if exponent < -1022 {
+            const _0X1P53: f64 = f64::from_bits(0x4340000000000000);
+            const _0X1P_1022: f64 = f64::from_bits(0x0010000000000000);
+            self *= _0X1P_1022 * _0X1P53;
+            exponent += 1022 - 53;
+            if exponent < -1022 {
+                self *= _0X1P_1022 * _0X1P53;
+                exponent += 1022 - 53;
+                if exponent < -1022 {
+                    exponent = -1022;
+                }
+            }
+        }
+        self * f64::from_bits(((0x3ff + exponent) as u64) << 52)
+    }
+}
+
 pub trait MantissaDigits {
     const MANTISSA_DIGITS: usize;
 }

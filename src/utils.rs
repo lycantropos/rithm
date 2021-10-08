@@ -75,6 +75,20 @@ pub(crate) fn load_exponent<Fraction: Float>(fraction: Fraction, exponent: i32) 
         * Fraction::from(2.0f32).pow(exponent - is_max_exponent)
 }
 
+pub(crate) fn fraction_exponent<Value: Float>(value: Value) -> (Value, i32) {
+    if value.is_zero() {
+        return (value, 0i32);
+    } else {
+        let value_modulus_log_2 = value.abs().log2();
+        let fraction_modulus =
+            (value_modulus_log_2 - value_modulus_log_2.floor() - Value::one()).exp2();
+        let exponent = value_modulus_log_2.floor() + Value::one();
+        (value.signum() * fraction_modulus, unsafe {
+            exponent.to_int_unchecked()
+        })
+    }
+}
+
 pub(crate) const fn power(base: usize, exponent: usize) -> usize {
     match exponent {
         0 => 1,

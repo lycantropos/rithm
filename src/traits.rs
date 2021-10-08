@@ -1,11 +1,11 @@
 use std::convert::{FloatToInt, TryFrom};
 use std::fmt::Debug;
+use std::libc::{c_double, c_float, c_int};
 use std::num::ParseIntError;
 use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Div, DivAssign,
     Mul, MulAssign, Neg, Not, Rem, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
 };
-use std::os::raw::{c_double, c_float, c_int};
 
 pub trait AdditiveMonoid<Other = Self> = Add<Other, Output = Self> + Zeroable;
 

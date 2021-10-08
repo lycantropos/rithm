@@ -133,7 +133,7 @@ pub trait RightShiftableDigit = AdditiveDigit
     + TryFrom<usize>
 where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
 
-pub trait UnitaryDigit = Oppose + Unitary + Zeroable;
+pub trait UnitaryDigit = Unitary + OppositiveDigit;
 
 pub trait ZeroableDigit = Oppose + Zeroable;
 

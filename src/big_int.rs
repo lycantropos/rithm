@@ -805,6 +805,22 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
     }
 }
 
+impl<Digit: DigitConvertibleFromFloat<f32>, const SEPARATOR: char, const SHIFT: usize>
+    FloatToInt<BigInt<Digit, SEPARATOR, SHIFT>> for f32
+{
+    unsafe fn to_int_unchecked(self) -> BigInt<Digit, SEPARATOR, SHIFT> {
+        BigInt::<Digit, SEPARATOR, SHIFT>::try_from(self).unwrap_unchecked()
+    }
+}
+
+impl<Digit: DigitConvertibleFromFloat<f64>, const SEPARATOR: char, const SHIFT: usize>
+    FloatToInt<BigInt<Digit, SEPARATOR, SHIFT>> for f64
+{
+    unsafe fn to_int_unchecked(self) -> BigInt<Digit, SEPARATOR, SHIFT> {
+        BigInt::<Digit, SEPARATOR, SHIFT>::try_from(self).unwrap_unchecked()
+    }
+}
+
 impl<SourceDigit, TargetDigit, const SEPARATOR: char, const SHIFT: usize> From<SourceDigit>
     for BigInt<TargetDigit, SEPARATOR, SHIFT>
 where

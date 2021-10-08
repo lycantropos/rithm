@@ -14,7 +14,7 @@ use pyo3::basic::CompareOp;
 use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
 use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, Python};
-use pyo3::types::{PyBytes, PyLong, PyString};
+use pyo3::types::{PyBytes, PyFloat, PyLong, PyString};
 use pyo3::{ffi, AsPyPointer, Py, PyAny, PyErr, PyNativeType, PyRef, ToPyObject};
 use pyo3::{IntoPy, PyNumberProtocol, PyObject};
 
@@ -65,6 +65,19 @@ impl PyInt {
                     }
                 } else if value.is_instance::<PyInt>()? {
                     value.extract::<PyInt>()
+                } else if value.is_instance::<PyFloat>()? {
+                    Ok(PyInt(
+                        _BigInt::try_from(value.extract::<&PyFloat>()?.value()).map_err(
+                            |reason| match reason {
+                                big_int::FromFloatConversionError::Infinity => {
+                                    PyOverflowError::new_err(reason.to_string())
+                                }
+                                big_int::FromFloatConversionError::NaN => {
+                                    PyValueError::new_err(reason.to_string())
+                                }
+                            },
+                        )?,
+                    ))
                 } else {
                     let ptr = value.as_ptr();
                     let py = value.py();

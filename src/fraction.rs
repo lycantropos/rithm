@@ -835,7 +835,7 @@ where
 
 fn finite_float_to_fraction_components<
     Component: Debug + Unitary + CheckedShl<u32>,
-    Value: Float + Display + FloatToInt<Component>,
+    Value: Float + FloatToInt<Component>,
 >(
     value: Value,
 ) -> (Component, Component) {

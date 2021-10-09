@@ -863,9 +863,13 @@ macro_rules! plain_try_from_float_impl {
                         exponent -= 1;
                     }
                     if exponent.is_negative() {
+                        let (numerator, denominator) = normalize_components_moduli(
+                            fraction.round() as $t,
+                            <$t>::one() << ((-exponent) as u32),
+                        );
                         Ok(Self {
-                            numerator: fraction.round() as $t,
-                            denominator: <$t>::one() << ((-exponent) as u32),
+                            numerator,
+                            denominator,
                         })
                     } else {
                         Ok(Self {

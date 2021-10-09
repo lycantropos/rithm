@@ -13,6 +13,7 @@ use crate::traits::{
     DivisivePartialMagma, Float, GcdMagma, Maybe, ModularUnaryAlgebra, MultiplicativeMonoid,
     NegatableUnaryAlgebra, Oppositive, Pow, SubtractiveMagma, Unitary, Zeroable,
 };
+use crate::utils;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct Fraction<Component: Clone + Eq> {
@@ -852,7 +853,7 @@ macro_rules! plain_try_from_float_impl {
                     Err(FromFloatConversionError::OutOfBounds)
                 } else {
                     let (mut fraction, mut exponent) = value.frexp();
-                    const MAX_EXPONENT_MODULUS: u32 = <$t>::BITS - 1;
+                    const MAX_EXPONENT_MODULUS: u32 = <$t>::BITS - (utils::is_signed::<$t>() as u32);
                     while fraction != fraction.floor()
                         && (fraction.abs() as $t) <= <$t>::MAX / 2
                         && ((exponent.abs() - (fraction.trunc().is_zero() as i32)) as u32)
@@ -878,8 +879,8 @@ macro_rules! plain_try_from_float_impl {
     )*)
 }
 
-plain_try_from_float_impl!(f32 => i8 i16 i32 i64);
-plain_try_from_float_impl!(f64 => i8 i16 i32 i64);
+plain_try_from_float_impl!(f32 => i8 i16 i32 i64 u8 u16 u32 u64);
+plain_try_from_float_impl!(f64 => i8 i16 i32 i64 u8 u16 u32 u64);
 
 #[inline]
 fn normalize_components_moduli<Component: Clone + DivisivePartialMagma + GcdMagma>(

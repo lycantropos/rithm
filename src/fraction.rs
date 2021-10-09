@@ -853,12 +853,20 @@ macro_rules! plain_try_from_float_impl {
                     Err(FromFloatConversionError::OutOfBounds)
                 } else {
                     let (mut fraction, mut exponent) = value.frexp();
-                    const MAX_EXPONENT_MODULUS: u32 = <$t>::BITS - (utils::is_signed::<$t>() as u32);
+                    const MAX_EXPONENT_MODULUS: u32 = <$t>::BITS - 1 - (utils::is_signed::<$t>() as u32);
+                    if (exponent.abs() as u32) > MAX_EXPONENT_MODULUS {
+                        if exponent.is_negative() {
+                            fraction *= ((exponent + (MAX_EXPONENT_MODULUS as i32)) as $f).exp2();
+                            exponent = -(MAX_EXPONENT_MODULUS as i32);
+                        } else {
+                            fraction *= ((exponent - (MAX_EXPONENT_MODULUS as i32)) as $f).exp2();
+                            exponent = MAX_EXPONENT_MODULUS as i32;
+                        };
+                    }
                     while fraction != fraction.floor()
                         && (fraction.round() as $t) >= <$t>::MIN / 2
                         && (fraction.round() as $t) <= <$t>::MAX / 2
-                        && ((exponent.abs() - (fraction.trunc().is_zero() as i32)) as u32)
-                            != MAX_EXPONENT_MODULUS
+                        && (exponent.abs() as u32) < MAX_EXPONENT_MODULUS
                     {
                         fraction *= 2.0 as $f;
                         exponent -= 1;
@@ -874,7 +882,7 @@ macro_rules! plain_try_from_float_impl {
                         })
                     } else {
                         Ok(Self {
-                            numerator: (fraction.round() as $t) << (exponent as u32),
+                            numerator: value.round() as $t,
                             denominator: <$t>::one(),
                         })
                     }

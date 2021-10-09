@@ -211,9 +211,9 @@ impl PyFraction {
     fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         state.extract::<(PyObject, PyObject)>(py).and_then(
             |(numerator_state, denominator_state)| {
-                let mut numerator = PyInt { 0: _BigInt::zero() };
+                let mut numerator = PyInt(_BigInt::zero());
                 numerator.__setstate__(py, numerator_state)?;
-                let mut denominator = PyInt { 0: _BigInt::zero() };
+                let mut denominator = PyInt(_BigInt::zero());
                 denominator.__setstate__(py, denominator_state)?;
                 self.0 = unsafe { _Fraction::new(numerator.0, denominator.0).unwrap_unchecked() };
                 Ok(())

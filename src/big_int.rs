@@ -256,7 +256,7 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, 
     }
 }
 
-impl<Digit: DisplayDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: DisplayableDigit, const SEPARATOR: char, const SHIFT: usize>
     BigInt<Digit, SEPARATOR, SHIFT>
 {
     const DIGIT_VALUES_ASCII_CODES: [char; MAX_REPRESENTABLE_BASE as usize] = [
@@ -701,7 +701,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     }
 }
 
-impl<Digit: DisplayDigit, const SEPARATOR: char, const SHIFT: usize> Display
+impl<Digit: DisplayableDigit, const SEPARATOR: char, const SHIFT: usize> Display
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {

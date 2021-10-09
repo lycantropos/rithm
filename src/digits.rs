@@ -75,7 +75,7 @@ where
 pub trait DigitConvertibleFromFloat<Source = f64> =
     Copy + ZeroableDigit where Source: FloatToInt<Self> + From<Self>;
 
-pub trait DisplayDigit = AssigningDivisivePartialMagma
+pub trait DisplayableDigit = AssigningDivisivePartialMagma
     + BinaryDigitConvertibleTo<Self>
     + ModularPartialMagma
     + OppositiveDigit

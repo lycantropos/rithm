@@ -177,12 +177,10 @@ impl PyFraction {
                     } else {
                         _Fraction::try_from(value.extract::<f64>()?).map_err(
                             |reason| match reason {
-                                fraction::FromFloatConversionError::Infinity => {
-                                    PyOverflowError::new_err(reason.to_string())
-                                }
                                 fraction::FromFloatConversionError::NaN => {
                                     PyValueError::new_err(reason.to_string())
                                 }
+                                _ => PyOverflowError::new_err(reason.to_string()),
                             },
                         )?
                     }

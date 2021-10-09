@@ -4,7 +4,10 @@ use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use crate::big_int::BigInt;
-use crate::digits::{AdditiveDigit, GcdDigit, MultiplicativeDigit, UnitaryDigit};
+use crate::digits::{
+    AdditiveDigit, DigitConvertibleFromFloat, GcdDigit, LeftShiftableDigit, MultiplicativeDigit,
+    UnitaryDigit,
+};
 use crate::traits::{
     Abs, AdditiveMonoid, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedPow, CheckedShl,
     DivisivePartialMagma, Float, GcdMagma, Maybe, ModularUnaryAlgebra, MultiplicativeMonoid,
@@ -20,6 +23,7 @@ pub struct Fraction<Component: Clone + Eq> {
 pub enum FromFloatConversionError {
     Infinity,
     NaN,
+    OutOfBounds,
 }
 
 impl FromFloatConversionError {
@@ -27,6 +31,7 @@ impl FromFloatConversionError {
         match self {
             FromFloatConversionError::Infinity => "Conversion of infinity is undefined.",
             FromFloatConversionError::NaN => "Conversion of NaN is undefined.",
+            FromFloatConversionError::OutOfBounds => "Value is out of bounds.",
         }
     }
 }
@@ -787,75 +792,94 @@ impl<Component: Clone + Eq + Unitary + Zeroable> Zeroable for Fraction<Component
     }
 }
 
-impl<Component: CheckedShl<u32> + Clone + Debug + Eq + Unitary + Zeroable> TryFrom<f32>
-    for Fraction<Component>
-where
-    f32: FloatToInt<Component>,
-{
-    type Error = FromFloatConversionError;
+macro_rules! big_int_try_from_float_impl {
+    ($($f:ty)*) => ($(
+        impl<
+                Digit: DigitConvertibleFromFloat + Eq + LeftShiftableDigit + UnitaryDigit,
+                const SEPARATOR: char,
+                const SHIFT: usize,
+            > TryFrom<$f> for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+        where
+            $f: FloatToInt<BigInt<Digit, SEPARATOR, SHIFT>>,
+        {
+            type Error = FromFloatConversionError;
 
-    fn try_from(value: f32) -> Result<Self, Self::Error> {
-        if value.is_infinite() {
-            Err(FromFloatConversionError::Infinity)
-        } else if value.is_nan() {
-            Err(FromFloatConversionError::NaN)
-        } else {
-            let (numerator, denominator) =
-                finite_float_to_fraction_components::<Component, f32>(value);
-            Ok(Self {
-                numerator,
-                denominator,
-            })
+            fn try_from(value: $f) -> Result<Self, Self::Error> {
+                if value.is_infinite() {
+                    Err(FromFloatConversionError::Infinity)
+                } else if value.is_nan() {
+                    Err(FromFloatConversionError::NaN)
+                } else {
+                    let (mut fraction, mut exponent) = value.frexp();
+                    for _ in 0..300 {
+                        if fraction == fraction.floor() {
+                            break;
+                        }
+                        fraction *= 2.0 as $f;
+                        exponent -= 1;
+                    }
+                    let mut numerator =
+                        unsafe { fraction.to_int_unchecked::<BigInt<Digit, SEPARATOR, SHIFT>>() };
+                    let mut denominator = BigInt::<Digit, SEPARATOR, SHIFT>::one();
+                    if exponent.is_negative() {
+                        denominator = denominator.checked_shl((-exponent) as u32).result();
+                    } else {
+                        numerator = numerator.checked_shl(exponent as u32).result();
+                    }
+                    Ok(Self {
+                        numerator,
+                        denominator,
+                    })
+                }
+            }
         }
-    }
+    )*)
 }
 
-impl<Component: CheckedShl<u32> + Clone + Debug + Eq + Unitary + Zeroable> TryFrom<f64>
-    for Fraction<Component>
-where
-    f64: FloatToInt<Component>,
-{
-    type Error = FromFloatConversionError;
+big_int_try_from_float_impl!(f32 f64);
 
-    fn try_from(value: f64) -> Result<Self, Self::Error> {
-        if value.is_infinite() {
-            Err(FromFloatConversionError::Infinity)
-        } else if value.is_nan() {
-            Err(FromFloatConversionError::NaN)
-        } else {
-            let (numerator, denominator) =
-                finite_float_to_fraction_components::<Component, f64>(value);
-            Ok(Self {
-                numerator,
-                denominator,
-            })
+macro_rules! plain_try_from_float_impl {
+    ($f:ty => $($t:ty)*) => ($(
+        impl TryFrom<$f> for Fraction<$t> {
+            type Error = FromFloatConversionError;
+
+            fn try_from(value: $f) -> Result<Self, Self::Error> {
+                if value.is_infinite() {
+                    Err(FromFloatConversionError::Infinity)
+                } else if value.is_nan() {
+                    Err(FromFloatConversionError::NaN)
+                } else if value.round() < (<$t>::MIN as $f) || value.round() > (<$t>::MAX as $f) {
+                    Err(FromFloatConversionError::OutOfBounds)
+                } else {
+                    let (mut fraction, mut exponent) = value.frexp();
+                    const MAX_EXPONENT_MODULUS: u32 = <$t>::BITS - 1;
+                    while fraction != fraction.floor()
+                        && (fraction.abs() as $t) <= <$t>::MAX / 2
+                        && ((exponent.abs() - (fraction.trunc().is_zero() as i32)) as u32)
+                            != MAX_EXPONENT_MODULUS
+                    {
+                        fraction *= 2.0 as $f;
+                        exponent -= 1;
+                    }
+                    if exponent.is_negative() {
+                        Ok(Self {
+                            numerator: fraction.round() as $t,
+                            denominator: <$t>::one() << ((-exponent) as u32),
+                        })
+                    } else {
+                        Ok(Self {
+                            numerator: (fraction.round() as $t) << (exponent as u32),
+                            denominator: <$t>::one(),
+                        })
+                    }
+                }
+            }
         }
-    }
+    )*)
 }
 
-fn finite_float_to_fraction_components<
-    Component: Debug + Unitary + CheckedShl<u32>,
-    Value: Float + FloatToInt<Component>,
->(
-    value: Value,
-) -> (Component, Component) {
-    let (mut fraction, mut exponent) = value.frexp();
-    for _ in 0..300 {
-        if fraction == fraction.floor() {
-            break;
-        }
-        fraction *= Value::from(2.0f32);
-        exponent -= 1;
-    }
-    let mut numerator = unsafe { fraction.to_int_unchecked() };
-    let mut denominator = Component::one();
-    if exponent.is_negative() {
-        denominator = denominator.checked_shl((-exponent) as u32).result();
-    } else {
-        numerator = numerator.checked_shl(exponent as u32).result();
-    }
-    (numerator, denominator)
-}
+plain_try_from_float_impl!(f32 => i8 i16 i32 i64);
+plain_try_from_float_impl!(f64 => i8 i16 i32 i64);
 
 #[inline]
 fn normalize_components_moduli<Component: Clone + DivisivePartialMagma + GcdMagma>(

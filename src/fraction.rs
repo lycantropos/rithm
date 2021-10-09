@@ -855,7 +855,8 @@ macro_rules! plain_try_from_float_impl {
                     let (mut fraction, mut exponent) = value.frexp();
                     const MAX_EXPONENT_MODULUS: u32 = <$t>::BITS - (utils::is_signed::<$t>() as u32);
                     while fraction != fraction.floor()
-                        && (fraction.abs() as $t) <= <$t>::MAX / 2
+                        && (fraction.round() as $t) >= <$t>::MIN / 2
+                        && (fraction.round() as $t) <= <$t>::MAX / 2
                         && ((exponent.abs() - (fraction.trunc().is_zero() as i32)) as u32)
                             != MAX_EXPONENT_MODULUS
                     {

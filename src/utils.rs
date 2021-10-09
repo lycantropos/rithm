@@ -1,6 +1,8 @@
 use std::convert::TryFrom;
 
-use crate::traits::{AssigningShiftingRightMonoid, ModularPartialMagma, Zeroable};
+use crate::traits::{
+    AssigningShiftingRightMonoid, ModularPartialMagma, Oppose, OppositionOf, Zeroable,
+};
 
 pub(crate) const fn are_same<T, U>() -> bool {
     trait SameTo<U> {
@@ -66,6 +68,14 @@ where
 {
     debug_assert!(!value.is_zero());
     bit_length(value) - 1
+}
+
+pub(crate) const fn is_signed<T: Oppose>() -> bool {
+    !are_same::<T, OppositionOf<T>>()
+}
+
+pub(crate) const fn is_unsigned<T: Oppose>() -> bool {
+    are_same::<T, OppositionOf<T>>()
 }
 
 pub(crate) const fn power(base: usize, exponent: usize) -> usize {

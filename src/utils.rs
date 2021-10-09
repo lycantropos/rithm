@@ -71,11 +71,11 @@ where
 }
 
 pub(crate) const fn is_signed<T: Oppose>() -> bool {
-    !are_same::<T, OppositionOf<T>>()
+    are_same::<T, OppositionOf<T>>()
 }
 
 pub(crate) const fn is_unsigned<T: Oppose>() -> bool {
-    are_same::<T, OppositionOf<T>>()
+    !are_same::<T, OppositionOf<T>>()
 }
 
 pub(crate) const fn power(base: usize, exponent: usize) -> usize {

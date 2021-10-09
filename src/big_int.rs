@@ -834,11 +834,11 @@ where
             Self::zero()
         } else if size_of::<SourceDigit>() < size_of::<TargetDigit>()
             || (size_of::<SourceDigit>() == size_of::<TargetDigit>()
-                && utils::is_unsigned::<SourceDigit>()
-                && utils::is_signed::<TargetDigit>())
+                && utils::is_signed::<SourceDigit>()
+                && utils::is_unsigned::<TargetDigit>())
         {
             let mut sign = Sign::one();
-            let mut value = if utils::is_unsigned::<SourceDigit>() {
+            let mut value = if utils::is_signed::<SourceDigit>() {
                 let value =
                     unsafe { OppositionOf::<SourceDigit>::try_from(value).unwrap_unchecked() };
                 if value.is_negative() {
@@ -865,7 +865,7 @@ where
             Self { sign, digits }
         } else {
             let mut sign = Sign::one();
-            let mut value = if utils::is_unsigned::<SourceDigit>() {
+            let mut value = if utils::is_signed::<SourceDigit>() {
                 let value =
                     unsafe { OppositionOf::<SourceDigit>::try_from(value).unwrap_unchecked() };
                 if value.is_negative() {
@@ -1605,5 +1605,5 @@ impl<Digit: ZeroableDigit, const SEPARATOR: char, const SHIFT: usize> Zeroable
 }
 
 const fn is_valid_shift<Digit: Oppose, const SHIFT: usize>() -> bool {
-    SHIFT < 8 * size_of::<Digit>() - (utils::is_unsigned::<Digit>() as usize)
+    SHIFT < 8 * size_of::<Digit>() - (utils::is_signed::<Digit>() as usize)
 }

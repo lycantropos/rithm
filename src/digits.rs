@@ -6,10 +6,10 @@ use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
     AssigningBitwiseExclusiveDisjunctiveMonoid, AssigningDivisivePartialMagma,
     AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid, AssigningShiftingRightMonoid,
-    AssigningSubtractiveMagma, BitwiseNegatableUnaryAlgebra, CheckedShl, DivisivePartialMagma,
-    DoublePrecision, DoublePrecisionOf, Float, Gcd, ModularPartialMagma, ModularSubtractiveMagma,
-    Oppose, OppositionOf, ShiftingLeftMonoid, ShiftingRightMonoid, SubtractiveMagma, Unitary,
-    Zeroable,
+    AssigningSubtractiveMagma, BitLength, BitwiseNegatableUnaryAlgebra, CheckedShl,
+    DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Float, Gcd, ModularPartialMagma,
+    ModularSubtractiveMagma, Oppose, OppositionOf, ShiftingLeftMonoid, ShiftingRightMonoid,
+    SubtractiveMagma, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -40,6 +40,7 @@ pub trait BinaryDigitConvertibleToBinary<Target> =
     BinaryDigitDowncastableTo<Target> + BinaryDigitUpcastableTo<Target> where Target: TryFrom<Self>;
 
 pub trait BinaryDigitConvertibleToFloat<Target> = BinaryDigit
+    + BitLength<Output = usize>
     + Oppose
     + DoublePrecision
     + From<u8>
@@ -61,11 +62,12 @@ where
         + ModularPartialMagma
         + TryFrom<usize>;
 
-pub trait BinaryDigitDowncastableTo<Target> = BinaryDigit + DoublePrecision + From<u8>
-where
-    Target: TryFrom<DoublePrecisionOf<Self>>,
-    DoublePrecisionOf<Self>: BinaryDigit,
-    usize: TryFrom<Self>;
+pub trait BinaryDigitDowncastableTo<Target> =
+    BinaryDigit + BitLength<Output = usize> + DoublePrecision + From<u8>
+    where
+        Target: TryFrom<DoublePrecisionOf<Self>>,
+        DoublePrecisionOf<Self>: BinaryDigit,
+        usize: TryFrom<Self>;
 
 pub trait BinaryDigitUpcastableTo<Target> = BinaryDigit
 where
@@ -82,6 +84,7 @@ pub trait DisplayableDigit = AssigningDivisivePartialMagma
     + TryFrom<usize>;
 
 pub trait DivisibleDigit = BinaryDigit
+    + BitLength<Output = usize>
     + DoublePrecision
     + From<u8>
     + TryFrom<DoublePrecisionOf<Self>>
@@ -302,7 +305,7 @@ pub(crate) fn binary_digits_to_lesser_binary_base<
     debug_assert!(source_shift > target_shift && target_shift > 0);
     let target_digit_mask = to_digit_mask::<DoublePrecisionOf<SourceDigit>>(target_shift);
     let digits_bits_count: usize =
-        (source.len() - 1) * source_shift + utils::bit_length(source[source.len() - 1]);
+        (source.len() - 1) * source_shift + source[source.len() - 1].bit_length();
     let digits_count: usize = (digits_bits_count + (target_shift - 1)) / target_shift;
     let mut result = Vec::<TargetDigit>::with_capacity(digits_count);
     let mut accumulator = DoublePrecisionOf::<SourceDigit>::from(source[0]);
@@ -400,8 +403,8 @@ pub(crate) fn checked_div_approximation<
         return Ok(Output::zero());
     }
     let bit_lengths_difference = digits_count_difference * (SHIFT as isize)
-        + (((utils::bit_length(dividend_digits[dividend_digits.len() - 1])) as isize)
-            - (utils::bit_length(divisor_digits[divisor_digits.len() - 1]) as isize));
+        + (((dividend_digits[dividend_digits.len() - 1].bit_length()) as isize)
+            - (divisor_digits[divisor_digits.len() - 1].bit_length() as isize));
     if bit_lengths_difference > (Output::MAX_EXP as isize) {
         return Err(CheckedDivApproximationError::TooLarge);
     } else if bit_lengths_difference
@@ -464,7 +467,7 @@ pub(crate) fn checked_div_approximation<
         }
     }
     let quotient_bit_length = ((quotient_digits.len() - 1) * SHIFT
-        + utils::bit_length(quotient_digits[quotient_digits.len() - 1]))
+        + quotient_digits[quotient_digits.len() - 1].bit_length())
         as isize;
     let extra_bits = quotient_bit_length.max((Output::MIN_EXP as isize) - shift)
         - (Output::MANTISSA_DIGITS as isize);
@@ -677,7 +680,7 @@ pub(crate) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usi
     let divisor_digits_count = divisor.len();
     let mut dividend_normalized = vec![Digit::zero(); dividend_digits_count];
     let mut divisor_normalized = vec![Digit::zero(); divisor_digits_count];
-    let shift = SHIFT - utils::bit_length(divisor[divisor.len() - 1]);
+    let shift = SHIFT - divisor[divisor.len() - 1].bit_length();
     shift_digits_left::<Digit, SHIFT>(divisor, shift, divisor_normalized.as_mut_slice());
     let accumulator =
         shift_digits_left::<Digit, SHIFT>(dividend, shift, dividend_normalized.as_mut_slice());
@@ -780,7 +783,7 @@ pub(crate) fn fraction_exponent_digits<
     let mut result_digits =
         vec![Digit::zero(); 2usize + (Fraction::MANTISSA_DIGITS + 1usize) / SHIFT];
     let size = digits.len();
-    let mut bits_count = utils::bit_length(digits[digits.len() - 1]);
+    let mut bits_count = digits[digits.len() - 1].bit_length();
     if size > (usize::MAX - 1) / SHIFT
         && (size > (usize::MAX - 1) / SHIFT + 1 || bits_count > (usize::MAX - 1) % SHIFT + 1)
     {

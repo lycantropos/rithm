@@ -928,8 +928,7 @@ impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd
                     digits: largest_digits,
                 };
             }
-            let highest_digit_bit_length =
-                utils::bit_length(largest_digits[largest_digits.len() - 1]);
+            let highest_digit_bit_length = largest_digits[largest_digits.len() - 1].bit_length();
             let mut largest_leading_bits = (OppositionOf::<DoublePrecisionOf<Digit>>::from(
                 largest_digits[largest_digits_count - 1],
             ) << (2 * SHIFT - highest_digit_bit_length))

@@ -50,33 +50,39 @@ impl Display for FromFloatConversionError {
     }
 }
 
-pub enum ParsingError {
+pub enum FromStringConversionError {
     StartsWithSeparator,
     ConsecutiveSeparators,
     InvalidDigit(char, u8),
     EndsWithSeparator,
 }
 
-impl ParsingError {
+impl FromStringConversionError {
     fn description(&self) -> String {
         match self {
-            ParsingError::StartsWithSeparator => String::from("Should not start with separator."),
-            ParsingError::InvalidDigit(character, base) => {
+            FromStringConversionError::StartsWithSeparator => {
+                String::from("Should not start with separator.")
+            }
+            FromStringConversionError::InvalidDigit(character, base) => {
                 format!("Invalid digit in base {}: {}.", base, character)
             }
-            ParsingError::ConsecutiveSeparators => String::from("Consecutive separators found."),
-            ParsingError::EndsWithSeparator => String::from("Should not end with separator."),
+            FromStringConversionError::ConsecutiveSeparators => {
+                String::from("Consecutive separators found.")
+            }
+            FromStringConversionError::EndsWithSeparator => {
+                String::from("Should not end with separator.")
+            }
         }
     }
 }
 
-impl Debug for ParsingError {
+impl Debug for FromStringConversionError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         formatter.write_str(&self.description())
     }
 }
 
-impl Display for ParsingError {
+impl Display for FromStringConversionError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self.description(), formatter)
     }
@@ -152,7 +158,7 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
         37,
     ];
 
-    fn new(string: &str, mut base: u8) -> Result<Self, ParsingError> {
+    fn new(string: &str, mut base: u8) -> Result<Self, FromStringConversionError> {
         debug_assert!(is_valid_shift::<Digit, SHIFT>());
         debug_assert!(Self::ASCII_CODES_DIGIT_VALUES[SEPARATOR as usize] >= MAX_REPRESENTABLE_BASE);
         let mut characters = string.trim().chars().peekable();
@@ -185,9 +191,12 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 
     #[inline]
-    fn parse_digits(mut characters: Peekable<Chars>, base: u8) -> Result<Vec<u8>, ParsingError> {
+    fn parse_digits(
+        mut characters: Peekable<Chars>,
+        base: u8,
+    ) -> Result<Vec<u8>, FromStringConversionError> {
         if characters.peek() == Some(&SEPARATOR) {
-            return Err(ParsingError::StartsWithSeparator);
+            return Err(FromStringConversionError::StartsWithSeparator);
         }
         let mut result: Vec<u8> = Vec::new();
         let mut prev: char = SEPARATOR;
@@ -195,16 +204,16 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
             if character != SEPARATOR {
                 let digit = Self::ASCII_CODES_DIGIT_VALUES[character as usize];
                 if digit >= base {
-                    return Err(ParsingError::InvalidDigit(character, base));
+                    return Err(FromStringConversionError::InvalidDigit(character, base));
                 }
                 result.push(digit);
             } else if prev == SEPARATOR {
-                return Err(ParsingError::ConsecutiveSeparators);
+                return Err(FromStringConversionError::ConsecutiveSeparators);
             }
             prev = character;
         }
         if prev == SEPARATOR {
-            return Err(ParsingError::EndsWithSeparator);
+            return Err(FromStringConversionError::EndsWithSeparator);
         }
         result.reverse();
         Ok(result)
@@ -892,7 +901,7 @@ where
 impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> FromStrRadix
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Error = ParsingError;
+    type Error = FromStringConversionError;
 
     fn from_str_radix(string: &str, radix: u32) -> Result<Self, Self::Error> {
         if (radix != 0 && radix < 2) || radix > (MAX_REPRESENTABLE_BASE as u32) {
@@ -1535,7 +1544,7 @@ impl<Digit: DigitConvertibleFromFloat, const SEPARATOR: char, const SHIFT: usize
 impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&str>
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Error = ParsingError;
+    type Error = FromStringConversionError;
 
     fn try_from(string: &str) -> Result<Self, Self::Error> {
         Self::new(string, 0)

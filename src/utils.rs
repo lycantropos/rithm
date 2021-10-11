@@ -16,15 +16,15 @@ pub(crate) const fn are_same<T, U>() -> bool {
     <T as SameTo<U>>::VALUE
 }
 
-pub(crate) const fn floor_log(value: usize, base: usize) -> Result<usize, &'static str> {
+pub(crate) const fn floor_log(value: usize, base: usize) -> Option<usize> {
     if value == 0usize {
-        Err("Logarithm of zero is undefined.")
+        None
     } else if value < base {
-        Ok(0)
+        Some(0)
     } else {
         match floor_log(value / base, base) {
-            Ok(value) => Ok(value + 1),
-            error => error,
+            Some(value) => Some(value + 1),
+            None => None,
         }
     }
 }

@@ -7,7 +7,7 @@ use crate::traits::{
     AssigningBitwiseExclusiveDisjunctiveMonoid, AssigningDivisivePartialMagma,
     AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid, AssigningShiftingRightMonoid,
     AssigningSubtractiveMagma, BitwiseNegatableUnaryAlgebra, CheckedShl, DivisivePartialMagma,
-    DoublePrecision, DoublePrecisionOf, Float, ModularPartialMagma, ModularSubtractiveMagma,
+    DoublePrecision, DoublePrecisionOf, Float, Gcd, ModularPartialMagma, ModularSubtractiveMagma,
     Oppose, OppositionOf, ShiftingLeftMonoid, ShiftingRightMonoid, SubtractiveMagma, Unitary,
     Zeroable,
 };
@@ -104,7 +104,9 @@ pub trait FromStrDigit =
 
 pub trait GcdDigit = DivisibleDigit + ModularSubtractiveMagma
 where
-    DoublePrecisionOf<Self>: ModularPartialMagma + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>,
+    DoublePrecisionOf<Self>: Gcd<Output = DoublePrecisionOf<Self>>
+        + ModularPartialMagma
+        + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>,
     OppositionOf<DoublePrecisionOf<Self>>:
         DivisivePartialMagma + ModularPartialMagma + TryFrom<DoublePrecisionOf<Self>>;
 

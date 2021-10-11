@@ -1050,10 +1050,11 @@ impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd
             largest_digits = next_largest_digits;
             smallest_digits = next_smallest_digits;
         }
-        Self::from(utils::gcd::<DoublePrecisionOf<Digit>>(
-            reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&largest_digits),
-            reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&smallest_digits),
-        ))
+        Self::from(
+            reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&largest_digits).gcd(
+                reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&smallest_digits),
+            ),
+        )
     }
 }
 

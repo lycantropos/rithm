@@ -1,8 +1,6 @@
 use std::convert::TryFrom;
 
-use crate::traits::{
-    AssigningShiftingRightMonoid, ModularPartialMagma, Oppose, OppositionOf, Zeroable,
-};
+use crate::traits::{AssigningShiftingRightMonoid, Oppose, OppositionOf};
 
 pub(crate) const fn are_same<T, U>() -> bool {
     trait SameTo<U> {
@@ -36,16 +34,6 @@ where
         5, 5,
     ];
     result + BIT_LENGTHS_TABLE[unsafe { usize::try_from(value).unwrap_unchecked() }]
-}
-
-pub(crate) fn gcd<T>(mut first: T, mut second: T) -> T
-where
-    T: Copy + ModularPartialMagma + Zeroable,
-{
-    while !second.is_zero() {
-        (first, second) = (second, first.rem_euclid(second));
-    }
-    first
 }
 
 pub(crate) const fn floor_log(value: usize, base: usize) -> Result<usize, &'static str> {

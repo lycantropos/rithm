@@ -824,8 +824,12 @@ macro_rules! plain_gcd_impl {
 
             #[inline(always)]
             fn gcd(self, other: Self) -> Self::Output {
-                use crate::utils;
-                utils::gcd::<$t>(self, other)
+                let mut first = self;
+                let mut second = other;
+                while !second.is_zero() {
+                    (first, second) = (second, first.rem_euclid(second));
+                }
+                first
             }
         }
     )*)

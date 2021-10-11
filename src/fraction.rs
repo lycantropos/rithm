@@ -62,7 +62,9 @@ impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fract
             })
         }
     }
+}
 
+impl<Component: Clone + Eq> Fraction<Component> {
     pub fn denominator(&self) -> &Component {
         &self.denominator
     }

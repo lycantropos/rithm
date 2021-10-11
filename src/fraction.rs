@@ -868,7 +868,7 @@ macro_rules! plain_try_from_float_impl {
                     while fraction != fraction.floor()
                         && (fraction.round() as $t) >= <$t>::MIN / 2
                         && (fraction.round() as $t) <= <$t>::MAX / 2
-                        && (exponent.abs() as u32) < MAX_EXPONENT_MODULUS
+                        && (!exponent.is_negative() || ((-exponent) as u32) < MAX_EXPONENT_MODULUS)
                     {
                         fraction *= 2.0 as $f;
                         exponent -= 1;

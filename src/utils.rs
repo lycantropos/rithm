@@ -1,6 +1,4 @@
-use std::convert::TryFrom;
-
-use crate::traits::{AssigningShiftingRightMonoid, Oppose, OppositionOf};
+use crate::traits::{BitLength, Oppose, OppositionOf, Zeroable};
 
 pub(crate) const fn are_same<T, U>() -> bool {
     trait SameTo<U> {
@@ -18,24 +16,6 @@ pub(crate) const fn are_same<T, U>() -> bool {
     <T as SameTo<U>>::VALUE
 }
 
-pub(crate) fn bit_length<T>(value: T) -> usize
-where
-    T: From<u8> + AssigningShiftingRightMonoid<usize> + PartialOrd,
-    usize: TryFrom<T>,
-{
-    let mut result: usize = 0;
-    let mut value = value;
-    while value >= T::from(32u8) {
-        result += 6;
-        value >>= 6;
-    }
-    const BIT_LENGTHS_TABLE: [usize; 32] = [
-        0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-        5, 5,
-    ];
-    result + BIT_LENGTHS_TABLE[unsafe { usize::try_from(value).unwrap_unchecked() }]
-}
-
 pub(crate) const fn floor_log(value: usize, base: usize) -> Result<usize, &'static str> {
     if value == 0usize {
         Err("Logarithm of zero is undefined.")
@@ -49,13 +29,9 @@ pub(crate) const fn floor_log(value: usize, base: usize) -> Result<usize, &'stat
     }
 }
 
-pub(crate) fn floor_log2<T>(value: T) -> usize
-where
-    T: From<u8> + AssigningShiftingRightMonoid<usize> + PartialOrd,
-    usize: TryFrom<T>,
-{
+pub(crate) fn floor_log2<T: BitLength<Output = usize> + Zeroable>(value: T) -> usize {
     debug_assert!(!value.is_zero());
-    bit_length(value) - 1
+    value.bit_length() - 1
 }
 
 pub(crate) const fn is_signed<T: Oppose>() -> bool {

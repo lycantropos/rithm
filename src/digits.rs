@@ -26,6 +26,7 @@ pub trait AdditiveDigit = AssigningAdditiveMonoid
 pub trait BinaryDigit = AssigningAdditiveMonoid
     + AssigningBitwiseConjunctiveMagma
     + AssigningBitwiseDisjunctiveMonoid
+    + AssigningBitwiseExclusiveDisjunctiveMonoid
     + AssigningMultiplicativeMonoid
     + AssigningShiftingLeftMonoid<usize>
     + AssigningShiftingRightMonoid<usize>
@@ -134,13 +135,9 @@ where
 
 pub trait OppositiveDigit = ZeroableDigit;
 
-pub trait RightShiftableDigit = AdditiveDigit
-    + AssigningBitwiseExclusiveDisjunctiveMonoid
-    + Debug
-    + DivisibleDigit
-    + ShiftingRightMonoid
-    + TryFrom<usize>
-where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
+pub trait RightShiftableDigit =
+    AdditiveDigit + Debug + DivisibleDigit + ShiftingRightMonoid + TryFrom<usize>
+    where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
 
 pub trait UnitaryDigit = Unitary + OppositiveDigit;
 

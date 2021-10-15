@@ -146,6 +146,34 @@ pub trait ZeroableDigit = Oppose + Zeroable;
 pub(crate) type Sign = i8;
 pub(crate) type WindowDigit = u8;
 
+pub enum CheckedDivApproximationError {
+    TooLarge,
+    ZeroDivision,
+}
+
+impl CheckedDivApproximationError {
+    fn description(&self) -> &str {
+        match self {
+            CheckedDivApproximationError::TooLarge => {
+                "Division result too large to be expressed as floating point."
+            }
+            CheckedDivApproximationError::ZeroDivision => "Division by zero is undefined.",
+        }
+    }
+}
+
+impl Debug for CheckedDivApproximationError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(self.description())
+    }
+}
+
+impl Display for CheckedDivApproximationError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.description(), formatter)
+    }
+}
+
 pub(crate) fn binary_digits_to_base<
     SourceDigit: BinaryDigitConvertibleTo<TargetDigit>,
     TargetDigit,
@@ -331,34 +359,6 @@ pub(crate) fn binary_digits_to_lesser_binary_base<
         }
     }
     result
-}
-
-pub enum CheckedDivApproximationError {
-    TooLarge,
-    ZeroDivision,
-}
-
-impl CheckedDivApproximationError {
-    fn description(&self) -> &str {
-        match self {
-            CheckedDivApproximationError::TooLarge => {
-                "Division result too large to be expressed as floating point."
-            }
-            CheckedDivApproximationError::ZeroDivision => "Division by zero is undefined.",
-        }
-    }
-}
-
-impl Debug for CheckedDivApproximationError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(self.description())
-    }
-}
-
-impl Display for CheckedDivApproximationError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.description(), formatter)
-    }
 }
 
 pub(crate) fn checked_div_approximation<

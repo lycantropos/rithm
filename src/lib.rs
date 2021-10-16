@@ -232,6 +232,10 @@ impl PyNumberProtocol for PyInt {
         PyInt(lhs.0 + rhs.0)
     }
 
+    fn __and__(lhs: PyInt, rhs: PyInt) -> PyInt {
+        PyInt(lhs.0 & rhs.0)
+    }
+
     fn __divmod__(lhs: PyInt, rhs: PyInt) -> PyResult<(PyInt, PyInt)> {
         match lhs.0.checked_div_rem_euclid(rhs.0) {
             Some((quotient, remainder)) => Ok((PyInt(quotient), PyInt(remainder))),

@@ -38,6 +38,11 @@ except ImportError:
                     if isinstance(other, Int)
                     else NotImplemented)
 
+        def __and__(self, other: 'Int') -> 'Int':
+            return (Int(self._value & other._value)
+                    if isinstance(other, Int)
+                    else NotImplemented)
+
         def __bool__(self) -> bool:
             return bool(self._value)
 

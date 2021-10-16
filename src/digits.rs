@@ -374,16 +374,15 @@ pub(crate) fn bitwise_and<Digit: BinaryDigit, const SHIFT: usize>(
         shortest = complement::<Digit, SHIFT>(&shortest);
     };
     let mut sign = longest_sign & shortest_sign;
-    let result_size = if shortest_sign.is_negative() {
+    let mut result = Vec::<Digit>::with_capacity(if shortest_sign.is_negative() {
         longest.len()
     } else {
         shortest.len()
-    };
-    let mut result = Vec::<Digit>::with_capacity(result_size);
+    });
     for index in 0..shortest.len() {
         result.push(longest[index] & shortest[index]);
     }
-    for index in shortest.len()..result_size {
+    for index in shortest.len()..result.len() {
         result.push(longest[index]);
     }
     if sign.is_negative() {

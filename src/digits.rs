@@ -361,6 +361,39 @@ pub(crate) fn binary_digits_to_lesser_binary_base<
     result
 }
 
+pub(crate) fn bitwise_and<Digit: BinaryDigit, const SHIFT: usize>(
+    mut longest: Vec<Digit>,
+    longest_sign: Sign,
+    mut shortest: Vec<Digit>,
+    shortest_sign: Sign,
+) -> (Sign, Vec<Digit>) {
+    if longest_sign.is_negative() {
+        longest = complement::<Digit, SHIFT>(&longest);
+    };
+    if shortest_sign.is_negative() {
+        shortest = complement::<Digit, SHIFT>(&shortest);
+    };
+    let mut sign = longest_sign & shortest_sign;
+    let result_size = if shortest_sign.is_negative() {
+        longest.len()
+    } else {
+        shortest.len()
+    };
+    let mut result = Vec::<Digit>::with_capacity(result_size);
+    for index in 0..shortest.len() {
+        result.push(longest[index] & shortest[index]);
+    }
+    for index in shortest.len()..result_size {
+        result.push(longest[index]);
+    }
+    if sign.is_negative() {
+        result = complement::<Digit, SHIFT>(&result);
+    }
+    trim_leading_zeros(&mut result);
+    sign *= (result.len() > 1 || !result[0].is_zero()) as Sign;
+    (sign, result)
+}
+
 pub(crate) fn checked_div_approximation<
     Digit: BinaryDigitConvertibleToFloat<Output> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
     Output: Float,
@@ -618,6 +651,19 @@ pub(crate) fn checked_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize
         }
         Some((sign, digits))
     }
+}
+
+pub(crate) fn complement<Digit: BinaryDigit, const SHIFT: usize>(digits: &[Digit]) -> Vec<Digit> {
+    let mut result = Vec::<Digit>::with_capacity(digits.len());
+    let mut accumulator = Digit::one();
+    let digit_mask = to_digit_mask::<Digit>(SHIFT);
+    for index in 0..digits.len() {
+        accumulator += digits[index] ^ digit_mask;
+        result.push(accumulator & digit_mask);
+        accumulator >>= SHIFT;
+    }
+    debug_assert!(accumulator.is_zero());
+    result
 }
 
 pub(crate) fn digits_from_finite_positive_improper_float<

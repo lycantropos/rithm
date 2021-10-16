@@ -3,7 +3,9 @@ use std::convert::{FloatToInt, TryFrom};
 use std::fmt::{Debug, Display, Formatter};
 use std::iter::Peekable;
 use std::mem::size_of;
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Not, Rem, Sub, SubAssign};
+use std::ops::{
+    Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Neg, Not, Rem, Sub, SubAssign,
+};
 use std::str::Chars;
 
 use crate::digits::*;
@@ -405,6 +407,21 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> AddAssign
     fn add_assign(&mut self, other: Self) {
         (self.sign, self.digits) =
             sum_signed_digits::<Digit, SHIFT>(&self.digits, self.sign, &other.digits, other.sign);
+    }
+}
+
+impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAnd
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Self;
+
+    fn bitand(self, other: Self) -> Self::Output {
+        let (sign, digits) = if self.digits.len() > other.digits.len() {
+            bitwise_and::<Digit, SHIFT>(self.digits, self.sign, other.digits, other.sign)
+        } else {
+            bitwise_and::<Digit, SHIFT>(other.digits, other.sign, self.digits, self.sign)
+        };
+        Self { sign, digits }
     }
 }
 

@@ -373,7 +373,6 @@ pub(crate) fn bitwise_and<Digit: BinaryDigit, const SHIFT: usize>(
     if shortest_sign.is_negative() {
         shortest = complement::<Digit, SHIFT>(&shortest);
     };
-    let mut sign = longest_sign & shortest_sign;
     let result_size = if shortest_sign.is_negative() {
         longest.len()
     } else {
@@ -386,6 +385,7 @@ pub(crate) fn bitwise_and<Digit: BinaryDigit, const SHIFT: usize>(
     for index in shortest.len()..result_size {
         result.push(longest[index]);
     }
+    let mut sign = longest_sign & shortest_sign;
     if sign.is_negative() {
         result.push(to_digit_mask::<Digit>(SHIFT));
         result = complement::<Digit, SHIFT>(&result);

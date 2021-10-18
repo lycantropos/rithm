@@ -11,11 +11,11 @@ use std::str::Chars;
 
 use crate::digits::*;
 use crate::traits::{
-    Abs, AssigningShiftingLeftMonoid, BitwiseNegatableUnaryAlgebra, CheckedDiv, CheckedDivAsF32,
-    CheckedDivAsF64, CheckedDivEuclid, CheckedDivRem, CheckedDivRemEuclid, CheckedPow,
-    CheckedPowRemEuclid, CheckedRem, CheckedRemEuclid, CheckedRemEuclidInv, CheckedShl, CheckedShr,
-    DivEuclid, DivRem, DivRemEuclid, DoublePrecisionOf, Float, FromStrRadix, Gcd, Oppose,
-    OppositionOf, Oppositive, Pow, RemEuclid, Unitary, Zeroable,
+    Abs, AssigningShiftingLeftMonoid, BitLength, BitwiseNegatableUnaryAlgebra, CheckedDiv,
+    CheckedDivAsF32, CheckedDivAsF64, CheckedDivEuclid, CheckedDivRem, CheckedDivRemEuclid,
+    CheckedPow, CheckedPowRemEuclid, CheckedRem, CheckedRemEuclid, CheckedRemEuclidInv, CheckedShl,
+    CheckedShr, DivEuclid, DivRem, DivRemEuclid, DoublePrecisionOf, Float, FromStrRadix, Gcd,
+    Oppose, OppositionOf, Oppositive, Pow, RemEuclid, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -435,6 +435,26 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAndAssign
         } else {
             bitwise_and::<Digit, SHIFT>(other.digits, other.sign, self.digits.clone(), self.sign)
         };
+    }
+}
+
+impl<
+        Digit: BitLength<Output = usize> + BinaryDigit + MultiplicativeDigit + Oppose + TryFrom<usize>,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > BitLength for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Self;
+
+    fn bit_length(self) -> Self::Output {
+        if self.digits.len() <= usize::MAX / SHIFT {
+            Self::from(
+                (self.digits.len() - 1) * SHIFT + self.digits[self.digits.len() - 1].bit_length(),
+            )
+        } else {
+            Self::from(self.digits.len() - 1) * Self::from(SHIFT)
+                + Self::from(self.digits[self.digits.len() - 1].bit_length())
+        }
     }
 }
 

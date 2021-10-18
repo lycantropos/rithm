@@ -914,43 +914,42 @@ impl<Digit: DigitConvertibleFromFloat, const SEPARATOR: char, const SHIFT: usize
     }
 }
 
-impl<SourceDigit, TargetDigit, const SEPARATOR: char, const SHIFT: usize> From<SourceDigit>
-    for BigInt<TargetDigit, SEPARATOR, SHIFT>
+impl<Source, Digit, const SEPARATOR: char, const SHIFT: usize> From<Source>
+    for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    SourceDigit: BinaryDigit + Oppose + TryFrom<OppositionOf<SourceDigit>>,
-    TargetDigit: BinaryDigit + Oppose + TryFrom<SourceDigit>,
-    OppositionOf<SourceDigit>: TryFrom<SourceDigit>,
+    Source: BinaryDigit + Oppose + TryFrom<OppositionOf<Source>>,
+    Digit: BinaryDigit + Oppose + TryFrom<Source>,
+    OppositionOf<Source>: TryFrom<Source>,
 {
-    fn from(value: SourceDigit) -> Self {
-        debug_assert!(is_valid_shift::<TargetDigit, SHIFT>());
+    fn from(value: Source) -> Self {
+        debug_assert!(is_valid_shift::<Digit, SHIFT>());
         if value.is_zero() {
             Self::zero()
-        } else if size_of::<SourceDigit>() < size_of::<TargetDigit>()
-            || (size_of::<SourceDigit>() == size_of::<TargetDigit>()
-                && utils::is_signed::<SourceDigit>()
-                && utils::is_unsigned::<TargetDigit>())
+        } else if size_of::<Source>() < size_of::<Digit>()
+            || (size_of::<Source>() == size_of::<Digit>()
+                && utils::is_signed::<Source>()
+                && utils::is_unsigned::<Digit>())
         {
             let mut sign = Sign::one();
-            let mut value = if utils::is_signed::<SourceDigit>() {
-                let value =
-                    unsafe { OppositionOf::<SourceDigit>::try_from(value).unwrap_unchecked() };
+            let mut value = if utils::is_signed::<Source>() {
+                let value = unsafe { OppositionOf::<Source>::try_from(value).unwrap_unchecked() };
                 if value.is_negative() {
                     sign = -sign;
                     unsafe {
-                        TargetDigit::try_from(SourceDigit::try_from(-value).unwrap_unchecked())
+                        Digit::try_from(Source::try_from(-value).unwrap_unchecked())
                             .unwrap_unchecked()
                     }
                 } else {
                     unsafe {
-                        TargetDigit::try_from(SourceDigit::try_from(value).unwrap_unchecked())
+                        Digit::try_from(Source::try_from(value).unwrap_unchecked())
                             .unwrap_unchecked()
                     }
                 }
             } else {
-                unsafe { TargetDigit::try_from(value).unwrap_unchecked() }
+                unsafe { Digit::try_from(value).unwrap_unchecked() }
             };
-            let mut digits = Vec::<TargetDigit>::new();
-            let digit_mask = to_digit_mask::<TargetDigit>(SHIFT);
+            let mut digits = Vec::<Digit>::new();
+            let digit_mask = to_digit_mask::<Digit>(SHIFT);
             while !value.is_zero() {
                 digits.push(value & digit_mask);
                 value >>= SHIFT;
@@ -958,23 +957,21 @@ where
             Self { sign, digits }
         } else {
             let mut sign = Sign::one();
-            let mut value = if utils::is_signed::<SourceDigit>() {
-                let value =
-                    unsafe { OppositionOf::<SourceDigit>::try_from(value).unwrap_unchecked() };
+            let mut value = if utils::is_signed::<Source>() {
+                let value = unsafe { OppositionOf::<Source>::try_from(value).unwrap_unchecked() };
                 if value.is_negative() {
                     sign = -sign;
-                    unsafe { SourceDigit::try_from(-value).unwrap_unchecked() }
+                    unsafe { Source::try_from(-value).unwrap_unchecked() }
                 } else {
-                    unsafe { SourceDigit::try_from(value).unwrap_unchecked() }
+                    unsafe { Source::try_from(value).unwrap_unchecked() }
                 }
             } else {
                 value
             };
-            let mut digits = Vec::<TargetDigit>::new();
-            let digit_mask = to_digit_mask::<SourceDigit>(SHIFT);
+            let mut digits = Vec::<Digit>::new();
+            let digit_mask = to_digit_mask::<Source>(SHIFT);
             while !value.is_zero() {
-                digits
-                    .push(unsafe { TargetDigit::try_from(value & digit_mask).unwrap_unchecked() });
+                digits.push(unsafe { Digit::try_from(value & digit_mask).unwrap_unchecked() });
                 value >>= SHIFT;
             }
             Self { sign, digits }

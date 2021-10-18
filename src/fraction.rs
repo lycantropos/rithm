@@ -9,9 +9,10 @@ use crate::digits::{
     UnitaryDigit,
 };
 use crate::traits::{
-    Abs, AdditiveMonoid, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedPow, CheckedShl,
-    DivisivePartialMagma, Float, GcdMagma, Maybe, ModularUnaryAlgebra, MultiplicativeMonoid,
-    NegatableUnaryAlgebra, Oppositive, Pow, SubtractiveMagma, Unitary, Zeroable,
+    Abs, AdditiveMonoid, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedPow,
+    CheckedRemEuclid, CheckedShl, DivisivePartialMagma, Float, GcdMagma, Maybe,
+    ModularUnaryAlgebra, MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, Pow,
+    SubtractiveMagma, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -262,6 +263,64 @@ impl<Digit: Eq + GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SH
             numerator,
             denominator,
         })
+    }
+}
+
+impl<
+        Component: Clone
+            + CheckedRemEuclid<Output = Option<Component>>
+            + DivisivePartialMagma
+            + Eq
+            + GcdMagma
+            + MultiplicativeMonoid
+            + Zeroable,
+    > CheckedRemEuclid for Fraction<Component>
+{
+    type Output = Option<Self>;
+
+    fn checked_rem_euclid(self, divisor: Self) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            let (numerator, denominator) = normalize_components_moduli(
+                (self.numerator * divisor.denominator.clone())
+                    .checked_rem_euclid(divisor.numerator * self.denominator.clone())?,
+                self.denominator * divisor.denominator,
+            );
+            Some(Self {
+                numerator,
+                denominator,
+            })
+        }
+    }
+}
+
+impl<
+        Component: Clone
+            + CheckedRemEuclid<Output = Option<Component>>
+            + DivisivePartialMagma
+            + Eq
+            + GcdMagma
+            + MultiplicativeMonoid
+            + Zeroable,
+    > CheckedRemEuclid<Component> for Fraction<Component>
+{
+    type Output = Option<Self>;
+
+    fn checked_rem_euclid(self, divisor: Component) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            let (numerator, denominator) = normalize_components_moduli(
+                self.numerator
+                    .checked_rem_euclid(divisor * self.denominator.clone())?,
+                self.denominator,
+            );
+            Some(Self {
+                numerator,
+                denominator,
+            })
+        }
     }
 }
 

@@ -258,6 +258,23 @@ except ImportError:
         def __float__(self) -> float:
             return self._numerator._value / self._denominator._value
 
+        @_overload
+        def __floordiv__(self, other: _Any) -> _Any:
+            ...
+
+        @_overload
+        def __floordiv__(self, other: _Union['Fraction', Int]) -> Int:
+            ...
+
+        def __floordiv__(self, other: _Union['Fraction', Int, _Any]
+                         ) -> _Union[Int, _Any]:
+            return ((self.numerator * other.denominator)
+                    // (self.denominator * other.numerator)
+                    if isinstance(other, Fraction)
+                    else (self.numerator // (self.denominator * other)
+                          if isinstance(other, Int)
+                          else NotImplemented))
+
         def __ge__(self, other: 'Fraction') -> bool:
             return (self.numerator * other.denominator
                     >= other.numerator * self.denominator

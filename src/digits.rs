@@ -428,6 +428,41 @@ pub(crate) fn bitwise_or<Digit: BinaryDigit, const SHIFT: usize>(
     (sign, result)
 }
 
+pub(crate) fn bitwise_xor<Digit: BinaryDigit, const SHIFT: usize>(
+    mut longest: Vec<Digit>,
+    longest_sign: Sign,
+    mut shortest: Vec<Digit>,
+    shortest_sign: Sign,
+) -> (Sign, Vec<Digit>) {
+    if longest_sign.is_negative() {
+        longest = complement::<Digit, SHIFT>(&longest);
+    };
+    if shortest_sign.is_negative() {
+        shortest = complement::<Digit, SHIFT>(&shortest);
+    };
+    let mut result = Vec::<Digit>::with_capacity(longest.len());
+    for index in 0..shortest.len() {
+        result.push(longest[index] ^ shortest[index]);
+    }
+    if shortest_sign.is_negative() {
+        let digit_mask = to_digit_mask::<Digit>(SHIFT);
+        for index in shortest.len()..longest.len() {
+            result.push(longest[index] ^ digit_mask);
+        }
+    } else {
+        for index in shortest.len()..longest.len() {
+            result.push(longest[index]);
+        }
+    };
+    let sign = longest_sign ^ shortest_sign;
+    if sign.is_negative() {
+        result.push(to_digit_mask::<Digit>(SHIFT));
+        result = complement::<Digit, SHIFT>(&result);
+    }
+    trim_leading_zeros(&mut result);
+    (sign, result)
+}
+
 pub(crate) fn checked_div_approximation<
     Digit: BinaryDigitConvertibleToFloat<Output> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
     Output: Float,

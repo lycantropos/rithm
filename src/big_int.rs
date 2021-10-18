@@ -4,7 +4,8 @@ use std::fmt::{Debug, Display, Formatter};
 use std::iter::Peekable;
 use std::mem::size_of;
 use std::ops::{
-    Add, AddAssign, BitAnd, BitOr, Div, DivAssign, Mul, MulAssign, Neg, Not, Rem, Sub, SubAssign,
+    Add, AddAssign, BitAnd, BitOr, BitXor, Div, DivAssign, Mul, MulAssign, Neg, Not, Rem, Sub,
+    SubAssign,
 };
 use std::str::Chars;
 
@@ -435,6 +436,21 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitOr
             bitwise_or::<Digit, SHIFT>(self.digits, self.sign, other.digits, other.sign)
         } else {
             bitwise_or::<Digit, SHIFT>(other.digits, other.sign, self.digits, self.sign)
+        };
+        Self { sign, digits }
+    }
+}
+
+impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitXor
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Self;
+
+    fn bitxor(self, other: Self) -> Self::Output {
+        let (sign, digits) = if self.digits.len() > other.digits.len() {
+            bitwise_xor::<Digit, SHIFT>(self.digits, self.sign, other.digits, other.sign)
+        } else {
+            bitwise_xor::<Digit, SHIFT>(other.digits, other.sign, self.digits, self.sign)
         };
         Self { sign, digits }
     }

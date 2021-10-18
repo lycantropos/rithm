@@ -296,6 +296,10 @@ impl PyNumberProtocol for PyInt {
         PyInt(-self.0.clone())
     }
 
+    fn __or__(lhs: PyInt, rhs: PyInt) -> PyInt {
+        PyInt(lhs.0 | rhs.0)
+    }
+
     fn __pow__(lhs: PyInt, rhs: PyInt, divisor: Option<PyInt>) -> PyResult<PyObject> {
         match divisor {
             Some(value) => {

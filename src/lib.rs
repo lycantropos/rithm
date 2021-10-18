@@ -443,6 +443,31 @@ impl PyNumberProtocol for PyFraction {
         }
     }
 
+    fn __mod__(lhs: PyFraction, rhs: &PyAny) -> PyResult<PyObject> {
+        let py = rhs.py();
+        if rhs.is_instance::<PyFraction>()? {
+            match lhs
+                .0
+                .clone()
+                .checked_rem_euclid(rhs.extract::<PyFraction>()?.0)
+            {
+                Some(value) => Ok(PyFraction(value).into_py(py)),
+                None => Err(PyZeroDivisionError::new_err(
+                    UNDEFINED_DIVISION_ERROR_MESSAGE,
+                )),
+            }
+        } else if rhs.is_instance::<PyInt>()? {
+            match lhs.0.clone().checked_rem_euclid(rhs.extract::<PyInt>()?.0) {
+                Some(value) => Ok(PyFraction(value).into_py(py)),
+                None => Err(PyZeroDivisionError::new_err(
+                    UNDEFINED_DIVISION_ERROR_MESSAGE,
+                )),
+            }
+        } else {
+            Ok(py.NotImplemented())
+        }
+    }
+
     fn __mul__(lhs: PyFraction, rhs: &PyAny) -> PyResult<PyObject> {
         let py = rhs.py();
         if rhs.is_instance::<PyFraction>()? {

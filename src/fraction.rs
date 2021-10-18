@@ -5,8 +5,8 @@ use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use crate::big_int::BigInt;
 use crate::digits::{
-    AdditiveDigit, DigitConvertibleFromFloat, GcdDigit, LeftShiftableDigit, MultiplicativeDigit,
-    UnitaryDigit,
+    AdditiveDigit, DigitConvertibleFromFloat, EuclidDivisibleDigit, GcdDigit, LeftShiftableDigit,
+    MultiplicativeDigit, UnitaryDigit,
 };
 use crate::traits::{
     Abs, AdditiveMonoid, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedDivEuclid,
@@ -294,6 +294,42 @@ impl<
         } else {
             self.numerator
                 .checked_div_euclid(divisor * self.denominator)
+        }
+    }
+}
+
+macro_rules! plain_checked_div_euclid_fraction_impl {
+    ($($t:ty)*) => ($(
+    impl CheckedDivEuclid<Fraction<Self>> for $t
+    {
+        type Output = Option<Self>;
+
+        fn checked_div_euclid(self, divisor: Fraction<Self>) -> Self::Output {
+            if divisor.is_zero() {
+                None
+            } else {
+                (self * divisor.denominator).checked_div_euclid(divisor.numerator)
+            }
+        }
+    }
+    )*)
+}
+
+plain_checked_div_euclid_fraction_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
+impl<
+        Digit: Eq + EuclidDivisibleDigit + MultiplicativeDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivEuclid<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Option<Self>;
+
+    fn checked_div_euclid(self, divisor: Fraction<Self>) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            (self * divisor.denominator).checked_div_euclid(divisor.numerator)
         }
     }
 }

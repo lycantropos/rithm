@@ -311,6 +311,25 @@ except ImportError:
                           else NotImplemented))
 
         @_overload
+        def __mod__(self, other: _Any) -> _Any:
+            ...
+
+        @_overload
+        def __mod__(self, other: _Union['Fraction', Int]) -> 'Fraction':
+            ...
+
+        def __mod__(self, other: _Union['Fraction', Int, _Any]
+                    ) -> _Union['Fraction', _Any]:
+            return (Fraction((self.numerator * other.denominator)
+                             % (self.denominator * other.numerator),
+                             self.denominator * other.denominator)
+                    if isinstance(other, Fraction)
+                    else (Fraction(self.numerator % (self.denominator * other),
+                                   self.denominator)
+                          if isinstance(other, Int)
+                          else NotImplemented))
+
+        @_overload
         def __mul__(self, other: _Any) -> _Any:
             ...
 

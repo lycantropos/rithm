@@ -9,8 +9,8 @@ use crate::digits::{
     UnitaryDigit,
 };
 use crate::traits::{
-    Abs, AdditiveMonoid, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedPow,
-    CheckedRemEuclid, CheckedShl, DivisivePartialMagma, Float, GcdMagma, Maybe,
+    Abs, AdditiveMonoid, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedDivEuclid,
+    CheckedPow, CheckedRemEuclid, CheckedShl, DivisivePartialMagma, Float, GcdMagma, Maybe,
     ModularUnaryAlgebra, MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, Pow,
     SubtractiveMagma, Unitary, Zeroable,
 };
@@ -263,6 +263,38 @@ impl<Digit: Eq + GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SH
             numerator,
             denominator,
         })
+    }
+}
+
+impl<
+        Component: Clone + CheckedDivEuclid<Output = Option<Component>> + Eq + MultiplicativeMonoid + Zeroable,
+    > CheckedDivEuclid for Fraction<Component>
+{
+    type Output = Option<Component>;
+
+    fn checked_div_euclid(self, divisor: Self) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            (self.numerator * divisor.denominator)
+                .checked_div_euclid(divisor.numerator * self.denominator)
+        }
+    }
+}
+
+impl<
+        Component: Clone + CheckedDivEuclid<Output = Option<Component>> + Eq + MultiplicativeMonoid + Zeroable,
+    > CheckedDivEuclid<Component> for Fraction<Component>
+{
+    type Output = Option<Component>;
+
+    fn checked_div_euclid(self, divisor: Component) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            self.numerator
+                .checked_div_euclid(divisor * self.denominator)
+        }
     }
 }
 

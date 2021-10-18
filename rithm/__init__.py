@@ -380,6 +380,19 @@ except ImportError:
                     else NotImplemented)
 
         @_overload
+        def __rfloordiv__(self, other: _Any) -> _Any:
+            ...
+
+        @_overload
+        def __rfloordiv__(self, other: Int) -> Int:
+            ...
+
+        def __rfloordiv__(self, other: _Union[Int, _Any]) -> _Union[Int, _Any]:
+            return ((other * self.denominator) // self.numerator
+                    if isinstance(other, Int)
+                    else NotImplemented)
+
+        @_overload
         def __rmul__(self, other: _Any) -> _Any:
             ...
 

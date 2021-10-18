@@ -168,6 +168,11 @@ except ImportError:
         def __trunc__(self) -> 'Int':
             return self
 
+        def __xor__(self, other: 'Int') -> 'Int':
+            return (Int(self._value ^ other._value)
+                    if isinstance(other, Int)
+                    else NotImplemented)
+
 
     _ONE = Int('1')
     _ZERO = Int()

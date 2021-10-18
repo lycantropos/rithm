@@ -354,6 +354,10 @@ impl PyNumberProtocol for PyInt {
             )),
         }
     }
+
+    fn __xor__(lhs: PyInt, rhs: PyInt) -> PyInt {
+        PyInt(lhs.0 ^ rhs.0)
+    }
 }
 
 fn hash(value: &_BigInt) -> usize {

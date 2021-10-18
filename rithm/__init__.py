@@ -16,6 +16,9 @@ except ImportError:
 
 
     class Int:
+        def bit_length(self) -> 'Int':
+            return Int(self._value.bit_length())
+
         def gcd(self, other: 'Int') -> 'Int':
             return Int(_gcd(self._value, other._value))
 

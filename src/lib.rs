@@ -19,9 +19,9 @@ use pyo3::{ffi, AsPyPointer, Py, PyAny, PyErr, PyNativeType, PyRef, ToPyObject};
 use pyo3::{IntoPy, PyNumberProtocol, PyObject};
 
 use crate::traits::{
-    Abs, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow, CheckedPowRemEuclid,
-    CheckedRemEuclid, CheckedShl, CheckedShr, FromStrRadix, Gcd, Oppositive, Pow, Unitary,
-    Zeroable,
+    Abs, BitLength, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,
+    CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, FromStrRadix, Gcd, Oppositive,
+    Pow, Unitary, Zeroable,
 };
 
 pub mod big_int;
@@ -112,6 +112,10 @@ impl PyInt {
                 }
             }
         }
+    }
+
+    fn bit_length(&self) -> PyInt {
+        PyInt(self.0.clone().bit_length())
     }
 
     #[pyo3(text_signature = "($self, other, /)")]

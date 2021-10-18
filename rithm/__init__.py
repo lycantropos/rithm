@@ -121,6 +121,11 @@ except ImportError:
         def __neg__(self) -> 'Int':
             return Int(-self._value)
 
+        def __or__(self, other: 'Int') -> 'Int':
+            return (Int(self._value | other._value)
+                    if isinstance(other, Int)
+                    else NotImplemented)
+
         def __pow__(self,
                     exponent: 'Int',
                     divisor: _Optional['Int'] = None

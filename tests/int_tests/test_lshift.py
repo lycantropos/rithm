@@ -14,7 +14,7 @@ def test_connection_with_builtin(first_with_builtin: IntWithBuiltin,
 
     try:
         result = first << second
-    except (MemoryError, ValueError) as error:
+    except (MemoryError, OverflowError, ValueError) as error:
         with pytest.raises(type(error)):
             first_builtin << second_builtin
     else:

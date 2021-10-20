@@ -278,8 +278,9 @@ impl PyNumberProtocol for PyInt {
             .checked_shl(rhs.0)
             .map(PyInt)
             .map_err(|reason| match reason {
+                big_int::ShiftError::NegativeShift => PyValueError::new_err(reason.to_string()),
                 big_int::ShiftError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
-                _ => PyValueError::new_err(reason.to_string()),
+                big_int::ShiftError::TooLarge => PyOverflowError::new_err(reason.to_string()),
             })
     }
 

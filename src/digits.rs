@@ -522,7 +522,7 @@ pub(crate) fn checked_div_approximation<
         }
         let quotient_digits_count = dividend_digits_count + shift_digits + 1;
         let mut quotient_data = vec![Digit::zero(); quotient_digits_count];
-        let remainder = shift_digits_left::<Digit, SHIFT>(
+        let remainder = shift_digits_left_in_place::<Digit, SHIFT>(
             dividend_digits,
             ((-shift) as usize) % SHIFT,
             &mut quotient_data[shift_digits..],
@@ -533,7 +533,7 @@ pub(crate) fn checked_div_approximation<
         let mut shift_digits = (shift as usize) / SHIFT;
         let quotient_digits_count = dividend_digits_count - shift_digits;
         let mut quotient_data = vec![Digit::zero(); quotient_digits_count];
-        let remainder = shift_digits_right::<Digit, SHIFT>(
+        let remainder = shift_digits_right_in_place::<Digit, SHIFT>(
             &dividend_digits[shift_digits..],
             (shift as usize) % SHIFT,
             &mut quotient_data,
@@ -793,9 +793,9 @@ pub(crate) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usi
     let mut dividend_normalized = vec![Digit::zero(); dividend_digits_count];
     let mut divisor_normalized = vec![Digit::zero(); divisor_digits_count];
     let shift = SHIFT - divisor[divisor.len() - 1].bit_length();
-    shift_digits_left::<Digit, SHIFT>(divisor, shift, divisor_normalized.as_mut_slice());
+    shift_digits_left_in_place::<Digit, SHIFT>(divisor, shift, divisor_normalized.as_mut_slice());
     let accumulator =
-        shift_digits_left::<Digit, SHIFT>(dividend, shift, dividend_normalized.as_mut_slice());
+        shift_digits_left_in_place::<Digit, SHIFT>(dividend, shift, dividend_normalized.as_mut_slice());
     let last_divisor_digit_normalized = divisor_normalized[divisor_normalized.len() - 1];
     if !accumulator.is_zero()
         || dividend_normalized[dividend_normalized.len() - 1] >= last_divisor_digit_normalized
@@ -876,7 +876,7 @@ pub(crate) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usi
     }
     trim_leading_zeros(&mut quotient);
     let mut remainder = divisor_normalized;
-    shift_digits_right::<Digit, SHIFT>(
+    shift_digits_right_in_place::<Digit, SHIFT>(
         &dividend_normalized[..divisor_digits_count],
         shift,
         remainder.as_mut_slice(),
@@ -906,7 +906,7 @@ pub(crate) fn fraction_exponent_digits<
         let shift_digits = (Fraction::MANTISSA_DIGITS + 2 - bits_count) / SHIFT;
         let shift_bits = (Fraction::MANTISSA_DIGITS + 2 - bits_count) % SHIFT;
         let mut result_size = shift_digits;
-        let remainder = shift_digits_left::<Digit, SHIFT>(
+        let remainder = shift_digits_left_in_place::<Digit, SHIFT>(
             digits,
             shift_bits,
             &mut result_digits[result_size..],
@@ -918,7 +918,7 @@ pub(crate) fn fraction_exponent_digits<
     } else {
         let mut shift_digits = (bits_count - Fraction::MANTISSA_DIGITS - 2) / SHIFT;
         let shift_bits = (bits_count - Fraction::MANTISSA_DIGITS - 2) % SHIFT;
-        let remainder = shift_digits_right::<Digit, SHIFT>(
+        let remainder = shift_digits_right_in_place::<Digit, SHIFT>(
             &digits[shift_digits..],
             shift_bits,
             &mut result_digits,
@@ -969,32 +969,6 @@ pub(crate) fn fraction_exponent_digits<
     } else {
         Some((fraction, exponent))
     }
-}
-
-pub(crate) fn left_shift_digits<Digit: LeftShiftableDigit, const SHIFT: usize>(
-    digits: &[Digit],
-    shift_quotient: usize,
-    shift_remainder: Digit,
-) -> Option<Vec<Digit>> {
-    let mut result = Vec::<Digit>::new();
-    result
-        .try_reserve_exact(shift_quotient + ((!shift_remainder.is_zero()) as usize) + digits.len())
-        .ok()?;
-    for _ in 0..shift_quotient {
-        result.push(Digit::zero());
-    }
-    let mut accumulator = DoublePrecisionOf::<Digit>::zero();
-    let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
-    for &digit in digits {
-        accumulator |= DoublePrecisionOf::<Digit>::from(digit) << shift_remainder;
-        result.push(unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() });
-        accumulator >>= SHIFT;
-    }
-    if !shift_remainder.is_zero() {
-        result.push(unsafe { Digit::try_from(accumulator).unwrap_unchecked() });
-    }
-    trim_leading_zeros(&mut result);
-    Some(result)
 }
 
 pub(crate) fn multiply_digits<Digit: MultiplicativeDigit, const SHIFT: usize>(
@@ -1310,7 +1284,53 @@ where
     result
 }
 
-pub(crate) fn right_shift_digits<Digit: RightShiftableDigit, const SHIFT: usize>(
+pub(crate) fn shift_digits_left<Digit: LeftShiftableDigit, const SHIFT: usize>(
+    digits: &[Digit],
+    shift_quotient: usize,
+    shift_remainder: Digit,
+) -> Option<Vec<Digit>> {
+    let mut result = Vec::<Digit>::new();
+    result
+        .try_reserve_exact(shift_quotient + ((!shift_remainder.is_zero()) as usize) + digits.len())
+        .ok()?;
+    for _ in 0..shift_quotient {
+        result.push(Digit::zero());
+    }
+    let mut accumulator = DoublePrecisionOf::<Digit>::zero();
+    let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
+    for &digit in digits {
+        accumulator |= DoublePrecisionOf::<Digit>::from(digit) << shift_remainder;
+        result.push(unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() });
+        accumulator >>= SHIFT;
+    }
+    if !shift_remainder.is_zero() {
+        result.push(unsafe { Digit::try_from(accumulator).unwrap_unchecked() });
+    }
+    trim_leading_zeros(&mut result);
+    Some(result)
+}
+
+fn shift_digits_left_in_place<Digit, const SHIFT: usize>(
+    input: &[Digit],
+    shift: usize,
+    output: &mut [Digit],
+) -> Digit
+where
+    Digit: BinaryDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>>,
+    DoublePrecisionOf<Digit>: BinaryDigit,
+{
+    let mut accumulator: Digit = Digit::zero();
+    let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
+    for index in 0..input.len() {
+        let step = (DoublePrecisionOf::<Digit>::from(input[index]) << shift)
+            | DoublePrecisionOf::<Digit>::from(accumulator);
+        output[index] = unsafe { Digit::try_from(step & digit_mask).unwrap_unchecked() };
+        accumulator = unsafe { Digit::try_from(step >> SHIFT).unwrap_unchecked() };
+    }
+    accumulator
+}
+
+pub(crate) fn shift_digits_right<Digit: RightShiftableDigit, const SHIFT: usize>(
     digits: &[Digit],
     shift_quotient: usize,
     shift_remainder: Digit,
@@ -1335,27 +1355,7 @@ pub(crate) fn right_shift_digits<Digit: RightShiftableDigit, const SHIFT: usize>
     result
 }
 
-fn shift_digits_left<Digit, const SHIFT: usize>(
-    input: &[Digit],
-    shift: usize,
-    output: &mut [Digit],
-) -> Digit
-where
-    Digit: BinaryDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>>,
-    DoublePrecisionOf<Digit>: BinaryDigit,
-{
-    let mut accumulator: Digit = Digit::zero();
-    let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
-    for index in 0..input.len() {
-        let step = (DoublePrecisionOf::<Digit>::from(input[index]) << shift)
-            | DoublePrecisionOf::<Digit>::from(accumulator);
-        output[index] = unsafe { Digit::try_from(step & digit_mask).unwrap_unchecked() };
-        accumulator = unsafe { Digit::try_from(step >> SHIFT).unwrap_unchecked() };
-    }
-    accumulator
-}
-
-fn shift_digits_right<Digit, const SHIFT: usize>(
+fn shift_digits_right_in_place<Digit, const SHIFT: usize>(
     input: &[Digit],
     shift: usize,
     output: &mut [Digit],

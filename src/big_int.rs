@@ -1356,7 +1356,7 @@ impl<Digit: LeftShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Check
             if shift_quotient >= usize::MAX / size_of::<Digit>() {
                 Err(ShiftError::TooLarge)
             } else {
-                let digits = left_shift_digits::<Digit, SHIFT>(
+                let digits = shift_digits_left::<Digit, SHIFT>(
                     &self.digits,
                     shift_quotient,
                     shift_remainder,
@@ -1390,7 +1390,7 @@ macro_rules! plain_signed_checked_shl_impl {
                         && shift_quotient >= ((usize::MAX / size_of::<Digit>()) as $t) {
                         Err(ShiftError::TooLarge)
                     } else {
-                        let digits = left_shift_digits::<Digit, SHIFT>(
+                        let digits = shift_digits_left::<Digit, SHIFT>(
                             &self.digits,
                             shift_quotient as usize,
                             unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
@@ -1426,7 +1426,7 @@ macro_rules! plain_unsigned_checked_shl_impl {
                         && shift_quotient >= ((usize::MAX / size_of::<Digit>()) as $t) {
                         Err(ShiftError::TooLarge)
                     } else {
-                        let digits = left_shift_digits::<Digit, SHIFT>(
+                        let digits = shift_digits_left::<Digit, SHIFT>(
                             &self.digits,
                             shift_quotient as usize,
                             unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
@@ -1467,7 +1467,7 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
                 Err(ShiftError::TooLarge)
             } else if self.is_negative() {
                 let inverted = !self;
-                let digits = right_shift_digits::<Digit, SHIFT>(
+                let digits = shift_digits_right::<Digit, SHIFT>(
                     &inverted.digits,
                     shift_quotient,
                     shift_remainder,
@@ -1477,7 +1477,7 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
                     digits,
                 })
             } else {
-                let digits = right_shift_digits::<Digit, SHIFT>(
+                let digits = shift_digits_right::<Digit, SHIFT>(
                     &self.digits,
                     shift_quotient,
                     shift_remainder,
@@ -1512,7 +1512,7 @@ macro_rules! plain_signed_checked_shr_impl {
                         Err(ShiftError::TooLarge)
                     } else if self.is_negative() {
                         let inverted = !self;
-                        let digits = right_shift_digits::<Digit, SHIFT>(
+                        let digits = shift_digits_right::<Digit, SHIFT>(
                             &inverted.digits,
                             shift_quotient as usize,
                             unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
@@ -1522,7 +1522,7 @@ macro_rules! plain_signed_checked_shr_impl {
                             digits,
                         })
                     } else {
-                        let digits = right_shift_digits::<Digit, SHIFT>(
+                        let digits = shift_digits_right::<Digit, SHIFT>(
                             &self.digits,
                             shift_quotient as usize,
                             unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
@@ -1558,7 +1558,7 @@ macro_rules! plain_unsigned_checked_shr_impl {
                     {
                         Err(ShiftError::TooLarge)
                     } else {
-                        let digits = right_shift_digits::<Digit, SHIFT>(
+                        let digits = shift_digits_right::<Digit, SHIFT>(
                             &self.digits,
                             shift_quotient as usize,
                             unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },

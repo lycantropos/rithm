@@ -278,9 +278,9 @@ impl PyNumberProtocol for PyInt {
             .checked_shl(rhs.0)
             .map(PyInt)
             .map_err(|reason| match reason {
-                big_int::ShiftError::NegativeShift => PyValueError::new_err(reason.to_string()),
-                big_int::ShiftError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
-                big_int::ShiftError::TooLarge => PyOverflowError::new_err(reason.to_string()),
+                big_int::LeftShiftError::NegativeShift => PyValueError::new_err(reason.to_string()),
+                big_int::LeftShiftError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
+                big_int::LeftShiftError::TooLarge => PyOverflowError::new_err(reason.to_string()),
             })
     }
 
@@ -342,8 +342,9 @@ impl PyNumberProtocol for PyInt {
             .checked_shr(rhs.0)
             .map(PyInt)
             .map_err(|reason| match reason {
-                big_int::ShiftError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
-                _ => PyValueError::new_err(reason.to_string()),
+                big_int::RightShiftError::NegativeShift => {
+                    PyValueError::new_err(reason.to_string())
+                }
             })
     }
 

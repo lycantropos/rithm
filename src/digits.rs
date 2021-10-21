@@ -88,6 +88,7 @@ pub trait DivisibleDigit = BinaryDigit
     + BitLength<Output = usize>
     + DoublePrecision
     + From<u8>
+    + Oppose
     + TryFrom<DoublePrecisionOf<Self>>
     + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>
     + TryFrom<usize>

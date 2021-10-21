@@ -455,13 +455,20 @@ pub(crate) fn bitwise_xor<Digit: BinaryDigit, const SHIFT: usize>(
             result.push(longest[index]);
         }
     };
-    let sign = longest_sign ^ shortest_sign;
-    if sign.is_negative() {
+    let sign_is_negative = longest_sign.is_negative() ^ shortest_sign.is_negative();
+    if sign_is_negative {
         result.push(to_digit_mask::<Digit>(SHIFT));
         result = complement::<Digit, SHIFT>(&result);
     }
     trim_leading_zeros(&mut result);
-    (sign, result)
+    (
+        if sign_is_negative {
+            -Sign::one()
+        } else {
+            Sign::one()
+        } * ((result.len() > 1 || !result[0].is_zero()) as Sign),
+        result,
+    )
 }
 
 pub(crate) fn checked_div_approximation<

@@ -197,7 +197,7 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
         Self::parse_digits(characters, base).map(|digits| {
             let digits = digits_to_binary_base::<u8, Digit, SHIFT>(&digits, base as usize);
             Self {
-                sign: sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+                sign: sign * to_digits_sign(&digits),
                 digits,
             }
         })
@@ -389,7 +389,7 @@ where
             negate_digits(&mut bytes);
             -Sign::one()
         } else {
-            (bytes.len() > 1 || !bytes[0].is_zero()) as Sign
+            to_digits_sign(&bytes)
         };
         Self {
             sign,
@@ -592,14 +592,11 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDi
                 div_rem_two_or_more_digits::<Digit, SHIFT>(&self.digits, &divisor.digits);
             Some((
                 Self {
-                    sign: self.sign
-                        * divisor.sign
-                        * ((quotient_digits.len() > 1 || !quotient_digits[0].is_zero()) as Sign),
+                    sign: self.sign * divisor.sign * to_digits_sign(&quotient_digits),
                     digits: quotient_digits,
                 },
                 Self {
-                    sign: self.sign
-                        * ((remainder_digits.len() > 1 || !remainder_digits[0].is_zero()) as Sign),
+                    sign: self.sign * to_digits_sign(&remainder_digits),
                     digits: remainder_digits,
                 },
             ))
@@ -1501,7 +1498,7 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
                     shift_remainder,
                 );
                 Ok(!Self {
-                    sign: inverted.sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+                    sign: inverted.sign * to_digits_sign(&digits),
                     digits,
                 })
             } else {
@@ -1511,7 +1508,7 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
                     shift_remainder,
                 );
                 Ok(Self {
-                    sign: self.sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+                    sign: self.sign * to_digits_sign(&digits),
                     digits,
                 })
             }
@@ -1546,7 +1543,7 @@ macro_rules! plain_signed_checked_shr_impl {
                             unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
                         );
                         Ok(!Self {
-                            sign: inverted.sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+                            sign: inverted.sign * to_digits_sign(&digits),
                             digits,
                         })
                     } else {
@@ -1556,7 +1553,7 @@ macro_rules! plain_signed_checked_shr_impl {
                             unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
                         );
                         Ok(Self {
-                            sign: self.sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+                            sign: self.sign * to_digits_sign(&digits),
                             digits,
                         })
                     }
@@ -1592,7 +1589,7 @@ macro_rules! plain_unsigned_checked_shr_impl {
                             unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
                         );
                         Ok(Self {
-                            sign: self.sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+                            sign: self.sign * to_digits_sign(&digits),
                             digits,
                         })
                     }

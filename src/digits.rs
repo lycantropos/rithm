@@ -392,7 +392,7 @@ pub(crate) fn bitwise_and<Digit: BinaryDigit, const SHIFT: usize>(
         result = complement::<Digit, SHIFT>(&result);
     }
     trim_leading_zeros(&mut result);
-    sign *= (result.len() > 1 || !result[0].is_zero()) as Sign;
+    sign *= to_digits_sign(&result);
     (sign, result)
 }
 
@@ -466,7 +466,7 @@ pub(crate) fn bitwise_xor<Digit: BinaryDigit, const SHIFT: usize>(
             -Sign::one()
         } else {
             Sign::one()
-        } * ((result.len() > 1 || !result[0].is_zero()) as Sign),
+        } * to_digits_sign(&result),
         result,
     )
 }
@@ -569,7 +569,7 @@ pub(crate) fn checked_div_approximation<
         let (next_quotient_digits, remainder) =
             div_rem_two_or_more_digits::<Digit, SHIFT>(&quotient_digits, divisor_digits);
         quotient_digits = next_quotient_digits;
-        if remainder.len() > 1 || !remainder[0].is_zero() {
+        if !to_digits_sign(&remainder).is_zero() {
             inexact = true;
         }
     }
@@ -613,7 +613,7 @@ pub(crate) fn checked_div<Digit: DivisibleDigit, const SHIFT: usize>(
     } else {
         let (digits, _) = div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
         Some((
-            dividend_sign * divisor_sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+            dividend_sign * divisor_sign * to_digits_sign(&digits),
             digits,
         ))
     }
@@ -651,9 +651,9 @@ pub(crate) fn checked_div_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize
         } else {
             let (digits, remainder) = div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
             (
-                dividend_sign * divisor_sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
+                dividend_sign * divisor_sign * to_digits_sign(&digits),
                 digits,
-                remainder.len() > 1 || !remainder[0].is_zero(),
+                !to_digits_sign(&remainder).is_zero(),
             )
         };
         if remainder_is_non_zero
@@ -681,10 +681,7 @@ pub(crate) fn checked_rem<Digit: DivisibleDigit, const SHIFT: usize>(
         Some((dividend_sign * ((!digit.is_zero()) as Sign), vec![digit]))
     } else {
         let (_, digits) = div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
-        Some((
-            dividend_sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
-            digits,
-        ))
+        Some((dividend_sign * to_digits_sign(&digits), digits))
     }
 }
 
@@ -716,10 +713,7 @@ pub(crate) fn checked_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize
             (dividend_sign * ((!digit.is_zero()) as Sign), vec![digit])
         } else {
             let (_, digits) = div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
-            (
-                dividend_sign * ((digits.len() > 1 || !digits[0].is_zero()) as Sign),
-                digits,
-            )
+            (dividend_sign * to_digits_sign(&digits), digits)
         };
         if (divisor_sign.is_negative() && sign.is_positive())
             || (divisor_sign.is_positive() && sign.is_negative())
@@ -1587,6 +1581,11 @@ pub(crate) fn to_digit_mask<Digit: ShiftingLeftMonoid<usize> + SubtractiveMagma 
     shift: usize,
 ) -> Digit {
     (Digit::one() << shift) - Digit::one()
+}
+
+#[inline]
+pub(crate) fn to_digits_sign<Digit: Zeroable>(result: &[Digit]) -> Sign {
+    (result.len() > 1 || !result[0].is_zero()) as Sign
 }
 
 pub(crate) fn trim_leading_zeros<Digit>(digits: &mut Vec<Digit>)

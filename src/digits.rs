@@ -795,8 +795,11 @@ pub(crate) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usi
     let mut divisor_normalized = vec![Digit::zero(); divisor_digits_count];
     let shift = SHIFT - divisor[divisor.len() - 1].bit_length();
     shift_digits_left_in_place::<Digit, SHIFT>(divisor, shift, divisor_normalized.as_mut_slice());
-    let accumulator =
-        shift_digits_left_in_place::<Digit, SHIFT>(dividend, shift, dividend_normalized.as_mut_slice());
+    let accumulator = shift_digits_left_in_place::<Digit, SHIFT>(
+        dividend,
+        shift,
+        dividend_normalized.as_mut_slice(),
+    );
     let last_divisor_digit_normalized = divisor_normalized[divisor_normalized.len() - 1];
     if !accumulator.is_zero()
         || dividend_normalized[dividend_normalized.len() - 1] >= last_divisor_digit_normalized

@@ -727,8 +727,8 @@ pub(crate) fn complement<Digit: BinaryDigit, const SHIFT: usize>(digits: &[Digit
     let mut result = Vec::<Digit>::with_capacity(digits.len());
     let mut accumulator = Digit::one();
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
-    for index in 0..digits.len() {
-        accumulator += digits[index] ^ digit_mask;
+    for &digit in digits {
+        accumulator += digit ^ digit_mask;
         result.push(accumulator & digit_mask);
         accumulator >>= SHIFT;
     }

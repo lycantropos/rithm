@@ -1488,7 +1488,11 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
                 checked_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
                     .unwrap_or(usize::MAX / size_of::<Digit>());
             if shift_quotient >= usize::MAX / size_of::<Digit>() {
-                Ok(Self::zero())
+                Ok(if self.is_negative() {
+                    !Self::zero()
+                } else {
+                    Self::zero()
+                })
             } else if self.is_negative() {
                 let inverted = !self;
                 let digits = shift_digits_right::<Digit, SHIFT>(

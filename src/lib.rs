@@ -448,18 +448,14 @@ impl PyNumberProtocol for PyFraction {
     fn __floordiv__(lhs: PyFraction, rhs: &PyAny) -> PyResult<PyObject> {
         let py = rhs.py();
         if rhs.is_instance::<PyFraction>()? {
-            match lhs
-                .0
-                .clone()
-                .checked_div_euclid(rhs.extract::<PyFraction>()?.0)
-            {
+            match lhs.0.checked_div_euclid(rhs.extract::<PyFraction>()?.0) {
                 Some(value) => Ok(PyInt(value).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
                     UNDEFINED_DIVISION_ERROR_MESSAGE,
                 )),
             }
         } else if rhs.is_instance::<PyInt>()? {
-            match lhs.0.clone().checked_div_euclid(rhs.extract::<PyInt>()?.0) {
+            match lhs.0.checked_div_euclid(rhs.extract::<PyInt>()?.0) {
                 Some(value) => Ok(PyInt(value).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
                     UNDEFINED_DIVISION_ERROR_MESSAGE,

@@ -369,27 +369,22 @@ pub(crate) fn bitwise_and<Digit: BinaryDigit, const SHIFT: usize>(
     shortest_sign: Sign,
 ) -> (Sign, Vec<Digit>) {
     if longest_sign.is_negative() {
-        longest = complement::<Digit, SHIFT>(&longest);
+        complement_in_place::<Digit, SHIFT>(&mut longest);
     };
     if shortest_sign.is_negative() {
-        shortest = complement::<Digit, SHIFT>(&shortest);
+        complement_in_place::<Digit, SHIFT>(&mut shortest);
     };
-    let result_size = if shortest_sign.is_negative() {
-        longest.len()
-    } else {
-        shortest.len()
+    let mut result = longest;
+    if !shortest_sign.is_negative() {
+        result.truncate(shortest.len());
     };
-    let mut result = Vec::<Digit>::with_capacity(result_size);
     for index in 0..shortest.len() {
-        result.push(longest[index] & shortest[index]);
-    }
-    for index in shortest.len()..result_size {
-        result.push(longest[index]);
+        result[index] &= shortest[index];
     }
     let mut sign = longest_sign & shortest_sign;
     if sign.is_negative() {
         result.push(to_digit_mask::<Digit>(SHIFT));
-        result = complement::<Digit, SHIFT>(&result);
+        complement_in_place::<Digit, SHIFT>(&mut result);
     }
     trim_leading_zeros(&mut result);
     sign *= to_digits_sign(&result);
@@ -403,46 +398,40 @@ pub(crate) fn bitwise_or<Digit: BinaryDigit, const SHIFT: usize>(
     shortest_sign: Sign,
 ) -> (Sign, Vec<Digit>) {
     if longest_sign.is_negative() {
-        longest = complement::<Digit, SHIFT>(&longest);
+        complement_in_place::<Digit, SHIFT>(&mut longest);
     };
     if shortest_sign.is_negative() {
-        shortest = complement::<Digit, SHIFT>(&shortest);
+        complement_in_place::<Digit, SHIFT>(&mut shortest);
     };
-    let result_size = if shortest_sign.is_negative() {
-        shortest.len()
-    } else {
-        longest.len()
+    let mut result = longest;
+    if shortest_sign.is_negative() {
+        result.truncate(shortest.len());
     };
-    let mut result = Vec::<Digit>::with_capacity(result_size);
     for index in 0..shortest.len() {
-        result.push(longest[index] | shortest[index]);
-    }
-    for index in shortest.len()..result_size {
-        result.push(longest[index]);
+        result[index] |= shortest[index];
     }
     let sign = longest_sign | shortest_sign;
     if sign.is_negative() {
         result.push(to_digit_mask::<Digit>(SHIFT));
-        result = complement::<Digit, SHIFT>(&result);
+        complement_in_place::<Digit, SHIFT>(&mut result);
     }
     trim_leading_zeros(&mut result);
     (sign, result)
 }
 
 pub(crate) fn bitwise_xor<Digit: BinaryDigit, const SHIFT: usize>(
-    longest: Vec<Digit>,
+    mut longest: Vec<Digit>,
     longest_sign: Sign,
     mut shortest: Vec<Digit>,
     shortest_sign: Sign,
 ) -> (Sign, Vec<Digit>) {
+    if longest_sign.is_negative() {
+        complement_in_place::<Digit, SHIFT>(&mut longest);
+    };
     if shortest_sign.is_negative() {
-        shortest = complement::<Digit, SHIFT>(&shortest);
+        complement_in_place::<Digit, SHIFT>(&mut shortest);
     };
-    let mut result = if longest_sign.is_negative() {
-        complement::<Digit, SHIFT>(&longest)
-    } else {
-        longest
-    };
+    let mut result = longest;
     for index in 0..shortest.len() {
         result[index] ^= shortest[index];
     }
@@ -455,7 +444,7 @@ pub(crate) fn bitwise_xor<Digit: BinaryDigit, const SHIFT: usize>(
     let sign_is_negative = longest_sign.is_negative() ^ shortest_sign.is_negative();
     if sign_is_negative {
         result.push(to_digit_mask::<Digit>(SHIFT));
-        result = complement::<Digit, SHIFT>(&result);
+        complement_in_place::<Digit, SHIFT>(&mut result);
     }
     trim_leading_zeros(&mut result);
     (
@@ -721,17 +710,15 @@ pub(crate) fn checked_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize
     }
 }
 
-pub(crate) fn complement<Digit: BinaryDigit, const SHIFT: usize>(digits: &[Digit]) -> Vec<Digit> {
-    let mut result = Vec::<Digit>::with_capacity(digits.len());
+pub(crate) fn complement_in_place<Digit: BinaryDigit, const SHIFT: usize>(digits: &mut [Digit]) {
     let mut accumulator = Digit::one();
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
-    for &digit in digits {
-        accumulator += digit ^ digit_mask;
-        result.push(accumulator & digit_mask);
+    for index in 0..digits.len() {
+        accumulator += digits[index] ^ digit_mask;
+        digits[index] = accumulator & digit_mask;
         accumulator >>= SHIFT;
     }
     debug_assert!(accumulator.is_zero());
-    result
 }
 
 pub(crate) fn digits_from_finite_positive_improper_float<

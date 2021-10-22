@@ -430,29 +430,26 @@ pub(crate) fn bitwise_or<Digit: BinaryDigit, const SHIFT: usize>(
 }
 
 pub(crate) fn bitwise_xor<Digit: BinaryDigit, const SHIFT: usize>(
-    mut longest: Vec<Digit>,
+    longest: Vec<Digit>,
     longest_sign: Sign,
     mut shortest: Vec<Digit>,
     shortest_sign: Sign,
 ) -> (Sign, Vec<Digit>) {
-    if longest_sign.is_negative() {
-        longest = complement::<Digit, SHIFT>(&longest);
-    };
     if shortest_sign.is_negative() {
         shortest = complement::<Digit, SHIFT>(&shortest);
     };
-    let mut result = Vec::<Digit>::with_capacity(longest.len());
+    let mut result = if longest_sign.is_negative() {
+        complement::<Digit, SHIFT>(&longest)
+    } else {
+        longest
+    };
     for index in 0..shortest.len() {
-        result.push(longest[index] ^ shortest[index]);
+        result[index] ^= shortest[index];
     }
     if shortest_sign.is_negative() {
         let digit_mask = to_digit_mask::<Digit>(SHIFT);
-        for index in shortest.len()..longest.len() {
-            result.push(longest[index] ^ digit_mask);
-        }
-    } else {
-        for index in shortest.len()..longest.len() {
-            result.push(longest[index]);
+        for index in shortest.len()..result.len() {
+            result[index] ^= digit_mask;
         }
     };
     let sign_is_negative = longest_sign.is_negative() ^ shortest_sign.is_negative();

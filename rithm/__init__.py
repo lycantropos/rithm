@@ -393,6 +393,21 @@ except ImportError:
                     else NotImplemented)
 
         @_overload
+        def __rmod__(self, other: _Any) -> _Any:
+            ...
+
+        @_overload
+        def __rmod__(self, other: Int) -> 'Fraction':
+            ...
+
+        def __rmod__(self, other: _Union[Int, _Any]
+                     ) -> _Union['Fraction', _Any]:
+            return (Fraction((other * self.denominator) % self.numerator,
+                             self.denominator)
+                    if isinstance(other, Int)
+                    else NotImplemented)
+
+        @_overload
         def __rmul__(self, other: _Any) -> _Any:
             ...
 

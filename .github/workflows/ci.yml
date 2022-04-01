@@ -54,9 +54,8 @@ jobs:
       - name: 'Install Rust toolchain'
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: nightly
           target: ${{ matrix.platform.rust_target }}
-          profile: minimal
           default: true
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install Rust aarch64-apple-darwin target'

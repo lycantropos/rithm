@@ -49,7 +49,7 @@ jobs:
       - name: 'Setup Python ${{ matrix.python_version }}'
         uses: actions/setup-python@v2
         with:
-          python_version: ${{ matrix.python_version }}
+          python-version: ${{ matrix.python_version }}
           architecture: ${{ matrix.platform.python_architecture }}
       - name: 'Install Rust toolchain'
         uses: actions-rs/toolchain@v1

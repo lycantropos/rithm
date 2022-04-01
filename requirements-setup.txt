@@ -1,1 +1,1 @@
-setuptools-rust>=0.12.1,<1.0
+setuptools-rust>=1.2.0,<2.0

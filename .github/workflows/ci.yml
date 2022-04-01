@@ -218,4 +218,4 @@ jobs:
       - name: 'crates.io upload'
         run: cargo publish --no-verify
         env:
-          CARGO_REGISTRY_TOKEN: $(CARGO_REGISTRY_TOKEN)
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

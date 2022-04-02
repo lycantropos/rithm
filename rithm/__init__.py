@@ -201,7 +201,8 @@ except ImportError:
             if _denominator is None:
                 if isinstance(_numerator, float):
                     raw_numerator, raw_denominator = (
-                        _numerator.as_integer_ratio())
+                        _numerator.as_integer_ratio()
+                    )
                     numerator, denominator = (Int(raw_numerator),
                                               Int(raw_denominator))
                 elif isinstance(_numerator, Int):
@@ -211,6 +212,9 @@ except ImportError:
                                     f'type {Int} or {float}, '
                                     f'but found: {type(_numerator)}.')
             elif isinstance(_denominator, Int):
+                if not isinstance(_numerator, Int):
+                    raise TypeError(f'Numerator should be of type {Int}, '
+                                    f'but found: {type(_numerator)}.')
                 numerator, denominator = _numerator, _denominator
             else:
                 raise TypeError(f'Denominator should be of type {Int}, '

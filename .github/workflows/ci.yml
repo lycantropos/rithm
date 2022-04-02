@@ -187,6 +187,7 @@ jobs:
       - name: 'Build wheels'
         uses: pypa/cibuildwheel@v2.3.1
         env:
+          CIBW_ARCHS: native
           CIBW_ARCHS_MACOS: x86_64 arm64 universal2
           CIBW_BEFORE_ALL_LINUX: curl https://sh.rustup.rs -sSf | sh -s -- -y
           CIBW_BEFORE_BUILD: >

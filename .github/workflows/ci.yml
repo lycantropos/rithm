@@ -225,13 +225,15 @@ jobs:
       - name: 'Build wheels'
         uses: messense/maturin-action@v1
         with:
+          args: --release --out dist --no-sdist
           target: ${{ matrix.platform.target }}
           manylinux: 'auto'
-          args: --release --out dist --no-sdist
+          rust-toolchain: 'nightly'
       - name: 'Build universal2 wheels'
         uses: messense/maturin-action@v1
         with:
           args: --release --out dist --no-sdist --universal2
+          rust-toolchain: 'nightly'
         if: ${{ matrix.platform.os == 'macos-latest'
                 && matrix.platform.rust_target == 'aarch64-apple-darwin' }}
       - name: 'Upload wheels'

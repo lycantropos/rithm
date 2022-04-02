@@ -219,9 +219,9 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           default: true
-          profile: minimal
           target: ${{ matrix.platform.rust_target }}
           toolchain: nightly
+        if: ${{ matrix.platform.os != 'ubuntu-latest' }}
       - name: 'Build wheels'
         uses: messense/maturin-action@v1
         with:

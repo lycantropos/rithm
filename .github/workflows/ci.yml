@@ -55,6 +55,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           default: true
+          rust-toolchain: rust-toolchain.toml
           target: ${{ matrix.platform.rust_target }}
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Setup Rust aarch64-apple-darwin target'
@@ -166,6 +167,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           default: true
+          rust-toolchain: rust-toolchain.toml
           target: ${{ matrix.platform.rust_target }}
       - name: 'Setup Rust aarch64-apple-darwin target'
         run: rustup target add aarch64-apple-darwin

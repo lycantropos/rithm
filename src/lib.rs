@@ -11,9 +11,9 @@ use pyo3::class::PyObjectProtocol;
 use pyo3::exceptions::*;
 use pyo3::prelude::{pyclass, pymethods, pymodule, pyproto, PyModule, PyResult, Python};
 use pyo3::types::{PyBytes, PyFloat, PyLong, PyString};
-use pyo3::{AsPyPointer, Py, PyAny, PyErr, PyNativeType, PyRef, ToPyObject};
-use pyo3_ffi as ffi;
+use pyo3::{AsPyPointer, Py, PyAny, PyErr, PyRef, ToPyObject};
 use pyo3::{IntoPy, PyNumberProtocol, PyObject};
+use pyo3_ffi as ffi;
 
 use crate::traits::{
     Abs, BitLength, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,

@@ -185,7 +185,9 @@ jobs:
         uses: pypa/cibuildwheel@v2.3.1
         env:
           CIBW_ARCHS_MACOS: x86_64 arm64 universal2
+          CIBW_BEFORE_ALL_LINUX: curl https://sh.rustup.rs -sSf | sh -s -- -y && PATH="$HOME/.cargo/bin$(python -c 'import os; print(os.pathsep, end="")')$PATH" rustup target install ${{ matrix.platform.rust_target }}
           CIBW_BEFORE_BUILD: pip install -e .
+          CIBW_ENVIRONMENT_LINUX: PATH="$HOME/.cargo/bin$(python -c 'import os; print(os.pathsep, end="")')$PATH"
           CIBW_BUILD_VERBOSITY: 1
       - name: 'Upload wheels'
         uses: actions/upload-artifact@v2

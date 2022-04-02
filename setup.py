@@ -24,7 +24,6 @@ parameters = dict(
     author_email='azatibrakov@gmail.com',
     classifiers=[
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
@@ -35,7 +34,7 @@ parameters = dict(
     license='MIT License',
     url=project_base_url,
     download_url=project_base_url + 'archive/master.zip',
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     setup_requires=read_file('requirements-setup.txt'),
 )
 if platform.python_implementation() == 'CPython':

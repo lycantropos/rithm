@@ -1,11 +1,7 @@
 #![feature(const_float_bits_conv)]
-#![feature(const_fn_trait_bound)]
 #![feature(convert_float_to_int)]
-#![feature(destructuring_assignment)]
-#![feature(option_result_unwrap_unchecked)]
 #![feature(specialization)]
 #![feature(trait_alias)]
-#![feature(try_reserve)]
 
 use std::cmp::Ordering;
 use std::convert::{TryFrom, TryInto};

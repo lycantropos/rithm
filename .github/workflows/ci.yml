@@ -219,6 +219,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           default: true
+          profile: minimal
           target: ${{ matrix.platform.rust_target }}
           toolchain: nightly
       - name: 'Build wheels'
@@ -232,7 +233,7 @@ jobs:
         with:
           args: --release --out dist --no-sdist --universal2
         if: ${{ matrix.platform.os == 'macos-latest'
-          && matrix.platform.rust_target == 'aarch64-apple-darwin' }}
+                && matrix.platform.rust_target == 'aarch64-apple-darwin' }}
       - name: 'Upload wheels'
         uses: actions/upload-artifact@v2
         with:

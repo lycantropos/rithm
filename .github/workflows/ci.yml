@@ -15,32 +15,101 @@ jobs:
     runs-on: ${{ matrix.platform.os }}
     strategy:
       matrix:
-        python_version: ['3.7', '3.8', '3.9', '3.10', 'pypy-3.7']
+        python_version: ['3.7', '3.8', '3.9', '3.10']
         platform: [
-        {
-          os: 'macos-latest',
-          python_architecture: 'x64',
-          rust_target: 'x86_64-apple-darwin'
-        },
-        {
-          os: 'ubuntu-latest',
-          python_architecture: 'x64',
-          rust_target: 'x86_64-unknown-linux-gnu'
-        },
-        {
-          os: 'windows-latest',
-          python_architecture: 'x64',
-          rust_target: 'x86_64-pc-windows-msvc'
-        },
-        {
-          os: 'windows-latest',
-          python_architecture: 'x86',
-          rust_target: 'i686-pc-windows-msvc'
-        },
+          {
+            os: 'macos-latest',
+            python_architecture: 'x64',
+            rust_target: 'x86_64-apple-darwin'
+          },
+          {
+            os: 'macos-latest',
+            python_architecture: 'x64',
+            rust_target: 'aarch64-apple-darwin'
+          },
+          {
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'x86_64-unknown-linux-gnu'
+          },
+          {
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'x86_64-unknown-linux-musl'
+          },
+          {
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'i686-unknown-linux-gnu'
+          },
+          {
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'i686-unknown-linux-musl'
+          },
+          {
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'aarch64-unknown-linux-gnu'
+          },
+          {
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'aarch64-unknown-linux-musl'
+          },
+          {
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'armv7-unknown-linux-gnueabihf'
+          },
+          {
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'armv7-unknown-linux-musleabihf'
+          },
+          {
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'powerpc64-unknown-linux-gnu'
+          },
+          {
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'powerpc64le-unknown-linux-gnu'
+          },
+          {
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'powerpc64le-unknown-linux-musl'
+          },
+          {
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 's390x-unknown-linux-gnu'
+          },
+          {
+            os: 'windows-latest',
+            python_architecture: 'x64',
+            rust_target: 'x86_64-pc-windows-msvc'
+          },
+          {
+            os: 'windows-latest',
+            python_architecture: 'x86',
+            rust_target: 'i686-pc-windows-msvc'
+          },
+          {
+            os: 'windows-latest',
+            python_architecture: 'x64',
+            rust_target: 'aarch64-pc-windows-msvc'
+          },
         ]
-        exclude:
+        include:
           - python_version: 'pypy-3.7'
-            platform: { os: 'windows-latest', python_architecture: 'x86' }
+            platform: { os: 'macos-latest', python_architecture: 'x64' }
+          - python_version: 'pypy-3.7'
+            platform: { os: 'ubuntu-latest', python_architecture: 'x64' }
+          - python_version: 'pypy-3.7'
+            platform: { os: 'windows-latest', python_architecture: 'x64' }
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v3

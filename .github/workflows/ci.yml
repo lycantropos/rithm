@@ -17,26 +17,26 @@ jobs:
       matrix:
         python_version: ['3.6', '3.7', '3.8', '3.9', '3.10', 'pypy-3.7']
         platform: [
-          {
-            os: 'macos-latest',
-            python_architecture: 'x64',
-            rust_target: 'x86_64-apple-darwin'
-          },
-          {
-            os: 'ubuntu-latest',
-            python_architecture: 'x64',
-            rust_target: 'x86_64-unknown-linux-gnu'
-          },
-          {
-            os: 'windows-latest',
-            python_architecture: 'x64',
-            rust_target: 'x86_64-pc-windows-msvc'
-          },
-          {
-            os: 'windows-latest',
-            python_architecture: 'x86',
-            rust_target: 'i686-pc-windows-msvc'
-          },
+        {
+          os: 'macos-latest',
+          python_architecture: 'x64',
+          rust_target: 'x86_64-apple-darwin'
+        },
+        {
+          os: 'ubuntu-latest',
+          python_architecture: 'x64',
+          rust_target: 'x86_64-unknown-linux-gnu'
+        },
+        {
+          os: 'windows-latest',
+          python_architecture: 'x64',
+          rust_target: 'x86_64-pc-windows-msvc'
+        },
+        {
+          os: 'windows-latest',
+          python_architecture: 'x86',
+          rust_target: 'i686-pc-windows-msvc'
+        },
         ]
         exclude:
           - python_version: 'pypy-3.7'
@@ -61,7 +61,7 @@ jobs:
       - name: 'Setup Rust aarch64-apple-darwin target'
         run: rustup target add aarch64-apple-darwin
         if: ${{ matrix.platform.os == 'macos-latest'
-                && !startsWith(matrix.python_version, 'pypy') }}
+          && !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install coverage dependencies'
         run: python -m pip install --upgrade coverage codecov
       - name: 'Install Rust coverage dependencies'
@@ -144,8 +144,56 @@ jobs:
             rust_target: 'x86_64-apple-darwin'
           },
           {
+            os: 'macos-latest',
+            rust_target: 'aarch64-apple-darwin'
+          },
+          {
             os: 'ubuntu-latest',
             rust_target: 'x86_64-unknown-linux-gnu'
+          },
+          {
+            os: 'ubuntu-latest',
+            rust_target: 'x86_64-unknown-linux-musl'
+          },
+          {
+            os: 'ubuntu-latest',
+            rust_target: 'i686-unknown-linux-gnu'
+          },
+          {
+            os: 'ubuntu-latest',
+            rust_target: 'i686-unknown-linux-musl'
+          },
+          {
+            os: 'ubuntu-latest',
+            rust_target: 'aarch64-unknown-linux-gnu'
+          },
+          {
+            os: 'ubuntu-latest',
+            rust_target: 'aarch64-unknown-linux-musl'
+          },
+          {
+            os: 'ubuntu-latest',
+            rust_target: 'armv7-unknown-linux-gnueabihf'
+          },
+          {
+            os: 'ubuntu-latest',
+            rust_target: 'armv7-unknown-linux-musleabihf'
+          },
+          {
+            os: 'ubuntu-latest',
+            rust_target: 'powerpc64-unknown-linux-gnu'
+          },
+          {
+            os: 'ubuntu-latest',
+            rust_target: 'powerpc64le-unknown-linux-gnu'
+          },
+          {
+            os: 'ubuntu-latest',
+            rust_target: 'powerpc64le-unknown-linux-musl'
+          },
+          {
+            os: 'ubuntu-latest',
+            rust_target: 's390x-unknown-linux-gnu'
           },
           {
             os: 'windows-latest',
@@ -154,6 +202,10 @@ jobs:
           {
             os: 'windows-latest',
             rust_target: 'i686-pc-windows-msvc'
+          },
+          {
+            os: 'windows-latest',
+            rust_target: 'aarch64-pc-windows-msvc'
           },
         ]
     steps:
@@ -169,38 +221,23 @@ jobs:
           default: true
           target: ${{ matrix.platform.rust_target }}
           toolchain: nightly
-      - name: 'Setup Rust aarch64-apple-darwin target'
-        run: rustup target add aarch64-apple-darwin
-        if: ${{ matrix.platform.os == 'macos-latest' }}
-      - name: 'Setup Rust i686-pc-windows-msvc target'
-        run: rustup target add i686-pc-windows-msvc
-        if: ${{ matrix.platform.os == 'windows-latest' }}
-      - name: 'Set cibuildwheel configurations'
-        run: |
-          cat >> pyproject.toml << EOF
-          [tool.cibuildwheel]
-          test-command = ""
-          # don't build PyPy wheels, install from source instead
-          skip = "pp*"
-          EOF
-        shell: bash
       - name: 'Build wheels'
-        uses: pypa/cibuildwheel@v2.3.1
-        env:
-          CIBW_ARCHS: native
-          CIBW_ARCHS_MACOS: x86_64 arm64 universal2
-          CIBW_BEFORE_ALL_LINUX: curl https://sh.rustup.rs -sSf | sh -s -- -y
-          CIBW_BEFORE_BUILD: >
-            rustup target install ${{ matrix.platform.rust_target }}
-            && pip install -e .
-          CIBW_BUILD_VERBOSITY: 1
-          CIBW_ENVIRONMENT_LINUX: >
-            PATH="$HOME/.cargo/bin$(python -c 'import os; print(os.pathsep, end="")')$PATH"
+        uses: messense/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          manylinux: 'auto'
+          args: --release --out dist --no-sdist
+      - name: 'Build universal2 wheels'
+        uses: messense/maturin-action@v1
+        with:
+          args: --release --out dist --no-sdist --universal2
+        if: ${{ matrix.platform.os == 'macos-latest'
+          && matrix.platform.rust_target == 'aarch64-apple-darwin' }}
       - name: 'Upload wheels'
         uses: actions/upload-artifact@v2
         with:
           name: dist
-          path: ./wheelhouse/*.whl
+          path: dist
 
   deploy:
     name: 'Deploy'

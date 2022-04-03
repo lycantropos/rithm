@@ -243,7 +243,7 @@ jobs:
         uses: docker/setup-qemu-action@v1
         with:
           platforms: all
-        if: ${{ contains(matrix.platform.arhcs, 'aarch64') }}
+        if: ${{ contains(matrix.platform.archs, 'aarch64') }}
       - name: 'Build wheels'
         uses: pypa/cibuildwheel@v2.3.1
         env:

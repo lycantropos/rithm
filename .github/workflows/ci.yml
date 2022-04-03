@@ -46,6 +46,9 @@ jobs:
           - python_version: 'pypy-3.7'
             platform: { os: 'windows-latest', python_architecture: 'x64' }
     steps:
+      - name: 'Show environment variables'
+        run: printenv
+        shell: bash
       - name: 'Checkout'
         uses: actions/checkout@v3
         with:

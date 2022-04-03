@@ -225,15 +225,6 @@ jobs:
           target: ${{ matrix.platform.rust_target }}
           toolchain: nightly
         if: ${{ matrix.platform.os != 'ubuntu-latest' }}
-      - name: 'Set cibuildwheel configurations'
-        run: |
-          cat >> pyproject.toml << EOF
-          [tool.cibuildwheel]
-          test-command = ""
-          # don't build PyPy wheels, install from source instead
-          skip = "pp*"
-          EOF
-        shell: bash
       - name: 'Build wheels'
         uses: pypa/cibuildwheel@v2.3.1
         env:
@@ -245,6 +236,7 @@ jobs:
           CIBW_BUILD: ${{ matrix.platform.builds }}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT_LINUX: PATH="$HOME/.cargo/bin:$PATH"
+          CIBW_SKIP: pp*
       - name: 'Upload wheels'
         uses: actions/upload-artifact@v2
         with:

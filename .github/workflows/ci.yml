@@ -111,7 +111,7 @@ jobs:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     steps:
       - name: '_'
-        run: echo "Predeploy step"
+        run: echo "Pre-deploy step"
 
   deploy-crates-io:
     name: 'Deploy to crates.io'

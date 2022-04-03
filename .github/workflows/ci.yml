@@ -137,6 +137,7 @@ jobs:
     runs-on: ${{ matrix.platform.os }}
 #    needs: pre-deploy
     strategy:
+      fail-fast: false
       matrix:
         platform: [
           {

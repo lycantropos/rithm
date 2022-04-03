@@ -1,7 +1,7 @@
 rithm
 =====
 
-[![](https://dev.azure.com/lycantropos/rithm/_apis/build/status/lycantropos.rithm?branchName=master)](https://dev.azure.com/lycantropos/rithm/_build/latest?definitionId=39&branchName=master "Azure Pipelines")
+[![](https://github.com/lycantropos/rithm/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/lycantropos/rithm/actions/workflows/ci.yml "Github Actions")
 [![](https://codecov.io/gh/lycantropos/rithm/branch/master/graph/badge.svg)](https://codecov.io/gh/lycantropos/rithm "Codecov")
 [![](https://img.shields.io/github/license/lycantropos/rithm.svg)](https://github.com/lycantropos/rithm/blob/master/LICENSE "License")
 [![](https://badge.fury.io/py/rithm.svg)](https://badge.fury.io/py/rithm "PyPI")

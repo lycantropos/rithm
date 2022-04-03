@@ -72,7 +72,7 @@ jobs:
       - name: 'Build sdist'
         run: python -m build --sdist
       - name: 'Install sdist'
-        run: cd dist && python -m pip -v install *.tar.gz && cd -
+        run: python -m pip -v install dist/*.tar.gz
         shell: bash
         env:
           CARGO_INCREMENTAL: 0
@@ -142,7 +142,6 @@ jobs:
     runs-on: ${{ matrix.platform.os }}
     needs: pre-deploy
     strategy:
-      fail-fast: false
       matrix:
         platform: [
           {
@@ -257,7 +256,7 @@ jobs:
   deploy-crates-io:
     name: 'Deploy to crates.io'
     environment: release
-    needs: pre-deploy
+#    needs: pre-deploy
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
@@ -268,6 +267,6 @@ jobs:
           default: true
           toolchain: nightly
       - name: 'Upload'
-        run: cargo publish --no-verify
+        run: cargo publish --no-verify --dry-run
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

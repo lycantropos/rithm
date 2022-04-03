@@ -266,6 +266,7 @@ jobs:
           CIBW_BEFORE_BUILD: pip install -e .
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT_LINUX: PATH="$HOME/.cargo/bin:$PATH"
+          CIBW_MUSLLINUX_I686_IMAGE: messense/rust-musl-cross:i686-musl
       - name: 'Upload wheels'
         uses: actions/upload-artifact@v2
         with:

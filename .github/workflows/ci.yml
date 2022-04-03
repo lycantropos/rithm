@@ -142,93 +142,52 @@ jobs:
         platform: [
           {
             archs: 'x86_64',
+            builds: '*-macosx_x86_64',
             os: 'macos-latest',
             python_architecture: 'x64',
             rust_target: 'x86_64-apple-darwin'
           },
           {
             archs: 'arm64 universal2',
+            builds: '*-macosx_arm64 *-macosx_universal2',
             os: 'macos-latest',
             python_architecture: 'x64',
             rust_target: 'aarch64-apple-darwin'
           },
           {
             archs: 'x86_64',
+            builds: '*-manylinux_x86_64',
             os: 'ubuntu-latest',
             python_architecture: 'x64',
             rust_target: 'x86_64-unknown-linux-gnu'
           },
           {
             archs: 'x86_64',
+            builds: '*-musllinux_x86_64',
             os: 'ubuntu-latest',
             python_architecture: 'x64',
             rust_target: 'x86_64-unknown-linux-musl'
           },
           {
             archs: 'i686',
+            builds: '*-manylinux_i686',
             os: 'ubuntu-latest',
             python_architecture: 'x64',
             rust_target: 'i686-unknown-linux-gnu'
           },
           {
-            archs: 'i686',
-            os: 'ubuntu-latest',
-            python_architecture: 'x64',
-            rust_target: 'i686-unknown-linux-musl'
-          },
-          {
-            archs: 'aarch64',
-            os: 'ubuntu-latest',
-            python_architecture: 'x64',
-            rust_target: 'aarch64-unknown-linux-gnu'
-          },
-          {
-            archs: 'aarch64',
-            os: 'ubuntu-latest',
-            python_architecture: 'x64',
-            rust_target: 'aarch64-unknown-linux-musl'
-          },
-          {
-            archs: 'ppc64le',
-            os: 'ubuntu-latest',
-            python_architecture: 'x64',
-            rust_target: 'powerpc64-unknown-linux-gnu'
-          },
-          {
-            archs: 'ppc64le',
-            os: 'ubuntu-latest',
-            python_architecture: 'x64',
-            rust_target: 'powerpc64le-unknown-linux-gnu'
-          },
-          {
-            archs: 'ppc64le',
-            os: 'ubuntu-latest',
-            python_architecture: 'x64',
-            rust_target: 'powerpc64le-unknown-linux-musl'
-          },
-          {
-            archs: 's390x',
-            os: 'ubuntu-latest',
-            python_architecture: 'x64',
-            rust_target: 's390x-unknown-linux-gnu'
-          },
-          {
             archs: 'AMD64',
+            builds: '*-win_amd64',
             os: 'windows-latest',
             python_architecture: 'x64',
             rust_target: 'x86_64-pc-windows-msvc'
           },
           {
             archs: 'x86',
+            builds: '*-win_x32',
             os: 'windows-latest',
             python_architecture: 'x86',
             rust_target: 'i686-pc-windows-msvc'
-          },
-          {
-            archs: 'AMD64',
-            os: 'windows-latest',
-            python_architecture: 'x64',
-            rust_target: 'aarch64-pc-windows-msvc'
           },
         ]
     steps:
@@ -264,9 +223,9 @@ jobs:
             curl https://sh.rustup.rs -sSf
             | sh -s -- -y --default-toolchain=nightly
           CIBW_BEFORE_BUILD: pip install -e .
+          CIBW_BUILD: ${{ matrix.platform.builds }}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT_LINUX: PATH="$HOME/.cargo/bin:$PATH"
-          CIBW_MUSLLINUX_I686_IMAGE: messense/rust-musl-cross:i686-musl
       - name: 'Upload wheels'
         uses: actions/upload-artifact@v2
         with:

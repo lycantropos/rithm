@@ -184,7 +184,7 @@ jobs:
           },
           {
             archs: 'x86',
-            builds: '*-win_x32',
+            builds: '*-win32',
             os: 'windows-latest',
             python_architecture: 'x86',
             rust_target: 'i686-pc-windows-msvc'

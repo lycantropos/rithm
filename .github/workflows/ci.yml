@@ -251,7 +251,7 @@ jobs:
           CIBW_BEFORE_ALL_LINUX: >
             curl https://sh.rustup.rs -sSf
             | sh -s -- -y --default-toolchain=nightly
-          CIBW_BEFORE_BUILD: pip install -e .
+          CIBW_BEFORE_BUILD: pip -v install -e .
           CIBW_BUILD: ${{ matrix.platform.builds }}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT_LINUX: PATH="$HOME/.cargo/bin:$PATH"

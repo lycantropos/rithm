@@ -73,6 +73,7 @@ jobs:
         run: python -m build --sdist
       - name: 'Install sdist'
         run: cd dist && python -m pip -v install *.tar.gz && cd -
+        shell: bash
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: >

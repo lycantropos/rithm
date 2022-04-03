@@ -261,23 +261,19 @@ jobs:
         platform: [
           {
             os: 'macos-latest',
-            python_architecture: 'x64',
-            rust_target: 'x86_64-apple-darwin'
+            python_architecture: 'x64'
           },
           {
             os: 'ubuntu-latest',
-            python_architecture: 'x64',
-            rust_target: 'x86_64-unknown-linux-gnu'
+            python_architecture: 'x64'
           },
           {
             os: 'windows-latest',
-            python_architecture: 'x64',
-            rust_target: 'x86_64-pc-windows-msvc'
+            python_architecture: 'x64'
           },
           {
             os: 'windows-latest',
-            python_architecture: 'x86',
-            rust_target: 'i686-pc-windows-msvc'
+            python_architecture: 'x86'
           },
         ]
         include:
@@ -293,13 +289,6 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
           architecture: ${{ matrix.platform.python_architecture }}
-      - name: 'Setup Rust'
-        uses: actions-rs/toolchain@v1
-        with:
-          default: true
-          target: ${{ matrix.platform.rust_target }}
-          toolchain: nightly
-        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Download distributions'
         uses: actions/download-artifact@v2
         with:

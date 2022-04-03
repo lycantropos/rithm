@@ -155,7 +155,7 @@ jobs:
   build-wheels:
     name: 'Build wheels'
     runs-on: ${{ matrix.platform.os }}
-    needs: pre-deploy
+#    needs: pre-deploy
     strategy:
       matrix:
         platform: [
@@ -195,6 +195,20 @@ jobs:
             rust_target: 'i686-unknown-linux-gnu'
           },
           {
+            archs: 'aarch64',
+            builds: '*-manylinux_aarch64',
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'aarch64-unknown-linux-gnu'
+          },
+          {
+            archs: 'aarch64',
+            builds: '*-musllinux_aarch64',
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'aarch64-unknown-linux-musl'
+          },
+          {
             archs: 'AMD64',
             builds: '*-win_amd64',
             os: 'windows-latest',
@@ -224,7 +238,12 @@ jobs:
           default: true
           target: ${{ matrix.platform.rust_target }}
           toolchain: nightly
-        if: ${{ matrix.platform.os != 'ubuntu-latest' }}
+        if: ${{ runner.os != 'Linux' }}
+      - name: 'Setup QEMU'
+        uses: docker/setup-qemu-action@v1
+        with:
+          platforms: all
+        if: ${{ contains(matrix.platform.arhcs, 'aarch64') }}
       - name: 'Build wheels'
         uses: pypa/cibuildwheel@v2.3.1
         env:

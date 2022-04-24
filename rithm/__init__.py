@@ -223,7 +223,8 @@ except ImportError:
                 raise ZeroDivisionError('Denominator should not be zero.')
             if _normalize:
                 numerator, denominator = _normalize_components_sign(
-                    *_normalize_components_moduli(numerator, denominator))
+                        *_normalize_components_moduli(numerator, denominator)
+                )
             self._numerator, self._denominator = numerator, denominator
             return self
 
@@ -354,17 +355,20 @@ except ImportError:
                             _normalize=False)
 
         def __pow__(self, exponent: 'Int', divisor: None = None) -> 'Fraction':
-            return (
-                (Fraction(self.numerator ** exponent,
-                          self.denominator ** exponent,
-                          _normalize=False)
-                 if exponent >= _ZERO
-                 else Fraction(
-                    *_normalize_components_sign(self.denominator ** -exponent,
-                                                self.numerator ** -exponent),
-                    _normalize=False))
-                if isinstance(exponent, Int) and divisor is None
-                else NotImplemented)
+            return ((Fraction(self.numerator ** exponent,
+                              self.denominator ** exponent,
+                              _normalize=False)
+                     if exponent >= _ZERO
+                     else
+                     Fraction(
+                             *_normalize_components_sign(
+                                     self.denominator ** -exponent,
+                                     self.numerator ** -exponent
+                             ),
+                             _normalize=False
+                     ))
+                    if isinstance(exponent, Int) and divisor is None
+                    else NotImplemented)
 
         def __repr__(self) -> str:
             return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'
@@ -437,12 +441,14 @@ except ImportError:
                      ) -> _Union['Fraction', _Any]:
             return (
                 Fraction(
-                    *_normalize_components_moduli(other * self.denominator
-                                                  - self.numerator,
-                                                  self.denominator),
-                    _normalize=False)
+                        *_normalize_components_moduli(other * self.denominator
+                                                      - self.numerator,
+                                                      self.denominator),
+                        _normalize=False
+                )
                 if isinstance(other, Int)
-                else NotImplemented)
+                else NotImplemented
+            )
 
         def __setstate__(self, state: _Tuple[Int, Int]) -> None:
             self._numerator, self._denominator = state
@@ -462,22 +468,24 @@ except ImportError:
 
         def __sub__(self, other: _Union['Fraction', Int, _Any]
                     ) -> _Union['Fraction', _Any]:
-            return (
-                Fraction(
+            return (Fraction(
                     *_normalize_components_moduli(
-                        self.numerator * other.denominator
-                        - other.numerator * self.denominator,
-                        self.denominator * other.denominator),
+                            self.numerator * other.denominator
+                            - other.numerator * self.denominator,
+                            self.denominator * other.denominator
+                    ),
                     _normalize=False)
-                if isinstance(other, Fraction)
-                else
-                (Fraction(
-                    *_normalize_components_moduli(self.numerator
-                                                  - other * self.denominator,
-                                                  self.denominator),
-                    _normalize=False)
-                 if isinstance(other, Int)
-                 else NotImplemented))
+                    if isinstance(other, Fraction)
+                    else
+                    (Fraction(
+                            *_normalize_components_moduli(
+                                    self.numerator - other * self.denominator,
+                                    self.denominator
+                            ),
+                            _normalize=False
+                    )
+                     if isinstance(other, Int)
+                     else NotImplemented))
 
         @_overload
         def __rtruediv__(self, other: _Any) -> _Any:
@@ -504,38 +512,48 @@ except ImportError:
         def __truediv__(self, other: _Union['Fraction', Int, _Any]
                         ) -> _Union['Fraction', _Any]:
             return (
-                Fraction(*_normalize_components_sign(
-                    *map(_mul,
-                         _normalize_components_moduli(self.numerator,
-                                                      other.numerator),
-                         _normalize_components_moduli(other.denominator,
-                                                      self.denominator))),
-                         _normalize=False)
+                Fraction(
+                        *_normalize_components_sign(
+                                *map(_mul,
+                                     _normalize_components_moduli(
+                                             self.numerator, other.numerator
+                                     ),
+                                     _normalize_components_moduli(
+                                             other.denominator,
+                                             self.denominator
+                                     ))
+                        ),
+                        _normalize=False
+                )
                 if isinstance(other, Fraction)
                 else (self._truediv_by_int(other)
                       if isinstance(other, Int)
-                      else NotImplemented))
+                      else NotImplemented)
+            )
 
         def _add_fraction(self, other: 'Fraction') -> 'Fraction':
             return Fraction(
-                *_normalize_components_moduli(
-                    self.numerator * other.denominator
-                    + other.numerator * self.denominator,
-                    self.denominator * other.denominator),
-                _normalize=False)
+                    *_normalize_components_moduli(
+                            self.numerator * other.denominator
+                            + other.numerator * self.denominator,
+                            self.denominator * other.denominator
+                    ),
+                    _normalize=False
+            )
 
         def _add_int(self, other: Int) -> 'Fraction':
             return Fraction(
-                *_normalize_components_moduli(self.numerator
-                                              + other * self.denominator,
-                                              self.denominator),
-                _normalize=False)
+                    *_normalize_components_moduli(self.numerator
+                                                  + other * self.denominator,
+                                                  self.denominator),
+                    _normalize=False
+            )
 
         def _mul_by_fraction(self, other: 'Fraction') -> 'Fraction':
             numerator, other_denominator = _normalize_components_moduli(
-                self.numerator, other.denominator)
+                    self.numerator, other.denominator)
             other_numerator, denominator = _normalize_components_moduli(
-                other.numerator, self.denominator)
+                    other.numerator, self.denominator)
             return Fraction(numerator * other_numerator,
                             denominator * other_denominator,
                             _normalize=False)
@@ -550,17 +568,19 @@ except ImportError:
             other, numerator = _normalize_components_moduli(other,
                                                             self.numerator)
             return Fraction(
-                *_normalize_components_sign(other * self.denominator,
-                                            numerator),
-                _normalize=False)
+                    *_normalize_components_sign(other * self.denominator,
+                                                numerator),
+                    _normalize=False
+            )
 
         def _truediv_by_int(self, other: Int) -> 'Fraction':
             numerator, other = _normalize_components_moduli(self.numerator,
                                                             other)
             return Fraction(
-                *_normalize_components_sign(numerator,
-                                            other * self.denominator),
-                _normalize=False)
+                    *_normalize_components_sign(numerator,
+                                                other * self.denominator),
+                    _normalize=False
+            )
 
 
     def _normalize_components_moduli(numerator: Int,

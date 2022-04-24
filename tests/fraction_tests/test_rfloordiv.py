@@ -20,4 +20,5 @@ def test_connection_with_builtin(fraction_with_builtin: FractionWithBuiltin,
             builtin_int // builtin_fraction
     else:
         assert is_equivalent_to_builtin_int(
-            result, builtin_int // builtin_fraction)
+                result, builtin_int // builtin_fraction
+        )

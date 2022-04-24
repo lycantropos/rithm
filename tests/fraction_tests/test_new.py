@@ -28,7 +28,9 @@ def test_connection_with_builtin(numerators: IntWithBuiltin,
             fractions.Fraction(builtin_numerator, builtin_denominator)
     else:
         assert is_equivalent_to_builtin_fraction(
-            result, fractions.Fraction(builtin_numerator, builtin_denominator))
+                result,
+                fractions.Fraction(builtin_numerator, builtin_denominator)
+        )
 
 
 @given(strategies.floats)
@@ -51,4 +53,5 @@ def test_numerator_only_connection_with_builtin(numerators: IntWithBuiltin
     result = Fraction(numerator)
 
     assert is_equivalent_to_builtin_fraction(
-        result, fractions.Fraction(builtin_numerator))
+            result, fractions.Fraction(builtin_numerator)
+    )

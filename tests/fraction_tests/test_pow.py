@@ -22,4 +22,5 @@ def test_connection_with_builtin(base_with_builtin: FractionWithBuiltin,
             base_builtin ** exponent_builtin
     else:
         assert is_equivalent_to_builtin_fraction(
-            result, base_builtin ** exponent_builtin)
+                result, base_builtin ** exponent_builtin
+        )

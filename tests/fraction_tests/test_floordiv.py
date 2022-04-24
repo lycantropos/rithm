@@ -24,5 +24,5 @@ def test_connection_with_builtin(first_with_builtin: FractionWithBuiltin,
         with pytest.raises(ZeroDivisionError):
             first_builtin // second_builtin
     else:
-        assert is_equivalent_to_builtin_int(
-            result, first_builtin // second_builtin)
+        assert is_equivalent_to_builtin_int(result,
+                                            first_builtin // second_builtin)

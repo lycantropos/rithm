@@ -1,6 +1,7 @@
 import fractions
 import pickle
-from typing import (Tuple,
+from typing import (Optional,
+                    Tuple,
                     TypeVar)
 
 from rithm import (Fraction,
@@ -37,9 +38,11 @@ def to_int_with_builtin(decimal_string: str) -> IntWithBuiltin:
 
 
 def to_fraction_with_builtin(numerators_pair: IntWithBuiltin,
-                             denominators_pair: IntWithBuiltin
+                             denominators_pair: Optional[IntWithBuiltin] = None
                              ) -> FractionWithBuiltin:
     numerator, builtin_numerator = numerators_pair
+    if denominators_pair is None:
+        return Fraction(numerator), fractions.Fraction(builtin_numerator)
     denominator, builtin_denominator = denominators_pair
     return (Fraction(numerator, denominator),
             fractions.Fraction(builtin_numerator, builtin_denominator))

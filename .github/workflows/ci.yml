@@ -195,7 +195,7 @@ jobs:
             rust_target: 'i686-unknown-linux-gnu'
           },
           {
-            archs: 'i686',
+            archs: 'ppc64le',
             builds: '*-manylinux_ppc64le',
             os: 'ubuntu-latest',
             python_architecture: 'x64',

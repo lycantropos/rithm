@@ -20,6 +20,6 @@ fractions_with_builtins = (strategies.builds(to_fraction_with_builtin,
                                                ints_with_builtins,
                                                non_zero_ints_with_builtins))
 fractions_or_ints_with_builtins = fractions_with_builtins | ints_with_builtins
-small_ints_with_builtins = strategies.builds(to_int_with_builtin,
-                                             (strategies.integers(-100, 100)
-                                              .map(str)))
+small_ints_with_builtins = strategies.builds(
+        to_int_with_builtin, strategies.integers(-100, 100).map(str)
+)

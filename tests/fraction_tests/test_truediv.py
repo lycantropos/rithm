@@ -26,5 +26,5 @@ def test_connection_with_builtin(first_with_builtin: FractionWithBuiltin,
             first_builtin / second_builtin
     else:
         assert is_equivalent_to_builtin_fraction(
-            result, fractions.Fraction(first_builtin, second_builtin)
+                result, fractions.Fraction(first_builtin, second_builtin)
         )

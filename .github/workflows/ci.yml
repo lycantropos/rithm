@@ -202,13 +202,6 @@ jobs:
             rust_target: 'powerpc64le-unknown-linux-gnu'
           },
           {
-            archs: 'ppc64le',
-            builds: '*-musllinux_ppc64le',
-            os: 'ubuntu-latest',
-            python_architecture: 'x64',
-            rust_target: 'powerpc64le-unknown-linux-musl'
-          },
-          {
             archs: 's390x',
             builds: '*-manylinux_s390x',
             os: 'ubuntu-latest',

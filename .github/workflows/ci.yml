@@ -209,13 +209,6 @@ jobs:
             rust_target: 's390x-unknown-linux-gnu'
           },
           {
-            archs: 's390x',
-            builds: '*-musllinux_s390x',
-            os: 'ubuntu-latest',
-            python_architecture: 'x64',
-            rust_target: 's390x-unknown-linux-musl'
-          },
-          {
             archs: 'x86_64',
             builds: '*-manylinux_x86_64',
             os: 'ubuntu-latest',

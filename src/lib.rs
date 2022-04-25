@@ -61,8 +61,6 @@ impl PyInt {
                         Ok(value) => Ok(PyInt(value)),
                         Err(reason) => Err(PyValueError::new_err(reason.to_string())),
                     }
-                } else if value.is_instance(PyInt::type_object(py))? {
-                    value.extract::<PyInt>()
                 } else if value.is_instance(PyFloat::type_object(py))? {
                     Ok(PyInt(
                         _BigInt::try_from(value.extract::<&PyFloat>()?.value()).map_err(
@@ -77,7 +75,7 @@ impl PyInt {
                         )?,
                     ))
                 } else {
-                    Ok(PyInt(try_py_long_to_big_int(value)?))
+                    Ok(PyInt(try_py_integral_to_big_int(value)?))
                 }
             }
         }

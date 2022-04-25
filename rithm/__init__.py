@@ -26,9 +26,9 @@ except ImportError:
 
         def __new__(cls, _value=0, _base=None):
             self = super().__new__(cls)
-            self._value = (int(_value, _base)
-                           if _base is not None
-                           else int(_value))
+            self._value = (int(_value)
+                           if _base is None
+                           else int(_value, _base))
             return self
 
         def __abs__(self):

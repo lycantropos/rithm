@@ -205,19 +205,21 @@ except ImportError:
                     )
                     numerator, denominator = (Int(raw_numerator),
                                               Int(raw_denominator))
-                elif isinstance(_numerator, Int):
-                    numerator, denominator = _numerator, _ONE
+                elif isinstance(_numerator, (Int, int)):
+                    numerator, denominator = Int(_numerator), _ONE
                 else:
                     raise TypeError('First argument should be of '
-                                    f'type {Int} or {float}, '
+                                    f'type {Int}, {int} or {float}, '
                                     f'but found: {type(_numerator)}.')
-            elif isinstance(_denominator, Int):
-                if not isinstance(_numerator, Int):
-                    raise TypeError(f'Numerator should be of type {Int}, '
+            elif isinstance(_denominator, (Int, int)):
+                if not isinstance(_numerator, (Int, int)):
+                    raise TypeError(f'Numerator should be '
+                                    f'of type {Int} or {int}, '
                                     f'but found: {type(_numerator)}.')
-                numerator, denominator = _numerator, _denominator
+                numerator, denominator = Int(_numerator), Int(_denominator)
             else:
-                raise TypeError(f'Denominator should be of type {Int}, '
+                raise TypeError(f'Denominator should be '
+                                f'of type {Int} or {int}, '
                                 f'but found: {type(_denominator)}.')
             if not denominator:
                 raise ZeroDivisionError('Denominator should not be zero.')

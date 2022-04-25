@@ -77,36 +77,7 @@ impl PyInt {
                         )?,
                     ))
                 } else {
-                    let ptr = value.as_ptr();
-                    let py = value.py();
-                    unsafe {
-                        let value = ffi::PyNumber_Index(ptr);
-                        if value.is_null() {
-                            return Err(PyErr::fetch(py));
-                        }
-                        let bits_count = ffi::_PyLong_NumBits(value);
-                        match bits_count.cmp(&0) {
-                            Ordering::Less => Err(PyErr::fetch(py)),
-                            Ordering::Equal => Ok(PyInt(_BigInt::zero())),
-                            Ordering::Greater => {
-                                let bytes_count = (bits_count as usize) / (u8::BITS as usize) + 1;
-                                let mut buffer = vec![0u8; bytes_count];
-                                if ffi::_PyLong_AsByteArray(
-                                    Py::<PyLong>::from_owned_ptr(py, value).as_ptr()
-                                        as *mut ffi::PyLongObject,
-                                    buffer.as_mut_ptr(),
-                                    buffer.len(),
-                                    1,
-                                    1,
-                                ) < 0
-                                {
-                                    Err(PyErr::fetch(py))
-                                } else {
-                                    Ok(PyInt(_BigInt::from_bytes(buffer)))
-                                }
-                            }
-                        }
-                    }
+                    Ok(PyInt(try_py_long_to_big_int(value)?))
                 }
             }
         }
@@ -313,14 +284,59 @@ fn big_int_to_py_long(value: &_BigInt) -> PyObject {
     })
 }
 
+#[inline]
+fn try_py_long_to_big_int(value: &PyAny) -> PyResult<_BigInt> {
+    let ptr = value.as_ptr();
+    let py = value.py();
+    unsafe {
+        let value = ffi::PyNumber_Index(ptr);
+        if value.is_null() {
+            return Err(PyErr::fetch(py));
+        }
+        let bits_count = ffi::_PyLong_NumBits(value);
+        match bits_count.cmp(&0) {
+            Ordering::Less => Err(PyErr::fetch(py)),
+            Ordering::Equal => Ok(_BigInt::zero()),
+            Ordering::Greater => {
+                let bytes_count = (bits_count as usize) / (u8::BITS as usize) + 1;
+                let mut buffer = vec![0u8; bytes_count];
+                if ffi::_PyLong_AsByteArray(
+                    Py::<PyLong>::from_owned_ptr(py, value).as_ptr() as *mut ffi::PyLongObject,
+                    buffer.as_mut_ptr(),
+                    buffer.len(),
+                    1,
+                    1,
+                ) < 0
+                {
+                    Err(PyErr::fetch(py))
+                } else {
+                    Ok(_BigInt::from_bytes(buffer))
+                }
+            }
+        }
+    }
+}
+
+#[inline]
+fn try_py_integral_to_big_int(value: &PyAny) -> PyResult<_BigInt> {
+    if value.is_instance(PyInt::type_object(value.py()))? {
+        Ok(value.extract::<PyInt>()?.0)
+    } else {
+        try_py_long_to_big_int(value)
+    }
+}
+
 #[pymethods]
 impl PyFraction {
     #[new]
-    fn new(_numerator: Option<&PyAny>, _denominator: Option<PyInt>) -> PyResult<Self> {
+    fn new(_numerator: Option<&PyAny>, _denominator: Option<&PyAny>) -> PyResult<Self> {
         match _denominator {
             Some(denominator) => match _numerator {
                 Some(numerator) => {
-                    match _Fraction::new(numerator.extract::<PyInt>()?.0, denominator.0) {
+                    match _Fraction::new(
+                        try_py_integral_to_big_int(numerator)?,
+                        try_py_integral_to_big_int(denominator)?,
+                    ) {
                         Some(value) => Ok(PyFraction(value)),
                         None => Err(PyZeroDivisionError::new_err(
                             UNDEFINED_DIVISION_ERROR_MESSAGE,
@@ -328,15 +344,12 @@ impl PyFraction {
                     }
                 }
                 None => Err(PyTypeError::new_err(
-                    "Numerator should be of type Int, but found None",
+                    "Numerator should be of type `Int` or `int`, but found `None`",
                 )),
             },
             None => Ok(PyFraction(match _numerator {
                 Some(value) => {
-                    let py = value.py();
-                    if value.is_instance(PyInt::type_object(py))? {
-                        _Fraction::new(value.extract::<PyInt>()?.0, _BigInt::one()).unwrap()
-                    } else {
+                    if value.is_instance(PyFloat::type_object(value.py()))? {
                         _Fraction::try_from(value.extract::<f64>()?).map_err(
                             |reason| match reason {
                                 fraction::FromFloatConversionError::NaN => {
@@ -345,6 +358,8 @@ impl PyFraction {
                                 _ => PyOverflowError::new_err(reason.to_string()),
                             },
                         )?
+                    } else {
+                        _Fraction::new(try_py_integral_to_big_int(value)?, _BigInt::one()).unwrap()
                     }
                 }
                 None => _Fraction::zero(),

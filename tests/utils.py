@@ -33,8 +33,8 @@ def pickle_round_trip(value: _Pickleable) -> _Pickleable:
     return pickle.loads(pickle.dumps(value))
 
 
-def to_int_with_builtin(decimal_string: str) -> IntWithBuiltin:
-    return Int(decimal_string), int(decimal_string)
+def to_int_with_builtin(value: int) -> IntWithBuiltin:
+    return Int(value), value
 
 
 def to_fraction_with_builtin(numerators_pair: IntWithBuiltin,

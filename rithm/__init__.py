@@ -16,123 +16,118 @@ except ImportError:
 
 
     class Int:
-        def bit_length(self) -> 'Int':
+        def bit_length(self):
             return Int(self._value.bit_length())
 
-        def gcd(self, other: 'Int') -> 'Int':
+        def gcd(self, other):
             return Int(_gcd(self._value, other._value))
 
         __slots__ = '_value',
 
-        def __new__(cls,
-                    _value: _Union[str, int] = 0,
-                    _base: _Optional[int] = None) -> 'Int':
+        def __new__(cls, _value=0, _base=None):
             self = super().__new__(cls)
             self._value = (int(_value, _base)
                            if _base is not None
                            else int(_value))
             return self
 
-        def __abs__(self) -> 'Int':
+        def __abs__(self):
             return Int(abs(self._value))
 
-        def __add__(self, other: 'Int') -> 'Int':
+        def __add__(self, other):
             return (Int(self._value + other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __and__(self, other: 'Int') -> 'Int':
+        def __and__(self, other):
             return (Int(self._value & other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __bool__(self) -> bool:
+        def __bool__(self):
             return bool(self._value)
 
-        def __ceil__(self) -> 'Int':
+        def __ceil__(self):
             return self
 
-        def __divmod__(self, other: 'Int') -> _Tuple['Int', 'Int']:
+        def __divmod__(self, other):
             return (tuple(Int(value)
                           for value in divmod(self._value, other._value))
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __eq__(self, other: 'Int') -> bool:
+        def __eq__(self, other):
             return (self._value == other._value
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __float__(self) -> float:
+        def __float__(self):
             return float(self._value)
 
-        def __floor__(self) -> 'Int':
+        def __floor__(self):
             return self
 
-        def __floordiv__(self, other: 'Int') -> 'Int':
+        def __floordiv__(self, other):
             return (Int(self._value // other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __ge__(self, other: 'Int') -> bool:
+        def __ge__(self, other):
             return (self._value >= other._value
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __getstate__(self) -> int:
+        def __getstate__(self):
             return self._value
 
-        def __gt__(self, other: 'Int') -> bool:
+        def __gt__(self, other):
             return (self._value > other._value
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __hash__(self) -> int:
+        def __hash__(self):
             return hash(self._value)
 
-        def __invert__(self) -> 'Int':
+        def __invert__(self):
             return Int(~self._value)
 
-        def __int__(self) -> int:
+        def __int__(self):
             return self._value
 
-        def __le__(self, other: 'Int') -> bool:
+        def __le__(self, other):
             return (self._value <= other._value
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __lshift__(self, other: 'Int') -> 'Int':
+        def __lshift__(self, other):
             return (Int(self._value << other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __lt__(self, other: 'Int') -> bool:
+        def __lt__(self, other):
             return (self._value < other._value
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __mod__(self, other: 'Int') -> 'Int':
+        def __mod__(self, other):
             return (Int(self._value % other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __mul__(self, other: 'Int') -> 'Int':
+        def __mul__(self, other):
             return (Int(self._value * other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __neg__(self) -> 'Int':
+        def __neg__(self):
             return Int(-self._value)
 
-        def __or__(self, other: 'Int') -> 'Int':
+        def __or__(self, other):
             return (Int(self._value | other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __pow__(self,
-                    exponent: 'Int',
-                    divisor: _Optional['Int'] = None
-                    ) -> _Union['Fraction', 'Int']:
+        def __pow__(self, exponent, divisor=None):
             return (((Int(self._value ** exponent._value)
                       if exponent >= _ZERO
                       else Fraction(_ONE, self) ** -exponent)
@@ -144,59 +139,59 @@ except ImportError:
                     if isinstance(exponent, Int)
                     else NotImplemented)
 
-        def __repr__(self) -> str:
+        def __repr__(self):
             return f'rithm.Int(\'{self._value}\')'
 
-        def __rshift__(self, other: 'Int') -> 'Int':
+        def __rshift__(self, other):
             return (Int(self._value >> other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __setstate__(self, state: int) -> None:
+        def __setstate__(self, state: int):
             self._value = state
 
-        def __str__(self) -> str:
+        def __str__(self):
             return str(self._value)
 
-        def __sub__(self, other: 'Int') -> 'Int':
+        def __sub__(self, other):
             return (Int(self._value - other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __truediv__(self, other: 'Int') -> 'Fraction':
+        def __truediv__(self, other):
             return (Fraction(self, other)
                     if isinstance(other, Int)
                     else NotImplemented)
 
-        def __trunc__(self) -> 'Int':
+        def __trunc__(self):
             return self
 
-        def __xor__(self, other: 'Int') -> 'Int':
+        def __xor__(self, other):
             return (Int(self._value ^ other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
 
 
-    _ONE = Int('1')
+    _ONE = Int(1)
     _ZERO = Int()
 
 
     class Fraction:
         @property
-        def denominator(self) -> Int:
+        def denominator(self):
             return self._denominator
 
         @property
-        def numerator(self) -> Int:
+        def numerator(self):
             return self._numerator
 
         __slots__ = '_denominator', '_numerator'
 
         def __new__(cls,
-                    _numerator: _Union[Int, float] = _ZERO,
-                    _denominator: _Optional[Int] = None,
+                    _numerator=_ZERO,
+                    _denominator=None,
                     *,
-                    _normalize: bool = True) -> 'Fraction':
+                    _normalize=True):
             self = super().__new__(cls)
             if _denominator is None:
                 if isinstance(_numerator, float):
@@ -230,7 +225,7 @@ except ImportError:
             self._numerator, self._denominator = numerator, denominator
             return self
 
-        def __abs__(self) -> 'Fraction':
+        def __abs__(self):
             return Fraction(abs(self.numerator), self.denominator,
                             _normalize=False)
 
@@ -239,7 +234,7 @@ except ImportError:
             ...
 
         @_overload
-        def __add__(self, other: _Union['Fraction', Int]) -> 'Fraction':
+        def __add__(self, other: _Union['Fraction', Int]):
             ...
 
         def __add__(self, other: _Union['Fraction', Int, _Any]
@@ -250,10 +245,10 @@ except ImportError:
                           if isinstance(other, Int)
                           else NotImplemented))
 
-        def __bool__(self) -> bool:
+        def __bool__(self):
             return bool(self.numerator)
 
-        def __eq__(self, other: 'Fraction') -> bool:
+        def __eq__(self, other: 'Fraction'):
             return (self.numerator == other.numerator
                     and self.denominator == other.denominator
                     if isinstance(other, Fraction)
@@ -262,7 +257,7 @@ except ImportError:
                           if isinstance(other, Int)
                           else NotImplemented))
 
-        def __float__(self) -> float:
+        def __float__(self):
             return self._numerator._value / self._denominator._value
 
         @_overload
@@ -270,7 +265,7 @@ except ImportError:
             ...
 
         @_overload
-        def __floordiv__(self, other: _Union['Fraction', Int]) -> Int:
+        def __floordiv__(self, other: _Union['Fraction', Int]):
             ...
 
         def __floordiv__(self, other: _Union['Fraction', Int, _Any]
@@ -282,7 +277,7 @@ except ImportError:
                           if isinstance(other, Int)
                           else NotImplemented))
 
-        def __ge__(self, other: 'Fraction') -> bool:
+        def __ge__(self, other: 'Fraction'):
             return (self.numerator * other.denominator
                     >= other.numerator * self.denominator
                     if isinstance(other, Fraction)
@@ -293,7 +288,7 @@ except ImportError:
         def __getstate__(self) -> _Tuple[Int, Int]:
             return self._numerator, self._denominator
 
-        def __gt__(self, other: 'Fraction') -> bool:
+        def __gt__(self, other: 'Fraction'):
             return (self.numerator * other.denominator
                     > other.numerator * self.denominator
                     if isinstance(other, Fraction)
@@ -301,7 +296,7 @@ except ImportError:
                           if isinstance(other, Int)
                           else NotImplemented))
 
-        def __le__(self, other: 'Fraction') -> bool:
+        def __le__(self, other: 'Fraction'):
             return (self.numerator * other.denominator
                     <= other.numerator * self.denominator
                     if isinstance(other, Fraction)
@@ -309,7 +304,7 @@ except ImportError:
                           if isinstance(other, Int)
                           else NotImplemented))
 
-        def __lt__(self, other: 'Fraction') -> bool:
+        def __lt__(self, other: 'Fraction'):
             return (self.numerator * other.denominator
                     < other.numerator * self.denominator
                     if isinstance(other, Fraction)
@@ -322,7 +317,7 @@ except ImportError:
             ...
 
         @_overload
-        def __mod__(self, other: _Union['Fraction', Int]) -> 'Fraction':
+        def __mod__(self, other: _Union['Fraction', Int]):
             ...
 
         def __mod__(self, other: _Union['Fraction', Int, _Any]
@@ -341,7 +336,7 @@ except ImportError:
             ...
 
         @_overload
-        def __mul__(self, other: _Union['Fraction', Int]) -> 'Fraction':
+        def __mul__(self, other: _Union['Fraction', Int]):
             ...
 
         def __mul__(self, other: _Union['Fraction', Int, _Any]
@@ -352,11 +347,11 @@ except ImportError:
                           if isinstance(other, Int)
                           else NotImplemented))
 
-        def __neg__(self) -> 'Fraction':
+        def __neg__(self):
             return Fraction(-self.numerator, self.denominator,
                             _normalize=False)
 
-        def __pow__(self, exponent: 'Int', divisor: None = None) -> 'Fraction':
+        def __pow__(self, exponent, divisor: None = None):
             return ((Fraction(self.numerator ** exponent,
                               self.denominator ** exponent,
                               _normalize=False)
@@ -372,7 +367,7 @@ except ImportError:
                     if isinstance(exponent, Int) and divisor is None
                     else NotImplemented)
 
-        def __repr__(self) -> str:
+        def __repr__(self):
             return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'
 
         @_overload
@@ -380,7 +375,7 @@ except ImportError:
             ...
 
         @_overload
-        def __radd__(self, other: Int) -> 'Fraction':
+        def __radd__(self, other: Int):
             ...
 
         def __radd__(self, other: _Union[Int, _Any]
@@ -394,7 +389,7 @@ except ImportError:
             ...
 
         @_overload
-        def __rfloordiv__(self, other: Int) -> Int:
+        def __rfloordiv__(self, other: Int):
             ...
 
         def __rfloordiv__(self, other: _Union[Int, _Any]) -> _Union[Int, _Any]:
@@ -407,7 +402,7 @@ except ImportError:
             ...
 
         @_overload
-        def __rmod__(self, other: Int) -> 'Fraction':
+        def __rmod__(self, other: Int):
             ...
 
         def __rmod__(self, other: _Union[Int, _Any]
@@ -422,7 +417,7 @@ except ImportError:
             ...
 
         @_overload
-        def __rmul__(self, other: Int) -> 'Fraction':
+        def __rmul__(self, other: Int):
             ...
 
         def __rmul__(self, other: _Union[Int, _Any]
@@ -436,7 +431,7 @@ except ImportError:
             ...
 
         @_overload
-        def __rsub__(self, other: Int) -> 'Fraction':
+        def __rsub__(self, other: Int):
             ...
 
         def __rsub__(self, other: _Union[Int, _Any]
@@ -452,10 +447,10 @@ except ImportError:
                 else NotImplemented
             )
 
-        def __setstate__(self, state: _Tuple[Int, Int]) -> None:
+        def __setstate__(self, state: _Tuple[Int, Int]):
             self._numerator, self._denominator = state
 
-        def __str__(self) -> str:
+        def __str__(self):
             return (str(self.numerator)
                     if self.denominator == _ONE
                     else f'{self.numerator}/{self.denominator}')
@@ -465,7 +460,7 @@ except ImportError:
             ...
 
         @_overload
-        def __sub__(self, other: _Union['Fraction', Int]) -> 'Fraction':
+        def __sub__(self, other: _Union['Fraction', Int]):
             ...
 
         def __sub__(self, other: _Union['Fraction', Int, _Any]
@@ -494,7 +489,7 @@ except ImportError:
             ...
 
         @_overload
-        def __rtruediv__(self, other: Int) -> 'Fraction':
+        def __rtruediv__(self, other: Int):
             ...
 
         def __rtruediv__(self, other: _Union[Int, _Any]
@@ -508,7 +503,7 @@ except ImportError:
             ...
 
         @_overload
-        def __truediv__(self, other: _Union['Fraction', Int]) -> 'Fraction':
+        def __truediv__(self, other: _Union['Fraction', Int]):
             ...
 
         def __truediv__(self, other: _Union['Fraction', Int, _Any]
@@ -533,7 +528,7 @@ except ImportError:
                       else NotImplemented)
             )
 
-        def _add_fraction(self, other: 'Fraction') -> 'Fraction':
+        def _add_fraction(self, other: 'Fraction'):
             return Fraction(
                     *_normalize_components_moduli(
                             self.numerator * other.denominator
@@ -543,7 +538,7 @@ except ImportError:
                     _normalize=False
             )
 
-        def _add_int(self, other: Int) -> 'Fraction':
+        def _add_int(self, other: Int):
             return Fraction(
                     *_normalize_components_moduli(self.numerator
                                                   + other * self.denominator,
@@ -551,7 +546,7 @@ except ImportError:
                     _normalize=False
             )
 
-        def _mul_by_fraction(self, other: 'Fraction') -> 'Fraction':
+        def _mul_by_fraction(self, other: 'Fraction'):
             numerator, other_denominator = _normalize_components_moduli(
                     self.numerator, other.denominator)
             other_numerator, denominator = _normalize_components_moduli(
@@ -560,13 +555,13 @@ except ImportError:
                             denominator * other_denominator,
                             _normalize=False)
 
-        def _mul_by_int(self, other: Int) -> 'Fraction':
+        def _mul_by_int(self, other: Int):
             other, denominator = _normalize_components_moduli(other,
                                                               self.denominator)
             return Fraction(self.numerator * other, denominator,
                             _normalize=False)
 
-        def _rtruediv_by_int(self, other: Int) -> 'Fraction':
+        def _rtruediv_by_int(self, other: Int):
             other, numerator = _normalize_components_moduli(other,
                                                             self.numerator)
             return Fraction(
@@ -575,7 +570,7 @@ except ImportError:
                     _normalize=False
             )
 
-        def _truediv_by_int(self, other: Int) -> 'Fraction':
+        def _truediv_by_int(self, other: Int):
             numerator, other = _normalize_components_moduli(self.numerator,
                                                             other)
             return Fraction(

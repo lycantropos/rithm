@@ -1,5 +1,6 @@
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::fmt::Debug;
+use std::mem;
 use std::num::ParseIntError;
 use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Div, DivAssign,
@@ -95,6 +96,56 @@ macro_rules! plain_abs_impl {
 }
 
 plain_abs_impl!(f32 f64 i8 i16 i32 i64 i128 isize);
+
+#[derive(Clone)]
+pub enum Endianness {
+    BIG,
+    LITTLE,
+}
+
+pub trait FromBytes {
+    fn from_bytes(bytes: &[u8], endianness: Endianness) -> Self;
+}
+
+macro_rules! plain_from_bytes_impl {
+    ($($t:ty)*) => ($(
+        impl FromBytes for $t {
+            #[inline(always)]
+            fn from_bytes(bytes: &[u8], endianness: Endianness) -> Self {
+                match endianness {
+                   Endianness::BIG => Self::from_be_bytes(bytes.try_into().unwrap()),
+                   Endianness::LITTLE => Self::from_le_bytes(bytes.try_into().unwrap()),
+                }
+            }
+        }
+    )*)
+}
+
+plain_from_bytes_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
+pub trait ToBytes {
+    type Output;
+
+    fn to_bytes(self, endianness: Endianness) -> Self::Output;
+}
+
+macro_rules! plain_to_bytes_impl {
+    ($($t:ty)*) => ($(
+        impl ToBytes for $t {
+            type Output = [u8; mem::size_of::<Self>()];
+
+            #[inline(always)]
+            fn to_bytes(self, endianness: Endianness) -> Self::Output {
+                match endianness {
+                   Endianness::BIG => self.to_be_bytes(),
+                   Endianness::LITTLE => self.to_le_bytes(),
+                }
+            }
+        }
+    )*)
+}
+
+plain_to_bytes_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait BitLength {
     type Output;

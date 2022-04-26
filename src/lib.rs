@@ -10,15 +10,15 @@ use pyo3::basic::CompareOp;
 use pyo3::exceptions::*;
 use pyo3::prelude::{pyclass, pymethods, pymodule, PyModule, PyResult, Python};
 use pyo3::type_object::PyTypeObject;
-use pyo3::types::{PyBytes, PyFloat, PyLong, PyString};
+use pyo3::types::{PyBytes, PyFloat, PyLong, PyString, PyType};
 use pyo3::{AsPyPointer, Py, PyAny, PyErr, PyRef, ToPyObject};
 use pyo3::{IntoPy, PyObject};
 use pyo3_ffi as ffi;
 
 use crate::traits::{
     Abs, BitLength, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,
-    CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, FromStrRadix, Gcd, Oppositive,
-    Pow, Unitary, Zeroable,
+    CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, Endianness, FromBytes,
+    FromStrRadix, Gcd, Oppositive, Pow, ToBytes, Unitary, Zeroable,
 };
 
 pub mod big_int;
@@ -34,19 +34,42 @@ type Digit = u32;
 
 const BINARY_SHIFT: usize = (traits::OppositionOf::<Digit>::BITS - 2) as usize;
 const UNDEFINED_DIVISION_ERROR_MESSAGE: &str = "Division by zero is undefined.";
+const PICKLE_SERIALIZATION_ENDIANNESS: Endianness = Endianness::LITTLE;
 
 type _BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
 type _Fraction = fraction::Fraction<_BigInt>;
+
+#[pyclass(name = "Endianness", module = "rithm")]
+#[derive(Clone)]
+struct PyEndianness(Endianness);
+
+#[pyclass(name = "Fraction", module = "rithm", subclass)]
+#[pyo3(text_signature = "(numerator=None, denominator=None, /)")]
+#[derive(Clone)]
+struct PyFraction(_Fraction);
 
 #[pyclass(name = "Int", module = "rithm", subclass)]
 #[pyo3(text_signature = "(value=None, base=None, /)")]
 #[derive(Clone)]
 struct PyInt(_BigInt);
 
-#[pyclass(name = "Fraction", module = "rithm", subclass)]
-#[pyo3(text_signature = "(numerator=None, denominator=None, /)")]
-#[derive(Clone)]
-struct PyFraction(_Fraction);
+#[pymethods]
+impl PyEndianness {
+    #[classattr]
+    const BIG: PyEndianness = PyEndianness(Endianness::BIG);
+    #[classattr]
+    const LITTLE: PyEndianness = PyEndianness(Endianness::LITTLE);
+
+    fn __repr__(&self) -> String {
+        format!(
+            "rithm.Endianness.{}",
+            match self.0 {
+                Endianness::BIG => "BIG",
+                Endianness::LITTLE => "LITTLE",
+            }
+        )
+    }
+}
 
 #[pymethods]
 impl PyInt {
@@ -79,6 +102,15 @@ impl PyInt {
                 }
             }
         }
+    }
+
+    fn to_bytes(&self, py: Python, endianness: PyEndianness) -> PyObject {
+        PyBytes::new(py, &self.0.to_bytes(endianness.0)).to_object(py)
+    }
+
+    #[classmethod]
+    fn from_bytes(_cls: &PyType, mut bytes: Vec<u8>, endianness: PyEndianness) -> PyInt {
+        PyInt(_BigInt::from_bytes(bytes.as_mut_slice(), endianness.0))
     }
 
     fn bit_length(&self) -> PyInt {
@@ -139,7 +171,7 @@ impl PyInt {
     }
 
     fn __getstate__(&self, py: Python) -> PyObject {
-        PyBytes::new(py, &self.0.as_bytes()).to_object(py)
+        PyBytes::new(py, &self.0.to_bytes(PICKLE_SERIALIZATION_ENDIANNESS)).to_object(py)
     }
 
     fn __hash__(&self) -> ffi::Py_hash_t {
@@ -240,9 +272,12 @@ impl PyInt {
     }
 
     fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
-        state.extract::<&PyBytes>(py).map(|py_bytes| {
-            self.0 = _BigInt::from_bytes(py_bytes.extract().unwrap());
-        })
+        state
+            .extract::<&PyBytes>(py)
+            .and_then(|py_bytes| py_bytes.extract::<Vec<u8>>())
+            .map(|bytes| {
+                self.0 = _BigInt::from_bytes(&bytes, PICKLE_SERIALIZATION_ENDIANNESS);
+            })
     }
 
     fn __str__(&self) -> String {
@@ -273,7 +308,7 @@ impl PyInt {
 
 #[inline]
 fn big_int_to_py_long(value: &_BigInt) -> PyObject {
-    let buffer = value.as_bytes();
+    let buffer = value.to_bytes(Endianness::LITTLE);
     Python::with_gil(|py| unsafe {
         PyObject::from_owned_ptr(
             py,
@@ -308,7 +343,10 @@ fn try_py_long_to_big_int(value: &PyAny) -> PyResult<_BigInt> {
                 {
                     Err(PyErr::fetch(py))
                 } else {
-                    Ok(_BigInt::from_bytes(buffer))
+                    Ok(_BigInt::from_bytes(
+                        buffer.as_mut_slice(),
+                        Endianness::LITTLE,
+                    ))
                 }
             }
         }
@@ -687,8 +725,9 @@ fn compare<T: PartialOrd<U>, U>(left: &T, right: &U, op: CompareOp) -> bool {
 fn _rithm(_py: Python, module: &PyModule) -> PyResult<()> {
     module.setattr("__doc__", env!("CARGO_PKG_DESCRIPTION"))?;
     module.setattr("__version__", env!("CARGO_PKG_VERSION"))?;
-    module.add_class::<PyInt>()?;
+    module.add_class::<PyEndianness>()?;
     module.add_class::<PyFraction>()?;
+    module.add_class::<PyInt>()?;
     Ok(())
 }
 

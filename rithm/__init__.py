@@ -3,16 +3,25 @@
 __version__ = '5.3.0'
 
 try:
-    from ._rithm import (Fraction,
+    from ._rithm import (Endianness,
+                         Fraction,
                          Int)
 except ImportError:
+    from enum import Enum as _Enum
     from math import gcd as _gcd
     from operator import mul as _mul
     from typing import (Any as _Any,
-                        Optional as _Optional,
                         Tuple as _Tuple,
                         Union as _Union,
                         overload as _overload)
+
+
+    class Endianness(_Enum):
+        BIG = 'big'
+        LITTLE = 'little'
+
+        def __repr__(self):
+            return f'rithm.{type(self).__qualname__}.{self.name}'
 
 
     class Int:
@@ -21,6 +30,15 @@ except ImportError:
 
         def gcd(self, other):
             return Int(_gcd(self._value, other._value))
+
+        def to_bytes(self, endianness):
+            return self._value.to_bytes(-(-self._value.bit_length() // 8) or 1,
+                                        endianness.value,
+                                        signed=True)
+        @classmethod
+        def from_bytes(cls, value, endianness):
+            return cls(int.from_bytes(value, endianness.value,
+                                      signed=True))
 
         __slots__ = '_value',
 

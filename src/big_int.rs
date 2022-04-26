@@ -14,8 +14,9 @@ use crate::traits::{
     Abs, AssigningShiftingLeftMonoid, BitLength, BitwiseNegatableUnaryAlgebra, CheckedDiv,
     CheckedDivAsF32, CheckedDivAsF64, CheckedDivEuclid, CheckedDivRem, CheckedDivRemEuclid,
     CheckedPow, CheckedPowRemEuclid, CheckedRem, CheckedRemEuclid, CheckedRemEuclidInv, CheckedShl,
-    CheckedShr, DivEuclid, DivRem, DivRemEuclid, DoublePrecisionOf, Float, FromStrRadix, Gcd,
-    Oppose, OppositionOf, Oppositive, Pow, RemEuclid, Unitary, Zeroable,
+    CheckedShr, DivEuclid, DivRem, DivRemEuclid, DoublePrecisionOf, Endianness, Float, FromBytes,
+    FromStrRadix, Gcd, Oppose, OppositionOf, Oppositive, Pow, RemEuclid, ToBytes, Unitary,
+    Zeroable,
 };
 use crate::utils;
 
@@ -353,11 +354,13 @@ impl<
         Digit: BinaryDigitConvertibleToBinary<Digit> + From<u8> + Oppose,
         const SEPARATOR: char,
         const SHIFT: usize,
-    > BigInt<Digit, SEPARATOR, SHIFT>
+    > ToBytes for &BigInt<Digit, SEPARATOR, SHIFT>
 where
     u8: TryFrom<Digit>,
 {
-    pub(crate) fn as_bytes(&self) -> Vec<u8> {
+    type Output = Vec<u8>;
+
+    fn to_bytes(self, endianness: Endianness) -> Self::Output {
         let mut result =
             binary_digits_to_binary_base::<Digit, Digit>(&self.digits, SHIFT, u8::BITS as usize)
                 .iter()
@@ -374,15 +377,25 @@ where
         if self.is_negative() {
             negate_digits(&mut result);
         }
+        match endianness {
+            Endianness::BIG => result.reverse(),
+            Endianness::LITTLE => {}
+        }
         result
     }
 }
 
-impl<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> FromBytes
+    for BigInt<Digit, SEPARATOR, SHIFT>
 where
     u8: BinaryDigitConvertibleToBinary<Digit>,
 {
-    pub(crate) fn from_bytes(mut bytes: Vec<u8>) -> Self {
+    fn from_bytes(bytes: &[u8], endianness: Endianness) -> Self {
+        let mut bytes = bytes.to_vec();
+        match endianness {
+            Endianness::BIG => bytes.reverse(),
+            Endianness::LITTLE => {}
+        }
         debug_assert!(is_valid_shift::<Digit, SHIFT>());
         let most_significant_byte = bytes[bytes.len() - 1];
         let sign = if most_significant_byte >= MIDDLE_BYTE {

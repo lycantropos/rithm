@@ -7,11 +7,26 @@ from typing import (Any as _Any,
 __version__: str = ...
 
 
+class Endianness:
+    BIG: 'Endianness' = ...
+    LITTLE: 'Endianness' = ...
+
+    def __repr__(self) -> str:
+        ...
+
+
 class Int:
     def bit_length(self) -> 'Int':
         ...
 
     def gcd(self, other: 'Int') -> 'Int':
+        ...
+
+    def to_bytes(self, endianness: Endianness) -> bytes:
+        ...
+
+    @classmethod
+    def from_bytes(cls, value: bytes, endianness: Endianness) -> 'Int':
         ...
 
     @_overload

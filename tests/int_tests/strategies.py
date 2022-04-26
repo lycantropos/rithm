@@ -1,10 +1,12 @@
 from hypothesis import strategies
 
-from rithm import Int
+from rithm import (Endianness,
+                   Int)
 from tests.strategies import (decimal_int_strings_with_leading_zeros,
                               int_strings_with_bases)
 from tests.utils import to_int_with_builtin
 
+endianesses = strategies.sampled_from([Endianness.BIG, Endianness.LITTLE])
 floats = strategies.floats()
 decimal_int_strings_with_leading_zeros = decimal_int_strings_with_leading_zeros
 int_strings_with_bases = int_strings_with_bases

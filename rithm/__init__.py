@@ -32,9 +32,10 @@ except ImportError:
             return Int(_gcd(self._value, other._value))
 
         def to_bytes(self, endianness):
-            return self._value.to_bytes(-(-self._value.bit_length() // 8) or 1,
+            return self._value.to_bytes(_to_bytes_count(self._value),
                                         endianness.value,
                                         signed=True)
+
         @classmethod
         def from_bytes(cls, value, endianness):
             return cls(int.from_bytes(value, endianness.value,
@@ -188,6 +189,10 @@ except ImportError:
             return (Int(self._value ^ other._value)
                     if isinstance(other, Int)
                     else NotImplemented)
+
+
+    def _to_bytes_count(value: int) -> int:
+        return (8 + (value + (value < 0)).bit_length()) // 8
 
 
     _ONE = Int(1)

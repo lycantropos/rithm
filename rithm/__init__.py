@@ -338,6 +338,9 @@ except ImportError:
             return Fraction(-self.numerator, self.denominator,
                             _normalize=False)
 
+        def __pos__(self):
+            return self
+
         def __pow__(self, exponent, divisor=None):
             return ((Fraction(self.numerator ** exponent,
                               self.denominator ** exponent,

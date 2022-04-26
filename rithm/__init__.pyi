@@ -213,6 +213,9 @@ class Fraction:
     def __neg__(self) -> 'Fraction':
         ...
 
+    def __pos__(self) -> 'Fraction':
+        ...
+
     def __pow__(self, exponent: 'Int', divisor: None = ...) -> 'Fraction':
         ...
 

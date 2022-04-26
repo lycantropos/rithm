@@ -523,6 +523,10 @@ impl PyFraction {
         PyFraction(-self.0.clone())
     }
 
+    fn __pos__(slf: PyRef<Self>) -> PyRef<Self> {
+        slf
+    }
+
     fn __pow__(&self, other: PyInt, modulo: Option<PyInt>) -> PyResult<PyObject> {
         if modulo.is_some() {
             Ok(Python::with_gil(|py| py.NotImplemented()))

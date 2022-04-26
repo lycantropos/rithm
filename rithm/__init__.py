@@ -146,6 +146,9 @@ except ImportError:
                     if isinstance(other, Int)
                     else NotImplemented)
 
+        def __pos__(self):
+            return self
+
         def __pow__(self, exponent, divisor=None):
             return (((Int(self._value ** exponent._value)
                       if exponent >= _ZERO

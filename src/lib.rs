@@ -219,6 +219,10 @@ impl PyInt {
         PyInt(self.0.clone() | other.0)
     }
 
+    fn __pos__(slf: PyRef<Self>) -> PyRef<Self> {
+        slf
+    }
+
     fn __pow__(&self, exponent: PyInt, divisor: Option<PyInt>) -> PyResult<PyObject> {
         match divisor {
             Some(value) => {

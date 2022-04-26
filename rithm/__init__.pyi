@@ -111,6 +111,9 @@ class Int:
     def __or__(self, other: 'Int') -> 'Int':
         ...
 
+    def __pos__(self) -> 'Int':
+        ...
+
     def __pow__(self,
                 exponent: 'Int',
                 divisor: _Optional['Int'] = None

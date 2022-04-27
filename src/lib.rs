@@ -121,6 +121,17 @@ impl PyInt {
     fn gcd(&self, other: Self) -> PyInt {
         PyInt(self.0.clone().gcd(other.0))
     }
+
+    #[getter]
+    fn numerator(slf: PyRef<Self>) -> PyRef<Self> {
+        slf
+    }
+
+    #[getter]
+    fn denominator(&self) -> Self {
+        PyInt(_BigInt::one())
+    }
+
     fn __abs__(&self) -> PyInt {
         PyInt(self.0.clone().abs())
     }

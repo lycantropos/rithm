@@ -22,6 +22,14 @@ except ImportError:
 
 
     class Int:
+        @property
+        def denominator(self):
+            return _ONE
+
+        @property
+        def numerator(self):
+            return self
+
         def bit_length(self):
             return Int(self._value.bit_length())
 

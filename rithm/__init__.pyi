@@ -16,6 +16,14 @@ class Endianness:
 
 
 class Int:
+    @property
+    def denominator(self) -> 'Int':
+        ...
+
+    @property
+    def numerator(self) -> 'Int':
+        ...
+
     def bit_length(self) -> 'Int':
         ...
 

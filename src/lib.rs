@@ -36,8 +36,8 @@ const BINARY_SHIFT: usize = (traits::OppositionOf::<Digit>::BITS - 2) as usize;
 const UNDEFINED_DIVISION_ERROR_MESSAGE: &str = "Division by zero is undefined.";
 const PICKLE_SERIALIZATION_ENDIANNESS: Endianness = Endianness::LITTLE;
 
-type _BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
-type _Fraction = fraction::Fraction<_BigInt>;
+type BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
+type Fraction = fraction::Fraction<BigInt>;
 
 #[pyclass(name = "Endianness", module = "rithm")]
 #[derive(Clone)]
@@ -46,12 +46,12 @@ struct PyEndianness(Endianness);
 #[pyclass(name = "Fraction", module = "rithm", subclass)]
 #[pyo3(text_signature = "(numerator=None, denominator=None, /)")]
 #[derive(Clone)]
-struct PyFraction(_Fraction);
+struct PyFraction(Fraction);
 
 #[pyclass(name = "Int", module = "rithm", subclass)]
 #[pyo3(text_signature = "(value=None, base=None, /)")]
 #[derive(Clone)]
-struct PyInt(_BigInt);
+struct PyInt(BigInt);
 
 #[pymethods]
 impl PyEndianness {
@@ -76,17 +76,17 @@ impl PyInt {
     #[new]
     fn new(_value: Option<&PyAny>, _base: Option<u32>) -> PyResult<Self> {
         match _value {
-            None => Ok(PyInt(_BigInt::zero())),
+            None => Ok(PyInt(BigInt::zero())),
             Some(value) => {
                 let py = value.py();
                 if _base.is_some() || value.is_instance(PyString::type_object(py))? {
-                    match _BigInt::from_str_radix(value.extract::<&str>()?, _base.unwrap_or(10)) {
+                    match BigInt::from_str_radix(value.extract::<&str>()?, _base.unwrap_or(10)) {
                         Ok(value) => Ok(PyInt(value)),
                         Err(reason) => Err(PyValueError::new_err(reason.to_string())),
                     }
                 } else if value.is_instance(PyFloat::type_object(py))? {
                     Ok(PyInt(
-                        _BigInt::try_from(value.extract::<&PyFloat>()?.value()).map_err(
+                        BigInt::try_from(value.extract::<&PyFloat>()?.value()).map_err(
                             |reason| match reason {
                                 big_int::FromFloatConversionError::Infinity => {
                                     PyOverflowError::new_err(reason.to_string())
@@ -110,7 +110,7 @@ impl PyInt {
 
     #[classmethod]
     fn from_bytes(_cls: &PyType, mut bytes: Vec<u8>, endianness: PyEndianness) -> PyInt {
-        PyInt(_BigInt::from_bytes(bytes.as_mut_slice(), endianness.0))
+        PyInt(BigInt::from_bytes(bytes.as_mut_slice(), endianness.0))
     }
 
     fn bit_length(&self) -> PyInt {
@@ -129,7 +129,7 @@ impl PyInt {
 
     #[getter]
     fn denominator(&self) -> Self {
-        PyInt(_BigInt::one())
+        PyInt(BigInt::one())
     }
 
     fn __abs__(&self) -> PyInt {
@@ -250,7 +250,7 @@ impl PyInt {
             None => Ok({
                 if exponent.0.is_negative() {
                     to_py_object(match unsafe {
-                        _Fraction::new(self.0.clone(), _BigInt::one()).unwrap_unchecked()
+                        Fraction::new(self.0.clone(), BigInt::one()).unwrap_unchecked()
                     }
                     .checked_pow(exponent.0)
                     {
@@ -291,7 +291,7 @@ impl PyInt {
             .extract::<&PyBytes>(py)
             .and_then(|py_bytes| py_bytes.extract::<Vec<u8>>())
             .map(|bytes| {
-                self.0 = _BigInt::from_bytes(&bytes, PICKLE_SERIALIZATION_ENDIANNESS);
+                self.0 = BigInt::from_bytes(&bytes, PICKLE_SERIALIZATION_ENDIANNESS);
             })
     }
 
@@ -304,7 +304,7 @@ impl PyInt {
     }
 
     fn __truediv__(&self, other: PyInt) -> PyResult<PyFraction> {
-        match _Fraction::new(self.0.clone(), other.0) {
+        match Fraction::new(self.0.clone(), other.0) {
             Some(result) => Ok(PyFraction(result)),
             None => Err(PyZeroDivisionError::new_err(
                 UNDEFINED_DIVISION_ERROR_MESSAGE,
@@ -322,7 +322,7 @@ impl PyInt {
 }
 
 #[inline]
-fn big_int_to_py_long(value: &_BigInt) -> PyObject {
+fn big_int_to_py_long(value: &BigInt) -> PyObject {
     let buffer = value.to_bytes(Endianness::LITTLE);
     Python::with_gil(|py| unsafe {
         PyObject::from_owned_ptr(
@@ -333,7 +333,16 @@ fn big_int_to_py_long(value: &_BigInt) -> PyObject {
 }
 
 #[inline]
-fn try_py_long_to_big_int(value: &PyAny) -> PyResult<_BigInt> {
+fn try_py_integral_to_big_int(value: &PyAny) -> PyResult<BigInt> {
+    if value.is_instance(PyInt::type_object(value.py()))? {
+        Ok(value.extract::<PyInt>()?.0)
+    } else {
+        try_py_long_to_big_int(value)
+    }
+}
+
+#[inline]
+fn try_py_long_to_big_int(value: &PyAny) -> PyResult<BigInt> {
     let ptr = value.as_ptr();
     let py = value.py();
     unsafe {
@@ -344,7 +353,7 @@ fn try_py_long_to_big_int(value: &PyAny) -> PyResult<_BigInt> {
         let bits_count = ffi::_PyLong_NumBits(value);
         match bits_count.cmp(&0) {
             Ordering::Less => Err(PyErr::fetch(py)),
-            Ordering::Equal => Ok(_BigInt::zero()),
+            Ordering::Equal => Ok(BigInt::zero()),
             Ordering::Greater => {
                 let bytes_count = (bits_count as usize) / (u8::BITS as usize) + 1;
                 let mut buffer = vec![0u8; bytes_count];
@@ -358,22 +367,13 @@ fn try_py_long_to_big_int(value: &PyAny) -> PyResult<_BigInt> {
                 {
                     Err(PyErr::fetch(py))
                 } else {
-                    Ok(_BigInt::from_bytes(
+                    Ok(BigInt::from_bytes(
                         buffer.as_mut_slice(),
                         Endianness::LITTLE,
                     ))
                 }
             }
         }
-    }
-}
-
-#[inline]
-fn try_py_integral_to_big_int(value: &PyAny) -> PyResult<_BigInt> {
-    if value.is_instance(PyInt::type_object(value.py()))? {
-        Ok(value.extract::<PyInt>()?.0)
-    } else {
-        try_py_long_to_big_int(value)
     }
 }
 
@@ -384,7 +384,7 @@ impl PyFraction {
         match _denominator {
             Some(denominator) => match _numerator {
                 Some(numerator) => {
-                    match _Fraction::new(
+                    match Fraction::new(
                         try_py_integral_to_big_int(numerator)?,
                         try_py_integral_to_big_int(denominator)?,
                     ) {
@@ -401,7 +401,7 @@ impl PyFraction {
             None => Ok(PyFraction(match _numerator {
                 Some(value) => {
                     if value.is_instance(PyFloat::type_object(value.py()))? {
-                        _Fraction::try_from(value.extract::<f64>()?).map_err(
+                        Fraction::try_from(value.extract::<f64>()?).map_err(
                             |reason| match reason {
                                 fraction::FromFloatConversionError::NaN => {
                                     PyValueError::new_err(reason.to_string())
@@ -410,10 +410,10 @@ impl PyFraction {
                             },
                         )?
                     } else {
-                        _Fraction::new(try_py_integral_to_big_int(value)?, _BigInt::one()).unwrap()
+                        Fraction::new(try_py_integral_to_big_int(value)?, BigInt::one()).unwrap()
                     }
                 }
-                None => _Fraction::zero(),
+                None => Fraction::zero(),
             })),
         }
     }
@@ -447,7 +447,7 @@ impl PyFraction {
     }
 
     fn __float__(&self) -> PyResult<PyObject> {
-        match <_Fraction as TryInto<f64>>::try_into(self.0.clone()) {
+        match <Fraction as TryInto<f64>>::try_into(self.0.clone()) {
             Ok(value) => Ok(Python::with_gil(|py| value.into_py(py))),
             Err(reason) => Err(PyOverflowError::new_err(reason.to_string())),
         }
@@ -650,11 +650,11 @@ impl PyFraction {
     fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         state.extract::<(PyObject, PyObject)>(py).and_then(
             |(numerator_state, denominator_state)| {
-                let mut numerator = PyInt(_BigInt::zero());
+                let mut numerator = PyInt(BigInt::zero());
                 numerator.__setstate__(py, numerator_state)?;
-                let mut denominator = PyInt(_BigInt::zero());
+                let mut denominator = PyInt(BigInt::zero());
                 denominator.__setstate__(py, denominator_state)?;
-                self.0 = unsafe { _Fraction::new(numerator.0, denominator.0).unwrap_unchecked() };
+                self.0 = unsafe { Fraction::new(numerator.0, denominator.0).unwrap_unchecked() };
                 Ok(())
             },
         )
@@ -697,7 +697,7 @@ impl PyFraction {
     }
 }
 
-fn hash(value: &_BigInt) -> usize {
+fn hash(value: &BigInt) -> usize {
     #[cfg(target_arch = "x86")]
     const HASH_BITS: usize = 31;
     #[cfg(not(target_arch = "x86"))]

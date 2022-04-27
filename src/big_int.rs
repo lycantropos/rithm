@@ -419,8 +419,8 @@ where
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Abs for BigInt<Digit, SEPARATOR, SHIFT> {
     type Output = Self;
 
-    fn abs(self) -> Self {
-        Self {
+    fn abs(self) -> Self::Output {
+        Self::Output {
             sign: self.sign.abs(),
             digits: self.digits,
         }
@@ -928,7 +928,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
             divisor.sign,
         )
         .unwrap();
-        Self { sign, digits }
+        Self::Output { sign, digits }
     }
 }
 
@@ -1054,7 +1054,7 @@ impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd
 {
     type Output = Self;
 
-    fn gcd(self, other: Self) -> Self {
+    fn gcd(self, other: Self) -> Self::Output {
         let mut largest_digits = self.digits;
         let mut smallest_digits = other.digits;
         if digits_lesser_than(&largest_digits, &smallest_digits) {
@@ -1067,7 +1067,7 @@ impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd
             }
             let smallest_digits_count = smallest_digits.len();
             if smallest_digits_count == 1 && smallest_digits[0].is_zero() {
-                return Self {
+                return Self::Output {
                     sign: Sign::one(),
                     digits: largest_digits,
                 };
@@ -1193,7 +1193,7 @@ impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd
             largest_digits = next_largest_digits;
             smallest_digits = next_smallest_digits;
         }
-        Self::from(
+        Self::Output::from(
             reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&largest_digits).gcd(
                 reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&smallest_digits),
             ),

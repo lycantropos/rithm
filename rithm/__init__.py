@@ -167,7 +167,7 @@ except ImportError:
                     else NotImplemented)
 
         def __repr__(self):
-            return f'rithm.Int(\'{self._value}\')'
+            return f'rithm.Int({self._value})'
 
         def __rshift__(self, other):
             return (Int(self._value >> other._value)

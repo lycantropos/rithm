@@ -267,7 +267,7 @@ impl PyInt {
     }
 
     fn __repr__(&self) -> String {
-        format!("rithm.Int('{}')", self.0)
+        format!("rithm.Int({})", self.0)
     }
 
     fn __richcmp__(&self, other: PyInt, op: CompareOp) -> bool {

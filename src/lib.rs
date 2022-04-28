@@ -586,9 +586,9 @@ impl PyFraction {
         slf
     }
 
-    fn __pow__(&self, other: PyInt, modulo: Option<PyInt>) -> PyResult<PyObject> {
+    fn __pow__(&self, other: PyInt, modulo: Option<PyInt>, py: Python) -> PyResult<PyObject> {
         if modulo.is_some() {
-            Ok(Python::with_gil(|py| py.NotImplemented()))
+            Ok(py.NotImplemented())
         } else {
             match self.0.clone().checked_pow(other.0) {
                 Some(value) => Ok(to_py_object(PyFraction(value))),

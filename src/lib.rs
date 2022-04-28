@@ -349,16 +349,17 @@ impl PyInt {
         })
     }
 
-    fn __rshift__(&self, other: PyInt) -> PyResult<PyInt> {
-        self.0
-            .clone()
-            .checked_shr(other.0)
-            .map(PyInt)
-            .map_err(|reason| match reason {
-                big_int::RightShiftError::NegativeShift => {
-                    PyValueError::new_err(reason.to_string())
-                }
-            })
+    fn __rshift__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyInt::type_object(py))? {
+            maybe_rshift(self.0.clone(), other.extract::<PyInt>()?.0)
+                .map(|result| PyInt(result).into_py(py))
+        } else if other.is_instance(PyLong::type_object(py))? {
+            maybe_rshift(self.0.clone(), try_py_long_to_big_int(other)?)
+                .map(|result| PyInt(result).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
     }
 
     fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
@@ -450,6 +451,12 @@ fn maybe_mod_to_near(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
             remainder
         },
     )
+}
+
+fn maybe_rshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
+    base.checked_shr(shift).map_err(|reason| match reason {
+        big_int::RightShiftError::NegativeShift => PyValueError::new_err(reason.to_string()),
+    })
 }
 
 #[inline]

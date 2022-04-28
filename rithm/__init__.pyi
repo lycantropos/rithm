@@ -145,7 +145,7 @@ class Int:
     def __round__(self, digits: _Optional[int] = ...) -> 'Int':
         ...
 
-    def __rshift__(self, other: 'Int') -> 'Int':
+    def __rshift__(self, other: _Union['Int', int]) -> 'Int':
         ...
 
     def __setstate__(self, state: int) -> None:

@@ -199,7 +199,9 @@ except ImportError:
         def __rshift__(self, other):
             return (Int(self._value >> other._value)
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else (Int(self._value >> other)
+                          if isinstance(other, int)
+                          else NotImplemented))
 
         def __setstate__(self, state: int):
             self._value = state

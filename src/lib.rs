@@ -417,6 +417,16 @@ impl PyInt {
         })
     }
 
+    fn __rrshift__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyLong::type_object(py))? {
+            maybe_rshift(try_py_long_to_big_int(other)?, self.0.clone())
+                .map(|result| PyInt(result).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
+    }
+
     fn __rshift__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
         if other.is_instance(PyInt::type_object(py))? {
@@ -424,16 +434,6 @@ impl PyInt {
                 .map(|result| PyInt(result).into_py(py))
         } else if other.is_instance(PyLong::type_object(py))? {
             maybe_rshift(self.0.clone(), try_py_long_to_big_int(other)?)
-                .map(|result| PyInt(result).into_py(py))
-        } else {
-            Ok(py.NotImplemented())
-        }
-    }
-
-    fn __rrshift__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyLong::type_object(py))? {
-            maybe_rshift(try_py_long_to_big_int(other)?, self.0.clone())
                 .map(|result| PyInt(result).into_py(py))
         } else {
             Ok(py.NotImplemented())

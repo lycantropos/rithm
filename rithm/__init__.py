@@ -158,7 +158,7 @@ except ImportError:
         def __or__(self, other):
             return (Int(self._value | other._value)
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else self.__ror__(other))
 
         def __pos__(self):
             return self
@@ -209,6 +209,11 @@ except ImportError:
 
         def __rmul__(self, other):
             return (Int(self._value * other)
+                    if isinstance(other, int)
+                    else NotImplemented)
+
+        def __ror__(self, other):
+            return (Int(self._value | other)
                     if isinstance(other, int)
                     else NotImplemented)
 

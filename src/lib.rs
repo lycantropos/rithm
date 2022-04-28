@@ -254,8 +254,13 @@ impl PyInt {
         PyInt(-self.0.clone())
     }
 
-    fn __or__(&self, other: PyInt) -> PyInt {
-        PyInt(self.0.clone() | other.0)
+    fn __or__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyInt::type_object(py))? {
+            Ok(PyInt(self.0.clone() | other.extract::<PyInt>()?.0).into_py(py))
+        } else {
+            self.__ror__(other)
+        }
     }
 
     fn __pos__(slf: PyRef<Self>) -> PyRef<Self> {
@@ -382,6 +387,15 @@ impl PyInt {
             Ok(PyInt(self.0.clone() * try_py_long_to_big_int(other)?).into_py(py))
         } else {
             Ok(py.NotImplemented())
+        }
+    }
+
+    fn __ror__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyInt::type_object(py))? {
+            Ok(PyInt(self.0.clone() | other.extract::<PyInt>()?.0).into_py(py))
+        } else {
+            self.__rxor__(other)
         }
     }
 

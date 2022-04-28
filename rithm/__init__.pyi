@@ -116,7 +116,7 @@ class Int:
     def __neg__(self) -> 'Int':
         ...
 
-    def __or__(self, other: 'Int') -> 'Int':
+    def __or__(self, other: _Union['Int', int]) -> 'Int':
         ...
 
     def __pos__(self) -> 'Int':
@@ -150,6 +150,9 @@ class Int:
         ...
 
     def __rmul__(self, other: int) -> 'Int':
+        ...
+
+    def __ror__(self, other: int) -> 'Int':
         ...
 
     def __round__(self, digits: _Optional[int] = ...) -> 'Int':

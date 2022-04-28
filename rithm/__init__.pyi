@@ -139,6 +139,9 @@ class Int:
     def __repr__(self) -> str:
         ...
 
+    def __rfloordiv__(self, other: int) -> 'Int':
+        ...
+
     def __round__(self, digits: _Optional[int] = ...) -> 'Int':
         ...
 

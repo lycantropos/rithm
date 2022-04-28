@@ -316,6 +316,16 @@ impl PyInt {
         format!("rithm.Int({})", self.0)
     }
 
+    fn __rfloordiv__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyLong::type_object(py))? {
+            maybe_floordiv(try_py_long_to_big_int(other)?, self.0.clone())
+                .map(|result| PyInt(result).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
+    }
+
     fn __richcmp__(&self, other: PyInt, op: CompareOp) -> bool {
         compare(&self.0, &other.0, op)
     }

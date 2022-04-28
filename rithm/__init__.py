@@ -189,6 +189,11 @@ except ImportError:
         def __repr__(self):
             return f'rithm.Int({self._value})'
 
+        def __rfloordiv__(self, other):
+            return (Int(other // self._value)
+                    if isinstance(other, int)
+                    else NotImplemented)
+
         def __rshift__(self, other):
             return (Int(self._value >> other._value)
                     if isinstance(other, Int)

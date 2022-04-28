@@ -201,6 +201,9 @@ except ImportError:
                     if isinstance(other, int)
                     else NotImplemented)
 
+        def __round__(self, digits=None):
+            return Int(round(self._value, digits))
+
         def __rrshift__(self, other):
             return (Int(other >> self._value)
                     if isinstance(other, int)
@@ -218,9 +221,6 @@ except ImportError:
 
         def __str__(self):
             return str(self._value)
-
-        def __round__(self, digits=None):
-            return Int(round(self._value, digits))
 
         def __sub__(self, other):
             return (Int(self._value - other._value)

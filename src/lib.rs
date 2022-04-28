@@ -458,7 +458,10 @@ impl PyFraction {
                             },
                         )?
                     } else {
-                        Fraction::new(try_py_integral_to_big_int(value)?, BigInt::one()).unwrap()
+                        unsafe {
+                            Fraction::new(try_py_integral_to_big_int(value)?, BigInt::one())
+                                .unwrap_unchecked()
+                        }
                     }
                 }
                 None => Fraction::zero(),

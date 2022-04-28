@@ -695,17 +695,21 @@ impl PyFraction {
         }
     }
 
-    fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
-        state.extract::<(PyObject, PyObject)>(py).and_then(
-            |(numerator_state, denominator_state)| {
-                let mut numerator = PyInt(BigInt::zero());
-                numerator.__setstate__(py, numerator_state)?;
-                let mut denominator = PyInt(BigInt::zero());
-                denominator.__setstate__(py, denominator_state)?;
-                self.0 = unsafe { Fraction::new(numerator.0, denominator.0).unwrap_unchecked() };
+    fn __setstate__(&mut self, state: (PyObject, PyObject), py: Python) -> PyResult<()> {
+        let (numerator_state, denominator_state) = state;
+        let mut numerator = PyInt(BigInt::zero());
+        numerator.__setstate__(py, numerator_state)?;
+        let mut denominator = PyInt(BigInt::zero());
+        denominator.__setstate__(py, denominator_state)?;
+        match Fraction::new(numerator.0, denominator.0) {
+            Some(fraction) => {
+                self.0 = fraction;
                 Ok(())
-            },
-        )
+            }
+            None => Err(PyZeroDivisionError::new_err(
+                UNDEFINED_DIVISION_ERROR_MESSAGE,
+            )),
+        }
     }
 
     fn __str__(&self) -> String {

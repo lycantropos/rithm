@@ -232,6 +232,11 @@ except ImportError:
                     if isinstance(other, int)
                     else NotImplemented)
 
+        def __rtruediv__(self, other):
+            return (Fraction(self, other)
+                    if isinstance(other, Int)
+                    else NotImplemented)
+
         def __setstate__(self, state: int):
             self._value = state
 

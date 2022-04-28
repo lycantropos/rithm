@@ -164,6 +164,9 @@ class Int:
     def __rsub__(self, other: int) -> 'Int':
         ...
 
+    def __rtruediv__(self, other: int) -> 'Fraction':
+        ...
+
     def __setstate__(self, state: int) -> None:
         ...
 

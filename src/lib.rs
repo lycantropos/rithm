@@ -435,6 +435,20 @@ impl PyInt {
         }
     }
 
+    fn __rtruediv__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyLong::type_object(py))? {
+            match Fraction::new(try_py_long_to_big_int(other)?, self.0.clone()) {
+                Some(result) => Ok(PyFraction(result).into_py(py)),
+                None => Err(PyZeroDivisionError::new_err(
+                    UNDEFINED_DIVISION_ERROR_MESSAGE,
+                )),
+            }
+        } else {
+            return Ok(py.NotImplemented());
+        }
+    }
+
     fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         state
             .extract::<&PyBytes>(py)

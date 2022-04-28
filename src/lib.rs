@@ -459,9 +459,17 @@ impl PyInt {
         }
     }
 
-    fn __truediv__(&self, other: PyInt) -> PyResult<PyFraction> {
-        match Fraction::new(self.0.clone(), other.0) {
-            Some(result) => Ok(PyFraction(result)),
+    fn __truediv__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        let other = if other.is_instance(PyInt::type_object(py))? {
+            other.extract::<PyInt>()?.0
+        } else if other.is_instance(PyLong::type_object(py))? {
+            try_py_long_to_big_int(other)?
+        } else {
+            return Ok(py.NotImplemented());
+        };
+        match Fraction::new(self.0.clone(), other) {
+            Some(result) => Ok(PyFraction(result).into_py(py)),
             None => Err(PyZeroDivisionError::new_err(
                 UNDEFINED_DIVISION_ERROR_MESSAGE,
             )),

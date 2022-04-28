@@ -173,7 +173,7 @@ class Int:
     def __sub__(self, other: _Union['Int', int]) -> 'Int':
         ...
 
-    def __truediv__(self, other: 'Int') -> 'Fraction':
+    def __truediv__(self, other: _Union['Int', int]) -> 'Fraction':
         ...
 
     def __trunc__(self) -> 'Int':

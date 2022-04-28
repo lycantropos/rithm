@@ -247,7 +247,7 @@ except ImportError:
 
         def __truediv__(self, other):
             return (Fraction(self, other)
-                    if isinstance(other, Int)
+                    if isinstance(other, (Int, int))
                     else NotImplemented)
 
         def __trunc__(self):

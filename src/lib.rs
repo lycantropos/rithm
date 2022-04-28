@@ -362,6 +362,16 @@ impl PyInt {
         }
     }
 
+    fn __rrshift__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyLong::type_object(py))? {
+            maybe_rshift(try_py_long_to_big_int(other)?, self.0.clone())
+                .map(|result| PyInt(result).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
+    }
+
     fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         state
             .extract::<&PyBytes>(py)

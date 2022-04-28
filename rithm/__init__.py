@@ -196,6 +196,11 @@ except ImportError:
                     if isinstance(other, int)
                     else NotImplemented)
 
+        def __rrshift__(self, other):
+            return (Int(other >> self._value)
+                    if isinstance(other, int)
+                    else NotImplemented)
+
         def __rshift__(self, other):
             return (Int(self._value >> other._value)
                     if isinstance(other, Int)

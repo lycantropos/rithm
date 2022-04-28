@@ -269,7 +269,7 @@ impl PyInt {
         } else if exponent.is_instance(PyLong::type_object(py))? {
             try_py_long_to_big_int(exponent)?
         } else {
-            return Ok(py.NotImplemented())
+            return Ok(py.NotImplemented());
         };
         match divisor {
             Some(divisor) => {
@@ -278,7 +278,7 @@ impl PyInt {
                 } else if divisor.is_instance(PyLong::type_object(py))? {
                     try_py_long_to_big_int(divisor)?
                 } else {
-                    return Ok(py.NotImplemented())
+                    return Ok(py.NotImplemented());
                 };
                 let is_zero_divisor = divisor.is_zero();
                 match self.0.clone().checked_pow_rem_euclid(exponent, divisor) {
@@ -771,7 +771,7 @@ impl PyFraction {
             } else if exponent.is_instance(PyLong::type_object(py))? {
                 try_py_long_to_big_int(exponent)?
             } else {
-                return Ok(py.NotImplemented())
+                return Ok(py.NotImplemented());
             };
             match self.0.clone().checked_pow(exponent) {
                 Some(value) => Ok(PyFraction(value).into_py(py)),

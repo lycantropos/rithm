@@ -179,6 +179,11 @@ except ImportError:
                     if isinstance(other, int)
                     else NotImplemented)
 
+        def __rdivmod__(self, other):
+            return (tuple(Int(value) for value in divmod(other, self._value))
+                    if isinstance(other, int)
+                    else NotImplemented)
+
         def __repr__(self):
             return f'rithm.Int({self._value})'
 

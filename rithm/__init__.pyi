@@ -133,6 +133,9 @@ class Int:
     def __rand__(self, other: int) -> Int:
         ...
 
+    def __rdivmod__(self, other: int) -> _Tuple['Int', 'Int']:
+        ...
+
     def __repr__(self) -> str:
         ...
 

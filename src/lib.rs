@@ -165,19 +165,11 @@ impl PyInt {
     fn __divmod__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
         if other.is_instance(PyInt::type_object(py))? {
-            match self.0.clone().checked_div_rem_euclid(other.extract::<PyInt>()?.0) {
-                Some((quotient, remainder)) => Ok((PyInt(quotient), PyInt(remainder)).into_py(py)),
-                None => Err(PyZeroDivisionError::new_err(
-                    UNDEFINED_DIVISION_ERROR_MESSAGE,
-                )),
-            }
+            maybe_divmod(self.0.clone(), other.extract::<PyInt>()?.0)
+                .map(|(quotient, remainder)| (PyInt(quotient), PyInt(remainder)).into_py(py))
         } else if other.is_instance(PyLong::type_object(py))? {
-            match self.0.clone().checked_div_rem_euclid(try_py_long_to_big_int(other)?) {
-                Some((quotient, remainder)) => Ok((PyInt(quotient), PyInt(remainder)).into_py(py)),
-                None => Err(PyZeroDivisionError::new_err(
-                    UNDEFINED_DIVISION_ERROR_MESSAGE,
-                )),
-            }
+            maybe_divmod(self.0.clone(), try_py_long_to_big_int(other)?)
+                .map(|(quotient, remainder)| (PyInt(quotient), PyInt(remainder)).into_py(py))
         } else {
             Ok(py.NotImplemented())
         }
@@ -306,6 +298,16 @@ impl PyInt {
         }
     }
 
+    fn __rdivmod__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyLong::type_object(py))? {
+            maybe_divmod(try_py_long_to_big_int(other)?, self.0.clone())
+                .map(|(quotient, remainder)| (PyInt(quotient), PyInt(remainder)).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
+    }
+
     fn __repr__(&self) -> String {
         format!("rithm.Int({})", self.0)
     }
@@ -376,6 +378,15 @@ impl PyInt {
 
     fn __xor__(&self, other: PyInt) -> PyInt {
         PyInt(self.0.clone() ^ other.0)
+    }
+}
+
+fn maybe_divmod(dividend: BigInt, divisor: BigInt) -> PyResult<(BigInt, BigInt)> {
+    match dividend.checked_div_rem_euclid(divisor) {
+        Some((quotient, remainder)) => Ok((quotient, remainder)),
+        None => Err(PyZeroDivisionError::new_err(
+            UNDEFINED_DIVISION_ERROR_MESSAGE,
+        )),
     }
 }
 

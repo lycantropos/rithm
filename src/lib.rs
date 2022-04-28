@@ -494,9 +494,9 @@ impl PyFraction {
         self.numerator().__bool__()
     }
 
-    fn __float__(&self) -> PyResult<PyObject> {
+    fn __float__(&self, py: Python) -> PyResult<PyObject> {
         match <Fraction as TryInto<f64>>::try_into(self.0.clone()) {
-            Ok(value) => Ok(Python::with_gil(|py| value.into_py(py))),
+            Ok(value) => Ok(value.into_py(py)),
             Err(reason) => Err(PyOverflowError::new_err(reason.to_string())),
         }
     }

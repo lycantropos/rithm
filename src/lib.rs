@@ -269,7 +269,7 @@ impl PyInt {
         } else if exponent.is_instance(PyLong::type_object(py))? {
             try_py_long_to_big_int(exponent)?
         } else {
-            return Ok(py.NotImplemented());
+            return Ok(py.NotImplemented())
         };
         match divisor {
             Some(divisor) => {
@@ -278,7 +278,7 @@ impl PyInt {
                 } else if divisor.is_instance(PyLong::type_object(py))? {
                     try_py_long_to_big_int(divisor)?
                 } else {
-                    return Ok(py.NotImplemented());
+                    return Ok(py.NotImplemented())
                 };
                 let is_zero_divisor = divisor.is_zero();
                 match self.0.clone().checked_pow_rem_euclid(exponent, divisor) {
@@ -752,11 +752,19 @@ impl PyFraction {
         slf
     }
 
-    fn __pow__(&self, other: PyInt, modulo: Option<PyInt>, py: Python) -> PyResult<PyObject> {
-        if modulo.is_some() {
+    fn __pow__(&self, exponent: &PyAny, modulo: &PyAny) -> PyResult<PyObject> {
+        let py = exponent.py();
+        if !modulo.is_none() {
             Ok(py.NotImplemented())
         } else {
-            match self.0.clone().checked_pow(other.0) {
+            let exponent = if exponent.is_instance(PyInt::type_object(py))? {
+                exponent.extract::<PyInt>()?.0
+            } else if exponent.is_instance(PyLong::type_object(py))? {
+                try_py_long_to_big_int(exponent)?
+            } else {
+                return Ok(py.NotImplemented())
+            };
+            match self.0.clone().checked_pow(exponent) {
                 Some(value) => Ok(PyFraction(value).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
                     UNDEFINED_DIVISION_ERROR_MESSAGE,

@@ -415,7 +415,7 @@ except ImportError:
                              ),
                              _normalize=False
                      ))
-                    if isinstance(exponent, Int) and divisor is None
+                    if isinstance(exponent, (Int, int)) and divisor is None
                     else NotImplemented)
 
         def __repr__(self):

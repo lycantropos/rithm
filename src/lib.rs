@@ -449,6 +449,15 @@ impl PyInt {
         }
     }
 
+    fn __rxor__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyLong::type_object(py))? {
+            Ok(PyInt(self.0.clone() ^ try_py_long_to_big_int(other)?).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
+    }
+
     fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
         state
             .extract::<&PyBytes>(py)
@@ -494,8 +503,13 @@ impl PyInt {
         slf
     }
 
-    fn __xor__(&self, other: PyInt) -> PyInt {
-        PyInt(self.0.clone() ^ other.0)
+    fn __xor__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyInt::type_object(py))? {
+            Ok(PyInt(self.0.clone() ^ other.extract::<PyInt>()?.0).into_py(py))
+        } else {
+            self.__rxor__(other)
+        }
     }
 }
 

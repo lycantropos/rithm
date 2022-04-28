@@ -237,6 +237,11 @@ except ImportError:
                     if isinstance(other, Int)
                     else NotImplemented)
 
+        def __rxor__(self, other):
+            return (Int(self._value ^ other)
+                    if isinstance(other, int)
+                    else NotImplemented)
+
         def __setstate__(self, state: int):
             self._value = state
 
@@ -261,7 +266,7 @@ except ImportError:
         def __xor__(self, other):
             return (Int(self._value ^ other._value)
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else self.__rxor__(other))
 
 
     def _to_bytes_count(value: int) -> int:

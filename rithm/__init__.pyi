@@ -167,6 +167,9 @@ class Int:
     def __rtruediv__(self, other: int) -> 'Fraction':
         ...
 
+    def __rxor__(self, other: int) -> 'Int':
+        ...
+
     def __setstate__(self, state: int) -> None:
         ...
 
@@ -182,7 +185,7 @@ class Int:
     def __trunc__(self) -> 'Int':
         ...
 
-    def __xor__(self, other: 'Int') -> 'Int':
+    def __xor__(self, other: _Union['Int', int]) -> 'Int':
         ...
 
 

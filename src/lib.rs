@@ -136,8 +136,13 @@ impl PyInt {
         PyInt(self.0.clone().abs())
     }
 
-    fn __add__(&self, other: PyInt) -> PyInt {
-        PyInt(self.0.clone() + other.0)
+    fn __add__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyInt::type_object(py))? {
+            Ok(PyInt(self.0.clone() + other.extract::<PyInt>()?.0).into_py(py))
+        } else {
+            self.__radd__(other)
+        }
     }
 
     fn __and__(&self, other: PyInt) -> PyInt {
@@ -263,6 +268,15 @@ impl PyInt {
                     to_py_object(PyInt(self.0.clone().pow(exponent.0)))
                 }
             }),
+        }
+    }
+
+    fn __radd__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyLong::type_object(py))? {
+            Ok(PyInt(self.0.clone() + try_py_long_to_big_int(other)?).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
         }
     }
 

@@ -61,7 +61,7 @@ except ImportError:
         def __add__(self, other):
             return (Int(self._value + other._value)
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else self.__radd__(other))
 
         def __and__(self, other):
             return (Int(self._value & other._value)
@@ -164,6 +164,11 @@ except ImportError:
                            if isinstance(divisor, Int)
                            else NotImplemented))
                     if isinstance(exponent, Int)
+                    else NotImplemented)
+
+        def __radd__(self, other):
+            return (Int(self._value + other)
+                    if isinstance(other, int)
                     else NotImplemented)
 
         def __repr__(self):

@@ -227,6 +227,11 @@ except ImportError:
                           if isinstance(other, int)
                           else NotImplemented))
 
+        def __rsub__(self, other):
+            return (Int(other - self._value)
+                    if isinstance(other, int)
+                    else NotImplemented)
+
         def __setstate__(self, state: int):
             self._value = state
 

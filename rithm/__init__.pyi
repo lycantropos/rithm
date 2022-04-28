@@ -161,6 +161,9 @@ class Int:
     def __rshift__(self, other: _Union['Int', int]) -> 'Int':
         ...
 
+    def __rsub__(self, other: int) -> Int:
+        ...
+
     def __setstate__(self, state: int) -> None:
         ...
 

@@ -143,7 +143,9 @@ except ImportError:
         def __mod__(self, other):
             return (Int(self._value % other._value)
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else (Int(self._value % other)
+                          if isinstance(other, int)
+                          else NotImplemented))
 
         def __mul__(self, other):
             return (Int(self._value * other._value)

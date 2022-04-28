@@ -107,7 +107,7 @@ class Int:
     def __lt__(self, other: 'Int') -> bool:
         ...
 
-    def __mod__(self, other: 'Int') -> 'Int':
+    def __mod__(self, other: _Union['Int', int]) -> 'Int':
         ...
 
     def __mul__(self, other: 'Int') -> 'Int':

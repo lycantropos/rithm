@@ -228,12 +228,16 @@ impl PyInt {
         }
     }
 
-    fn __mod__(&self, other: PyInt) -> PyResult<PyInt> {
-        match self.0.clone().checked_rem_euclid(other.0) {
-            Some(result) => Ok(PyInt(result)),
-            None => Err(PyZeroDivisionError::new_err(
-                UNDEFINED_DIVISION_ERROR_MESSAGE,
-            )),
+    fn __mod__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyInt::type_object(py))? {
+            maybe_mod(self.0.clone(), other.extract::<PyInt>()?.0)
+                .map(|result| PyInt(result).into_py(py))
+        } else if other.is_instance(PyLong::type_object(py))? {
+            maybe_mod(self.0.clone(), try_py_long_to_big_int(other)?)
+                .map(|result| PyInt(result).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
         }
     }
 
@@ -441,6 +445,15 @@ fn maybe_lshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
         big_int::LeftShiftError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
         big_int::LeftShiftError::TooLarge => PyOverflowError::new_err(reason.to_string()),
     })
+}
+
+fn maybe_mod(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
+    match dividend.checked_rem_euclid(divisor) {
+        Some(result) => Ok(result),
+        None => Err(PyZeroDivisionError::new_err(
+            UNDEFINED_DIVISION_ERROR_MESSAGE,
+        )),
+    }
 }
 
 fn maybe_mod_to_near(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {

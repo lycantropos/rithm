@@ -241,7 +241,9 @@ except ImportError:
         def __sub__(self, other):
             return (Int(self._value - other._value)
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else (Int(self._value - other)
+                          if isinstance(other, int)
+                          else NotImplemented))
 
         def __truediv__(self, other):
             return (Fraction(self, other)

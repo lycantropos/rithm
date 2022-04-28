@@ -170,7 +170,7 @@ class Int:
     def __str__(self) -> str:
         ...
 
-    def __sub__(self, other: 'Int') -> 'Int':
+    def __sub__(self, other: _Union['Int', int]) -> 'Int':
         ...
 
     def __truediv__(self, other: 'Int') -> 'Fraction':

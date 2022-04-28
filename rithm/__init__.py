@@ -97,7 +97,9 @@ except ImportError:
         def __floordiv__(self, other):
             return (Int(self._value // other._value)
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else (Int(self._value // other)
+                          if isinstance(other, int)
+                          else NotImplemented))
 
         def __ge__(self, other):
             return (self._value >= other._value

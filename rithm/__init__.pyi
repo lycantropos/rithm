@@ -77,7 +77,7 @@ class Int:
     def __floor__(self) -> 'Int':
         ...
 
-    def __floordiv__(self, other: 'Int') -> 'Int':
+    def __floordiv__(self, other: _Union['Int', int]) -> 'Int':
         ...
 
     def __ge__(self, other: 'Int') -> bool:

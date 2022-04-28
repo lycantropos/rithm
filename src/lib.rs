@@ -186,12 +186,16 @@ impl PyInt {
         slf
     }
 
-    fn __floordiv__(&self, other: PyInt) -> PyResult<PyInt> {
-        match self.0.clone().checked_div_euclid(other.0) {
-            Some(result) => Ok(PyInt(result)),
-            None => Err(PyZeroDivisionError::new_err(
-                UNDEFINED_DIVISION_ERROR_MESSAGE,
-            )),
+    fn __floordiv__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyInt::type_object(py))? {
+            maybe_floordiv(self.0.clone(), other.extract::<PyInt>()?.0)
+                .map(|result| PyInt(result).into_py(py))
+        } else if other.is_instance(PyLong::type_object(py))? {
+            maybe_floordiv(self.0.clone(), try_py_long_to_big_int(other)?)
+                .map(|result| PyInt(result).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
         }
     }
 
@@ -384,6 +388,15 @@ impl PyInt {
 fn maybe_divmod(dividend: BigInt, divisor: BigInt) -> PyResult<(BigInt, BigInt)> {
     match dividend.checked_div_rem_euclid(divisor) {
         Some((quotient, remainder)) => Ok((quotient, remainder)),
+        None => Err(PyZeroDivisionError::new_err(
+            UNDEFINED_DIVISION_ERROR_MESSAGE,
+        )),
+    }
+}
+
+fn maybe_floordiv(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
+    match dividend.checked_div_euclid(divisor) {
+        Some(result) => Ok(result),
         None => Err(PyZeroDivisionError::new_err(
             UNDEFINED_DIVISION_ERROR_MESSAGE,
         )),

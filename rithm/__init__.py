@@ -243,8 +243,8 @@ except ImportError:
                     else NotImplemented)
 
         def __rtruediv__(self, other):
-            return (Fraction(self, other)
-                    if isinstance(other, Int)
+            return (Fraction(other, self)
+                    if isinstance(other, int)
                     else NotImplemented)
 
         def __rxor__(self, other):

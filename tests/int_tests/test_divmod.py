@@ -14,8 +14,8 @@ def test_connection_with_builtin(first_with_builtin: IntWithBuiltin,
 
     try:
         quotient, remainder = divmod(first, second)
-    except ZeroDivisionError:
-        with pytest.raises(ZeroDivisionError):
+    except ZeroDivisionError as exception:
+        with pytest.raises(type(exception)):
             divmod(first_builtin, second_builtin)
     else:
         builtin_quotient, builtin_remainder = divmod(first_builtin,

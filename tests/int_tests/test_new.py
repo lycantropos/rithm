@@ -25,8 +25,8 @@ def test_decimal_string_connection_with_builtin(string: str) -> None:
 def test_float_connection_with_builtin(float_: float) -> None:
     try:
         result = Int(float_)
-    except (OverflowError, ValueError) as error:
-        with pytest.raises(type(error)):
+    except (OverflowError, ValueError) as exception:
+        with pytest.raises(type(exception)):
             int(float_)
     else:
         assert is_equivalent_to_builtin_int(result, int(float_))

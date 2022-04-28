@@ -32,8 +32,8 @@ def test_negative_exponent_no_modulo_connection_with_builtin(
 
     try:
         result = base ** exponent
-    except ZeroDivisionError:
-        with pytest.raises(ZeroDivisionError):
+    except ZeroDivisionError as exception:
+        with pytest.raises(type(exception)):
             fractions.Fraction(base_builtin) ** exponent_builtin
     else:
         assert is_equivalent_to_builtin_fraction(
@@ -56,8 +56,8 @@ def test_with_modulo_connection_with_builtin(
 
     try:
         result = pow(base, exponent, divisor)
-    except ValueError:
-        with pytest.raises(ValueError):
+    except ValueError as exception:
+        with pytest.raises(type(exception)):
             pow(base_builtin, exponent_builtin, divisor_builtin)
     else:
         assert is_equivalent_to_builtin_int(

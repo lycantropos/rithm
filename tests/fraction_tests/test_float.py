@@ -12,8 +12,8 @@ def test_connection_with_builtin(fraction_with_builtin: FractionWithBuiltin
 
     try:
         result = float(fraction)
-    except OverflowError:
-        with pytest.raises(OverflowError):
+    except OverflowError as exception:
+        with pytest.raises(type(exception)):
             float(builtin_fraction)
     else:
         assert result == float(builtin_fraction)

@@ -23,8 +23,8 @@ def test_connection_with_builtin(numerators: IntWithBuiltin,
 
     try:
         result = Fraction(numerator, denominator)
-    except ZeroDivisionError:
-        with pytest.raises(ZeroDivisionError):
+    except ZeroDivisionError as exception:
+        with pytest.raises(type(exception)):
             fractions.Fraction(builtin_numerator, builtin_denominator)
     else:
         assert is_equivalent_to_builtin_fraction(

@@ -11,8 +11,8 @@ def test_connection_with_builtin(int_with_builtin_int: IntWithBuiltin) -> None:
 
     try:
         result = float(int_)
-    except OverflowError:
-        with pytest.raises(OverflowError):
+    except OverflowError as exception:
+        with pytest.raises(type(exception)):
             float(builtin_int)
     else:
         assert result == float(builtin_int)

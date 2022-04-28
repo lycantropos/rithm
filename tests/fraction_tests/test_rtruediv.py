@@ -15,8 +15,8 @@ def test_connection_with_builtin(fraction_with_builtin: FractionWithBuiltin,
 
     try:
         result = int_ / fraction
-    except ZeroDivisionError:
-        with pytest.raises(ZeroDivisionError):
+    except ZeroDivisionError as exception:
+        with pytest.raises(type(exception)):
             builtin_int / builtin_fraction
     else:
         assert is_equivalent_to_builtin_fraction(

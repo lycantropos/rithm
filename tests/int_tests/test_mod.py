@@ -14,8 +14,8 @@ def test_connection_with_builtin(first_with_builtin: IntWithBuiltin,
 
     try:
         result = first % second
-    except ZeroDivisionError:
-        with pytest.raises(ZeroDivisionError):
+    except ZeroDivisionError as exception:
+        with pytest.raises(type(exception)):
             first_builtin % second_builtin
     else:
         assert is_equivalent_to_builtin_int(result,

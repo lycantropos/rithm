@@ -17,8 +17,8 @@ def test_connection_with_builtin(base_with_builtin: FractionWithBuiltin,
 
     try:
         result = base ** exponent
-    except ZeroDivisionError:
-        with pytest.raises(ZeroDivisionError):
+    except ZeroDivisionError as exception:
+        with pytest.raises(type(exception)):
             base_builtin ** exponent_builtin
     else:
         assert is_equivalent_to_builtin_fraction(

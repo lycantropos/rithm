@@ -15,7 +15,7 @@ use crate::traits::{
     CheckedDivAsF32, CheckedDivAsF64, CheckedDivEuclid, CheckedDivRem, CheckedDivRemEuclid,
     CheckedPow, CheckedPowRemEuclid, CheckedRem, CheckedRemEuclid, CheckedRemEuclidInv, CheckedShl,
     CheckedShr, DivEuclid, DivRem, DivRemEuclid, DoublePrecisionOf, Endianness, Float, FromBytes,
-    FromStrRadix, Gcd, Oppose, OppositionOf, Oppositive, Pow, RemEuclid, ToBytes, Unitary,
+    FromStrRadix, Gcd, Oppose, OppositionOf, Oppositive, Parity, Pow, RemEuclid, ToBytes, Unitary,
     Zeroable,
 };
 use crate::utils;
@@ -1325,6 +1325,18 @@ impl<Digit: Clone + PartialOrd + ZeroableDigit, const SEPARATOR: char, const SHI
         } else {
             Ordering::Equal
         })
+    }
+}
+
+impl<Digit: ParitiableDigit, const SEPARATOR: char, const SHIFT: usize> Parity
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    fn is_even(&self) -> bool {
+        (self.digits[0] & Digit::one()).is_zero()
+    }
+
+    fn is_odd(&self) -> bool {
+        !(self.digits[0] & Digit::one()).is_zero()
     }
 }
 

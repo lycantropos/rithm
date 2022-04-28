@@ -136,6 +136,8 @@ where
 
 pub trait OppositiveDigit = ZeroableDigit;
 
+pub trait ParitiableDigit = AssigningBitwiseConjunctiveMagma + Copy + UnitaryDigit;
+
 pub trait RightShiftableDigit =
     AdditiveDigit + Debug + DivisibleDigit + ShiftingRightMonoid + TryFrom<usize>
     where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;

@@ -1159,6 +1159,30 @@ macro_rules! plain_oppositive_impl {
 
 plain_oppositive_impl!(i8 i16 i32 i64 i128 isize);
 
+pub trait Parity {
+    fn is_even(&self) -> bool;
+
+    fn is_odd(&self) -> bool;
+}
+
+macro_rules! plain_parity_impl {
+    ($($t:ty)*) => ($(
+        impl Parity for $t {
+            #[inline(always)]
+            fn is_even(&self) -> bool {
+                self & 1 == 0
+            }
+
+            #[inline(always)]
+            fn is_odd(&self) -> bool {
+                self & 1 == 1
+            }
+        }
+    )*)
+}
+
+plain_parity_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
 pub trait Pow<Exponent> {
     type Output;
 

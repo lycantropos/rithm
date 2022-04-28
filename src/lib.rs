@@ -975,7 +975,3 @@ fn _rithm(_py: Python, module: &PyModule) -> PyResult<()> {
     module.add_class::<PyInt>()?;
     Ok(())
 }
-
-fn to_py_object<T: IntoPy<PyObject>>(result: T) -> PyObject {
-    Python::with_gil(|py| result.into_py(py))
-}

@@ -60,7 +60,7 @@ class Int:
     def __ceil__(self) -> 'Int':
         ...
 
-    def __divmod__(self, other: 'Int') -> _Tuple['Int', 'Int']:
+    def __divmod__(self, other: _Union['Int', int]) -> _Tuple['Int', 'Int']:
         ...
 
     @_overload

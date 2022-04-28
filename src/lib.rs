@@ -162,12 +162,24 @@ impl PyInt {
         slf
     }
 
-    fn __divmod__(&self, other: PyInt) -> PyResult<(PyInt, PyInt)> {
-        match self.0.clone().checked_div_rem_euclid(other.0) {
-            Some((quotient, remainder)) => Ok((PyInt(quotient), PyInt(remainder))),
-            None => Err(PyZeroDivisionError::new_err(
-                UNDEFINED_DIVISION_ERROR_MESSAGE,
-            )),
+    fn __divmod__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyInt::type_object(py))? {
+            match self.0.clone().checked_div_rem_euclid(other.extract::<PyInt>()?.0) {
+                Some((quotient, remainder)) => Ok((PyInt(quotient), PyInt(remainder)).into_py(py)),
+                None => Err(PyZeroDivisionError::new_err(
+                    UNDEFINED_DIVISION_ERROR_MESSAGE,
+                )),
+            }
+        } else if other.is_instance(PyLong::type_object(py))? {
+            match self.0.clone().checked_div_rem_euclid(try_py_long_to_big_int(other)?) {
+                Some((quotient, remainder)) => Ok((PyInt(quotient), PyInt(remainder)).into_py(py)),
+                None => Err(PyZeroDivisionError::new_err(
+                    UNDEFINED_DIVISION_ERROR_MESSAGE,
+                )),
+            }
+        } else {
+            Ok(py.NotImplemented())
         }
     }
 

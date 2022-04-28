@@ -78,7 +78,10 @@ except ImportError:
             return (tuple(Int(value)
                           for value in divmod(self._value, other._value))
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else (tuple(Int(value)
+                                for value in divmod(self._value, other))
+                          if isinstance(other, int)
+                          else NotImplemented))
 
         def __eq__(self, other):
             return (self._value == other._value

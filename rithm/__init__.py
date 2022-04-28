@@ -220,6 +220,11 @@ except ImportError:
         def __round__(self, digits=None):
             return Int(round(self._value, digits))
 
+        def __rpow__(self, base, divisor=None):
+            return (Int(base).__pow__(self)
+                    if isinstance(base, int)
+                    else NotImplemented)
+
         def __rrshift__(self, other):
             return (Int(other >> self._value)
                     if isinstance(other, int)

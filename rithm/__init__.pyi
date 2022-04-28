@@ -124,7 +124,7 @@ class Int:
 
     def __pow__(self,
                 exponent: _Union['Int', int],
-                divisor: _Union['Int', None, int] = None
+                divisor: _Union['Int', None, int] = ...
                 ) -> _Union['Fraction', 'Int']:
         ...
 
@@ -156,6 +156,12 @@ class Int:
         ...
 
     def __round__(self, digits: _Optional[int] = ...) -> 'Int':
+        ...
+
+    def __rpow__(self,
+                 base: int,
+                 divisor: _Union['Int', None, int] = ...
+                 ) -> _Union['Fraction', 'Int']:
         ...
 
     def __rrshift__(self, other: int) -> 'Int':

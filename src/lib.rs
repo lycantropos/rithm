@@ -285,33 +285,9 @@ impl PyInt {
                 } else {
                     return Ok(py.NotImplemented());
                 };
-                let is_zero_divisor = divisor.is_zero();
-                match self.0.clone().checked_pow_rem_euclid(exponent, divisor) {
-                    Some(value) => Ok(PyInt(value).into_py(py)),
-                    None => Err(PyValueError::new_err(if is_zero_divisor {
-                        "Divisor cannot be zero."
-                    } else {
-                        "Base is not invertible for the given divisor."
-                    })),
-                }
+                maybe_pow_mod(self.0.clone(), exponent, divisor, py)
             }
-            None => {
-                if exponent.is_negative() {
-                    match unsafe { Fraction::new(self.0.clone(), BigInt::one()).unwrap_unchecked() }
-                        .checked_pow(exponent)
-                    {
-                        Some(value) => Ok(PyFraction(value).into_py(py)),
-                        None => Err(PyZeroDivisionError::new_err(
-                            UNDEFINED_DIVISION_ERROR_MESSAGE,
-                        )),
-                    }
-                } else {
-                    Ok(
-                        PyInt(unsafe { self.0.clone().checked_pow(exponent).unwrap_unchecked() })
-                            .into_py(py),
-                    )
-                }
-            }
+            None => maybe_pow(self.0.clone(), exponent, py),
         }
     }
 
@@ -415,6 +391,28 @@ impl PyInt {
             }
             None => self.clone(),
         })
+    }
+
+    fn __rpow__(&self, base: &PyAny, divisor: Option<&PyAny>) -> PyResult<PyObject> {
+        let py = base.py();
+        let base = if base.is_instance(PyLong::type_object(py))? {
+            try_py_long_to_big_int(base)?
+        } else {
+            return Ok(py.NotImplemented());
+        };
+        match divisor {
+            Some(divisor) => {
+                let divisor = if divisor.is_instance(PyInt::type_object(py))? {
+                    divisor.extract::<PyInt>()?.0
+                } else if divisor.is_instance(PyLong::type_object(py))? {
+                    try_py_long_to_big_int(divisor)?
+                } else {
+                    return Ok(py.NotImplemented());
+                };
+                maybe_pow_mod(base, self.0.clone(), divisor, py)
+            }
+            None => maybe_pow(base, self.0.clone(), py),
+        }
     }
 
     fn __rrshift__(&self, other: &PyAny) -> PyResult<PyObject> {
@@ -590,6 +588,37 @@ fn maybe_mod_to_near(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
             remainder
         },
     )
+}
+
+fn maybe_pow(base: BigInt, exponent: BigInt, py: Python) -> PyResult<PyObject> {
+    if exponent.is_negative() {
+        match unsafe { Fraction::new(base, BigInt::one()).unwrap_unchecked() }.checked_pow(exponent)
+        {
+            Some(value) => Ok(PyFraction(value).into_py(py)),
+            None => Err(PyZeroDivisionError::new_err(
+                UNDEFINED_DIVISION_ERROR_MESSAGE,
+            )),
+        }
+    } else {
+        Ok(PyInt(unsafe { base.checked_pow(exponent).unwrap_unchecked() }).into_py(py))
+    }
+}
+
+fn maybe_pow_mod(
+    base: BigInt,
+    exponent: BigInt,
+    divisor: BigInt,
+    py: Python,
+) -> PyResult<PyObject> {
+    let is_zero_divisor = divisor.is_zero();
+    match base.checked_pow_rem_euclid(exponent, divisor) {
+        Some(value) => Ok(PyInt(value).into_py(py)),
+        None => Err(PyValueError::new_err(if is_zero_divisor {
+            "Divisor cannot be zero."
+        } else {
+            "Base is not invertible for the given divisor."
+        })),
+    }
 }
 
 fn maybe_rshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {

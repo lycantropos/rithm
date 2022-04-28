@@ -145,8 +145,13 @@ impl PyInt {
         }
     }
 
-    fn __and__(&self, other: PyInt) -> PyInt {
-        PyInt(self.0.clone() & other.0)
+    fn __and__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyInt::type_object(py))? {
+            Ok(PyInt(self.0.clone() & other.extract::<PyInt>()?.0).into_py(py))
+        } else {
+            self.__rand__(other)
+        }
     }
 
     fn __bool__(&self) -> bool {
@@ -275,6 +280,15 @@ impl PyInt {
         let py = other.py();
         if other.is_instance(PyLong::type_object(py))? {
             Ok(PyInt(self.0.clone() + try_py_long_to_big_int(other)?).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
+    }
+
+    fn __rand__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyLong::type_object(py))? {
+            Ok(PyInt(self.0.clone() & try_py_long_to_big_int(other)?).into_py(py))
         } else {
             Ok(py.NotImplemented())
         }

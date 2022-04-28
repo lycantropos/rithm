@@ -51,7 +51,7 @@ class Int:
     def __add__(self, other: _Union['Int', int]) -> 'Int':
         ...
 
-    def __and__(self, other: 'Int') -> 'Int':
+    def __and__(self, other: _Union['Int', int]) -> 'Int':
         ...
 
     def __bool__(self) -> bool:
@@ -128,6 +128,9 @@ class Int:
         ...
 
     def __radd__(self, other: int) -> Int:
+        ...
+
+    def __rand__(self, other: int) -> Int:
         ...
 
     def __repr__(self) -> str:

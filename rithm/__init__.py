@@ -66,7 +66,7 @@ except ImportError:
         def __and__(self, other):
             return (Int(self._value & other._value)
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else self.__rand__(other))
 
         def __bool__(self):
             return bool(self._value)
@@ -168,6 +168,11 @@ except ImportError:
 
         def __radd__(self, other):
             return (Int(self._value + other)
+                    if isinstance(other, int)
+                    else NotImplemented)
+
+        def __rand__(self, other):
+            return (Int(self._value & other)
                     if isinstance(other, int)
                     else NotImplemented)
 

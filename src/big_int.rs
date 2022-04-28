@@ -435,7 +435,7 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Add
     fn add(self, other: Self) -> Self::Output {
         let (sign, digits) =
             sum_signed_digits::<Digit, SHIFT>(&self.digits, self.sign, &other.digits, other.sign);
-        Self { sign, digits }
+        Self::Output { sign, digits }
     }
 }
 
@@ -459,7 +459,7 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAnd
         } else {
             bitwise_and::<Digit, SHIFT>(other.digits, other.sign, self.digits, self.sign)
         };
-        Self { sign, digits }
+        Self::Output { sign, digits }
     }
 }
 
@@ -506,7 +506,7 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitOr
         } else {
             bitwise_or::<Digit, SHIFT>(other.digits, other.sign, self.digits, self.sign)
         };
-        Self { sign, digits }
+        Self::Output { sign, digits }
     }
 }
 
@@ -533,7 +533,7 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitXor
         } else {
             bitwise_xor::<Digit, SHIFT>(other.digits, other.sign, self.digits, self.sign)
         };
-        Self { sign, digits }
+        Self::Output { sign, digits }
     }
 }
 
@@ -869,7 +869,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
             divisor.sign,
         )
         .unwrap();
-        Self { sign, digits }
+        Self::Output { sign, digits }
     }
 }
 
@@ -1227,7 +1227,7 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> Neg for BigInt<Digit, SEP
     type Output = Self;
 
     fn neg(self) -> Self::Output {
-        Self {
+        Self::Output {
             sign: -self.sign,
             digits: self.digits,
         }
@@ -1348,7 +1348,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Rem
         let (sign, digits) =
             checked_rem::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
                 .unwrap();
-        Self { sign, digits }
+        Self::Output { sign, digits }
     }
 }
 
@@ -1365,7 +1365,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Rem
             divisor.sign,
         )
         .unwrap();
-        Self { sign, digits }
+        Self::Output { sign, digits }
     }
 }
 
@@ -1626,7 +1626,7 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Sub
             &subtrahend.digits,
             subtrahend.sign,
         );
-        Self { sign, digits }
+        Self::Output { sign, digits }
     }
 }
 

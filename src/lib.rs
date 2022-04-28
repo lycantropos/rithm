@@ -18,7 +18,7 @@ use pyo3_ffi as ffi;
 use crate::traits::{
     Abs, BitLength, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,
     CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, Endianness, FromBytes,
-    FromStrRadix, Gcd, Oppositive, Pow, ToBytes, Unitary, Zeroable,
+    FromStrRadix, Gcd, Oppositive, Parity, Pow, ToBytes, Unitary, Zeroable,
 };
 
 pub mod big_int;
@@ -274,6 +274,24 @@ impl PyInt {
         compare(&self.0, &other.0, op)
     }
 
+    fn __round__(&self, digits: Option<&PyLong>, py: Python) -> PyResult<Self> {
+        Ok(match digits {
+            Some(digits) => {
+                if digits.lt(0.into_py(py))? {
+                    let ten_to_digits_power = unsafe {
+                        BigInt::from(10u8)
+                            .checked_pow(-try_py_long_to_big_int(digits)?)
+                            .unwrap_unchecked()
+                    };
+                    PyInt(self.0.clone() - maybe_mod_to_near(self.0.clone(), ten_to_digits_power)?)
+                } else {
+                    self.clone()
+                }
+            }
+            None => self.clone(),
+        })
+    }
+
     fn __rshift__(&self, other: PyInt) -> PyResult<PyInt> {
         self.0
             .clone()
@@ -319,6 +337,36 @@ impl PyInt {
     fn __xor__(&self, other: PyInt) -> PyInt {
         PyInt(self.0.clone() ^ other.0)
     }
+}
+
+fn maybe_mod_to_near(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
+    let (quotient, remainder) = match dividend.checked_div_rem_euclid(divisor.clone()) {
+        Some((quotient, remainder)) => Ok((quotient, remainder)),
+        None => Err(PyZeroDivisionError::new_err(
+            UNDEFINED_DIVISION_ERROR_MESSAGE,
+        )),
+    }?;
+    let double_remainder = remainder
+        .clone()
+        .checked_shl(BigInt::one())
+        .map_err(|reason| match reason {
+            big_int::LeftShiftError::NegativeShift => PyValueError::new_err(reason.to_string()),
+            big_int::LeftShiftError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
+            big_int::LeftShiftError::TooLarge => PyOverflowError::new_err(reason.to_string()),
+        })?;
+    let greater_than_half = if divisor.is_positive() {
+        double_remainder > divisor
+    } else {
+        double_remainder < divisor
+    };
+    let exactly_half = double_remainder == divisor;
+    Ok(
+        if greater_than_half || (exactly_half && quotient.is_odd()) {
+            remainder - divisor
+        } else {
+            remainder
+        },
+    )
 }
 
 #[inline]

@@ -131,6 +131,9 @@ class Int:
     def __repr__(self) -> str:
         ...
 
+    def __round__(self, digits: _Optional[int] = ...) -> 'Int':
+        ...
+
     def __rshift__(self, other: 'Int') -> 'Int':
         ...
 

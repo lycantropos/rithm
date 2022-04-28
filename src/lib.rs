@@ -215,16 +215,17 @@ impl PyInt {
         PyInt(!self.0.clone())
     }
 
-    fn __lshift__(&self, other: PyInt) -> PyResult<PyInt> {
-        self.0
-            .clone()
-            .checked_shl(other.0)
-            .map(PyInt)
-            .map_err(|reason| match reason {
-                big_int::LeftShiftError::NegativeShift => PyValueError::new_err(reason.to_string()),
-                big_int::LeftShiftError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
-                big_int::LeftShiftError::TooLarge => PyOverflowError::new_err(reason.to_string()),
-            })
+    fn __lshift__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyInt::type_object(py))? {
+            maybe_lshift(self.0.clone(), other.extract::<PyInt>()?.0)
+                .map(|result| PyInt(result).into_py(py))
+        } else if other.is_instance(PyLong::type_object(py))? {
+            maybe_lshift(self.0.clone(), try_py_long_to_big_int(other)?)
+                .map(|result| PyInt(result).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
     }
 
     fn __mod__(&self, other: PyInt) -> PyResult<PyInt> {
@@ -411,6 +412,14 @@ fn maybe_floordiv(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
             UNDEFINED_DIVISION_ERROR_MESSAGE,
         )),
     }
+}
+
+fn maybe_lshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
+    base.checked_shl(shift).map_err(|reason| match reason {
+        big_int::LeftShiftError::NegativeShift => PyValueError::new_err(reason.to_string()),
+        big_int::LeftShiftError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
+        big_int::LeftShiftError::TooLarge => PyOverflowError::new_err(reason.to_string()),
+    })
 }
 
 fn maybe_mod_to_near(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {

@@ -101,7 +101,7 @@ class Int:
     def __le__(self, other: 'Int') -> bool:
         ...
 
-    def __lshift__(self, other: 'Int') -> 'Int':
+    def __lshift__(self, other: _Union['Int', int]) -> 'Int':
         ...
 
     def __lt__(self, other: 'Int') -> bool:

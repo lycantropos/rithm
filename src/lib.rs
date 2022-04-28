@@ -18,7 +18,7 @@ use pyo3_ffi as ffi;
 use crate::traits::{
     Abs, BitLength, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,
     CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, Endianness, FromBytes,
-    FromStrRadix, Gcd, Oppositive, Parity, Pow, ToBytes, Unitary, Zeroable,
+    FromStrRadix, Gcd, Oppositive, Parity, ToBytes, Unitary, Zeroable,
 };
 
 pub mod big_int;
@@ -262,12 +262,27 @@ impl PyInt {
         slf
     }
 
-    fn __pow__(&self, exponent: PyInt, divisor: Option<PyInt>) -> PyResult<PyObject> {
+    fn __pow__(&self, exponent: &PyAny, divisor: Option<&PyAny>) -> PyResult<PyObject> {
+        let py = exponent.py();
+        let exponent = if exponent.is_instance(PyInt::type_object(py))? {
+            exponent.extract::<PyInt>()?.0
+        } else if exponent.is_instance(PyLong::type_object(py))? {
+            try_py_long_to_big_int(exponent)?
+        } else {
+            return Ok(py.NotImplemented());
+        };
         match divisor {
-            Some(value) => {
-                let is_zero_divisor = value.0.is_zero();
-                match self.0.clone().checked_pow_rem_euclid(exponent.0, value.0) {
-                    Some(value) => Ok(to_py_object(PyInt(value))),
+            Some(divisor) => {
+                let divisor = if divisor.is_instance(PyInt::type_object(py))? {
+                    divisor.extract::<PyInt>()?.0
+                } else if divisor.is_instance(PyLong::type_object(py))? {
+                    try_py_long_to_big_int(divisor)?
+                } else {
+                    return Ok(py.NotImplemented());
+                };
+                let is_zero_divisor = divisor.is_zero();
+                match self.0.clone().checked_pow_rem_euclid(exponent, divisor) {
+                    Some(value) => Ok(PyInt(value).into_py(py)),
                     None => Err(PyValueError::new_err(if is_zero_divisor {
                         "Divisor cannot be zero."
                     } else {
@@ -275,22 +290,23 @@ impl PyInt {
                     })),
                 }
             }
-            None => Ok({
-                if exponent.0.is_negative() {
-                    to_py_object(match unsafe {
-                        Fraction::new(self.0.clone(), BigInt::one()).unwrap_unchecked()
-                    }
-                    .checked_pow(exponent.0)
+            None => {
+                if exponent.is_negative() {
+                    match unsafe { Fraction::new(self.0.clone(), BigInt::one()).unwrap_unchecked() }
+                        .checked_pow(exponent)
                     {
-                        Some(value) => Ok(PyFraction(value)),
+                        Some(value) => Ok(PyFraction(value).into_py(py)),
                         None => Err(PyZeroDivisionError::new_err(
                             UNDEFINED_DIVISION_ERROR_MESSAGE,
                         )),
-                    }?)
+                    }
                 } else {
-                    to_py_object(PyInt(self.0.clone().pow(exponent.0)))
+                    Ok(
+                        PyInt(unsafe { self.0.clone().checked_pow(exponent).unwrap_unchecked() })
+                            .into_py(py),
+                    )
                 }
-            }),
+            }
         }
     }
 

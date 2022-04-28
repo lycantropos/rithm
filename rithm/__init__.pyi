@@ -123,8 +123,9 @@ class Int:
         ...
 
     def __pow__(self,
-                exponent: 'Int',
-                divisor: _Optional['Int'] = None) -> _Union['Fraction', 'Int']:
+                exponent: _Union['Int', int],
+                divisor: _Union['Int', None, int] = None
+                ) -> _Union['Fraction', 'Int']:
         ...
 
     def __radd__(self, other: int) -> Int:

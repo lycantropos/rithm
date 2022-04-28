@@ -164,15 +164,14 @@ except ImportError:
             return self
 
         def __pow__(self, exponent, divisor=None):
-            return (((Int(self._value ** exponent._value)
+            return (((Int(self._value ** int(exponent))
                       if exponent >= _ZERO
                       else Fraction(_ONE, self) ** -exponent)
                      if divisor is None
-                     else (Int(pow(self._value, exponent._value,
-                                   divisor._value))
-                           if isinstance(divisor, Int)
+                     else (Int(pow(self._value, int(exponent), int(divisor)))
+                           if isinstance(divisor, (Int, int))
                            else NotImplemented))
-                    if isinstance(exponent, Int)
+                    if isinstance(exponent, (Int, int))
                     else NotImplemented)
 
         def __radd__(self, other):

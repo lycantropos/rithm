@@ -14,7 +14,8 @@ from . import strategies
        strategies.non_negative_one_byte_ints_with_builtins)
 def test_non_negative_exponent_no_modulo_connection_with_builtin(
         base_with_builtin: IntWithBuiltin,
-        exponent_with_builtin: IntWithBuiltin) -> None:
+        exponent_with_builtin: IntWithBuiltin
+) -> None:
     base, base_builtin = base_with_builtin
     exponent, exponent_builtin = exponent_with_builtin
 
@@ -26,7 +27,8 @@ def test_non_negative_exponent_no_modulo_connection_with_builtin(
        strategies.negative_one_byte_ints_with_builtins)
 def test_negative_exponent_no_modulo_connection_with_builtin(
         base_with_builtin: IntWithBuiltin,
-        exponent_with_builtin: IntWithBuiltin) -> None:
+        exponent_with_builtin: IntWithBuiltin
+) -> None:
     base, base_builtin = base_with_builtin
     exponent, exponent_builtin = exponent_with_builtin
 
@@ -49,7 +51,8 @@ def test_negative_exponent_no_modulo_connection_with_builtin(
 def test_with_modulo_connection_with_builtin(
         base_with_builtin: IntWithBuiltin,
         exponent_with_builtin: IntWithBuiltin,
-        divisor_with_builtin: IntWithBuiltin) -> None:
+        divisor_with_builtin: IntWithBuiltin
+) -> None:
     base, base_builtin = base_with_builtin
     exponent, exponent_builtin = exponent_with_builtin
     divisor, divisor_builtin = divisor_with_builtin

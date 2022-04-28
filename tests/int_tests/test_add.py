@@ -1,14 +1,22 @@
 from hypothesis import given
 
 from rithm import Int
-from tests.utils import (IntWithBuiltin,
+from tests.utils import (IntOrBuiltin,
+                         IntWithBuiltin,
                          is_equivalent_to_builtin_int)
 from . import strategies
 
 
-@given(strategies.ints, strategies.ints)
-def test_alternatives(first: Int, second: Int) -> None:
+@given(strategies.ints, strategies.ints_or_builtins)
+def test_alternatives(first: Int, second: IntOrBuiltin) -> None:
     assert first + second == first - (-second)
+
+
+@given(strategies.ints, strategies.ints_with_builtins)
+def test_polymorphism(first: Int, second_with_builtin: IntWithBuiltin) -> None:
+    second, second_builtin = second_with_builtin
+
+    assert first + second == first + second_builtin
 
 
 @given(strategies.ints_with_builtins, strategies.ints_with_builtins)

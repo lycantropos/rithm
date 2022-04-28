@@ -2,12 +2,14 @@ import fractions
 import pickle
 from typing import (Optional,
                     Tuple,
-                    TypeVar)
+                    TypeVar,
+                    Union)
 
 from rithm import (Fraction,
                    Int)
 
 FractionWithBuiltin = Tuple[Fraction, fractions.Fraction]
+IntOrBuiltin = Union[Int, int]
 IntWithBuiltin = Tuple[Int, int]
 
 

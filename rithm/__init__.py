@@ -203,6 +203,11 @@ except ImportError:
                     if isinstance(other, int)
                     else NotImplemented)
 
+        def __rmod__(self, other):
+            return (Int(other % self._value)
+                    if isinstance(other, int)
+                    else NotImplemented)
+
         def __round__(self, digits=None):
             return Int(round(self._value, digits))
 

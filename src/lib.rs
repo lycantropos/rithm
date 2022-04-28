@@ -345,6 +345,16 @@ impl PyInt {
         }
     }
 
+    fn __rmod__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyLong::type_object(py))? {
+            maybe_mod(try_py_long_to_big_int(other)?, self.0.clone())
+                .map(|result| PyInt(result).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
+    }
+
     fn __round__(&self, digits: Option<&PyLong>, py: Python) -> PyResult<Self> {
         Ok(match digits {
             Some(digits) => {

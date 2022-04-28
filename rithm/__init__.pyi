@@ -145,6 +145,9 @@ class Int:
     def __rlshift__(self, other: int) -> 'Int':
         ...
 
+    def __rmod__(self, other: int) -> 'Int':
+        ...
+
     def __round__(self, digits: _Optional[int] = ...) -> 'Int':
         ...
 

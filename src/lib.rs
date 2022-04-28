@@ -741,7 +741,7 @@ impl PyFraction {
             Ok(py.NotImplemented())
         } else {
             match self.0.clone().checked_pow(other.0) {
-                Some(value) => Ok(to_py_object(PyFraction(value))),
+                Some(value) => Ok(PyFraction(value).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
                     UNDEFINED_DIVISION_ERROR_MESSAGE,
                 )),

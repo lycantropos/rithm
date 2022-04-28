@@ -150,7 +150,7 @@ except ImportError:
         def __mul__(self, other):
             return (Int(self._value * other._value)
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else self.__rmul__(other))
 
         def __neg__(self):
             return Int(-self._value)
@@ -205,6 +205,11 @@ except ImportError:
 
         def __rmod__(self, other):
             return (Int(other % self._value)
+                    if isinstance(other, int)
+                    else NotImplemented)
+
+        def __rmul__(self, other):
+            return (Int(self._value * other)
                     if isinstance(other, int)
                     else NotImplemented)
 

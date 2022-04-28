@@ -241,8 +241,13 @@ impl PyInt {
         }
     }
 
-    fn __mul__(&self, other: PyInt) -> PyInt {
-        PyInt(self.0.clone() * other.0)
+    fn __mul__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyInt::type_object(py))? {
+            Ok(PyInt(self.0.clone() * other.extract::<PyInt>()?.0).into_py(py))
+        } else {
+            self.__rmul__(other)
+        }
     }
 
     fn __neg__(&self) -> PyInt {
@@ -350,6 +355,15 @@ impl PyInt {
         if other.is_instance(PyLong::type_object(py))? {
             maybe_mod(try_py_long_to_big_int(other)?, self.0.clone())
                 .map(|result| PyInt(result).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
+        }
+    }
+
+    fn __rmul__(&self, other: &PyAny) -> PyResult<PyObject> {
+        let py = other.py();
+        if other.is_instance(PyLong::type_object(py))? {
+            Ok(PyInt(self.0.clone() * try_py_long_to_big_int(other)?).into_py(py))
         } else {
             Ok(py.NotImplemented())
         }

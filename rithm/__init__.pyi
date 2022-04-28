@@ -148,6 +148,9 @@ class Int:
     def __rmod__(self, other: int) -> 'Int':
         ...
 
+    def __rmul__(self, other: int) -> 'Int':
+        ...
+
     def __round__(self, digits: _Optional[int] = ...) -> 'Int':
         ...
 

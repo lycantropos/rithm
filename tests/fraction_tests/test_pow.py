@@ -7,8 +7,21 @@ from tests.utils import (FractionWithBuiltin,
 from . import strategies
 
 
-@given(strategies.fractions_with_builtins,
-       strategies.small_ints_with_builtins)
+@given(strategies.fractions_with_builtins, strategies.small_ints_with_builtins)
+def test_polymorphism(base: FractionWithBuiltin,
+                      exponent_with_builtin: IntWithBuiltin) -> None:
+    exponent, exponent_builtin = exponent_with_builtin
+
+    try:
+        result = base ** exponent
+    except ZeroDivisionError as exception:
+        with pytest.raises(type(exception)):
+            base ** exponent_builtin
+    else:
+        assert result == base ** exponent_builtin
+
+
+@given(strategies.fractions_with_builtins, strategies.small_ints_with_builtins)
 def test_connection_with_builtin(base_with_builtin: FractionWithBuiltin,
                                  exponent_with_builtin: IntWithBuiltin
                                  ) -> None:

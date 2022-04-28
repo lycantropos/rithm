@@ -4,7 +4,8 @@ import pytest
 from hypothesis import given
 
 from rithm import Int
-from tests.utils import (IntOrBuiltin, IntWithBuiltin)
+from tests.utils import (IntOrBuiltin,
+                         IntWithBuiltin)
 from . import strategies
 
 

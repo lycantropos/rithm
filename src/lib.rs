@@ -104,7 +104,7 @@ impl PyInt {
         }
     }
 
-    fn to_bytes(&self, py: Python, endianness: PyEndianness) -> PyObject {
+    fn to_bytes(&self, endianness: PyEndianness, py: Python) -> PyObject {
         PyBytes::new(py, &self.0.to_bytes(endianness.0)).to_object(py)
     }
 

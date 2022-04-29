@@ -17,6 +17,10 @@ def equivalence(left: bool, right: bool) -> bool:
     return left is right
 
 
+def implication(antecedent: bool, consequent: bool) -> bool:
+    return not antecedent or consequent
+
+
 def is_equivalent_to_builtin_fraction(value: Fraction,
                                       builtin: fractions.Fraction) -> bool:
     return (is_equivalent_to_builtin_int(value.numerator, builtin.numerator)

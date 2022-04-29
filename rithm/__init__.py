@@ -354,7 +354,7 @@ except ImportError:
             return (self._add_fraction(other)
                     if isinstance(other, Fraction)
                     else (self._add_int(other)
-                          if isinstance(other, Int)
+                          if isinstance(other, (Int, int))
                           else NotImplemented))
 
         def __bool__(self):
@@ -466,7 +466,7 @@ except ImportError:
 
         def __radd__(self, other):
             return (self._add_int(other)
-                    if isinstance(other, Int)
+                    if isinstance(other, (Int, int))
                     else NotImplemented)
 
         def __rfloordiv__(self, other):

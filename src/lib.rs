@@ -734,10 +734,11 @@ impl PyFraction {
         let py = other.py();
         if other.is_instance(PyFraction::type_object(py))? {
             Ok(PyFraction(self.0.clone() + other.extract::<PyFraction>()?.0).into_py(py))
-        } else if other.is_instance(PyInt::type_object(py))? {
-            Ok(PyFraction(self.0.clone() + other.extract::<PyInt>()?.0).into_py(py))
         } else {
-            Ok(py.NotImplemented())
+            match try_py_any_to_maybe_big_int(other)? {
+                Some(other) => Ok(PyFraction(self.0.clone() + other).into_py(py)),
+                None => Ok(py.NotImplemented()),
+            }
         }
     }
 

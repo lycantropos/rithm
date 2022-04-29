@@ -222,7 +222,7 @@ class Fraction:
     def __abs__(self) -> 'Fraction':
         ...
 
-    def __add__(self, other: _Union['Fraction', Int]) -> 'Fraction':
+    def __add__(self, other: _Union['Fraction', Int, int]) -> 'Fraction':
         ...
 
     def __bool__(self) -> bool:
@@ -281,7 +281,7 @@ class Fraction:
     def __repr__(self) -> str:
         ...
 
-    def __radd__(self, other: Int) -> 'Fraction':
+    def __radd__(self, other: _Union[Int, int]) -> 'Fraction':
         ...
 
     def __rfloordiv__(self, other: Int) -> Int:

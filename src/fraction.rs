@@ -10,7 +10,7 @@ use crate::digits::{
 };
 use crate::traits::{
     Abs, AdditiveMonoid, Ceil, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedDivEuclid,
-    CheckedPow, CheckedRemEuclid, CheckedShl, DivisivePartialMagma, Float, GcdMagma, Maybe,
+    CheckedPow, CheckedRemEuclid, CheckedShl, DivisivePartialMagma, Float, Floor, GcdMagma, Maybe,
     ModularUnaryAlgebra, MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, Pow,
     SubtractiveMagma, Unitary, Zeroable,
 };
@@ -552,6 +552,21 @@ impl<Digit: Eq + GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SH
 
     fn div(self, divisor: Fraction<Self>) -> Self::Output {
         self.checked_div(divisor).unwrap()
+    }
+}
+
+impl<
+        Component: Clone + CheckedDivEuclid<Output = Option<Component>> + Eq + MultiplicativeMonoid + Zeroable,
+    > Floor for Fraction<Component>
+{
+    type Output = Component;
+
+    fn floor(self) -> Self::Output {
+        unsafe {
+            self.numerator
+                .checked_div_euclid(self.denominator)
+                .unwrap_unchecked()
+        }
     }
 }
 

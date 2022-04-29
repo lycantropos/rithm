@@ -9,7 +9,7 @@ use crate::digits::{
     MultiplicativeDigit, UnitaryDigit,
 };
 use crate::traits::{
-    Abs, AdditiveMonoid, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedDivEuclid,
+    Abs, AdditiveMonoid, Ceil, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedDivEuclid,
     CheckedPow, CheckedRemEuclid, CheckedShl, DivisivePartialMagma, Float, GcdMagma, Maybe,
     ModularUnaryAlgebra, MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, Pow,
     SubtractiveMagma, Unitary, Zeroable,
@@ -174,6 +174,26 @@ impl<
                 + other.numerator * self.denominator.clone(),
             self.denominator.clone() * other.denominator,
         );
+    }
+}
+
+impl<
+        Component: Clone
+            + CheckedDivEuclid<Output = Option<Component>>
+            + Eq
+            + MultiplicativeMonoid
+            + NegatableUnaryAlgebra
+            + Zeroable,
+    > Ceil for Fraction<Component>
+{
+    type Output = Component;
+
+    fn ceil(self) -> Self::Output {
+        -unsafe {
+            (-self.numerator)
+                .checked_div_euclid(self.denominator)
+                .unwrap_unchecked()
+        }
     }
 }
 

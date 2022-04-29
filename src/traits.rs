@@ -97,6 +97,27 @@ macro_rules! plain_abs_impl {
 
 plain_abs_impl!(f32 f64 i8 i16 i32 i64 i128 isize);
 
+pub trait Ceil {
+    type Output;
+
+    fn ceil(self) -> Self::Output;
+}
+
+macro_rules! plain_ceil_impl {
+    ($($t:ty)*) => ($(
+        impl Ceil for $t {
+            type Output = $t;
+
+            #[inline(always)]
+            fn ceil(self) -> Self::Output {
+                <$t>::ceil(self)
+            }
+        }
+    )*)
+}
+
+plain_ceil_impl!(f32 f64);
+
 #[derive(Clone)]
 pub enum Endianness {
     BIG,

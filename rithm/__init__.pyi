@@ -245,7 +245,7 @@ class Fraction:
     def __floor__(self) -> 'Int':
         ...
 
-    def __floordiv__(self, other: _Union['Fraction', Int, int]) -> Int:
+    def __floordiv__(self, divisor: _Union['Fraction', Int, int]) -> Int:
         ...
 
     def __ge__(self, other: _Union['Fraction', Int, int]) -> bool:
@@ -263,7 +263,7 @@ class Fraction:
     def __lt__(self, other: _Union['Fraction', Int, int]) -> bool:
         ...
 
-    def __mod__(self, other: _Union['Fraction', Int, int]) -> 'Fraction':
+    def __mod__(self, divisor: _Union['Fraction', Int, int]) -> 'Fraction':
         ...
 
     def __mul__(self, other: _Union['Fraction', Int, int]) -> 'Fraction':
@@ -285,10 +285,10 @@ class Fraction:
     def __radd__(self, other: _Union[Int, int]) -> 'Fraction':
         ...
 
-    def __rfloordiv__(self, other: _Union[Int, int]) -> Int:
+    def __rfloordiv__(self, dividend: _Union[Int, int]) -> Int:
         ...
 
-    def __rmod__(self, other: _Union[Int, int]) -> 'Fraction':
+    def __rmod__(self, dividend: _Union[Int, int]) -> 'Fraction':
         ...
 
     def __rmul__(self, other: _Union[Int, int]) -> 'Fraction':

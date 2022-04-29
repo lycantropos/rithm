@@ -303,7 +303,7 @@ class Fraction:
     def __str__(self) -> str:
         ...
 
-    def __sub__(self, other: _Union['Fraction', Int]) -> 'Fraction':
+    def __sub__(self, minuend: _Union['Fraction', Int, int]) -> 'Fraction':
         ...
 
     def __rtruediv__(self, dividend: _Union[Int, int]) -> 'Fraction':

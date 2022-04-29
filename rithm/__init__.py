@@ -524,7 +524,7 @@ except ImportError:
                             ),
                             _normalize=False
                     )
-                     if isinstance(other, Int)
+                     if isinstance(other, (Int, int))
                      else NotImplemented))
 
         def __rtruediv__(self, other):

@@ -956,14 +956,15 @@ impl PyFraction {
         self.0.to_string()
     }
 
-    fn __sub__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyFraction::type_object(py))? {
-            Ok(PyFraction(self.0.clone() - other.extract::<PyFraction>()?.0).into_py(py))
-        } else if other.is_instance(PyInt::type_object(py))? {
-            Ok(PyFraction(self.0.clone() - other.extract::<PyInt>()?.0).into_py(py))
+    fn __sub__(&self, minuend: &PyAny) -> PyResult<PyObject> {
+        let py = minuend.py();
+        if minuend.is_instance(PyFraction::type_object(py))? {
+            Ok(PyFraction(self.0.clone() - minuend.extract::<PyFraction>()?.0).into_py(py))
         } else {
-            Ok(py.NotImplemented())
+            match try_py_any_to_maybe_big_int(minuend)? {
+                Some(minuend) => Ok(PyFraction(self.0.clone() - minuend).into_py(py)),
+                None => Ok(py.NotImplemented()),
+            }
         }
     }
 

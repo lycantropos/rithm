@@ -1,15 +1,16 @@
 import pytest
 from hypothesis import given
 
+from rithm import Fraction
 from tests.utils import (FractionWithBuiltin,
                          IntWithBuiltin,
                          is_equivalent_to_builtin_fraction)
 from . import strategies
 
 
-@given(strategies.fractions_with_builtins, strategies.small_ints_with_builtins)
-def test_polymorphism(base: FractionWithBuiltin,
-                      exponent_with_builtin: IntWithBuiltin) -> None:
+@given(strategies.fractions, strategies.small_ints_with_builtins)
+def test_polymorphism(base: Fraction, exponent_with_builtin: IntWithBuiltin
+                      ) -> None:
     exponent, exponent_builtin = exponent_with_builtin
 
     try:

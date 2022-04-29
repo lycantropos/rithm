@@ -266,7 +266,7 @@ class Fraction:
     def __mod__(self, other: _Union['Fraction', Int]) -> 'Fraction':
         ...
 
-    def __mul__(self, other: _Any) -> _Any:
+    def __mul__(self, other: _Union['Fraction', Int, int]) -> 'Fraction':
         ...
 
     def __neg__(self) -> 'Fraction':
@@ -290,7 +290,7 @@ class Fraction:
     def __rmod__(self, other: Int) -> 'Fraction':
         ...
 
-    def __rmul__(self, other: Int) -> 'Fraction':
+    def __rmul__(self, other: _Union[Int, int]) -> 'Fraction':
         ...
 
     def __rsub__(self, other: Int) -> 'Fraction':

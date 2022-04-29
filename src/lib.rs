@@ -740,6 +740,7 @@ impl PyFraction {
             Ok(py.NotImplemented())
         }
     }
+
     fn __bool__(&self) -> bool {
         self.numerator().__bool__()
     }

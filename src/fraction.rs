@@ -12,7 +12,7 @@ use crate::traits::{
     Abs, AdditiveMonoid, Ceil, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedDivEuclid,
     CheckedPow, CheckedRemEuclid, CheckedShl, DivisivePartialMagma, Float, Floor, GcdMagma, Maybe,
     ModularUnaryAlgebra, MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, Pow,
-    SubtractiveMagma, Unitary, Zeroable,
+    SubtractiveMagma, Trunc, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -963,6 +963,25 @@ impl<
                 - subtrahend.numerator * self.denominator.clone(),
             self.denominator.clone() * subtrahend.denominator,
         );
+    }
+}
+
+impl<
+        Component: Clone
+            + CheckedDivEuclid<Output = Option<Component>>
+            + Eq
+            + MultiplicativeMonoid
+            + Oppositive,
+    > Trunc for Fraction<Component>
+{
+    type Output = Component;
+
+    fn trunc(self) -> Self::Output {
+        if self.is_negative() {
+            self.ceil()
+        } else {
+            self.floor()
+        }
     }
 }
 

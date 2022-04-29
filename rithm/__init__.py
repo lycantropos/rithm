@@ -369,7 +369,7 @@ except ImportError:
                     if isinstance(other, Fraction)
                     else (self.denominator == _ONE
                           and self.numerator == other
-                          if isinstance(other, Int)
+                          if isinstance(other, (Int, int))
                           else NotImplemented))
 
         def __float__(self):
@@ -391,7 +391,7 @@ except ImportError:
                     >= other.numerator * self.denominator
                     if isinstance(other, Fraction)
                     else (self.numerator >= other * self.denominator
-                          if isinstance(other, Int)
+                          if isinstance(other, (Int, int))
                           else NotImplemented))
 
         def __getstate__(self):
@@ -402,7 +402,7 @@ except ImportError:
                     > other.numerator * self.denominator
                     if isinstance(other, Fraction)
                     else (self.numerator > other * self.denominator
-                          if isinstance(other, Int)
+                          if isinstance(other, (Int, int))
                           else NotImplemented))
 
         def __le__(self, other):
@@ -410,7 +410,7 @@ except ImportError:
                     <= other.numerator * self.denominator
                     if isinstance(other, Fraction)
                     else (self.numerator <= other * self.denominator
-                          if isinstance(other, Int)
+                          if isinstance(other, (Int, int))
                           else NotImplemented))
 
         def __lt__(self, other):
@@ -418,7 +418,7 @@ except ImportError:
                     < other.numerator * self.denominator
                     if isinstance(other, Fraction)
                     else (self.numerator < other * self.denominator
-                          if isinstance(other, Int)
+                          if isinstance(other, (Int, int))
                           else NotImplemented))
 
         def __mod__(self, other):

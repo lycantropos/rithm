@@ -232,7 +232,7 @@ class Fraction:
         ...
 
     @_overload
-    def __eq__(self, other: 'Fraction') -> bool:
+    def __eq__(self, other: _Union['Fraction', Int, int]) -> bool:
         ...
 
     @_overload
@@ -248,19 +248,19 @@ class Fraction:
     def __floordiv__(self, other: _Union['Fraction', Int]) -> Int:
         ...
 
-    def __ge__(self, other: 'Fraction') -> bool:
+    def __ge__(self, other: _Union['Fraction', Int, int]) -> bool:
         ...
 
     def __getstate__(self) -> _Tuple[Int, Int]:
         ...
 
-    def __gt__(self, other: 'Fraction') -> bool:
+    def __gt__(self, other: _Union['Fraction', Int, int]) -> bool:
         ...
 
-    def __le__(self, other: 'Fraction') -> bool:
+    def __le__(self, other: _Union['Fraction', Int, int]) -> bool:
         ...
 
-    def __lt__(self, other: 'Fraction') -> bool:
+    def __lt__(self, other: _Union['Fraction', Int, int]) -> bool:
         ...
 
     def __mod__(self, other: _Union['Fraction', Int]) -> 'Fraction':

@@ -162,16 +162,12 @@ impl PyInt {
         slf
     }
 
-    fn __divmod__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyInt::type_object(py))? {
-            maybe_divmod(self.0.clone(), other.extract::<PyInt>()?.0)
-                .map(|(quotient, remainder)| (PyInt(quotient), PyInt(remainder)).into_py(py))
-        } else if other.is_instance(PyLong::type_object(py))? {
-            maybe_divmod(self.0.clone(), try_py_long_to_big_int(other)?)
-                .map(|(quotient, remainder)| (PyInt(quotient), PyInt(remainder)).into_py(py))
-        } else {
-            Ok(py.NotImplemented())
+    fn __divmod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+        let py = divisor.py();
+        match try_py_any_to_maybe_big_int(divisor)? {
+            Some(divisor) => try_divmod(self.0.clone(), divisor)
+                .map(|(quotient, remainder)| (PyInt(quotient), PyInt(remainder)).into_py(py)),
+            None => Ok(py.NotImplemented()),
         }
     }
 
@@ -186,16 +182,13 @@ impl PyInt {
         slf
     }
 
-    fn __floordiv__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyInt::type_object(py))? {
-            maybe_floordiv(self.0.clone(), other.extract::<PyInt>()?.0)
-                .map(|result| PyInt(result).into_py(py))
-        } else if other.is_instance(PyLong::type_object(py))? {
-            maybe_floordiv(self.0.clone(), try_py_long_to_big_int(other)?)
-                .map(|result| PyInt(result).into_py(py))
-        } else {
-            Ok(py.NotImplemented())
+    fn __floordiv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+        let py = divisor.py();
+        match try_py_any_to_maybe_big_int(divisor)? {
+            Some(divisor) => {
+                try_floordiv(self.0.clone(), divisor).map(|result| PyInt(result).into_py(py))
+            }
+            None => Ok(py.NotImplemented()),
         }
     }
 
@@ -215,29 +208,23 @@ impl PyInt {
         PyInt(!self.0.clone())
     }
 
-    fn __lshift__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyInt::type_object(py))? {
-            maybe_lshift(self.0.clone(), other.extract::<PyInt>()?.0)
-                .map(|result| PyInt(result).into_py(py))
-        } else if other.is_instance(PyLong::type_object(py))? {
-            maybe_lshift(self.0.clone(), try_py_long_to_big_int(other)?)
-                .map(|result| PyInt(result).into_py(py))
-        } else {
-            Ok(py.NotImplemented())
+    fn __lshift__(&self, shift: &PyAny) -> PyResult<PyObject> {
+        let py = shift.py();
+        match try_py_any_to_maybe_big_int(shift)? {
+            Some(shift) => {
+                try_lshift(self.0.clone(), shift).map(|result| PyInt(result).into_py(py))
+            }
+            None => Ok(py.NotImplemented()),
         }
     }
 
-    fn __mod__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyInt::type_object(py))? {
-            maybe_mod(self.0.clone(), other.extract::<PyInt>()?.0)
-                .map(|result| PyInt(result).into_py(py))
-        } else if other.is_instance(PyLong::type_object(py))? {
-            maybe_mod(self.0.clone(), try_py_long_to_big_int(other)?)
-                .map(|result| PyInt(result).into_py(py))
-        } else {
-            Ok(py.NotImplemented())
+    fn __mod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+        let py = divisor.py();
+        match try_py_any_to_maybe_big_int(divisor)? {
+            Some(divisor) => {
+                try_mod(self.0.clone(), divisor).map(|result| PyInt(result).into_py(py))
+            }
+            None => Ok(py.NotImplemented()),
         }
     }
 
@@ -269,25 +256,15 @@ impl PyInt {
 
     fn __pow__(&self, exponent: &PyAny, divisor: Option<&PyAny>) -> PyResult<PyObject> {
         let py = exponent.py();
-        let exponent = if exponent.is_instance(PyInt::type_object(py))? {
-            exponent.extract::<PyInt>()?.0
-        } else if exponent.is_instance(PyLong::type_object(py))? {
-            try_py_long_to_big_int(exponent)?
-        } else {
-            return Ok(py.NotImplemented());
-        };
-        match divisor {
-            Some(divisor) => {
-                let divisor = if divisor.is_instance(PyInt::type_object(py))? {
-                    divisor.extract::<PyInt>()?.0
-                } else if divisor.is_instance(PyLong::type_object(py))? {
-                    try_py_long_to_big_int(divisor)?
-                } else {
-                    return Ok(py.NotImplemented());
-                };
-                maybe_pow_mod(self.0.clone(), exponent, divisor, py)
-            }
-            None => maybe_pow(self.0.clone(), exponent, py),
+        match try_py_any_to_maybe_big_int(exponent)? {
+            Some(exponent) => match divisor {
+                Some(divisor) => match try_py_any_to_maybe_big_int(divisor)? {
+                    Some(divisor) => try_pow_mod(self.0.clone(), exponent, divisor, py),
+                    None => Ok(py.NotImplemented()),
+                },
+                None => try_pow(self.0.clone(), exponent, py),
+            },
+            None => Ok(py.NotImplemented()),
         }
     }
 
@@ -312,7 +289,7 @@ impl PyInt {
     fn __rdivmod__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
         if other.is_instance(PyLong::type_object(py))? {
-            maybe_divmod(try_py_long_to_big_int(other)?, self.0.clone())
+            try_divmod(try_py_long_to_big_int(other)?, self.0.clone())
                 .map(|(quotient, remainder)| (PyInt(quotient), PyInt(remainder)).into_py(py))
         } else {
             Ok(py.NotImplemented())
@@ -323,10 +300,10 @@ impl PyInt {
         format!("rithm.Int({})", self.0)
     }
 
-    fn __rfloordiv__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyLong::type_object(py))? {
-            maybe_floordiv(try_py_long_to_big_int(other)?, self.0.clone())
+    fn __rfloordiv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+        let py = dividend.py();
+        if dividend.is_instance(PyLong::type_object(py))? {
+            try_floordiv(try_py_long_to_big_int(dividend)?, self.0.clone())
                 .map(|result| PyInt(result).into_py(py))
         } else {
             Ok(py.NotImplemented())
@@ -335,30 +312,26 @@ impl PyInt {
 
     fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<PyObject> {
         let py = other.py();
-        let other = if other.is_instance(PyInt::type_object(py))? {
-            other.extract::<PyInt>()?.0
-        } else if other.is_instance(PyLong::type_object(py))? {
-            try_py_long_to_big_int(other)?
-        } else {
-            return Ok(py.NotImplemented());
-        };
-        Ok(compare(&self.0, &other, op).into_py(py))
+        match try_py_any_to_maybe_big_int(other)? {
+            Some(other) => Ok(compare(&self.0, &other, op).into_py(py)),
+            None => Ok(py.NotImplemented()),
+        }
     }
 
-    fn __rlshift__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyLong::type_object(py))? {
-            maybe_lshift(try_py_long_to_big_int(other)?, self.0.clone())
+    fn __rlshift__(&self, base: &PyAny) -> PyResult<PyObject> {
+        let py = base.py();
+        if base.is_instance(PyLong::type_object(py))? {
+            try_lshift(try_py_long_to_big_int(base)?, self.0.clone())
                 .map(|result| PyInt(result).into_py(py))
         } else {
             Ok(py.NotImplemented())
         }
     }
 
-    fn __rmod__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyLong::type_object(py))? {
-            maybe_mod(try_py_long_to_big_int(other)?, self.0.clone())
+    fn __rmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+        let py = dividend.py();
+        if dividend.is_instance(PyLong::type_object(py))? {
+            try_mod(try_py_long_to_big_int(dividend)?, self.0.clone())
                 .map(|result| PyInt(result).into_py(py))
         } else {
             Ok(py.NotImplemented())
@@ -392,7 +365,7 @@ impl PyInt {
                             .checked_pow(-try_py_long_to_big_int(digits)?)
                             .unwrap_unchecked()
                     };
-                    PyInt(self.0.clone() - maybe_mod_to_near(self.0.clone(), ten_to_digits_power)?)
+                    PyInt(self.0.clone() - try_mod_to_near(self.0.clone(), ten_to_digits_power)?)
                 } else {
                     self.clone()
                 }
@@ -417,55 +390,48 @@ impl PyInt {
                 } else {
                     return Ok(py.NotImplemented());
                 };
-                maybe_pow_mod(base, self.0.clone(), divisor, py)
+                try_pow_mod(base, self.0.clone(), divisor, py)
             }
-            None => maybe_pow(base, self.0.clone(), py),
+            None => try_pow(base, self.0.clone(), py),
         }
     }
 
-    fn __rrshift__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyLong::type_object(py))? {
-            maybe_rshift(try_py_long_to_big_int(other)?, self.0.clone())
+    fn __rrshift__(&self, base: &PyAny) -> PyResult<PyObject> {
+        let py = base.py();
+        if base.is_instance(PyLong::type_object(py))? {
+            try_rshift(try_py_long_to_big_int(base)?, self.0.clone())
                 .map(|result| PyInt(result).into_py(py))
         } else {
             Ok(py.NotImplemented())
         }
     }
 
-    fn __rshift__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyInt::type_object(py))? {
-            maybe_rshift(self.0.clone(), other.extract::<PyInt>()?.0)
-                .map(|result| PyInt(result).into_py(py))
-        } else if other.is_instance(PyLong::type_object(py))? {
-            maybe_rshift(self.0.clone(), try_py_long_to_big_int(other)?)
-                .map(|result| PyInt(result).into_py(py))
-        } else {
-            Ok(py.NotImplemented())
-        }
-    }
-
-    fn __rsub__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyLong::type_object(py))? {
-            Ok(PyInt(try_py_long_to_big_int(other)? - self.0.clone()).into_py(py))
-        } else {
-            Ok(py.NotImplemented())
-        }
-    }
-
-    fn __rtruediv__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyLong::type_object(py))? {
-            match Fraction::new(try_py_long_to_big_int(other)?, self.0.clone()) {
-                Some(result) => Ok(PyFraction(result).into_py(py)),
-                None => Err(PyZeroDivisionError::new_err(
-                    UNDEFINED_DIVISION_ERROR_MESSAGE,
-                )),
+    fn __rshift__(&self, shift: &PyAny) -> PyResult<PyObject> {
+        let py = shift.py();
+        match try_py_any_to_maybe_big_int(shift)? {
+            Some(shift) => {
+                try_rshift(self.0.clone(), shift).map(|result| PyInt(result).into_py(py))
             }
+            None => Ok(py.NotImplemented()),
+        }
+    }
+
+    fn __rsub__(&self, minuend: &PyAny) -> PyResult<PyObject> {
+        let py = minuend.py();
+        if minuend.is_instance(PyLong::type_object(py))? {
+            Ok(PyInt(try_py_long_to_big_int(minuend)? - self.0.clone()).into_py(py))
         } else {
-            return Ok(py.NotImplemented());
+            Ok(py.NotImplemented())
+        }
+    }
+
+    fn __rtruediv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+        let py = dividend.py();
+        if dividend.is_instance(PyLong::type_object(py))? {
+            try_truediv(try_py_long_to_big_int(dividend)?, self.0.clone())
+                .map(|result| PyFraction(result).into_py(py))
+        } else {
+            Ok(py.NotImplemented())
         }
     }
 
@@ -478,7 +444,7 @@ impl PyInt {
         }
     }
 
-    fn __setstate__(&mut self, py: Python, state: PyObject) -> PyResult<()> {
+    fn __setstate__(&mut self, state: PyObject, py: Python) -> PyResult<()> {
         state
             .extract::<&PyBytes>(py)
             .and_then(|py_bytes| py_bytes.extract::<Vec<u8>>())
@@ -491,31 +457,21 @@ impl PyInt {
         self.0.to_string()
     }
 
-    fn __sub__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyInt::type_object(py))? {
-            Ok(PyInt(self.0.clone() - other.extract::<PyInt>()?.0).into_py(py))
-        } else if other.is_instance(PyLong::type_object(py))? {
-            Ok(PyInt(self.0.clone() - try_py_long_to_big_int(other)?).into_py(py))
-        } else {
-            Ok(py.NotImplemented())
+    fn __sub__(&self, subtrahend: &PyAny) -> PyResult<PyObject> {
+        let py = subtrahend.py();
+        match try_py_any_to_maybe_big_int(subtrahend)? {
+            Some(subtrahend) => Ok(PyInt(self.0.clone() - subtrahend).into_py(py)),
+            None => Ok(py.NotImplemented()),
         }
     }
 
-    fn __truediv__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        let other = if other.is_instance(PyInt::type_object(py))? {
-            other.extract::<PyInt>()?.0
-        } else if other.is_instance(PyLong::type_object(py))? {
-            try_py_long_to_big_int(other)?
-        } else {
-            return Ok(py.NotImplemented());
-        };
-        match Fraction::new(self.0.clone(), other) {
-            Some(result) => Ok(PyFraction(result).into_py(py)),
-            None => Err(PyZeroDivisionError::new_err(
-                UNDEFINED_DIVISION_ERROR_MESSAGE,
-            )),
+    fn __truediv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+        let py = divisor.py();
+        match try_py_any_to_maybe_big_int(divisor)? {
+            Some(divisor) => {
+                try_truediv(self.0.clone(), divisor).map(|result| PyFraction(result).into_py(py))
+            }
+            None => Ok(py.NotImplemented()),
         }
     }
 
@@ -533,7 +489,19 @@ impl PyInt {
     }
 }
 
-fn maybe_divmod(dividend: BigInt, divisor: BigInt) -> PyResult<(BigInt, BigInt)> {
+#[inline]
+fn big_int_to_py_long(value: &BigInt, py: Python) -> PyObject {
+    let buffer = value.to_bytes(Endianness::LITTLE);
+    unsafe {
+        PyObject::from_owned_ptr(
+            py,
+            ffi::_PyLong_FromByteArray(buffer.as_ptr(), buffer.len(), 1, 1),
+        )
+    }
+}
+
+#[inline]
+fn try_divmod(dividend: BigInt, divisor: BigInt) -> PyResult<(BigInt, BigInt)> {
     match dividend.checked_div_rem_euclid(divisor) {
         Some((quotient, remainder)) => Ok((quotient, remainder)),
         None => Err(PyZeroDivisionError::new_err(
@@ -542,7 +510,8 @@ fn maybe_divmod(dividend: BigInt, divisor: BigInt) -> PyResult<(BigInt, BigInt)>
     }
 }
 
-fn maybe_floordiv(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
+#[inline]
+fn try_floordiv(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
     match dividend.checked_div_euclid(divisor) {
         Some(result) => Ok(result),
         None => Err(PyZeroDivisionError::new_err(
@@ -551,7 +520,8 @@ fn maybe_floordiv(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
     }
 }
 
-fn maybe_lshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
+#[inline]
+fn try_lshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
     base.checked_shl(shift).map_err(|reason| match reason {
         big_int::LeftShiftError::NegativeShift => PyValueError::new_err(reason.to_string()),
         big_int::LeftShiftError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
@@ -559,7 +529,8 @@ fn maybe_lshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
     })
 }
 
-fn maybe_mod(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
+#[inline]
+fn try_mod(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
     match dividend.checked_rem_euclid(divisor) {
         Some(result) => Ok(result),
         None => Err(PyZeroDivisionError::new_err(
@@ -568,7 +539,8 @@ fn maybe_mod(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
     }
 }
 
-fn maybe_mod_to_near(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
+#[inline]
+fn try_mod_to_near(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
     let (quotient, remainder) = match dividend.checked_div_rem_euclid(divisor.clone()) {
         Some((quotient, remainder)) => Ok((quotient, remainder)),
         None => Err(PyZeroDivisionError::new_err(
@@ -598,7 +570,8 @@ fn maybe_mod_to_near(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
     )
 }
 
-fn maybe_pow(base: BigInt, exponent: BigInt, py: Python) -> PyResult<PyObject> {
+#[inline]
+fn try_pow(base: BigInt, exponent: BigInt, py: Python) -> PyResult<PyObject> {
     if exponent.is_negative() {
         match unsafe { Fraction::new(base, BigInt::one()).unwrap_unchecked() }.checked_pow(exponent)
         {
@@ -612,12 +585,8 @@ fn maybe_pow(base: BigInt, exponent: BigInt, py: Python) -> PyResult<PyObject> {
     }
 }
 
-fn maybe_pow_mod(
-    base: BigInt,
-    exponent: BigInt,
-    divisor: BigInt,
-    py: Python,
-) -> PyResult<PyObject> {
+#[inline]
+fn try_pow_mod(base: BigInt, exponent: BigInt, divisor: BigInt, py: Python) -> PyResult<PyObject> {
     let is_zero_divisor = divisor.is_zero();
     match base.checked_pow_rem_euclid(exponent, divisor) {
         Some(value) => Ok(PyInt(value).into_py(py)),
@@ -629,20 +598,22 @@ fn maybe_pow_mod(
     }
 }
 
-fn maybe_rshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
+#[inline]
+fn try_rshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
     base.checked_shr(shift).map_err(|reason| match reason {
         big_int::RightShiftError::NegativeShift => PyValueError::new_err(reason.to_string()),
     })
 }
 
 #[inline]
-fn big_int_to_py_long(value: &BigInt, py: Python) -> PyObject {
-    let buffer = value.to_bytes(Endianness::LITTLE);
-    unsafe {
-        PyObject::from_owned_ptr(
-            py,
-            ffi::_PyLong_FromByteArray(buffer.as_ptr(), buffer.len(), 1, 1),
-        )
+fn try_py_any_to_maybe_big_int(value: &PyAny) -> PyResult<Option<BigInt>> {
+    let py = value.py();
+    if value.is_instance(PyInt::type_object(py))? {
+        Ok(Some(value.extract::<PyInt>()?.0))
+    } else if value.is_instance(PyLong::type_object(py))? {
+        try_py_long_to_big_int(value).map(Some)
+    } else {
+        Ok(None)
     }
 }
 
@@ -688,6 +659,16 @@ fn try_py_long_to_big_int(value: &PyAny) -> PyResult<BigInt> {
                 }
             }
         }
+    }
+}
+
+#[inline]
+fn try_truediv(dividend: BigInt, divisor: BigInt) -> PyResult<Fraction> {
+    match Fraction::new(dividend, divisor) {
+        Some(result) => Ok(result),
+        None => Err(PyZeroDivisionError::new_err(
+            UNDEFINED_DIVISION_ERROR_MESSAGE,
+        )),
     }
 }
 
@@ -975,9 +956,9 @@ impl PyFraction {
     fn __setstate__(&mut self, state: (PyObject, PyObject), py: Python) -> PyResult<()> {
         let (numerator_state, denominator_state) = state;
         let mut numerator = PyInt(BigInt::zero());
-        numerator.__setstate__(py, numerator_state)?;
+        numerator.__setstate__(numerator_state, py)?;
         let mut denominator = PyInt(BigInt::zero());
-        denominator.__setstate__(py, denominator_state)?;
+        denominator.__setstate__(denominator_state, py)?;
         match Fraction::new(numerator.0, denominator.0) {
             Some(fraction) => {
                 self.0 = fraction;

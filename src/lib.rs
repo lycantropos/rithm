@@ -761,24 +761,13 @@ impl PyFraction {
         PyInt(self.0.clone().floor())
     }
 
-    fn __floordiv__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyFraction::type_object(py))? {
+    fn __floordiv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+        let py = divisor.py();
+        if divisor.is_instance(PyFraction::type_object(py))? {
             match self
                 .0
                 .clone()
-                .checked_div_euclid(other.extract::<PyFraction>()?.0)
-            {
-                Some(value) => Ok(PyInt(value).into_py(py)),
-                None => Err(PyZeroDivisionError::new_err(
-                    UNDEFINED_DIVISION_ERROR_MESSAGE,
-                )),
-            }
-        } else if other.is_instance(PyInt::type_object(py))? {
-            match self
-                .0
-                .clone()
-                .checked_div_euclid(other.extract::<PyInt>()?.0)
+                .checked_div_euclid(divisor.extract::<PyFraction>()?.0)
             {
                 Some(value) => Ok(PyInt(value).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
@@ -786,7 +775,15 @@ impl PyFraction {
                 )),
             }
         } else {
-            Ok(py.NotImplemented())
+            match try_py_any_to_maybe_big_int(divisor)? {
+                Some(divisor) => match self.0.clone().checked_div_euclid(divisor) {
+                    Some(value) => Ok(PyInt(value).into_py(py)),
+                    None => Err(PyZeroDivisionError::new_err(
+                        UNDEFINED_DIVISION_ERROR_MESSAGE,
+                    )),
+                },
+                None => Ok(py.NotImplemented()),
+            }
         }
     }
 
@@ -896,21 +893,16 @@ impl PyFraction {
         }
     }
 
-    fn __rfloordiv__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyInt::type_object(py))? {
-            match other
-                .extract::<PyInt>()?
-                .0
-                .checked_div_euclid(self.0.clone())
-            {
+    fn __rfloordiv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+        let py = dividend.py();
+        match try_py_any_to_maybe_big_int(dividend)? {
+            Some(dividend) => match dividend.checked_div_euclid(self.0.clone()) {
                 Some(value) => Ok(PyInt(value).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
                     UNDEFINED_DIVISION_ERROR_MESSAGE,
                 )),
-            }
-        } else {
-            Ok(py.NotImplemented())
+            },
+            None => Ok(py.NotImplemented()),
         }
     }
 

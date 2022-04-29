@@ -471,7 +471,7 @@ except ImportError:
 
         def __rfloordiv__(self, other):
             return ((other * self.denominator) // self.numerator
-                    if isinstance(other, Int)
+                    if isinstance(other, (Int, int))
                     else NotImplemented)
 
         def __rmod__(self, other):

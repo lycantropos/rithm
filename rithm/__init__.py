@@ -353,7 +353,7 @@ except ImportError:
         def __add__(self, other):
             return (self._add_fraction(other)
                     if isinstance(other, Fraction)
-                    else (self._add_int(other)
+                    else (self._add_int(Int(other))
                           if isinstance(other, (Int, int))
                           else NotImplemented))
 
@@ -466,7 +466,7 @@ except ImportError:
             return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'
 
         def __radd__(self, other):
-            return (self._add_int(other)
+            return (self._add_int(Int(other))
                     if isinstance(other, (Int, int))
                     else NotImplemented)
 

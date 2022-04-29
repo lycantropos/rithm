@@ -421,14 +421,15 @@ except ImportError:
                           if isinstance(other, (Int, int))
                           else NotImplemented))
 
-        def __mod__(self, other):
-            return (Fraction((self.numerator * other.denominator)
-                             % (self.denominator * other.numerator),
-                             self.denominator * other.denominator)
-                    if isinstance(other, Fraction)
-                    else (Fraction(self.numerator % (self.denominator * other),
+        def __mod__(self, divisor):
+            return (Fraction((self.numerator * divisor.denominator)
+                             % (self.denominator * divisor.numerator),
+                             self.denominator * divisor.denominator)
+                    if isinstance(divisor, Fraction)
+                    else (Fraction(self.numerator
+                                   % (self.denominator * divisor),
                                    self.denominator)
-                          if isinstance(other, Int)
+                          if isinstance(divisor, (Int, int))
                           else NotImplemented))
 
         def __mul__(self, other):
@@ -474,10 +475,10 @@ except ImportError:
                     if isinstance(other, (Int, int))
                     else NotImplemented)
 
-        def __rmod__(self, other):
-            return (Fraction((other * self.denominator) % self.numerator,
+        def __rmod__(self, dividend):
+            return (Fraction((dividend * self.denominator) % self.numerator,
                              self.denominator)
-                    if isinstance(other, Int)
+                    if isinstance(dividend, (Int, int))
                     else NotImplemented)
 
         def __rmul__(self, other):

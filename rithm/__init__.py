@@ -486,15 +486,16 @@ except ImportError:
                     if isinstance(other, (Int, int))
                     else NotImplemented)
 
-        def __rsub__(self, other):
+        def __rsub__(self, subtrahend):
             return (
                 Fraction(
-                        *_normalize_components_moduli(other * self.denominator
-                                                      - self.numerator,
-                                                      self.denominator),
+                        *_normalize_components_moduli(
+                                subtrahend * self.denominator - self.numerator,
+                                self.denominator
+                        ),
                         _normalize=False
                 )
-                if isinstance(other, Int)
+                if isinstance(subtrahend, (Int, int))
                 else NotImplemented
             )
 

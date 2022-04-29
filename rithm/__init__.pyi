@@ -294,7 +294,7 @@ class Fraction:
     def __rmul__(self, other: _Union[Int, int]) -> 'Fraction':
         ...
 
-    def __rsub__(self, other: Int) -> 'Fraction':
+    def __rsub__(self, subtrahend: _Union[Int, int]) -> 'Fraction':
         ...
 
     def __setstate__(self, state: _Tuple[Int, Int]) -> None:

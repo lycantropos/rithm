@@ -914,12 +914,11 @@ impl PyFraction {
         }
     }
 
-    fn __rsub__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyInt::type_object(py))? {
-            Ok(PyFraction(other.extract::<PyInt>()?.0 - self.0.clone()).into_py(py))
-        } else {
-            Ok(py.NotImplemented())
+    fn __rsub__(&self, subtrahend: &PyAny) -> PyResult<PyObject> {
+        let py = subtrahend.py();
+        match try_py_any_to_maybe_big_int(subtrahend)? {
+            Some(subtrahend) => Ok(PyFraction(subtrahend - self.0.clone()).into_py(py)),
+            None => Ok(py.NotImplemented()),
         }
     }
 

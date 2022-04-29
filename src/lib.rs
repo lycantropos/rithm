@@ -866,10 +866,9 @@ impl PyFraction {
 
     fn __radd__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
-        if other.is_instance(PyInt::type_object(py))? {
-            Ok(PyFraction(other.extract::<PyInt>()?.0 + self.0.clone()).into_py(py))
-        } else {
-            Ok(py.NotImplemented())
+        match try_py_any_to_maybe_big_int(other)? {
+            Some(other) => Ok(PyFraction(other + self.0.clone()).into_py(py)),
+            None => Ok(py.NotImplemented()),
         }
     }
 

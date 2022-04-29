@@ -551,6 +551,11 @@ except ImportError:
                       else NotImplemented)
             )
 
+        def __trunc__(self):
+            return (self.__ceil__()
+                    if self.numerator < _ZERO
+                    else self.__floor__())
+
         def _add_fraction(self, other: 'Fraction') -> 'Fraction':
             return Fraction(
                     *_normalize_components_moduli(

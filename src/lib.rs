@@ -18,7 +18,7 @@ use pyo3_ffi as ffi;
 use crate::traits::{
     Abs, BitLength, Ceil, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,
     CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, Endianness, Floor, FromBytes,
-    FromStrRadix, Gcd, Oppositive, Parity, ToBytes, Unitary, Zeroable,
+    FromStrRadix, Gcd, Oppositive, Parity, ToBytes, Trunc, Unitary, Zeroable,
 };
 
 pub mod big_int;
@@ -1013,6 +1013,10 @@ impl PyFraction {
         } else {
             Ok(py.NotImplemented())
         }
+    }
+
+    fn __trunc__(&self) -> PyInt {
+        PyInt(self.0.clone().trunc())
     }
 }
 

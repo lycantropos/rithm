@@ -310,3 +310,6 @@ class Fraction:
 
     def __truediv__(self, other: _Union['Fraction', Int]) -> 'Fraction':
         ...
+
+    def __trunc__(self) -> Int:
+        ...

@@ -17,7 +17,7 @@ use pyo3_ffi as ffi;
 
 use crate::traits::{
     Abs, BitLength, Ceil, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,
-    CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, Endianness, FromBytes,
+    CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, Endianness, Floor, FromBytes,
     FromStrRadix, Gcd, Oppositive, Parity, ToBytes, Unitary, Zeroable,
 };
 
@@ -754,6 +754,10 @@ impl PyFraction {
             Ok(value) => Ok(value.into_py(py)),
             Err(reason) => Err(PyOverflowError::new_err(reason.to_string())),
         }
+    }
+
+    fn __floor__(&self) -> PyInt {
+        PyInt(self.0.clone().floor())
     }
 
     fn __floordiv__(&self, other: &PyAny) -> PyResult<PyObject> {

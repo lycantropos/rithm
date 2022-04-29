@@ -375,6 +375,9 @@ except ImportError:
         def __float__(self):
             return self._numerator._value / self._denominator._value
 
+        def __floor__(self):
+            return self.numerator // self.denominator
+
         def __floordiv__(self, other):
             return ((self.numerator * other.denominator)
                     // (self.denominator * other.numerator)

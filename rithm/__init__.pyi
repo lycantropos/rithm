@@ -242,6 +242,9 @@ class Fraction:
     def __float__(self) -> float:
         ...
 
+    def __floor__(self) -> 'Int':
+        ...
+
     def __floordiv__(self, other: _Union['Fraction', Int]) -> Int:
         ...
 

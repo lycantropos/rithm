@@ -435,7 +435,7 @@ except ImportError:
         def __mul__(self, other):
             return (self._mul_by_fraction(other)
                     if isinstance(other, Fraction)
-                    else (self._mul_by_int(other)
+                    else (self._mul_by_int(Int(other))
                           if isinstance(other, (Int, int))
                           else NotImplemented))
 
@@ -482,7 +482,7 @@ except ImportError:
                     else NotImplemented)
 
         def __rmul__(self, other):
-            return (self._mul_by_int(other)
+            return (self._mul_by_int(Int(other))
                     if isinstance(other, (Int, int))
                     else NotImplemented)
 

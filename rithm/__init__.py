@@ -528,8 +528,8 @@ except ImportError:
                      else NotImplemented))
 
         def __rtruediv__(self, other):
-            return (self._rtruediv_by_int(other)
-                    if isinstance(other, Int)
+            return (self._rtruediv_by_int(Int(other))
+                    if isinstance(other, (Int, int))
                     else NotImplemented)
 
         def __truediv__(self, other):
@@ -548,8 +548,8 @@ except ImportError:
                         _normalize=False
                 )
                 if isinstance(other, Fraction)
-                else (self._truediv_by_int(other)
-                      if isinstance(other, Int)
+                else (self._truediv_by_int(Int(other))
+                      if isinstance(other, (Int, int))
                       else NotImplemented)
             )
 
@@ -591,21 +591,21 @@ except ImportError:
             return Fraction(self.numerator * other, denominator,
                             _normalize=False)
 
-        def _rtruediv_by_int(self, other: Int) -> 'Fraction':
-            other, numerator = _normalize_components_moduli(other,
-                                                            self.numerator)
+        def _rtruediv_by_int(self, dividend: Int) -> 'Fraction':
+            dividend, numerator = _normalize_components_moduli(dividend,
+                                                               self.numerator)
             return Fraction(
-                    *_normalize_components_sign(other * self.denominator,
+                    *_normalize_components_sign(dividend * self.denominator,
                                                 numerator),
                     _normalize=False
             )
 
-        def _truediv_by_int(self, other: Int) -> 'Fraction':
-            numerator, other = _normalize_components_moduli(self.numerator,
-                                                            other)
+        def _truediv_by_int(self, divisor: Int) -> 'Fraction':
+            numerator, divisor = _normalize_components_moduli(self.numerator,
+                                                              divisor)
             return Fraction(
                     *_normalize_components_sign(numerator,
-                                                other * self.denominator),
+                                                divisor * self.denominator),
                     _normalize=False
             )
 

@@ -306,10 +306,10 @@ class Fraction:
     def __sub__(self, other: _Union['Fraction', Int]) -> 'Fraction':
         ...
 
-    def __rtruediv__(self, other: Int) -> 'Fraction':
+    def __rtruediv__(self, dividend: _Union[Int, int]) -> 'Fraction':
         ...
 
-    def __truediv__(self, other: _Union['Fraction', Int]) -> 'Fraction':
+    def __truediv__(self, divisor: _Union['Fraction', Int, int]) -> 'Fraction':
         ...
 
     def __trunc__(self) -> Int:

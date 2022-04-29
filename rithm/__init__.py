@@ -86,7 +86,9 @@ except ImportError:
         def __eq__(self, other):
             return (self._value == other._value
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else (self._value == other
+                          if isinstance(other, int)
+                          else NotImplemented))
 
         def __float__(self):
             return float(self._value)
@@ -104,7 +106,9 @@ except ImportError:
         def __ge__(self, other):
             return (self._value >= other._value
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else (self._value >= other
+                          if isinstance(other, int)
+                          else NotImplemented))
 
         def __getstate__(self):
             return self._value
@@ -112,7 +116,9 @@ except ImportError:
         def __gt__(self, other):
             return (self._value > other._value
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else (self._value > other
+                          if isinstance(other, int)
+                          else NotImplemented))
 
         def __hash__(self):
             return hash(self._value)
@@ -126,7 +132,9 @@ except ImportError:
         def __le__(self, other):
             return (self._value <= other._value
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else (self._value <= other
+                          if isinstance(other, int)
+                          else NotImplemented))
 
         def __lshift__(self, other):
             return (Int(self._value << other._value)
@@ -138,7 +146,9 @@ except ImportError:
         def __lt__(self, other):
             return (self._value < other._value
                     if isinstance(other, Int)
-                    else NotImplemented)
+                    else (self._value < other
+                          if isinstance(other, int)
+                          else NotImplemented))
 
         def __mod__(self, other):
             return (Int(self._value % other._value)

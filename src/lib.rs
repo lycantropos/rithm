@@ -333,8 +333,16 @@ impl PyInt {
         }
     }
 
-    fn __richcmp__(&self, other: PyInt, op: CompareOp) -> bool {
-        compare(&self.0, &other.0, op)
+    fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<PyObject> {
+        let py = other.py();
+        let other = if other.is_instance(PyInt::type_object(py))? {
+            other.extract::<PyInt>()?.0
+        } else if other.is_instance(PyLong::type_object(py))? {
+            try_py_long_to_big_int(other)?
+        } else {
+            return Ok(py.NotImplemented());
+        };
+        Ok(compare(&self.0, &other, op).into_py(py))
     }
 
     fn __rlshift__(&self, other: &PyAny) -> PyResult<PyObject> {

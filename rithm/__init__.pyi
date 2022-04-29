@@ -228,6 +228,9 @@ class Fraction:
     def __bool__(self) -> bool:
         ...
 
+    def __ceil__(self) -> 'Int':
+        ...
+
     @_overload
     def __eq__(self, other: 'Fraction') -> bool:
         ...

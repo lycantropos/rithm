@@ -16,7 +16,7 @@ use pyo3::{IntoPy, PyObject};
 use pyo3_ffi as ffi;
 
 use crate::traits::{
-    Abs, BitLength, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,
+    Abs, BitLength, Ceil, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,
     CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, Endianness, FromBytes,
     FromStrRadix, Gcd, Oppositive, Parity, ToBytes, Unitary, Zeroable,
 };
@@ -743,6 +743,10 @@ impl PyFraction {
 
     fn __bool__(&self) -> bool {
         self.numerator().__bool__()
+    }
+
+    fn __ceil__(&self) -> PyInt {
+        PyInt(self.0.clone().ceil())
     }
 
     fn __float__(&self, py: Python) -> PyResult<PyObject> {

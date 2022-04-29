@@ -360,6 +360,9 @@ except ImportError:
         def __bool__(self):
             return bool(self.numerator)
 
+        def __ceil__(self):
+            return -(-self.numerator // self.denominator)
+
         def __eq__(self, other):
             return (self.numerator == other.numerator
                     and self.denominator == other.denominator

@@ -8,7 +8,7 @@ from . import strategies
 
 @given(strategies.ints)
 def test_irreflexivity(int_: Int) -> None:
-    assert int_ != int_
+    assert not int_ != int_
 
 
 @given(strategies.ints, strategies.ints)

@@ -1246,6 +1246,27 @@ macro_rules! plain_rem_euclid_impl {
 
 plain_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
+pub trait Trunc {
+    type Output;
+
+    fn trunc(self) -> Self::Output;
+}
+
+macro_rules! plain_trunc_impl {
+    ($($t:ty)*) => ($(
+        impl Trunc for $t {
+            type Output = $t;
+
+            #[inline(always)]
+            fn trunc(self) -> Self::Output {
+                <$t>::trunc(self)
+            }
+        }
+    )*)
+}
+
+plain_trunc_impl!(f32 f64);
+
 pub trait Unitary {
     fn one() -> Self;
 

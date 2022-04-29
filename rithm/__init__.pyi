@@ -275,7 +275,8 @@ class Fraction:
     def __pos__(self) -> 'Fraction':
         ...
 
-    def __pow__(self, exponent: 'Int', divisor: None = ...) -> 'Fraction':
+    def __pow__(self, exponent: _Union['Int', int], divisor: None = ...
+                ) -> 'Fraction':
         ...
 
     def __repr__(self) -> str:

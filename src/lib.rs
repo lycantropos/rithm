@@ -843,18 +843,14 @@ impl PyFraction {
         if !modulo.is_none() {
             Ok(py.NotImplemented())
         } else {
-            let exponent = if exponent.is_instance(PyInt::type_object(py))? {
-                exponent.extract::<PyInt>()?.0
-            } else if exponent.is_instance(PyLong::type_object(py))? {
-                try_py_long_to_big_int(exponent)?
-            } else {
-                return Ok(py.NotImplemented());
-            };
-            match self.0.clone().checked_pow(exponent) {
-                Some(value) => Ok(PyFraction(value).into_py(py)),
-                None => Err(PyZeroDivisionError::new_err(
-                    UNDEFINED_DIVISION_ERROR_MESSAGE,
-                )),
+            match try_py_any_to_maybe_big_int(exponent)? {
+                Some(exponent) => match self.0.clone().checked_pow(exponent) {
+                    Some(value) => Ok(PyFraction(value).into_py(py)),
+                    None => Err(PyZeroDivisionError::new_err(
+                        UNDEFINED_DIVISION_ERROR_MESSAGE,
+                    )),
+                },
+                None => Ok(py.NotImplemented()),
             }
         }
     }

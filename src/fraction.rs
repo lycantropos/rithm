@@ -652,6 +652,16 @@ impl<Component: Clone + Eq + NegatableUnaryAlgebra> Neg for Fraction<Component> 
     }
 }
 
+impl<Component: Clone + Eq + Oppositive + Unitary> Oppositive for Fraction<Component> {
+    fn is_negative(&self) -> bool {
+        self.numerator.is_negative()
+    }
+
+    fn is_positive(&self) -> bool {
+        self.numerator.is_positive()
+    }
+}
+
 impl<Component: Clone + Eq + MultiplicativeMonoid + PartialOrd> Ord for Fraction<Component> {
     fn cmp(&self, other: &Self) -> Ordering {
         if self.lt(other) {

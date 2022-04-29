@@ -207,8 +207,8 @@ impl PyInt {
         hash(&self.0) as ffi::Py_hash_t
     }
 
-    fn __int__(&self) -> PyObject {
-        big_int_to_py_long(&self.0)
+    fn __int__(&self, py: Python) -> PyObject {
+        big_int_to_py_long(&self.0, py)
     }
 
     fn __invert__(&self) -> PyInt {
@@ -636,14 +636,14 @@ fn maybe_rshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
 }
 
 #[inline]
-fn big_int_to_py_long(value: &BigInt) -> PyObject {
+fn big_int_to_py_long(value: &BigInt, py: Python) -> PyObject {
     let buffer = value.to_bytes(Endianness::LITTLE);
-    Python::with_gil(|py| unsafe {
+    unsafe {
         PyObject::from_owned_ptr(
             py,
             ffi::_PyLong_FromByteArray(buffer.as_ptr(), buffer.len(), 1, 1),
         )
-    })
+    }
 }
 
 #[inline]

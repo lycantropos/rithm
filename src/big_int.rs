@@ -378,8 +378,8 @@ where
             negate_digits(&mut result);
         }
         match endianness {
-            Endianness::BIG => result.reverse(),
-            Endianness::LITTLE => {}
+            Endianness::Big => result.reverse(),
+            Endianness::Little => {}
         }
         result
     }
@@ -393,8 +393,8 @@ where
     fn from_bytes(bytes: &[u8], endianness: Endianness) -> Self {
         let mut bytes = bytes.to_vec();
         match endianness {
-            Endianness::BIG => bytes.reverse(),
-            Endianness::LITTLE => {}
+            Endianness::Big => bytes.reverse(),
+            Endianness::Little => {}
         }
         debug_assert!(is_valid_shift::<Digit, SHIFT>());
         let most_significant_byte = bytes[bytes.len() - 1];

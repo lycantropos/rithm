@@ -120,8 +120,8 @@ plain_ceil_impl!(f32 f64);
 
 #[derive(Clone)]
 pub enum Endianness {
-    BIG,
-    LITTLE,
+    Big,
+    Little,
 }
 
 pub trait FromBytes {
@@ -134,8 +134,8 @@ macro_rules! plain_from_bytes_impl {
             #[inline(always)]
             fn from_bytes(bytes: &[u8], endianness: Endianness) -> Self {
                 match endianness {
-                   Endianness::BIG => Self::from_be_bytes(bytes.try_into().unwrap()),
-                   Endianness::LITTLE => Self::from_le_bytes(bytes.try_into().unwrap()),
+                   Endianness::Big => Self::from_be_bytes(bytes.try_into().unwrap()),
+                   Endianness::Little => Self::from_le_bytes(bytes.try_into().unwrap()),
                 }
             }
         }
@@ -158,8 +158,8 @@ macro_rules! plain_to_bytes_impl {
             #[inline(always)]
             fn to_bytes(self, endianness: Endianness) -> Self::Output {
                 match endianness {
-                   Endianness::BIG => self.to_be_bytes(),
-                   Endianness::LITTLE => self.to_le_bytes(),
+                   Endianness::Big => self.to_be_bytes(),
+                   Endianness::Little => self.to_le_bytes(),
                 }
             }
         }

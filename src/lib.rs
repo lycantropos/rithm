@@ -33,7 +33,7 @@ type Digit = u32;
 
 const BINARY_SHIFT: usize = (traits::OppositionOf::<Digit>::BITS - 2) as usize;
 const UNDEFINED_DIVISION_ERROR_MESSAGE: &str = "Division by zero is undefined.";
-const PICKLE_SERIALIZATION_ENDIANNESS: Endianness = Endianness::LITTLE;
+const PICKLE_SERIALIZATION_ENDIANNESS: Endianness = Endianness::Little;
 
 type BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
 type Fraction = fraction::Fraction<BigInt>;
@@ -55,16 +55,16 @@ struct PyInt(BigInt);
 #[pymethods]
 impl PyEndianness {
     #[classattr]
-    const BIG: PyEndianness = PyEndianness(Endianness::BIG);
+    const BIG: PyEndianness = PyEndianness(Endianness::Big);
     #[classattr]
-    const LITTLE: PyEndianness = PyEndianness(Endianness::LITTLE);
+    const LITTLE: PyEndianness = PyEndianness(Endianness::Little);
 
     fn __repr__(&self) -> String {
         format!(
             "rithm.Endianness.{}",
             match self.0 {
-                Endianness::BIG => "BIG",
-                Endianness::LITTLE => "LITTLE",
+                Endianness::Big => "BIG",
+                Endianness::Little => "LITTLE",
             }
         )
     }
@@ -484,7 +484,7 @@ impl PyInt {
 
 #[inline]
 fn big_int_to_py_long(value: &BigInt, py: Python) -> PyObject {
-    let buffer = value.to_bytes(Endianness::LITTLE);
+    let buffer = value.to_bytes(Endianness::Little);
     unsafe {
         PyObject::from_owned_ptr(
             py,
@@ -665,7 +665,7 @@ fn try_py_long_to_big_int(value: &PyAny) -> PyResult<BigInt> {
                 } else {
                     Ok(BigInt::from_bytes(
                         buffer.as_mut_slice(),
-                        Endianness::LITTLE,
+                        Endianness::Little,
                     ))
                 }
             }

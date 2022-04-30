@@ -382,16 +382,10 @@ impl PyInt {
             return Ok(py.NotImplemented());
         };
         match divisor {
-            Some(divisor) => {
-                let divisor = if divisor.is_instance(PyInt::type_object(py))? {
-                    divisor.extract::<PyInt>()?.0
-                } else if divisor.is_instance(PyLong::type_object(py))? {
-                    try_py_long_to_big_int(divisor)?
-                } else {
-                    return Ok(py.NotImplemented());
-                };
-                try_pow_mod(base, self.0.clone(), divisor, py)
-            }
+            Some(divisor) => match try_py_any_to_maybe_big_int(divisor)? {
+                Some(divisor) => try_pow_mod(base, self.0.clone(), divisor, py),
+                None => Ok(py.NotImplemented()),
+            },
             None => try_pow(base, self.0.clone(), py),
         }
     }

@@ -611,6 +611,24 @@ fn try_py_any_to_maybe_big_int(value: &PyAny) -> PyResult<Option<BigInt>> {
 }
 
 #[inline]
+fn try_py_any_to_maybe_fraction(value: &PyAny) -> PyResult<Option<Fraction>> {
+    let py = value.py();
+    match value.getattr(intern!(py, "numerator")) {
+        Ok(numerator) => match try_py_any_to_maybe_big_int(numerator)? {
+            Some(numerator) => match value.getattr(intern!(py, "denominator")) {
+                Ok(denominator) => match try_py_any_to_maybe_big_int(denominator)? {
+                    Some(denominator) => try_truediv(numerator, denominator).map(Some),
+                    None => Ok(None),
+                },
+                Err(_) => Ok(None),
+            },
+            None => Ok(None),
+        },
+        Err(_) => Ok(None),
+    }
+}
+
+#[inline]
 fn try_py_integral_to_big_int(value: &PyAny) -> PyResult<BigInt> {
     if value.is_instance(PyInt::type_object(value.py()))? {
         Ok(value.extract::<PyInt>()?.0)
@@ -686,26 +704,40 @@ impl PyFraction {
                     "Numerator should be of type `Int` or `int`, but found `None`",
                 )),
             },
-            None => Ok(PyFraction(match _numerator {
+            None => match _numerator {
                 Some(value) => {
-                    if value.is_instance(PyFloat::type_object(value.py()))? {
-                        Fraction::try_from(value.extract::<f64>()?).map_err(
-                            |reason| match reason {
+                    let py = value.py();
+                    if value.is_instance(PyFraction::type_object(py))? {
+                        value.extract::<PyFraction>()
+                    } else if value.is_instance(PyFloat::type_object(py))? {
+                        match Fraction::try_from(value.extract::<f64>()?) {
+                            Ok(value) => Ok(PyFraction(value)),
+                            Err(reason) => Err(match reason {
                                 fraction::FromFloatConversionError::NaN => {
                                     PyValueError::new_err(reason.to_string())
                                 }
                                 _ => PyOverflowError::new_err(reason.to_string()),
-                            },
-                        )?
+                            }),
+                        }
                     } else {
-                        unsafe {
-                            Fraction::new(try_py_integral_to_big_int(value)?, BigInt::one())
-                                .unwrap_unchecked()
+                        match try_py_any_to_maybe_big_int(value)? {
+                            Some(value) => unsafe {
+                                Ok(PyFraction(
+                                    Fraction::new(value, BigInt::one()).unwrap_unchecked(),
+                                ))
+                            },
+                            None => match try_py_any_to_maybe_fraction(value)? {
+                                Some(value) => Ok(PyFraction(value)),
+                                None => Err(PyTypeError::new_err(
+                                    format!("Value should be rational or floating point number, but found: {}",
+                                            value.get_type().repr()?),
+                                )),
+                            },
                         }
                     }
                 }
-                None => Fraction::zero(),
-            })),
+                None => Ok(PyFraction(Fraction::zero())),
+            },
         }
     }
 

@@ -9,6 +9,7 @@ try:
 except ImportError:
     from enum import Enum as _Enum
     from math import gcd as _gcd
+    from numbers import Rational as _Rational
     from operator import mul as _mul
     from typing import Tuple as _Tuple
 
@@ -315,7 +316,10 @@ except ImportError:
                     _normalize=True):
             self = super().__new__(cls)
             if _denominator is None:
-                if isinstance(_numerator, float):
+                if isinstance(_numerator, Fraction):
+                    numerator, denominator = (_numerator.numerator,
+                                              _numerator.denominator)
+                elif isinstance(_numerator, float):
                     raw_numerator, raw_denominator = (
                         _numerator.as_integer_ratio()
                     )
@@ -323,6 +327,9 @@ except ImportError:
                                               Int(raw_denominator))
                 elif isinstance(_numerator, (Int, int)):
                     numerator, denominator = Int(_numerator), _ONE
+                elif isinstance(_numerator, _Rational):
+                    numerator, denominator = (_numerator.numerator,
+                                              _numerator.denominator)
                 else:
                     raise TypeError('First argument should be of '
                                     f'type {Int}, {int} or {float}, '

@@ -1,3 +1,4 @@
+from numbers import Rational as _Rational
 from typing import (Any as _Any,
                     Optional as _Optional,
                     Tuple as _Tuple,
@@ -210,7 +211,9 @@ class Fraction:
     __slots__ = '_denominator', '_numerator'
 
     @_overload
-    def __new__(cls, _numerator: _Union[Int, float, int] = ...) -> 'Fraction':
+    def __new__(cls,
+                _value: _Union['Fraction', Int, _Rational, float, int] = ...
+                ) -> 'Fraction':
         ...
 
     @_overload

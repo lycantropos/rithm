@@ -11,8 +11,7 @@ use pyo3::exceptions::*;
 use pyo3::prelude::{pyclass, pymethods, pymodule, PyModule, PyResult, Python};
 use pyo3::type_object::PyTypeObject;
 use pyo3::types::{PyBytes, PyFloat, PyLong, PyString, PyType};
-use pyo3::{AsPyPointer, Py, PyAny, PyErr, PyRef, ToPyObject};
-use pyo3::{IntoPy, PyObject};
+use pyo3::{intern, AsPyPointer, IntoPy, Py, PyAny, PyErr, PyObject, PyRef, ToPyObject};
 use pyo3_ffi as ffi;
 
 use crate::traits::{
@@ -1037,9 +1036,9 @@ fn compare<T: PartialOrd<U>, U>(left: &T, right: &U, op: CompareOp) -> bool {
 }
 
 #[pymodule]
-fn _rithm(_py: Python, module: &PyModule) -> PyResult<()> {
-    module.setattr("__doc__", env!("CARGO_PKG_DESCRIPTION"))?;
-    module.setattr("__version__", env!("CARGO_PKG_VERSION"))?;
+fn _rithm(py: Python, module: &PyModule) -> PyResult<()> {
+    module.setattr(intern!(py, "__doc__"), env!("CARGO_PKG_DESCRIPTION"))?;
+    module.setattr(intern!(py, "__version__"), env!("CARGO_PKG_VERSION"))?;
     module.add_class::<PyEndianness>()?;
     module.add_class::<PyFraction>()?;
     module.add_class::<PyInt>()?;

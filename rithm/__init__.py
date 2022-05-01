@@ -317,6 +317,26 @@ except ImportError:
         def numerator(self):
             return self._numerator
 
+        def round(self, tie_breaking):
+            quotient, remainder = divmod(self.numerator, self.denominator)
+            double_remainder = remainder * 2
+            if double_remainder == self.denominator:
+                if tie_breaking is TieBreaking.AWAY_FROM_ZERO:
+                    return quotient + _ONE if quotient >= 0 else quotient
+                elif tie_breaking is TieBreaking.TO_EVEN:
+                    return quotient + _ONE if not quotient % 2 else quotient
+                elif tie_breaking is TieBreaking.TO_ODD:
+                    return quotient + _ONE if quotient % 2 else quotient
+                else:
+                    assert tie_breaking is TieBreaking.TOWARD_ZERO, (
+                        tie_breaking
+                    )
+                    return quotient + _ONE if quotient < 0 else quotient
+            else:
+                return (quotient + _ONE
+                        if double_remainder > self.denominator
+                        else quotient)
+
         __slots__ = '_denominator', '_numerator'
 
         def __new__(cls,

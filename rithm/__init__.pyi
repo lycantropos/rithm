@@ -217,6 +217,9 @@ class Fraction:
     def numerator(self) -> Int:
         ...
 
+    def round(self, tie_breaking: TieBreaking) -> Int:
+        ...
+
     @_overload
     def __new__(cls,
                 _value: _Union['Fraction', Int, _Rational, float, int] = ...

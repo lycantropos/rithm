@@ -779,6 +779,10 @@ impl PyFraction {
         PyInt(self.0.numerator().clone())
     }
 
+    fn round(&self, tie_breaking: PyTieBreaking) -> PyInt {
+        PyInt(self.0.clone().round(tie_breaking.0))
+    }
+
     fn __abs__(&self) -> PyFraction {
         PyFraction(self.0.clone().abs())
     }

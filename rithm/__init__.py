@@ -504,9 +504,6 @@ except ImportError:
                     if isinstance(exponent, (Int, int)) and divisor is None
                     else NotImplemented)
 
-        def __repr__(self):
-            return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'
-
         def __radd__(self, other):
             return (self._add_int(Int(other))
                     if isinstance(other, (Int, int))
@@ -516,6 +513,9 @@ except ImportError:
             return (_divmod_rationals(dividend, self)
                     if isinstance(dividend, (Int, int))
                     else NotImplemented)
+
+        def __repr__(self):
+            return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'
 
         def __rfloordiv__(self, dividend):
             return ((dividend * self.denominator) // self.numerator

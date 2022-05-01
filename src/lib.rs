@@ -52,6 +52,10 @@ struct PyFraction(Fraction);
 #[derive(Clone)]
 struct PyInt(BigInt);
 
+#[pyclass(name = "TieBreaking", module = "rithm")]
+#[derive(Clone)]
+struct PyTieBreaking(TieBreaking);
+
 #[pymethods]
 impl PyEndianness {
     #[classattr]
@@ -65,6 +69,30 @@ impl PyEndianness {
             match self.0 {
                 Endianness::Big => "BIG",
                 Endianness::Little => "LITTLE",
+            }
+        )
+    }
+}
+
+#[pymethods]
+impl PyTieBreaking {
+    #[classattr]
+    const AWAY_FROM_ZERO: PyTieBreaking = PyTieBreaking(TieBreaking::AwayFromZero);
+    #[classattr]
+    const TO_EVEN: PyTieBreaking = PyTieBreaking(TieBreaking::ToEven);
+    #[classattr]
+    const TO_ODD: PyTieBreaking = PyTieBreaking(TieBreaking::ToOdd);
+    #[classattr]
+    const TOWARD_ZERO: PyTieBreaking = PyTieBreaking(TieBreaking::TowardZero);
+
+    fn __repr__(&self) -> String {
+        format!(
+            "rithm.TieBreaking.{}",
+            match self.0 {
+                TieBreaking::AwayFromZero => "AWAY_FROM_ZERO",
+                TieBreaking::ToEven => "TO_EVEN",
+                TieBreaking::ToOdd => "TO_ODD",
+                TieBreaking::TowardZero => "TOWARD_ZERO",
             }
         )
     }
@@ -1134,6 +1162,7 @@ fn _rithm(py: Python, module: &PyModule) -> PyResult<()> {
     module.add_class::<PyEndianness>()?;
     module.add_class::<PyFraction>()?;
     module.add_class::<PyInt>()?;
+    module.add_class::<PyTieBreaking>()?;
     let numbers_module = py.import("numbers")?;
     let rational_cls = numbers_module.getattr(intern!(py, "Rational"))?;
     let integral_cls = numbers_module.getattr(intern!(py, "Integral"))?;

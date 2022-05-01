@@ -890,8 +890,7 @@ impl<
                 .checked_div_rem_euclid(self.denominator.clone())
                 .unwrap_unchecked()
         };
-        let double_remainder = remainder * Component::from(2u8);
-        match double_remainder.cmp(&self.denominator) {
+        match (remainder * Component::from(2u8)).cmp(&self.denominator) {
             Ordering::Equal => {
                 if match tie_breaking {
                     TieBreaking::AwayFromZero => !quotient.is_negative(),

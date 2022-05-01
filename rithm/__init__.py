@@ -5,7 +5,8 @@ __version__ = '5.4.0'
 try:
     from ._rithm import (Endianness,
                          Fraction,
-                         Int)
+                         Int,
+                         TieBreaking)
 except ImportError:
     from enum import Enum as _Enum
     from math import gcd as _gcd
@@ -14,12 +15,21 @@ except ImportError:
     from typing import Tuple as _Tuple
 
 
-    class Endianness(_Enum):
+    class _BaseEnum(_Enum):
+        def __repr__(self):
+            return f'rithm.{type(self).__qualname__}.{self.name}'
+
+
+    class Endianness(_BaseEnum):
         BIG = 'big'
         LITTLE = 'little'
 
-        def __repr__(self):
-            return f'rithm.{type(self).__qualname__}.{self.name}'
+
+    class TieBreaking(int, _BaseEnum):
+        AWAY_FROM_ZERO = 0
+        TO_EVEN = 1
+        TO_ODD = 2
+        TOWARD_ZERO = 3
 
 
     class Int:

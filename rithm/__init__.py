@@ -324,9 +324,9 @@ except ImportError:
                 if tie_breaking is TieBreaking.AWAY_FROM_ZERO:
                     return quotient + _ONE if quotient >= 0 else quotient
                 elif tie_breaking is TieBreaking.TO_EVEN:
-                    return quotient + _ONE if not quotient % 2 else quotient
-                elif tie_breaking is TieBreaking.TO_ODD:
                     return quotient + _ONE if quotient % 2 else quotient
+                elif tie_breaking is TieBreaking.TO_ODD:
+                    return quotient + _ONE if not quotient % 2 else quotient
                 else:
                     assert tie_breaking is TieBreaking.TOWARD_ZERO, (
                         tie_breaking

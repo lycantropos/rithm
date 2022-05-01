@@ -512,6 +512,11 @@ except ImportError:
                     if isinstance(other, (Int, int))
                     else NotImplemented)
 
+        def __rdivmod__(self, dividend):
+            return (_divmod_rationals(dividend, self)
+                    if isinstance(dividend, (Int, int))
+                    else NotImplemented)
+
         def __rfloordiv__(self, dividend):
             return ((dividend * self.denominator) // self.numerator
                     if isinstance(dividend, (Int, int))

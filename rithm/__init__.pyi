@@ -303,6 +303,10 @@ class Fraction:
     def __radd__(self, other: _Union[Int, int]) -> 'Fraction':
         ...
 
+    def __rdivmod__(self, dividend: _Union[Int, int]
+                    ) -> _Tuple[Int, 'Fraction']:
+        ...
+
     def __rfloordiv__(self, dividend: _Union[Int, int]) -> Int:
         ...
 

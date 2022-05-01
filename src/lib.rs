@@ -939,6 +939,15 @@ impl PyFraction {
         }
     }
 
+    fn __rdivmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+        let py = dividend.py();
+        match try_py_any_to_maybe_big_int(dividend)? {
+            Some(dividend) => try_divmod(dividend, self.0.clone())
+                .map(|(quotient, remainder)| (PyInt(quotient), PyFraction(remainder)).into_py(py)),
+            None => Ok(py.NotImplemented()),
+        }
+    }
+
     fn __repr__(&self) -> String {
         format!(
             "rithm.Fraction({}, {})",

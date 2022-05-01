@@ -10,7 +10,8 @@ try:
 except ImportError:
     from enum import Enum as _Enum
     from math import gcd as _gcd
-    from numbers import Rational as _Rational
+    from numbers import (Integral as _Integral,
+                         Rational as _Rational)
     from operator import mul as _mul
     from typing import Tuple as _Tuple
 
@@ -32,6 +33,7 @@ except ImportError:
         TOWARD_ZERO = 3
 
 
+    @_Integral.register
     class Int:
         @property
         def denominator(self):
@@ -308,6 +310,7 @@ except ImportError:
     _ZERO = Int()
 
 
+    @_Rational.register
     class Fraction:
         @property
         def denominator(self):

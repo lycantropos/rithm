@@ -522,7 +522,15 @@ fn big_int_to_py_long(value: &BigInt, py: Python) -> PyObject {
 }
 
 #[inline]
-fn try_divmod(dividend: BigInt, divisor: BigInt) -> PyResult<(BigInt, BigInt)> {
+fn try_divmod<
+    Dividend: CheckedDivRemEuclid<Divisor, Output = Option<(Quotient, Remainder)>>,
+    Divisor,
+    Quotient,
+    Remainder,
+>(
+    dividend: Dividend,
+    divisor: Divisor,
+) -> PyResult<(Quotient, Remainder)> {
     match dividend.checked_div_rem_euclid(divisor) {
         Some((quotient, remainder)) => Ok((quotient, remainder)),
         None => Err(PyZeroDivisionError::new_err(
@@ -798,6 +806,24 @@ impl PyFraction {
 
     fn __ceil__(&self) -> PyInt {
         PyInt(self.0.clone().ceil())
+    }
+
+    fn __divmod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+        let py = divisor.py();
+        if divisor.is_instance(PyFraction::type_object(py))? {
+            let divisor = divisor.extract::<PyFraction>()?.0;
+            try_divmod(self.0.clone(), divisor)
+                .map(|(quotient, remainder)| (PyInt(quotient), PyFraction(remainder)).into_py(py))
+        } else {
+            match try_py_any_to_maybe_big_int(divisor)? {
+                Some(divisor) => {
+                    try_divmod(self.0.clone(), divisor).map(|(quotient, remainder)| {
+                        (PyInt(quotient), PyFraction(remainder)).into_py(py)
+                    })
+                }
+                None => Ok(py.NotImplemented()),
+            }
+        }
     }
 
     fn __float__(&self, py: Python) -> PyResult<PyObject> {

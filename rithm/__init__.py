@@ -13,7 +13,8 @@ except ImportError:
     from numbers import (Integral as _Integral,
                          Rational as _Rational)
     from operator import mul as _mul
-    from typing import Tuple as _Tuple
+    from typing import (Tuple as _Tuple,
+                        Union as _Union)
 
 
     class _BaseEnum(_Enum):
@@ -401,6 +402,11 @@ except ImportError:
         def __ceil__(self):
             return -(-self.numerator // self.denominator)
 
+        def __divmod__(self, divisor):
+            return (_divmod_rationals(self, divisor)
+                    if isinstance(divisor, (Fraction, Int, int))
+                    else NotImplemented)
+
         def __eq__(self, other):
             return (self.numerator == other.numerator
                     and self.denominator == other.denominator
@@ -655,6 +661,17 @@ except ImportError:
                                                 divisor * self.denominator),
                     _normalize=False
             )
+
+
+    def _divmod_rationals(dividend: _Union[Fraction, Int, int],
+                          divisor: _Union[Fraction, Int, int]
+                          ) -> _Tuple[Int, Fraction]:
+        quotient, remainder_numerator = divmod(
+                dividend.numerator * divisor.denominator,
+                dividend.denominator * divisor.numerator
+        )
+        return quotient, Fraction(remainder_numerator,
+                                  dividend.denominator * divisor.denominator)
 
 
     def _normalize_components_moduli(numerator: Int, denominator: Int

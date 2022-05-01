@@ -244,6 +244,10 @@ class Fraction:
     def __ceil__(self) -> 'Int':
         ...
 
+    def __divmod__(self, divisor: _Union['Fraction', Int, int]
+                   ) -> _Tuple[Int, 'Fraction']:
+        ...
+
     @_overload
     def __eq__(self, other: _Union['Fraction', Int, int]) -> bool:
         ...

@@ -297,6 +297,14 @@ class Fraction:
     def __rmul__(self, other: _Union[Int, int]) -> 'Fraction':
         ...
 
+    @_overload
+    def __round__(self, digits: None = ...) -> Int:
+        ...
+
+    @_overload
+    def __round__(self, digits: int) -> 'Fraction':
+        ...
+
     def __rsub__(self, subtrahend: _Union[Int, int]) -> 'Fraction':
         ...
 

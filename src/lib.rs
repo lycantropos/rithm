@@ -17,7 +17,7 @@ use pyo3_ffi as ffi;
 use crate::traits::{
     Abs, BitLength, Ceil, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,
     CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, Endianness, Floor, FromBytes,
-    FromStrRadix, Gcd, Oppositive, Parity, ToBytes, Trunc, Unitary, Zeroable,
+    FromStrRadix, Gcd, Oppositive, Parity, Round, TieBreaking, ToBytes, Trunc, Unitary, Zeroable,
 };
 
 pub mod big_int;
@@ -939,6 +939,35 @@ impl PyFraction {
         }
     }
 
+    fn __round__(&self, digits: Option<&PyLong>, py: Python) -> PyResult<PyObject> {
+        match digits {
+            Some(digits) => {
+                let digits = try_py_long_to_big_int(digits)?;
+                let shift = unsafe {
+                    BigInt::from(10)
+                        .checked_pow(digits.clone().abs())
+                        .unwrap_unchecked()
+                };
+                if digits.is_positive() {
+                    Ok(PyFraction(unsafe {
+                        Fraction::new(
+                            (self.0.clone() * shift.clone()).round(TieBreaking::ToEven),
+                            shift,
+                        )
+                        .unwrap_unchecked()
+                    })
+                    .into_py(py))
+                } else {
+                    Ok(PyFraction(Fraction::from(
+                        (self.0.clone() / shift.clone()).round(TieBreaking::ToEven) * shift,
+                    ))
+                    .into_py(py))
+                }
+            }
+            None => Ok(PyInt(self.0.clone().round(TieBreaking::ToEven)).into_py(py)),
+        }
+    }
+
     fn __rsub__(&self, subtrahend: &PyAny) -> PyResult<PyObject> {
         let py = subtrahend.py();
         match try_py_any_to_maybe_big_int(subtrahend)? {
@@ -1069,10 +1098,46 @@ fn compare<T: PartialOrd<U>, U>(left: &T, right: &U, op: CompareOp) -> bool {
 
 #[pymodule]
 fn _rithm(py: Python, module: &PyModule) -> PyResult<()> {
+    let mut values = (-10..10).map(|x| x as f64).collect::<Vec<f64>>();
+    values.push((1u64 << 52) as f64);
+    for value in values {
+        for value in [
+            (value as f64) + 0.25,
+            (value as f64) + 0.5,
+            (value as f64) + 0.75,
+        ] {
+            println!("{} has fractional part {}", value, value.ceil() - value);
+            println!(
+                "{} with round away from zero {}",
+                value,
+                <f64 as Round>::round(value, TieBreaking::AwayFromZero)
+            );
+            println!(
+                "{} with round to even {}",
+                value,
+                <f64 as Round>::round(value, TieBreaking::ToEven)
+            );
+            println!(
+                "{} with round to odd {}",
+                value,
+                <f64 as Round>::round(value, TieBreaking::ToOdd)
+            );
+            println!(
+                "{} with round toward zero {}",
+                value,
+                <f64 as Round>::round(value, TieBreaking::TowardZero)
+            );
+        }
+    }
     module.setattr(intern!(py, "__doc__"), env!("CARGO_PKG_DESCRIPTION"))?;
     module.setattr(intern!(py, "__version__"), env!("CARGO_PKG_VERSION"))?;
     module.add_class::<PyEndianness>()?;
     module.add_class::<PyFraction>()?;
     module.add_class::<PyInt>()?;
+    let numbers_module = py.import("numbers")?;
+    let rational_cls = numbers_module.getattr(intern!(py, "Rational"))?;
+    let integral_cls = numbers_module.getattr(intern!(py, "Integral"))?;
+    integral_cls.call_method1("register", (PyInt::type_object(py),))?;
+    rational_cls.call_method1("register", (PyFraction::type_object(py),))?;
     Ok(())
 }

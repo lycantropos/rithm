@@ -1130,37 +1130,6 @@ fn compare<T: PartialOrd<U>, U>(left: &T, right: &U, op: CompareOp) -> bool {
 
 #[pymodule]
 fn _rithm(py: Python, module: &PyModule) -> PyResult<()> {
-    let mut values = (-10..10).map(|x| x as f64).collect::<Vec<f64>>();
-    values.push((1u64 << 52) as f64);
-    for value in values {
-        for value in [
-            (value as f64) + 0.25,
-            (value as f64) + 0.5,
-            (value as f64) + 0.75,
-        ] {
-            println!("{} has fractional part {}", value, value.ceil() - value);
-            println!(
-                "{} with round away from zero {}",
-                value,
-                <f64 as Round>::round(value, TieBreaking::AwayFromZero)
-            );
-            println!(
-                "{} with round to even {}",
-                value,
-                <f64 as Round>::round(value, TieBreaking::ToEven)
-            );
-            println!(
-                "{} with round to odd {}",
-                value,
-                <f64 as Round>::round(value, TieBreaking::ToOdd)
-            );
-            println!(
-                "{} with round toward zero {}",
-                value,
-                <f64 as Round>::round(value, TieBreaking::TowardZero)
-            );
-        }
-    }
     module.setattr(intern!(py, "__doc__"), env!("CARGO_PKG_DESCRIPTION"))?;
     module.setattr(intern!(py, "__version__"), env!("CARGO_PKG_VERSION"))?;
     module.add_class::<PyEndianness>()?;

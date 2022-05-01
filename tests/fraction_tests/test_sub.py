@@ -3,6 +3,7 @@ from hypothesis import given
 from rithm import Fraction
 from tests.utils import (FractionOrIntOrBuiltinInt,
                          FractionWithBuiltin,
+                         IntWithBuiltin,
                          RationalWithBuiltin,
                          equivalence,
                          is_equivalent_to_builtin_fraction,
@@ -41,9 +42,9 @@ def test_alternatives(subtrahend: Fraction, minuend: Fraction) -> None:
     assert subtrahend - minuend == subtrahend + (-minuend)
 
 
-@given(strategies.fractions, strategies.rationals_with_builtins)
+@given(strategies.fractions, strategies.ints_with_builtins)
 def test_polymorphism(subtrahend: Fraction,
-                      minuend_with_builtin: RationalWithBuiltin) -> None:
+                      minuend_with_builtin: IntWithBuiltin) -> None:
     minuend, minuend_builtin = minuend_with_builtin
 
     assert subtrahend - minuend == subtrahend - minuend_builtin

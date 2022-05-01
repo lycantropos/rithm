@@ -895,7 +895,7 @@ impl PyFraction {
         } else {
             match try_py_any_to_maybe_big_int(exponent)? {
                 Some(exponent) => match self.0.clone().checked_pow(exponent) {
-                    Some(value) => Ok(PyFraction(value).into_py(py)),
+                    Some(power) => Ok(PyFraction(power).into_py(py)),
                     None => Err(PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )),

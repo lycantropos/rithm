@@ -525,12 +525,14 @@ except ImportError:
 
         def __round__(self, digits=None):
             if digits is None:
-                return self._round_to_even()
+                return self.round(TieBreaking.TO_EVEN)
             else:
                 shift = 10 ** abs(digits)
-                return (Fraction((self * shift)._round_to_even(), shift)
+                return (Fraction((self * shift).round(TieBreaking.TO_EVEN),
+                                 shift)
                         if digits > 0
-                        else Fraction((self / shift)._round_to_even() * shift))
+                        else Fraction((self / shift).round(TieBreaking.TO_EVEN)
+                                      * shift))
 
         def __rsub__(self, subtrahend):
             return (
@@ -636,13 +638,6 @@ except ImportError:
                                                               self.denominator)
             return Fraction(self.numerator * other, denominator,
                             _normalize=False)
-
-        def _round_to_even(self) -> Int:
-            quotient, remainder = divmod(self.numerator, self.denominator)
-            double_remainder = remainder * 2
-            return quotient + (double_remainder > self.denominator
-                               or (double_remainder == self.denominator
-                                   and quotient % 2 != 0))
 
         def _rtruediv_by_int(self, dividend: Int) -> 'Fraction':
             dividend, numerator = _normalize_components_moduli(dividend,

@@ -41,8 +41,7 @@ def test_polymorphism(first: Fraction, second_with_builtin: IntWithBuiltin
     assert first * second == first * second_builtin
 
 
-@given(strategies.fractions_with_builtins,
-       strategies.rationals_with_builtins)
+@given(strategies.fractions_with_builtins, strategies.rationals_with_builtins)
 def test_connection_with_builtin(first_with_builtin: FractionWithBuiltin,
                                  second_with_builtin: RationalWithBuiltin
                                  ) -> None:

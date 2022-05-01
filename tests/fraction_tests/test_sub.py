@@ -49,8 +49,7 @@ def test_polymorphism(subtrahend: Fraction,
     assert subtrahend - minuend == subtrahend - minuend_builtin
 
 
-@given(strategies.fractions_with_builtins,
-       strategies.rationals_with_builtins)
+@given(strategies.fractions_with_builtins, strategies.rationals_with_builtins)
 def test_connection_with_builtin(subtrahend_with_builtin: FractionWithBuiltin,
                                  minuend_with_builtin: RationalWithBuiltin
                                  ) -> None:

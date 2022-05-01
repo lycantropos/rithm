@@ -55,8 +55,7 @@ def test_polymorphism(dividend: Fraction, divisor_with_builtin: IntWithBuiltin
         assert result == dividend // divisor_builtin
 
 
-@given(strategies.fractions_with_builtins,
-       strategies.rationals_with_builtins)
+@given(strategies.fractions_with_builtins, strategies.rationals_with_builtins)
 def test_connection_with_builtin(dividend_with_builtin: FractionWithBuiltin,
                                  divisor_with_builtin: RationalWithBuiltin
                                  ) -> None:

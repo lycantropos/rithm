@@ -302,28 +302,20 @@ impl<
     type Output = Option<Component>;
 
     fn checked_div_euclid(self, divisor: Self) -> Self::Output {
-        if divisor.is_zero() {
-            None
-        } else {
-            (self.numerator * divisor.denominator)
-                .checked_div_euclid(divisor.numerator * self.denominator)
-        }
+        (self.numerator * divisor.denominator)
+            .checked_div_euclid(divisor.numerator * self.denominator)
     }
 }
 
 impl<
-        Component: Clone + CheckedDivEuclid<Output = Option<Component>> + Eq + MultiplicativeMonoid + Zeroable,
+        Component: Clone + CheckedDivEuclid<Output = Option<Component>> + Eq + MultiplicativeMonoid,
     > CheckedDivEuclid<Component> for Fraction<Component>
 {
     type Output = Option<Component>;
 
     fn checked_div_euclid(self, divisor: Component) -> Self::Output {
-        if divisor.is_zero() {
-            None
-        } else {
-            self.numerator
-                .checked_div_euclid(divisor * self.denominator)
-        }
+        self.numerator
+            .checked_div_euclid(divisor * self.denominator)
     }
 }
 
@@ -334,11 +326,7 @@ macro_rules! plain_checked_div_euclid_fraction_impl {
         type Output = Option<Self>;
 
         fn checked_div_euclid(self, divisor: Fraction<Self>) -> Self::Output {
-            if divisor.is_zero() {
-                None
-            } else {
-                (self * divisor.denominator).checked_div_euclid(divisor.numerator)
-            }
+            (self * divisor.denominator).checked_div_euclid(divisor.numerator)
         }
     }
     )*)
@@ -355,11 +343,7 @@ impl<
     type Output = Option<Self>;
 
     fn checked_div_euclid(self, divisor: Fraction<Self>) -> Self::Output {
-        if divisor.is_zero() {
-            None
-        } else {
-            (self * divisor.denominator).checked_div_euclid(divisor.numerator)
-        }
+        (self * divisor.denominator).checked_div_euclid(divisor.numerator)
     }
 }
 

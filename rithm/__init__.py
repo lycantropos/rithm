@@ -390,7 +390,7 @@ except ImportError:
                     // (self.denominator * other.numerator)
                     if isinstance(other, Fraction)
                     else (self.numerator // (self.denominator * other)
-                          if isinstance(other, Int)
+                          if isinstance(other, (Int, int))
                           else NotImplemented))
 
         def __ge__(self, other):

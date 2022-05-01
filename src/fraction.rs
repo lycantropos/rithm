@@ -892,40 +892,18 @@ impl<
         };
         let double_remainder = remainder * Component::from(2u8);
         match double_remainder.cmp(&self.denominator) {
-            Ordering::Equal => match tie_breaking {
-                TieBreaking::AwayFromZero => {
-                    if quotient.is_positive() {
-                        quotient + Component::one()
-                    } else if quotient.is_negative() {
-                        quotient - Component::one()
-                    } else {
-                        quotient
-                    }
+            Ordering::Equal => {
+                if match tie_breaking {
+                    TieBreaking::AwayFromZero => !quotient.is_negative(),
+                    TieBreaking::ToEven => quotient.is_odd(),
+                    TieBreaking::ToOdd => quotient.is_even(),
+                    TieBreaking::TowardZero => quotient.is_negative(),
+                } {
+                    quotient + Component::one()
+                } else {
+                    quotient
                 }
-                TieBreaking::ToEven => {
-                    if quotient.is_odd() {
-                        quotient + Component::one()
-                    } else {
-                        quotient
-                    }
-                }
-                TieBreaking::ToOdd => {
-                    if quotient.is_even() {
-                        quotient + Component::one()
-                    } else {
-                        quotient
-                    }
-                }
-                TieBreaking::TowardZero => {
-                    if quotient.is_positive() {
-                        quotient - Component::one()
-                    } else if quotient.is_negative() {
-                        quotient + Component::one()
-                    } else {
-                        quotient
-                    }
-                }
-            },
+            }
             Ordering::Greater => quotient + Component::one(),
             Ordering::Less => quotient,
         }

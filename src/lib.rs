@@ -722,7 +722,7 @@ impl PyFraction {
                         try_py_integral_to_big_int(numerator)?,
                         try_py_integral_to_big_int(denominator)?,
                     ) {
-                        Some(value) => Ok(PyFraction(value)),
+                        Some(fraction) => Ok(PyFraction(fraction)),
                         None => Err(PyZeroDivisionError::new_err(
                             UNDEFINED_DIVISION_ERROR_MESSAGE,
                         )),
@@ -739,7 +739,7 @@ impl PyFraction {
                         value.extract::<PyFraction>()
                     } else if value.is_instance(PyFloat::type_object(py))? {
                         match Fraction::try_from(value.extract::<f64>()?) {
-                            Ok(value) => Ok(PyFraction(value)),
+                            Ok(fraction) => Ok(PyFraction(fraction)),
                             Err(reason) => Err(match reason {
                                 fraction::FromFloatConversionError::NaN => {
                                     PyValueError::new_err(reason.to_string())
@@ -749,13 +749,9 @@ impl PyFraction {
                         }
                     } else {
                         match try_py_any_to_maybe_big_int(value)? {
-                            Some(value) => unsafe {
-                                Ok(PyFraction(
-                                    Fraction::new(value, BigInt::one()).unwrap_unchecked(),
-                                ))
-                            },
+                            Some(numerator) => Ok(PyFraction(Fraction::from(numerator))),
                             None => match try_py_any_to_maybe_fraction(value)? {
-                                Some(value) => Ok(PyFraction(value)),
+                                Some(fraction) => Ok(PyFraction(fraction)),
                                 None => Err(PyTypeError::new_err(
                                     format!("Value should be rational or floating point number, but found: {}",
                                             value.get_type().repr()?),

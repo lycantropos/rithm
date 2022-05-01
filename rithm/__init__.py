@@ -393,9 +393,7 @@ except ImportError:
         def __add__(self, other):
             return (self._add_fraction(other)
                     if isinstance(other, Fraction)
-                    else (self._add_int(Int(other))
-                          if isinstance(other, (Int, int))
-                          else NotImplemented))
+                    else self.__radd__(other))
 
         def __bool__(self):
             return bool(self.numerator)

@@ -411,7 +411,7 @@ except ImportError:
                           else NotImplemented))
 
         def __float__(self):
-            return self._numerator._value / self._denominator._value
+            return int(self.numerator) / int(self.denominator)
 
         def __floor__(self):
             return self.numerator // self.denominator

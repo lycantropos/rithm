@@ -596,7 +596,7 @@ fn try_pow(base: BigInt, exponent: BigInt, py: Python) -> PyResult<PyObject> {
     if exponent.is_negative() {
         match unsafe { Fraction::new(base, BigInt::one()).unwrap_unchecked() }.checked_pow(exponent)
         {
-            Some(value) => Ok(PyFraction(value).into_py(py)),
+            Some(power) => Ok(PyFraction(power).into_py(py)),
             None => Err(PyZeroDivisionError::new_err(
                 UNDEFINED_DIVISION_ERROR_MESSAGE,
             )),
@@ -610,7 +610,7 @@ fn try_pow(base: BigInt, exponent: BigInt, py: Python) -> PyResult<PyObject> {
 fn try_pow_mod(base: BigInt, exponent: BigInt, divisor: BigInt, py: Python) -> PyResult<PyObject> {
     let is_zero_divisor = divisor.is_zero();
     match base.checked_pow_rem_euclid(exponent, divisor) {
-        Some(value) => Ok(PyInt(value).into_py(py)),
+        Some(remainder) => Ok(PyInt(remainder).into_py(py)),
         None => Err(PyValueError::new_err(if is_zero_divisor {
             "Divisor cannot be zero."
         } else {

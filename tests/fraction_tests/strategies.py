@@ -1,10 +1,15 @@
 from hypothesis import strategies
 
 from rithm import (Fraction,
-                   Int)
+                   Int,
+                   TieBreaking)
 from tests.utils import (to_fraction_with_builtin,
                          to_int_with_builtin)
 
+tie_breakings = strategies.sampled_from([TieBreaking.AWAY_FROM_ZERO,
+                                         TieBreaking.TO_EVEN,
+                                         TieBreaking.TO_ODD,
+                                         TieBreaking.TOWARD_ZERO])
 floats = strategies.floats()
 integers = strategies.integers()
 zero_integers = strategies.builds(int)

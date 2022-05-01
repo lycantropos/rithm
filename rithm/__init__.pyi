@@ -208,8 +208,6 @@ class Fraction:
     def numerator(self) -> Int:
         ...
 
-    __slots__ = '_denominator', '_numerator'
-
     @_overload
     def __new__(cls,
                 _value: _Union['Fraction', Int, _Rational, float, int] = ...

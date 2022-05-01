@@ -7,8 +7,8 @@ from . import strategies
 
 
 @given(strategies.ints_with_builtins, strategies.ints)
-def test_connection_with_truediv(dividend_with_builtin: IntWithBuiltin,
-                                 divisor: Int) -> None:
+def test_connection_with__truediv__(dividend_with_builtin: IntWithBuiltin,
+                                    divisor: Int) -> None:
     dividend, dividend_builtin = dividend_with_builtin
 
     try:

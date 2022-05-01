@@ -704,7 +704,7 @@ fn try_py_long_to_big_int(value: &PyAny) -> PyResult<BigInt> {
 #[inline]
 fn try_truediv(dividend: BigInt, divisor: BigInt) -> PyResult<Fraction> {
     match Fraction::new(dividend, divisor) {
-        Some(result) => Ok(result),
+        Some(quotient) => Ok(quotient),
         None => Err(PyZeroDivisionError::new_err(
             UNDEFINED_DIVISION_ERROR_MESSAGE,
         )),

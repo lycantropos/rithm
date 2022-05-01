@@ -1246,6 +1246,54 @@ macro_rules! plain_rem_euclid_impl {
 
 plain_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
+#[derive(Clone)]
+pub enum TieBreaking {
+    AwayFromZero,
+    ToEven,
+    ToOdd,
+    TowardZero,
+}
+
+pub trait Round {
+    type Output;
+
+    fn round(self, tie_breaking: TieBreaking) -> Self::Output;
+}
+
+macro_rules! plain_round_impl {
+    ($($t:ty)*) => ($(
+        impl Round for $t {
+            type Output = $t;
+
+            #[inline(always)]
+            fn round(self, tie_breaking: TieBreaking) -> Self::Output {
+                match tie_breaking {
+                    TieBreaking::AwayFromZero => <$t>::round(self),
+                    TieBreaking::ToEven => {
+                        if self.ceil() - self == (0.5 as $t) {
+                            2.0 * <$t>::round(self / 2.0)
+                        } else {
+                            <$t>::round(self)
+                        }
+                    }
+                    TieBreaking::ToOdd => {
+                        if self.ceil() - self == (0.5 as $t) {
+                            2.0 * (self / 2.0).floor() + 1.0
+                        } else {
+                            <$t>::round(self)
+                        }
+                    }
+                    TieBreaking::TowardZero => {
+                        self.trunc() + ((self.fract().abs() > (0.5 as $t)) as i32 as $t) * self.signum()
+                    }
+                }
+            }
+        }
+    )*)
+}
+
+plain_round_impl!(f32 f64);
+
 pub trait Trunc {
     type Output;
 

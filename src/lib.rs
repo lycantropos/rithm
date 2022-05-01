@@ -802,7 +802,7 @@ impl PyFraction {
 
     fn __float__(&self, py: Python) -> PyResult<PyObject> {
         match <Fraction as TryInto<f64>>::try_into(self.0.clone()) {
-            Ok(value) => Ok(value.into_py(py)),
+            Ok(float) => Ok(float.into_py(py)),
             Err(reason) => Err(PyOverflowError::new_err(reason.to_string())),
         }
     }

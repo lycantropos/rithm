@@ -857,7 +857,7 @@ impl PyFraction {
                 .clone()
                 .checked_rem_euclid(divisor.extract::<PyFraction>()?.0)
             {
-                Some(value) => Ok(PyFraction(value).into_py(py)),
+                Some(remainder) => Ok(PyFraction(remainder).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
                     UNDEFINED_DIVISION_ERROR_MESSAGE,
                 )),
@@ -865,7 +865,7 @@ impl PyFraction {
         } else {
             match try_py_any_to_maybe_big_int(divisor)? {
                 Some(divisor) => match self.0.clone().checked_rem_euclid(divisor) {
-                    Some(value) => Ok(PyFraction(value).into_py(py)),
+                    Some(remainder) => Ok(PyFraction(remainder).into_py(py)),
                     None => Err(PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )),

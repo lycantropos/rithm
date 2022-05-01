@@ -1058,7 +1058,7 @@ impl PyFraction {
                 .clone()
                 .checked_div(divisor.extract::<PyFraction>()?.0)
             {
-                Some(value) => Ok(PyFraction(value).into_py(py)),
+                Some(quotient) => Ok(PyFraction(quotient).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
                     UNDEFINED_DIVISION_ERROR_MESSAGE,
                 )),
@@ -1066,7 +1066,7 @@ impl PyFraction {
         } else {
             match try_py_any_to_maybe_big_int(divisor)? {
                 Some(divisor) => match self.0.clone().checked_div(divisor) {
-                    Some(value) => Ok(PyFraction(value).into_py(py)),
+                    Some(quotient) => Ok(PyFraction(quotient).into_py(py)),
                     None => Err(PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )),

@@ -950,7 +950,7 @@ impl PyFraction {
         let py = dividend.py();
         match try_py_any_to_maybe_big_int(dividend)? {
             Some(dividend) => match dividend.checked_rem_euclid(self.0.clone()) {
-                Some(value) => Ok(PyFraction(value).into_py(py)),
+                Some(remainder) => Ok(PyFraction(remainder).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
                     UNDEFINED_DIVISION_ERROR_MESSAGE,
                 )),

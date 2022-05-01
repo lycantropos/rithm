@@ -10,9 +10,9 @@ use crate::digits::{
 };
 use crate::traits::{
     Abs, AdditiveMonoid, Ceil, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedDivEuclid,
-    CheckedPow, CheckedRemEuclid, CheckedShl, DivisivePartialMagma, Float, Floor, GcdMagma, Maybe,
-    ModularUnaryAlgebra, MultiplicativeMonoid, NegatableUnaryAlgebra, Oppositive, Pow,
-    SubtractiveMagma, Trunc, Unitary, Zeroable,
+    CheckedDivRemEuclid, CheckedPow, CheckedRemEuclid, CheckedShl, DivisivePartialMagma, Float,
+    Floor, GcdMagma, Maybe, ModularUnaryAlgebra, MultiplicativeMonoid, NegatableUnaryAlgebra,
+    Oppositive, Parity, Pow, Round, SubtractiveMagma, TieBreaking, Trunc, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -870,6 +870,69 @@ impl<
 }
 
 impl<
+        Component: AdditiveMonoid
+            + Clone
+            + CheckedDivRemEuclid<Output = Option<(Component, Component)>>
+            + Eq
+            + From<u8>
+            + MultiplicativeMonoid
+            + Oppositive
+            + Ord
+            + Parity
+            + SubtractiveMagma,
+    > Round for Fraction<Component>
+{
+    type Output = Component;
+
+    fn round(self, tie_breaking: TieBreaking) -> Self::Output {
+        let (quotient, remainder) = unsafe {
+            self.numerator
+                .checked_div_rem_euclid(self.denominator.clone())
+                .unwrap_unchecked()
+        };
+        let double_remainder = remainder * Component::from(2u8);
+        match double_remainder.cmp(&self.denominator) {
+            Ordering::Equal => match tie_breaking {
+                TieBreaking::AwayFromZero => {
+                    if quotient.is_positive() {
+                        quotient + Component::one()
+                    } else if quotient.is_negative() {
+                        quotient - Component::one()
+                    } else {
+                        quotient
+                    }
+                }
+                TieBreaking::ToEven => {
+                    if quotient.is_odd() {
+                        quotient + Component::one()
+                    } else {
+                        quotient
+                    }
+                }
+                TieBreaking::ToOdd => {
+                    if quotient.is_even() {
+                        quotient + Component::one()
+                    } else {
+                        quotient
+                    }
+                }
+                TieBreaking::TowardZero => {
+                    if quotient.is_positive() {
+                        quotient - Component::one()
+                    } else if quotient.is_negative() {
+                        quotient + Component::one()
+                    } else {
+                        quotient
+                    }
+                }
+            },
+            Ordering::Greater => quotient + Component::one(),
+            Ordering::Less => quotient,
+        }
+    }
+}
+
+impl<
         Component: Clone
             + DivisivePartialMagma
             + Eq
@@ -925,7 +988,7 @@ macro_rules! plain_sub_fraction_impl {
 
         fn sub(self, subtrahend: Fraction<Self>) -> Self::Output {
             let (numerator, denominator) = normalize_components_moduli(
-                self * subtrahend.denominator.clone() - subtrahend.numerator,
+                self * subtrahend.denominator - subtrahend.numerator,
                 subtrahend.denominator,
             );
             Self::Output {

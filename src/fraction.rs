@@ -65,6 +65,15 @@ impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fract
     }
 }
 
+impl<Component: Clone + Eq + Unitary> From<Component> for Fraction<Component> {
+    fn from(value: Component) -> Self {
+        Self {
+            numerator: value,
+            denominator: Component::one(),
+        }
+    }
+}
+
 impl<Component: Clone + Eq> Fraction<Component> {
     pub fn denominator(&self) -> &Component {
         &self.denominator

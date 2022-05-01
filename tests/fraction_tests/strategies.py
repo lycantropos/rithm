@@ -31,5 +31,6 @@ zero_fractions_or_ints_or_builtin_ints = (zero_fractions | zero_ints
 non_zero_fractions_or_ints_or_builtin_ints = (
         non_zero_fractions | non_zero_ints | non_zero_integers
 )
+small_integers = strategies.integers(-100, 100)
 small_ints_with_builtins = strategies.builds(to_int_with_builtin,
-                                             strategies.integers(-100, 100))
+                                             small_integers)

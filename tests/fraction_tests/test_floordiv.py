@@ -3,7 +3,8 @@ import math
 import pytest
 from hypothesis import given
 
-from rithm import Fraction
+from rithm import (Fraction,
+                   Int)
 from tests.utils import (FractionOrIntOrBuiltinInt,
                          FractionWithBuiltin,
                          IntWithBuiltin,
@@ -12,11 +13,12 @@ from tests.utils import (FractionOrIntOrBuiltinInt,
 from . import strategies
 
 
-@given(strategies.fractions, strategies.non_zero_fractions_or_ints_or_integers)
+@given(strategies.fractions,
+       strategies.non_zero_fractions_or_ints_or_builtin_ints)
 def test_basic(dividend: Fraction, divisor: FractionOrIntOrBuiltinInt) -> None:
     result = dividend // divisor
 
-    assert isinstance(result, int)
+    assert isinstance(result, Int)
 
 
 @given(strategies.fractions, strategies.non_zero_fractions)
@@ -73,7 +75,7 @@ def test_connection_with_builtin(dividend_with_builtin: FractionWithBuiltin,
         )
 
 
-@given(strategies.fractions, strategies.zero_fractions_or_ints_or_integers)
+@given(strategies.fractions, strategies.zero_fractions_or_ints_or_builtin_ints)
 def test_zero_divisor(dividend: Fraction, divisor: FractionOrIntOrBuiltinInt
                       ) -> None:
     with pytest.raises(ZeroDivisionError):

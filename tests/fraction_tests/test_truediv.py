@@ -12,7 +12,8 @@ from tests.utils import (FractionOrIntOrBuiltinInt,
 from . import strategies
 
 
-@given(strategies.fractions, strategies.non_zero_fractions_or_ints_or_integers)
+@given(strategies.fractions,
+       strategies.non_zero_fractions_or_ints_or_builtin_ints)
 def test_basic(dividend: Fraction, divisor: FractionOrIntOrBuiltinInt) -> None:
     result = dividend / divisor
 

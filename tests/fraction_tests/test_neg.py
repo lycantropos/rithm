@@ -63,7 +63,8 @@ def test_rmul_operand(first: IntOrBuiltin, second: Fraction) -> None:
     assert -(first * second) == (-first) * second == first * (-second)
 
 
-@given(strategies.fractions, strategies.fractions_or_ints_or_builtin_ints)
+@given(strategies.fractions,
+       strategies.non_zero_fractions_or_ints_or_builtin_ints)
 def test_truediv_operand(first: Fraction, second: FractionOrIntOrBuiltinInt
                          ) -> None:
     assert -(first / second) == (-first) / second == first / (-second)

@@ -26,9 +26,10 @@ fractions_with_builtins = (strategies.builds(to_fraction_with_builtin,
                                                ints_with_builtins,
                                                non_zero_ints_with_builtins))
 rationals_with_builtins = fractions_with_builtins | ints_with_builtins
-zero_fractions_or_ints_or_integers = (zero_fractions | zero_ints
-                                      | zero_integers)
-non_zero_fractions_or_ints_or_integers = (non_zero_fractions | non_zero_ints
-                                          | non_zero_integers)
+zero_fractions_or_ints_or_builtin_ints = (zero_fractions | zero_ints
+                                          | zero_integers)
+non_zero_fractions_or_ints_or_builtin_ints = (
+        non_zero_fractions | non_zero_ints | non_zero_integers
+)
 small_ints_with_builtins = strategies.builds(to_int_with_builtin,
                                              strategies.integers(-100, 100))

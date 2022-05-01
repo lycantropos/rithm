@@ -416,12 +416,12 @@ except ImportError:
         def __floor__(self):
             return self.numerator // self.denominator
 
-        def __floordiv__(self, other):
-            return ((self.numerator * other.denominator)
-                    // (self.denominator * other.numerator)
-                    if isinstance(other, Fraction)
-                    else (self.numerator // (self.denominator * other)
-                          if isinstance(other, (Int, int))
+        def __floordiv__(self, divisor):
+            return ((self.numerator * divisor.denominator)
+                    // (self.denominator * divisor.numerator)
+                    if isinstance(divisor, Fraction)
+                    else (self.numerator // (self.denominator * divisor)
+                          if isinstance(divisor, (Int, int))
                           else NotImplemented))
 
         def __ge__(self, other):
@@ -506,9 +506,9 @@ except ImportError:
                     if isinstance(other, (Int, int))
                     else NotImplemented)
 
-        def __rfloordiv__(self, other):
-            return ((other * self.denominator) // self.numerator
-                    if isinstance(other, (Int, int))
+        def __rfloordiv__(self, dividend):
+            return ((dividend * self.denominator) // self.numerator
+                    if isinstance(dividend, (Int, int))
                     else NotImplemented)
 
         def __rmod__(self, dividend):
@@ -554,49 +554,49 @@ except ImportError:
                     if self.denominator == _ONE
                     else f'{self.numerator}/{self.denominator}')
 
-        def __sub__(self, other):
+        def __sub__(self, minuend):
             return (Fraction(
                     *_normalize_components_moduli(
-                            self.numerator * other.denominator
-                            - other.numerator * self.denominator,
-                            self.denominator * other.denominator
+                            self.numerator * minuend.denominator
+                            - minuend.numerator * self.denominator,
+                            self.denominator * minuend.denominator
                     ),
                     _normalize=False)
-                    if isinstance(other, Fraction)
+                    if isinstance(minuend, Fraction)
                     else
                     (Fraction(
                             *_normalize_components_moduli(
-                                    self.numerator - other * self.denominator,
+                                    self.numerator - minuend * self.denominator,
                                     self.denominator
                             ),
                             _normalize=False
                     )
-                     if isinstance(other, (Int, int))
+                     if isinstance(minuend, (Int, int))
                      else NotImplemented))
 
-        def __rtruediv__(self, other):
-            return (self._rtruediv_by_int(Int(other))
-                    if isinstance(other, (Int, int))
+        def __rtruediv__(self, dividend):
+            return (self._rtruediv_by_int(Int(dividend))
+                    if isinstance(dividend, (Int, int))
                     else NotImplemented)
 
-        def __truediv__(self, other):
+        def __truediv__(self, divisor):
             return (
                 Fraction(
                         *_normalize_components_sign(
                                 *map(_mul,
                                      _normalize_components_moduli(
-                                             self.numerator, other.numerator
+                                             self.numerator, divisor.numerator
                                      ),
                                      _normalize_components_moduli(
-                                             other.denominator,
+                                             divisor.denominator,
                                              self.denominator
                                      ))
                         ),
                         _normalize=False
                 )
-                if isinstance(other, Fraction)
-                else (self._truediv_by_int(Int(other))
-                      if isinstance(other, (Int, int))
+                if isinstance(divisor, Fraction)
+                else (self._truediv_by_int(Int(divisor))
+                      if isinstance(divisor, (Int, int))
                       else NotImplemented)
             )
 
@@ -657,14 +657,14 @@ except ImportError:
             )
 
 
-    def _normalize_components_moduli(numerator: Int,
-                                     denominator: Int) -> _Tuple[Int, Int]:
+    def _normalize_components_moduli(numerator: Int, denominator: Int
+                                     ) -> _Tuple[Int, Int]:
         gcd = numerator.gcd(denominator)
         return numerator // gcd, denominator // gcd
 
 
-    def _normalize_components_sign(numerator: Int,
-                                   denominator: Int) -> _Tuple[Int, Int]:
+    def _normalize_components_sign(numerator: Int, denominator: Int
+                                   ) -> _Tuple[Int, Int]:
         return ((-numerator, -denominator)
                 if denominator < _ZERO
                 else (numerator, denominator))

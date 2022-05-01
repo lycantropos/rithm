@@ -1,18 +1,14 @@
-from typing import Union
-
 from hypothesis import given
 
 from tests.utils import (FractionWithBuiltin,
-                         IntWithBuiltin,
+                         RationalWithBuiltin,
                          equivalence)
 from . import strategies
 
 
-@given(strategies.fractions_with_builtins,
-       strategies.fractions_or_ints_with_builtins)
+@given(strategies.fractions_with_builtins, strategies.rationals_with_builtins)
 def test_connection_with_builtin(first_with_builtin: FractionWithBuiltin,
-                                 second_with_builtin
-                                 : Union[FractionWithBuiltin, IntWithBuiltin]
+                                 second_with_builtin: RationalWithBuiltin
                                  ) -> None:
     first, first_builtin = first_with_builtin
     second, second_builtin = second_with_builtin

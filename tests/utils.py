@@ -8,9 +8,11 @@ from typing import (Optional,
 from rithm import (Fraction,
                    Int)
 
+FractionOrIntOrBuiltinInt = Union[Fraction, Int, int]
 FractionWithBuiltin = Tuple[Fraction, fractions.Fraction]
 IntOrBuiltin = Union[Int, int]
 IntWithBuiltin = Tuple[Int, int]
+RationalWithBuiltin = Union[FractionWithBuiltin, IntWithBuiltin]
 
 
 def equivalence(left: bool, right: bool) -> bool:
@@ -41,6 +43,14 @@ def pickle_round_trip(value: _Pickleable) -> _Pickleable:
 
 def to_int_with_builtin(value: int) -> IntWithBuiltin:
     return Int(value), value
+
+
+def is_fraction_valid(fraction: Fraction) -> bool:
+    return (isinstance(fraction.numerator, Int)
+            and isinstance(fraction.denominator, Int)
+            and fraction.denominator > 0
+            and fraction.numerator.gcd(fraction.denominator) == 1
+            and (fraction.numerator != 0 or fraction.denominator == 1))
 
 
 def to_fraction_with_builtin(numerators_pair: IntWithBuiltin,

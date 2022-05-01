@@ -313,10 +313,10 @@ impl PyInt {
         }
     }
 
-    fn __rdivmod__(&self, other: &PyAny) -> PyResult<PyObject> {
-        let py = other.py();
-        if other.is_instance(PyLong::type_object(py))? {
-            try_divmod(try_py_long_to_big_int(other)?, self.0.clone())
+    fn __rdivmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+        let py = dividend.py();
+        if dividend.is_instance(PyLong::type_object(py))? {
+            try_divmod(try_py_long_to_big_int(dividend)?, self.0.clone())
                 .map(|(quotient, remainder)| (PyInt(quotient), PyInt(remainder)).into_py(py))
         } else {
             Ok(py.NotImplemented())

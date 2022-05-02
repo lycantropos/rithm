@@ -30,8 +30,10 @@ def is_equivalent_to_builtin_fraction(value: Fraction,
                                              builtin.denominator))
 
 
-def is_equivalent_to_builtin_int(value: Int, builtin: int) -> bool:
-    return int(value) == builtin
+def is_equivalent_to_builtin_int(int_: Int, builtin_int: int) -> bool:
+    assert isinstance(int_, Int)
+    assert isinstance(builtin_int, int)
+    return int_ == builtin_int
 
 
 _Pickleable = TypeVar('_Pickleable')

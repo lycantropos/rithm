@@ -6,6 +6,7 @@ from hypothesis import given
 from rithm import Int
 from tests.utils import (IntOrBuiltin,
                          IntWithBuiltin,
+                         equivalence,
                          is_equivalent_to_builtin_int)
 from . import strategies
 
@@ -17,11 +18,20 @@ def test_basic(dividend: Int, divisor: IntOrBuiltin) -> None:
     assert isinstance(result, Int)
 
 
-@given(strategies.ints, strategies.non_zero_ints_or_builtins)
-def test_alternatives(dividend: Int, divisor: IntOrBuiltin) -> None:
+@given(strategies.ints, strategies.non_zero_ints)
+def test_value(dividend: Int, divisor: Int) -> None:
     result = dividend // divisor
 
-    assert result == math.floor((dividend - dividend % divisor) / divisor)
+    assert result <= dividend / divisor
+    assert equivalence(result == dividend / divisor, dividend % divisor == 0)
+
+
+@given(strategies.ints, strategies.non_zero_ints)
+def test_alternatives(dividend: Int, divisor: Int) -> None:
+    result = dividend // divisor
+
+    assert result == math.floor(dividend / divisor)
+    assert result == math.trunc((dividend - dividend % divisor) / divisor)
 
 
 @given(strategies.ints, strategies.ints_with_builtins)

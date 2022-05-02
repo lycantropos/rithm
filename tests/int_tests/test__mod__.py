@@ -4,6 +4,8 @@ from hypothesis import given
 from rithm import Int
 from tests.utils import (IntOrBuiltin,
                          IntWithBuiltin,
+                         equivalence,
+                         implication,
                          is_equivalent_to_builtin_int)
 from . import strategies
 
@@ -16,11 +18,17 @@ def test_basic(dividend: Int, divisor: IntOrBuiltin) -> None:
 
 
 @given(strategies.ints, strategies.non_zero_ints)
+def test_sign(dividend: Int, divisor: Int) -> None:
+    result = dividend % divisor
+
+    assert equivalence(result == 0, dividend / divisor == dividend // divisor)
+    assert implication(result > 0, divisor > 0)
+
+
+@given(strategies.ints, strategies.non_zero_ints)
 def test_value(dividend: Int, divisor: Int) -> None:
     result = dividend % divisor
 
-    assert (result == 0 and (dividend / divisor == dividend // divisor)
-            or (result > 0) is (divisor > 0))
     assert abs(result) < abs(divisor)
 
 

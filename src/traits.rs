@@ -837,7 +837,7 @@ impl FrExp for f64 {
     type Output = (Self, i32);
 
     fn frexp(self) -> Self::Output {
-        let mut bits = self.to_bits();
+        let bits = self.to_bits();
         let exponent_bits = ((bits >> 52) & 0x7ff) as i32;
         if exponent_bits.is_zero() {
             if !self.is_zero() {
@@ -850,10 +850,10 @@ impl FrExp for f64 {
         } else if exponent_bits == 0x7ff {
             (self, 0)
         } else {
-            let e = exponent_bits - 0x3fe;
-            bits &= 0x800fffffffffffff;
-            bits |= 0x3fe0000000000000;
-            (f64::from_bits(bits), e)
+            (
+                f64::from_bits(bits & 0x800fffffffffffff | 0x3fe0000000000000),
+                exponent_bits - 0x3fe,
+            )
         }
     }
 }
@@ -862,7 +862,7 @@ impl FrExp for f32 {
     type Output = (Self, i32);
 
     fn frexp(self) -> Self::Output {
-        let mut bits = self.to_bits();
+        let bits = self.to_bits();
         let exponent_bits = ((bits >> 23) & 0xff) as i32;
         if exponent_bits.is_zero() {
             if !self.is_zero() {
@@ -875,10 +875,10 @@ impl FrExp for f32 {
         } else if exponent_bits == 0xff {
             (self, 0)
         } else {
-            let exponent = exponent_bits - 0x7e;
-            bits &= 0x807fffff;
-            bits |= 0x3f000000;
-            (f32::from_bits(bits), exponent)
+            (
+                f32::from_bits(bits & 0x807fffff | 0x3f000000),
+                exponent_bits - 0x7e,
+            )
         }
     }
 }

@@ -9,6 +9,7 @@ from tests.utils import (FractionOrIntOrBuiltinInt,
                          FractionWithBuiltin,
                          IntWithBuiltin,
                          RationalWithBuiltin,
+                         equivalence,
                          is_equivalent_to_builtin_int)
 from . import strategies
 
@@ -25,22 +26,16 @@ def test_basic(dividend: Fraction, divisor: FractionOrIntOrBuiltinInt) -> None:
 def test_value(dividend: Fraction, divisor: Fraction) -> None:
     result = dividend // divisor
 
-    assert (dividend % divisor == 0 and result == dividend / divisor
-            or result < dividend / divisor)
-
-
-@given(strategies.fractions)
-def test_division_by_one(dividend: Fraction) -> None:
-    result = dividend // 1
-
-    assert result == math.floor(dividend)
+    assert result <= dividend / divisor
+    assert equivalence(result == dividend / divisor, dividend % divisor == 0)
 
 
 @given(strategies.fractions, strategies.non_zero_fractions)
-def test_connection_with_mod(dividend: Fraction, divisor: Fraction) -> None:
+def test_alternatives(dividend: Fraction, divisor: Fraction) -> None:
     result = dividend // divisor
 
-    assert result * divisor + dividend % divisor == dividend
+    assert result == math.floor(dividend / divisor)
+    assert result == math.trunc((dividend - dividend % divisor) / divisor)
 
 
 @given(strategies.fractions, strategies.ints_with_builtins)

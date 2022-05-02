@@ -1,5 +1,3 @@
-import math
-
 import pytest
 from hypothesis import given
 
@@ -8,6 +6,8 @@ from tests.utils import (FractionOrIntOrBuiltinInt,
                          FractionWithBuiltin,
                          IntWithBuiltin,
                          RationalWithBuiltin,
+                         equivalence,
+                         implication,
                          is_equivalent_to_builtin_fraction,
                          is_fraction_valid)
 from . import strategies
@@ -23,27 +23,25 @@ def test_basic(dividend: Fraction, divisor: FractionOrIntOrBuiltinInt) -> None:
 
 
 @given(strategies.fractions, strategies.non_zero_fractions)
-def test_value(dividend: Fraction, divisor: Fraction) -> None:
+def test_sign(dividend: Fraction, divisor: Fraction) -> None:
     result = dividend % divisor
 
-    assert (result == 0 and (dividend / divisor == dividend // divisor)
-            or (result > 0) is (divisor > 0))
-    assert abs(result) < abs(divisor)
-
-
-@given(strategies.fractions)
-def test_modulo_one(dividend: Fraction) -> None:
-    result = dividend % 1
-
-    assert result == dividend - math.floor(dividend)
+    assert equivalence(result == 0, dividend / divisor == dividend // divisor)
+    assert implication(result > 0, divisor > 0)
 
 
 @given(strategies.fractions, strategies.non_zero_fractions)
-def test_connection_with_floordiv(dividend: Fraction, divisor: Fraction
-                                  ) -> None:
+def test_value(dividend: Fraction, divisor: Fraction) -> None:
     result = dividend % divisor
 
-    assert result + (dividend // divisor) * divisor == dividend
+    assert abs(result) < abs(divisor)
+
+
+@given(strategies.fractions, strategies.non_zero_fractions)
+def test_alternatives(dividend: Fraction, divisor: Fraction) -> None:
+    result = dividend % divisor
+
+    assert result == dividend - (dividend // divisor) * divisor
 
 
 @given(strategies.fractions, strategies.ints_with_builtins)

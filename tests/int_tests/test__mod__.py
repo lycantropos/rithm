@@ -2,9 +2,33 @@ import pytest
 from hypothesis import given
 
 from rithm import Int
-from tests.utils import (IntWithBuiltin,
+from tests.utils import (IntOrBuiltin,
+                         IntWithBuiltin,
                          is_equivalent_to_builtin_int)
 from . import strategies
+
+
+@given(strategies.ints, strategies.non_zero_ints_or_builtins)
+def test_basic(dividend: Int, divisor: IntOrBuiltin) -> None:
+    result = dividend % divisor
+
+    assert isinstance(result, Int)
+
+
+@given(strategies.ints, strategies.non_zero_ints)
+def test_value(dividend: Int, divisor: Int) -> None:
+    result = dividend % divisor
+
+    assert (result == 0 and (dividend / divisor == dividend // divisor)
+            or (result > 0) is (divisor > 0))
+    assert abs(result) < abs(divisor)
+
+
+@given(strategies.ints, strategies.non_zero_ints)
+def test_alternatives(dividend: Int, divisor: Int) -> None:
+    result = dividend % divisor
+
+    assert result == dividend - (dividend // divisor) * divisor
 
 
 @given(strategies.ints, strategies.ints_with_builtins)
@@ -35,3 +59,9 @@ def test_connection_with_builtin(dividend_with_builtin: IntWithBuiltin,
     else:
         assert is_equivalent_to_builtin_int(result,
                                             dividend_builtin % divisor_builtin)
+
+
+@given(strategies.ints, strategies.zero_ints_or_builtins)
+def test_zero_divisor(dividend: Int, divisor: IntOrBuiltin) -> None:
+    with pytest.raises(ZeroDivisionError):
+        dividend % divisor

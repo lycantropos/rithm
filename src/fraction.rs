@@ -588,6 +588,27 @@ impl<
     }
 }
 
+impl<Component: Clone + Debug + Eq + Unitary> Debug for Fraction<Component> {
+    fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
+        if self.denominator.is_one() {
+            write!(
+                formatter,
+                "{}::from({:?})",
+                std::any::type_name::<Self>(),
+                self.numerator
+            )
+        } else {
+            write!(
+                formatter,
+                "{}::new({:?}, {:?}).unwrap()",
+                std::any::type_name::<Self>(),
+                self.numerator,
+                self.denominator
+            )
+        }
+    }
+}
+
 impl<Component: Clone + Display + Eq + Unitary> Display for Fraction<Component> {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
         if self.denominator.is_one() {

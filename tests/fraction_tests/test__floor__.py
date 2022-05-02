@@ -18,5 +18,13 @@ def test_basic(fraction: Fraction) -> None:
 def test_value(fraction: Fraction) -> None:
     result = math.floor(fraction)
 
-    assert result <= fraction
-    assert result > fraction - 1
+    assert fraction - 1 < result <= fraction
+    assert result % 1 == 0
+
+
+@given(strategies.fractions)
+def test_alternatives(fraction: Fraction) -> None:
+    result = math.floor(fraction)
+
+    assert result == -math.ceil(-fraction)
+    assert result == fraction // 1

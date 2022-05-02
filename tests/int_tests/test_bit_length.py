@@ -6,8 +6,8 @@ from . import strategies
 
 
 @given(strategies.ints_with_builtins)
-def test_connection_with_builtin(int_with_builtin_int: IntWithBuiltin) -> None:
-    int_, builtin_int = int_with_builtin_int
+def test_connection_with_builtin(int_with_builtin: IntWithBuiltin) -> None:
+    int_, builtin_int = int_with_builtin
 
     assert is_equivalent_to_builtin_int(int_.bit_length(),
                                         builtin_int.bit_length())

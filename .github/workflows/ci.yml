@@ -82,6 +82,7 @@ jobs:
         run: >
           coverage run -m doctest README.md
           && coverage run --append -m pytest --doctest-modules --ignore=tests
+          && cargo test --doc
       - name: 'Run tests'
         run: coverage run --append -m pytest
       - name: 'Collect coverage'

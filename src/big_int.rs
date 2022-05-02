@@ -1270,6 +1270,32 @@ impl<Digit: Clone + Eq + PartialOrd + ZeroableDigit, const SEPARATOR: char, cons
     }
 }
 
+impl<Source: Copy, Digit: PartialEq, const SEPARATOR: char, const SHIFT: usize> PartialEq<Source>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: From<Source>,
+{
+    fn eq(&self, other: &Source) -> bool {
+        self.eq(&Self::from(*other))
+    }
+}
+
+macro_rules! plain_eq_to_big_int_impl {
+    ($($t:ty)*) => ($(
+        impl<Digit: PartialEq, const SEPARATOR: char, const SHIFT: usize>
+            PartialEq<BigInt<Digit, SEPARATOR, SHIFT>> for $t
+        where
+            BigInt<Digit, SEPARATOR, SHIFT>: From<$t>,
+        {
+            fn eq(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
+                other.eq(&Self::from(*self))
+            }
+        }
+    )*)
+}
+
+plain_eq_to_big_int_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+
 impl<Digit: Clone + PartialOrd + ZeroableDigit, const SEPARATOR: char, const SHIFT: usize>
     PartialOrd for BigInt<Digit, SEPARATOR, SHIFT>
 {

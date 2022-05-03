@@ -26,6 +26,7 @@ pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
     digits: Vec<Digit>,
 }
 
+const MIN_REPRESENTABLE_BASE: u8 = 2;
 const MAX_REPRESENTABLE_BASE: u8 = 36;
 
 #[derive(Eq, PartialEq)]
@@ -57,26 +58,34 @@ impl Display for FromFloatConversionError {
 
 #[derive(Eq, PartialEq)]
 pub enum FromStringConversionError {
-    StartsWithSeparator,
+    BaseOutOfBounds(u32),
     ConsecutiveSeparators,
-    InvalidDigit(char, u8),
     EndsWithSeparator,
+    InvalidDigit(char, u8),
+    StartsWithSeparator,
 }
 
 impl FromStringConversionError {
     fn description(&self) -> String {
         match self {
-            FromStringConversionError::StartsWithSeparator => {
-                String::from("Should not start with separator.")
-            }
-            FromStringConversionError::InvalidDigit(character, base) => {
-                format!("Invalid digit in base {}: {}.", base, character)
+            FromStringConversionError::BaseOutOfBounds(base) => {
+                format!(
+                    "Base should be zero or in range from {MIN_REPRESENTABLE_BASE} \
+                     to {MAX_REPRESENTABLE_BASE}, but found: {}.",
+                    base
+                )
             }
             FromStringConversionError::ConsecutiveSeparators => {
                 String::from("Consecutive separators found.")
             }
             FromStringConversionError::EndsWithSeparator => {
                 String::from("Should not end with separator.")
+            }
+            FromStringConversionError::InvalidDigit(character, base) => {
+                format!("Invalid digit in base {}: {:?}.", base, character)
+            }
+            FromStringConversionError::StartsWithSeparator => {
+                String::from("Should not start with separator.")
             }
         }
     }
@@ -194,6 +203,9 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
     fn new(string: &str, mut base: u8) -> Result<Self, FromStringConversionError> {
         debug_assert!(is_valid_shift::<Digit, SHIFT>());
         debug_assert!(Self::ASCII_CODES_DIGIT_VALUES[SEPARATOR as usize] >= MAX_REPRESENTABLE_BASE);
+        debug_assert!(
+            base == 0 || (base >= MIN_REPRESENTABLE_BASE && base <= MAX_REPRESENTABLE_BASE)
+        );
         let mut characters = string.trim().chars().peekable();
         let sign = Self::parse_sign(&mut characters);
         if base == 0 {
@@ -988,13 +1000,13 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> FromStrRadi
     type Error = FromStringConversionError;
 
     fn from_str_radix(string: &str, radix: u32) -> Result<Self, Self::Error> {
-        if (radix != 0 && radix < 2) || radix > (MAX_REPRESENTABLE_BASE as u32) {
-            panic!(
-                "Radix should be in range from 2 to {}.",
-                MAX_REPRESENTABLE_BASE
-            );
+        if radix != 0
+            && (radix < (MIN_REPRESENTABLE_BASE as u32) || radix > (MAX_REPRESENTABLE_BASE as u32))
+        {
+            Err(FromStringConversionError::BaseOutOfBounds(radix))
+        } else {
+            Self::new(string, radix as u8)
         }
-        Self::new(string, radix as u8)
     }
 }
 

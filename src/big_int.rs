@@ -652,66 +652,10 @@ impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize> Chec
 
     fn checked_pow(self, exponent: Self) -> Self::Output {
         if exponent.is_negative() {
-            return None;
-        }
-        let mut result = Self::one();
-        let mut exponent_digit = exponent.digits[exponent.digits.len() - 1];
-        if exponent.digits.len() == 1 && exponent_digit <= Digit::from(3) {
-            if exponent_digit >= Digit::from(2) {
-                result = self.clone() * self.clone();
-                if exponent_digit == Digit::from(3) {
-                    result *= self;
-                }
-            } else if exponent_digit.is_one() {
-                result *= self;
-            }
-        } else if exponent.digits.len() <= WINDOW_CUTOFF {
-            result = self.clone();
-            let mut exponent_digit_mask = Digit::from(2);
-            loop {
-                if exponent_digit_mask > exponent_digit {
-                    exponent_digit_mask >>= 1;
-                    break;
-                }
-                exponent_digit_mask <<= 1;
-            }
-            exponent_digit_mask >>= 1;
-            let mut exponent_digits_iterator = exponent.digits.iter().rev().skip(1).peekable();
-            loop {
-                while !exponent_digit_mask.is_zero() {
-                    result *= result.clone();
-                    if !(exponent_digit & exponent_digit_mask).is_zero() {
-                        result *= self.clone();
-                    }
-                    exponent_digit_mask >>= 1;
-                }
-                if exponent_digits_iterator.peek().is_none() {
-                    break;
-                }
-                exponent_digit = unsafe { *exponent_digits_iterator.next().unwrap_unchecked() };
-                exponent_digit_mask = Digit::one() << (SHIFT - 1);
-            }
+            None
         } else {
-            let mut cache = vec![Self::zero(); WINDOW_BASE];
-            cache[0] = result.clone();
-            for index in 1..WINDOW_BASE {
-                cache[index] = cache[index - 1].clone() * self.clone();
-            }
-            let exponent_window_digits = binary_digits_to_lesser_binary_base::<Digit, WindowDigit>(
-                &exponent.digits,
-                SHIFT,
-                WINDOW_SHIFT,
-            );
-            for &digit in exponent_window_digits.iter().rev() {
-                for _ in 0..WINDOW_SHIFT {
-                    result *= result.clone();
-                }
-                if !digit.is_zero() {
-                    result *= cache[digit as usize].clone();
-                }
-            }
+            Some(self.unchecked_pow(&exponent))
         }
-        Some(result)
     }
 }
 
@@ -1797,4 +1741,74 @@ impl<Digit: ZeroableDigit, const SEPARATOR: char, const SHIFT: usize> Zeroable
 
 const fn is_valid_shift<Digit: Oppose, const SHIFT: usize>() -> bool {
     SHIFT < 8 * size_of::<Digit>() - (utils::is_signed::<Digit>() as usize)
+}
+
+impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize>
+    BigInt<Digit, SEPARATOR, SHIFT>
+{
+    fn unchecked_pow(self, exponent: &Self) -> Self {
+        assert!(!exponent.is_negative());
+        let mut result = Self::one();
+        let mut exponent_digit = exponent.digits[exponent.digits.len() - 1];
+        if exponent.digits.len() == 1 && exponent_digit <= Digit::from(3) {
+            if exponent_digit >= Digit::from(2) {
+                result = self.clone() * self.clone();
+                if exponent_digit == Digit::from(3) {
+                    result *= self;
+                }
+            } else if exponent_digit.is_one() {
+                result *= self;
+            }
+        } else if exponent.digits.len() <= WINDOW_CUTOFF {
+            result = self.clone();
+            let mut exponent_digit_mask = Digit::from(2);
+            loop {
+                if exponent_digit_mask > exponent_digit {
+                    exponent_digit_mask >>= 1;
+                    break;
+                }
+                exponent_digit_mask <<= 1;
+            }
+            exponent_digit_mask >>= 1;
+            let mut exponent_digits_iterator = exponent.digits.iter().rev().skip(1);
+            loop {
+                while !exponent_digit_mask.is_zero() {
+                    result *= result.clone();
+                    if !(exponent_digit & exponent_digit_mask).is_zero() {
+                        result *= self.clone();
+                    }
+                    exponent_digit_mask >>= 1;
+                }
+                match exponent_digits_iterator.next() {
+                    Some(next_exponent_digit) => {
+                        exponent_digit = *next_exponent_digit;
+                        exponent_digit_mask = Digit::one() << (SHIFT - 1);
+                    }
+                    None => {
+                        break;
+                    }
+                }
+            }
+        } else {
+            let mut cache = vec![Self::zero(); WINDOW_BASE];
+            cache[0] = result.clone();
+            for index in 1..WINDOW_BASE {
+                cache[index] = cache[index - 1].clone() * self.clone();
+            }
+            let exponent_window_digits = binary_digits_to_lesser_binary_base::<Digit, WindowDigit>(
+                &exponent.digits,
+                SHIFT,
+                WINDOW_SHIFT,
+            );
+            for &digit in exponent_window_digits.iter().rev() {
+                for _ in 0..WINDOW_SHIFT {
+                    result *= result.clone();
+                }
+                if !digit.is_zero() {
+                    result *= cache[digit as usize].clone();
+                }
+            }
+        }
+        result
+    }
 }

@@ -101,13 +101,24 @@ impl PyTieBreaking {
 #[pymethods]
 impl PyInt {
     #[new]
-    fn new(_value: Option<&PyAny>, _base: Option<u32>) -> PyResult<Self> {
+    fn new(_value: Option<&PyAny>, _base: Option<&PyLong>) -> PyResult<Self> {
         match _value {
             None => Ok(PyInt(BigInt::zero())),
             Some(value) => {
                 let py = value.py();
                 if _base.is_some() || value.is_instance(PyString::type_object(py))? {
-                    match BigInt::from_str_radix(value.extract::<&str>()?, _base.unwrap_or(10)) {
+                    let base = match _base {
+                        Some(base) => {
+                            base.extract::<u32>().or(Err(PyValueError::new_err(format!(
+                                "Base should be zero or in range from {} to {}, but found: {}.",
+                                big_int::MIN_REPRESENTABLE_BASE,
+                                big_int::MAX_REPRESENTABLE_BASE,
+                                base.repr()?
+                            ))))?
+                        }
+                        None => 10,
+                    };
+                    match BigInt::from_str_radix(value.extract::<&str>()?, base) {
                         Ok(value) => Ok(PyInt(value)),
                         Err(reason) => Err(PyValueError::new_err(reason.to_string())),
                     }

@@ -26,8 +26,8 @@ pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
     digits: Vec<Digit>,
 }
 
-const MIN_REPRESENTABLE_BASE: u8 = 2;
-const MAX_REPRESENTABLE_BASE: u8 = 36;
+pub(crate) const MIN_REPRESENTABLE_BASE: u8 = 2;
+pub(crate) const MAX_REPRESENTABLE_BASE: u8 = 36;
 
 #[derive(Eq, PartialEq)]
 pub enum FromFloatConversionError {

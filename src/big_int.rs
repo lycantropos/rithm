@@ -27,6 +27,7 @@ pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
 }
 
 const MAX_REPRESENTABLE_BASE: u8 = 36;
+
 #[derive(Eq, PartialEq)]
 pub enum FromFloatConversionError {
     Infinity,
@@ -53,6 +54,7 @@ impl Display for FromFloatConversionError {
         Display::fmt(&self.description(), formatter)
     }
 }
+
 #[derive(Eq, PartialEq)]
 pub enum FromStringConversionError {
     StartsWithSeparator,
@@ -91,6 +93,7 @@ impl Display for FromStringConversionError {
         Display::fmt(&self.description(), formatter)
     }
 }
+
 #[derive(Eq, PartialEq)]
 pub enum LeftShiftError {
     NegativeShift,
@@ -119,6 +122,7 @@ impl Display for LeftShiftError {
         Display::fmt(&self.description(), formatter)
     }
 }
+
 #[derive(Eq, PartialEq)]
 pub enum RightShiftError {
     NegativeShift,
@@ -143,6 +147,7 @@ impl Display for RightShiftError {
         Display::fmt(&self.description(), formatter)
     }
 }
+
 #[derive(Eq, PartialEq)]
 pub enum ToFloatConversionError {
     TooLarge,

@@ -1747,7 +1747,7 @@ impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize>
     BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn unchecked_pow(self, exponent: &Self) -> Self {
-        assert!(!exponent.is_negative());
+        debug_assert!(!exponent.is_negative());
         let mut result = Self::one();
         let mut exponent_digit = exponent.digits[exponent.digits.len() - 1];
         if exponent.digits.len() == 1 && exponent_digit <= Digit::from(3) {

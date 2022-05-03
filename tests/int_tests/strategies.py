@@ -1,3 +1,6 @@
+import string
+from operator import itemgetter
+
 from hypothesis import strategies
 
 from rithm import (Endianness,
@@ -10,6 +13,14 @@ endianesses = strategies.sampled_from([Endianness.BIG, Endianness.LITTLE])
 floats = strategies.floats()
 decimal_int_strings_with_leading_zeros = decimal_int_strings_with_leading_zeros
 int_strings_with_bases = int_strings_with_bases
+invalid_int_strings = strategies.text(
+        strategies.sampled_from(string.whitespace + string.punctuation)
+)
+int_strings = int_strings_with_bases.map(itemgetter(0))
+negative_integers = strategies.integers(max_value=-1)
+bases = strategies.just(0) | strategies.integers(2, 36)
+out_of_range_bases = (negative_integers | strategies.just(1)
+                      | strategies.sampled_from(37))
 integers = strategies.integers()
 non_zero_integers = integers.filter(bool)
 zero_integers = strategies.builds(int)

@@ -74,3 +74,15 @@ def test_string_with_base_connection_with_builtin(string_with_base
     result = Int(string, base)
 
     assert is_equivalent_to_builtin_int(result, int(string, base))
+
+
+@given(strategies.int_strings, strategies.out_of_range_bases)
+def test_string_with_out_of_range_base(string: int, base: int) -> None:
+    with pytest.raises(ValueError):
+        Int(string, base)
+
+
+@given(strategies.invalid_int_strings, strategies.bases)
+def test_invalid_string_with_base(string: int, base: int) -> None:
+    with pytest.raises(ValueError):
+        Int(string, base)

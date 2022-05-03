@@ -52,19 +52,21 @@ int_strings_with_bases = (
                                              separator=separator,
                                              whitespaces=whitespaces_class))),
                     strategies.just(max_digit + 1))
-                for max_digit in range(1, 10)])
+                for max_digit in range(1, 10)
+            ])
      | strategies.one_of([strategies.tuples(
-                    strategies.from_regex(
-                            compile_(r'\A{whitespaces}*[+-]?{digits}'
-                                     r'({separator}{digits}+)*'
-                                     r'{whitespaces}*\Z'
-                                     .format(digits
-                                             =('[0-9a-{max_lower}'
-                                               'A-{max_upper}]'
-                                               .format(max_lower=max_lower,
-                                                       max_upper=max_lower.upper())),
-                                             separator=separator,
-                                             whitespaces=whitespaces_class))),
+                    strategies.from_regex(compile_(
+                            (r'\A{whitespaces}*[+-]?{digits}'
+                             r'({separator}{digits}+)*'
+                             r'{whitespaces}*\Z'
+                             .format(digits
+                                     =('[0-9a-{max_lower}'
+                                       'A-{max_upper}]'
+                                       .format(max_lower=max_lower,
+                                               max_upper=max_lower.upper())),
+                                     separator=separator,
+                                     whitespaces=whitespaces_class))
+                    )),
                     strategies.just(base))
                 for base, max_lower in enumerate(string.ascii_lowercase,
                                                  start=11)])

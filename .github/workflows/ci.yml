@@ -92,7 +92,7 @@ jobs:
         run: >
           coverage run -m doctest README.md
           && coverage run --append -m pytest --doctest-modules --ignore=tests
-          && cargo test --doc
+          && cargo test --doc --target=${{ matrix.platform.rust_target }}
       - name: 'Run tests'
         run: coverage run --append -m pytest
       - name: 'Collect coverage'

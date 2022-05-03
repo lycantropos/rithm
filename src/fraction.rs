@@ -21,7 +21,7 @@ pub struct Fraction<Component: Clone + Eq> {
     numerator: Component,
     denominator: Component,
 }
-
+#[derive(Eq, PartialEq)]
 pub enum FromFloatConversionError {
     Infinity,
     NaN,

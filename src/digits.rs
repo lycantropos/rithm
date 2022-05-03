@@ -149,6 +149,7 @@ pub trait ZeroableDigit = Oppose + Zeroable;
 pub(crate) type Sign = i8;
 pub(crate) type WindowDigit = u8;
 
+#[derive(Eq, PartialEq)]
 pub enum CheckedDivApproximationError {
     TooLarge,
     ZeroDivision,

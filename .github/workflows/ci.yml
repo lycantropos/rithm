@@ -88,11 +88,13 @@ jobs:
             -Zpanic_abort_tests -Cpanic=abort
       - name: 'Install tests dependencies'
         run: python -m pip install -r requirements-tests.txt
-      - name: 'Run doctests'
+      - name: 'Run Rust doctests'
+        run: cargo test --doc --target=${{ matrix.platform.rust_target }}
+        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Run Python doctests'
         run: >
           coverage run -m doctest README.md
           && coverage run --append -m pytest --doctest-modules --ignore=tests
-          && cargo test --doc --target=${{ matrix.platform.rust_target }}
       - name: 'Run tests'
         run: coverage run --append -m pytest
       - name: 'Collect coverage'

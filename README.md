@@ -99,6 +99,10 @@ rithm.Fraction(rithm.Int(1), rithm.Int(2))
 rithm.Fraction(rithm.Int(1), rithm.Int(2))
 >>> Fraction(0.5)
 rithm.Fraction(rithm.Int(1), rithm.Int(2))
+>>> Fraction(1, 2) + 0
+rithm.Fraction(rithm.Int(1), rithm.Int(2))
+>>> 0 + Fraction(1, 2)
+rithm.Fraction(rithm.Int(1), rithm.Int(2))
 >>> Fraction(1, 3) + Fraction(1, 6)
 rithm.Fraction(rithm.Int(1), rithm.Int(2))
 >>> Fraction(3, 2) - 1
@@ -179,6 +183,8 @@ assert_eq!(Fraction::zero(), 0);
 assert_eq!(Fraction::new(1, 2), Some(Fraction::from(1) / 2));
 assert_eq!(Fraction::new(50, 100), Fraction::new(1, 2));
 assert_eq!(Fraction::try_from(0.5).unwrap(), Fraction::new(1, 2).unwrap());
+assert_eq!(Fraction::new(1, 2).unwrap() + 0, Fraction::new(1, 2).unwrap());
+assert_eq!(0 + Fraction::new(1, 2).unwrap(), Fraction::new(1, 2).unwrap());
 assert_eq!(Fraction::new(1, 3).unwrap() + Fraction::new(1, 6).unwrap(),
            Fraction::new(1, 2).unwrap());
 assert_eq!(Fraction::new(3, 2).unwrap() - 1, Fraction::new(1, 2).unwrap());

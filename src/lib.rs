@@ -1185,3 +1185,6 @@ fn _rithm(py: Python, module: &PyModule) -> PyResult<()> {
     rational_cls.call_method1("register", (PyFraction::type_object(py),))?;
     Ok(())
 }
+
+#[doc = include_str!("../README.md")]
+type _DoctestReadme = ();

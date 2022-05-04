@@ -480,8 +480,12 @@ impl<
             }
         } else {
             Some(Self {
-                numerator: self.numerator.checked_pow(exponent.clone())?,
-                denominator: self.denominator.checked_pow(exponent)?,
+                numerator: unsafe {
+                    self.numerator
+                        .checked_pow(exponent.clone())
+                        .unwrap_unchecked()
+                },
+                denominator: unsafe { self.denominator.checked_pow(exponent).unwrap_unchecked() },
             })
         }
     }

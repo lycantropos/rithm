@@ -77,11 +77,7 @@ jobs:
       - name: 'Install Python coverage dependencies'
         run: python -m pip install --upgrade coverage
       - name: 'Install Rust coverage dependencies'
-        uses: actions-rs/install@v0.1
-        with:
-          crate: grcov
-          version: latest
-          use-tool-cache: true
+        run: cargo install grcov
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install in editable mode'
         run: python -m pip -v install -e .

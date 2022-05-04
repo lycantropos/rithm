@@ -117,7 +117,11 @@ rithm.Fraction(rithm.Int(1), rithm.Int(2))
 rithm.Fraction(rithm.Int(1), rithm.Int(2))
 >>> Fraction(3, 2) // 1
 rithm.Int(1)
+>>> 2 // Fraction(3, 2)
+rithm.Int(1)
 >>> Fraction(3, 2) % 1
+rithm.Fraction(rithm.Int(1), rithm.Int(2))
+>>> 2 % Fraction(3, 2)
 rithm.Fraction(rithm.Int(1), rithm.Int(2))
 >>> Fraction(1, 2) ** 2
 rithm.Fraction(rithm.Int(1), rithm.Int(4))
@@ -187,7 +191,9 @@ assert_eq!(Fraction::new(1, 6).unwrap() * 3, Fraction::new(1, 2).unwrap());
 assert_eq!(Fraction::new(3, 2).unwrap() / 3, Fraction::new(1, 2).unwrap());
 assert_eq!(1 / Fraction::from(2), Fraction::new(1, 2).unwrap());
 assert_eq!(Fraction::new(3, 2).unwrap().checked_div_euclid(1), Some(1));
+assert_eq!(2.checked_div_euclid(Fraction::new(3, 2).unwrap()), Some(1));
 assert_eq!(Fraction::new(3, 2).unwrap().checked_rem_euclid(1), Fraction::new(1, 2));
+assert_eq!(2.checked_rem_euclid(Fraction::new(3, 2).unwrap()), Fraction::new(1, 2));
 assert_eq!(Fraction::new(1, 2).unwrap().checked_pow(2), Fraction::new(1, 4));
 assert_eq!(Fraction::new(1, 2).unwrap().to_string(), "1/2");
 ```

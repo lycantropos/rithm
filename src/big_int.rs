@@ -20,7 +20,7 @@ use crate::traits::{
 };
 use crate::utils;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
     sign: Sign,
     digits: Vec<Digit>,
@@ -1231,16 +1231,6 @@ impl<Digit: Clone + Eq + PartialOrd + ZeroableDigit, const SEPARATOR: char, cons
     }
 }
 
-impl<Source: Copy, Digit: PartialEq, const SEPARATOR: char, const SHIFT: usize> PartialEq<Source>
-    for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Self: From<Source>,
-{
-    fn eq(&self, other: &Source) -> bool {
-        self.eq(&Self::from(*other))
-    }
-}
-
 macro_rules! plain_eq_to_big_int_impl {
     ($($t:ty)*) => ($(
         impl<Digit: PartialEq, const SEPARATOR: char, const SHIFT: usize>
@@ -1249,7 +1239,17 @@ macro_rules! plain_eq_to_big_int_impl {
             BigInt<Digit, SEPARATOR, SHIFT>: From<$t>,
         {
             fn eq(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
-                other.eq(&Self::from(*self))
+                BigInt::<Digit, SEPARATOR, SHIFT>::from(*self).eq(other)
+            }
+        }
+
+        impl<Digit: PartialEq, const SEPARATOR: char, const SHIFT: usize> PartialEq<$t>
+            for BigInt<Digit, SEPARATOR, SHIFT>
+        where
+            Self: From<$t>,
+        {
+            fn eq(&self, other: &$t) -> bool {
+                self.eq(&Self::from(*other))
             }
         }
     )*)

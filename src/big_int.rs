@@ -1752,7 +1752,8 @@ impl<Digit: ZeroableDigit, const SEPARATOR: char, const SHIFT: usize> Zeroable
 }
 
 const fn is_valid_shift<Digit: Oppose, const SHIFT: usize>() -> bool {
-    SHIFT < 8 * size_of::<Digit>() - (utils::is_signed::<Digit>() as usize)
+    const BITS_IN_BYTE: usize = 8;
+    SHIFT < BITS_IN_BYTE * size_of::<Digit>() - (utils::is_signed::<Digit>() as usize)
 }
 
 impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize>

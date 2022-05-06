@@ -516,6 +516,61 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAnd
     }
 }
 
+impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAnd<&Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Self;
+
+    fn bitand(self, other: &Self) -> Self::Output {
+        let (sign, digits) = if self.digits.len() > other.digits.len() {
+            bitwise_and::<Digit, SHIFT>(self.digits, self.sign, other.digits.clone(), other.sign)
+        } else {
+            bitwise_and::<Digit, SHIFT>(other.digits.clone(), other.sign, self.digits, self.sign)
+        };
+        Self::Output { sign, digits }
+    }
+}
+
+impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize>
+    BitAnd<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+
+    fn bitand(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+        let (sign, digits) = if self.digits.len() > other.digits.len() {
+            bitwise_and::<Digit, SHIFT>(self.digits.clone(), self.sign, other.digits, other.sign)
+        } else {
+            bitwise_and::<Digit, SHIFT>(other.digits, other.sign, self.digits.clone(), self.sign)
+        };
+        Self::Output { sign, digits }
+    }
+}
+
+impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAnd
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+
+    fn bitand(self, other: Self) -> Self::Output {
+        let (sign, digits) = if self.digits.len() > other.digits.len() {
+            bitwise_and::<Digit, SHIFT>(
+                self.digits.clone(),
+                self.sign,
+                other.digits.clone(),
+                other.sign,
+            )
+        } else {
+            bitwise_and::<Digit, SHIFT>(
+                other.digits.clone(),
+                other.sign,
+                self.digits.clone(),
+                self.sign,
+            )
+        };
+        Self::Output { sign, digits }
+    }
+}
+
 impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAndAssign
     for BigInt<Digit, SEPARATOR, SHIFT>
 {

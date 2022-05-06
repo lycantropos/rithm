@@ -1316,31 +1316,35 @@ impl<Digit: Clone + Eq + PartialOrd + ZeroableDigit, const SEPARATOR: char, cons
     }
 }
 
-macro_rules! plain_eq_to_big_int_impl {
+macro_rules! plain_partial_eq_to_big_int_impl {
     ($($t:ty)*) => ($(
         impl<Digit: PartialEq, const SEPARATOR: char, const SHIFT: usize>
             PartialEq<BigInt<Digit, SEPARATOR, SHIFT>> for $t
         where
-            BigInt<Digit, SEPARATOR, SHIFT>: From<$t>,
+            Digit: BinaryDigit + Oppose + TryFrom<$t>,
         {
             fn eq(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
-                BigInt::<Digit, SEPARATOR, SHIFT>::from(*self).eq(other)
+                value_to_sign(*self) == other.sign
+                    && (self.is_zero()
+                        || non_zero_value_to_digits::<$t, Digit, SHIFT>(*self) == other.digits)
             }
         }
 
         impl<Digit: PartialEq, const SEPARATOR: char, const SHIFT: usize> PartialEq<$t>
             for BigInt<Digit, SEPARATOR, SHIFT>
         where
-            Self: From<$t>,
+            Digit: BinaryDigit + Oppose + TryFrom<$t>,
         {
             fn eq(&self, other: &$t) -> bool {
-                self.eq(&Self::from(*other))
+                self.sign == value_to_sign(*other)
+                    && (self.is_zero()
+                        || self.digits == non_zero_value_to_digits::<$t, Digit, SHIFT>(*other))
             }
         }
     )*)
 }
 
-plain_eq_to_big_int_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+plain_partial_eq_to_big_int_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 impl<Digit: Clone + PartialOrd + ZeroableDigit, const SEPARATOR: char, const SHIFT: usize>
     PartialOrd for BigInt<Digit, SEPARATOR, SHIFT>

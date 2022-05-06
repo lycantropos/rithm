@@ -1643,6 +1643,19 @@ where
 }
 
 #[inline]
+pub(crate) fn value_to_sign<Source>(value: Source) -> Sign
+where
+    Source: Oppose + Zeroable,
+    OppositionOf<Source>: TryFrom<Source>,
+{
+    if value.is_zero() {
+        Sign::zero()
+    } else {
+        non_zero_value_to_sign(value)
+    }
+}
+
+#[inline]
 pub(crate) fn non_zero_value_to_sign<Source>(value: Source) -> Sign
 where
     Source: Oppose,

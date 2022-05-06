@@ -269,7 +269,7 @@ impl PyInt {
     fn __mul__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
         if other.is_instance(PyInt::type_object(py))? {
-            Ok(PyInt(self.0.clone() * other.extract::<PyInt>()?.0).into_py(py))
+            Ok(PyInt(&self.0 * other.extract::<PyInt>()?.0).into_py(py))
         } else {
             self.__rmul__(other)
         }
@@ -379,7 +379,7 @@ impl PyInt {
     fn __rmul__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
         if other.is_instance(PyLong::type_object(py))? {
-            Ok(PyInt(self.0.clone() * try_py_long_to_big_int(other)?).into_py(py))
+            Ok(PyInt(try_py_long_to_big_int(other)? * &self.0).into_py(py))
         } else {
             Ok(py.NotImplemented())
         }

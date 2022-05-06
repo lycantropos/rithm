@@ -318,7 +318,7 @@ impl PyInt {
     fn __rand__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
         if other.is_instance(PyLong::type_object(py))? {
-            Ok(PyInt(&self.0 & try_py_long_to_big_int(other)?).into_py(py))
+            Ok(PyInt(try_py_long_to_big_int(other)? & &self.0).into_py(py))
         } else {
             Ok(py.NotImplemented())
         }

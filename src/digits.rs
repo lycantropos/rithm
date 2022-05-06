@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::convert::{FloatToInt, TryFrom};
 use std::fmt::{Debug, Display, Formatter};
+use std::mem::size_of;
 
 use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
@@ -8,8 +9,8 @@ use crate::traits::{
     AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid, AssigningShiftingRightMonoid,
     AssigningSubtractiveMagma, BitLength, BitwiseNegatableUnaryAlgebra, CheckedShl,
     DivisivePartialMagma, DoublePrecision, DoublePrecisionOf, Float, Gcd, ModularPartialMagma,
-    ModularSubtractiveMagma, Oppose, OppositionOf, ShiftingLeftMonoid, ShiftingRightMonoid,
-    SubtractiveMagma, Unitary, Zeroable,
+    ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, ShiftingLeftMonoid,
+    ShiftingRightMonoid, SubtractiveMagma, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -1585,5 +1586,73 @@ where
     }
     if digits_count != digits.len() {
         digits.truncate(digits_count);
+    }
+}
+
+pub(crate) fn non_zero_value_to_digits<Source, Digit, const SHIFT: usize>(
+    value: Source,
+) -> Vec<Digit>
+where
+    Digit: BinaryDigit + Oppose + TryFrom<Source>,
+    Source: BinaryDigit + Oppose + TryFrom<OppositionOf<Source>>,
+    OppositionOf<Source>: TryFrom<Source>,
+{
+    if size_of::<Source>() < size_of::<Digit>()
+        || (size_of::<Source>() == size_of::<Digit>()
+            && utils::is_signed::<Source>()
+            && utils::is_unsigned::<Digit>())
+    {
+        let mut value = if utils::is_signed::<Source>() {
+            let value = unsafe { OppositionOf::<Source>::try_from(value).unwrap_unchecked() };
+            unsafe {
+                Digit::try_from(
+                    Source::try_from(if value.is_negative() { -value } else { value })
+                        .unwrap_unchecked(),
+                )
+                .unwrap_unchecked()
+            }
+        } else {
+            unsafe { Digit::try_from(value).unwrap_unchecked() }
+        };
+        let mut digits = Vec::<Digit>::new();
+        let digit_mask = to_digit_mask::<Digit>(SHIFT);
+        while !value.is_zero() {
+            digits.push(value & digit_mask);
+            value >>= SHIFT;
+        }
+        digits
+    } else {
+        let mut value = if utils::is_signed::<Source>() {
+            let value = unsafe { OppositionOf::<Source>::try_from(value).unwrap_unchecked() };
+            if value.is_negative() {
+                unsafe { Source::try_from(-value).unwrap_unchecked() }
+            } else {
+                unsafe { Source::try_from(value).unwrap_unchecked() }
+            }
+        } else {
+            value
+        };
+        let mut digits = Vec::<Digit>::new();
+        let digit_mask = to_digit_mask::<Source>(SHIFT);
+        while !value.is_zero() {
+            digits.push(unsafe { Digit::try_from(value & digit_mask).unwrap_unchecked() });
+            value >>= SHIFT;
+        }
+        digits
+    }
+}
+
+#[inline]
+pub(crate) fn non_zero_value_to_sign<Source>(value: Source) -> Sign
+where
+    Source: Oppose,
+    OppositionOf<Source>: TryFrom<Source>,
+{
+    if utils::is_signed::<Source>()
+        && unsafe { OppositionOf::<Source>::try_from(value).unwrap_unchecked() }.is_negative()
+    {
+        -Sign::one()
+    } else {
+        Sign::one()
     }
 }

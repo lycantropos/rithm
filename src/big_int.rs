@@ -1031,56 +1031,11 @@ where
         debug_assert!(is_valid_shift::<Digit, SHIFT>());
         if value.is_zero() {
             Self::zero()
-        } else if size_of::<Source>() < size_of::<Digit>()
-            || (size_of::<Source>() == size_of::<Digit>()
-                && utils::is_signed::<Source>()
-                && utils::is_unsigned::<Digit>())
-        {
-            let mut sign = Sign::one();
-            let mut value = if utils::is_signed::<Source>() {
-                let value = unsafe { OppositionOf::<Source>::try_from(value).unwrap_unchecked() };
-                if value.is_negative() {
-                    sign = -sign;
-                    unsafe {
-                        Digit::try_from(Source::try_from(-value).unwrap_unchecked())
-                            .unwrap_unchecked()
-                    }
-                } else {
-                    unsafe {
-                        Digit::try_from(Source::try_from(value).unwrap_unchecked())
-                            .unwrap_unchecked()
-                    }
-                }
-            } else {
-                unsafe { Digit::try_from(value).unwrap_unchecked() }
-            };
-            let mut digits = Vec::<Digit>::new();
-            let digit_mask = to_digit_mask::<Digit>(SHIFT);
-            while !value.is_zero() {
-                digits.push(value & digit_mask);
-                value >>= SHIFT;
-            }
-            Self { sign, digits }
         } else {
-            let mut sign = Sign::one();
-            let mut value = if utils::is_signed::<Source>() {
-                let value = unsafe { OppositionOf::<Source>::try_from(value).unwrap_unchecked() };
-                if value.is_negative() {
-                    sign = -sign;
-                    unsafe { Source::try_from(-value).unwrap_unchecked() }
-                } else {
-                    unsafe { Source::try_from(value).unwrap_unchecked() }
-                }
-            } else {
-                value
-            };
-            let mut digits = Vec::<Digit>::new();
-            let digit_mask = to_digit_mask::<Source>(SHIFT);
-            while !value.is_zero() {
-                digits.push(unsafe { Digit::try_from(value & digit_mask).unwrap_unchecked() });
-                value >>= SHIFT;
+            Self {
+                sign: non_zero_value_to_sign(value),
+                digits: non_zero_value_to_digits::<Source, Digit, SHIFT>(value),
             }
-            Self { sign, digits }
         }
     }
 }

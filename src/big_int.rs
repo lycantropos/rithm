@@ -501,6 +501,15 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> AddAssign
     }
 }
 
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> AddAssign<&Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    fn add_assign(&mut self, other: &Self) {
+        (self.sign, self.digits) =
+            sum_signed_digits::<Digit, SHIFT>(&self.digits, self.sign, &other.digits, other.sign);
+    }
+}
+
 impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAnd
     for BigInt<Digit, SEPARATOR, SHIFT>
 {

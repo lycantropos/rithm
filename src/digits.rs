@@ -1002,6 +1002,15 @@ pub(crate) fn fraction_exponent_digits<
     }
 }
 
+pub(crate) fn invert_digits<Digit: AdditiveDigit, const SHIFT: usize>(
+    sign: Sign,
+    digits: &[Digit],
+) -> (Sign, Vec<Digit>) {
+    let (sign, digits) =
+        sum_signed_digits::<Digit, SHIFT>(sign, digits, Sign::one(), &[Digit::one()]);
+    (-sign, digits)
+}
+
 pub(crate) fn multiply_digits<Digit: MultiplicativeDigit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],

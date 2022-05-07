@@ -1034,12 +1034,75 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     type Output = Option<(Self, Self)>;
 
     fn checked_div_rem_euclid(self, divisor: Self) -> Self::Output {
-        self.checked_div_rem(divisor.clone())
+        self.checked_div_rem(&divisor)
             .map(|(mut quotient, mut modulo)| {
                 if (divisor.is_negative() && modulo.is_positive())
                     || (divisor.is_positive() && modulo.is_negative())
                 {
                     quotient -= Self::one();
+                    modulo += divisor;
+                }
+                (quotient, modulo)
+            })
+    }
+}
+
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDivRemEuclid<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Option<(Self, Self)>;
+
+    fn checked_div_rem_euclid(self, divisor: &Self) -> Self::Output {
+        self.checked_div_rem(divisor)
+            .map(|(mut quotient, mut modulo)| {
+                if (divisor.is_negative() && modulo.is_positive())
+                    || (divisor.is_positive() && modulo.is_negative())
+                {
+                    quotient -= Self::one();
+                    modulo += divisor;
+                }
+                (quotient, modulo)
+            })
+    }
+}
+
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDivRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Option<(
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        BigInt<Digit, SEPARATOR, SHIFT>,
+    )>;
+
+    fn checked_div_rem_euclid(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+        self.checked_div_rem(&divisor)
+            .map(|(mut quotient, mut modulo)| {
+                if (divisor.is_negative() && modulo.is_positive())
+                    || (divisor.is_positive() && modulo.is_negative())
+                {
+                    quotient -= BigInt::<Digit, SEPARATOR, SHIFT>::one();
+                    modulo += divisor;
+                }
+                (quotient, modulo)
+            })
+    }
+}
+
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRemEuclid
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Option<(
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        BigInt<Digit, SEPARATOR, SHIFT>,
+    )>;
+
+    fn checked_div_rem_euclid(self, divisor: Self) -> Self::Output {
+        self.checked_div_rem(divisor)
+            .map(|(mut quotient, mut modulo)| {
+                if (divisor.is_negative() && modulo.is_positive())
+                    || (divisor.is_positive() && modulo.is_negative())
+                {
+                    quotient -= BigInt::<Digit, SEPARATOR, SHIFT>::one();
                     modulo += divisor;
                 }
                 (quotient, modulo)

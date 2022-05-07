@@ -14,9 +14,8 @@ use crate::traits::{
     Abs, AssigningShiftingLeftMonoid, BitLength, BitwiseNegatableUnaryAlgebra, CheckedDiv,
     CheckedDivAsF32, CheckedDivAsF64, CheckedDivEuclid, CheckedDivRem, CheckedDivRemEuclid,
     CheckedPow, CheckedPowRemEuclid, CheckedRem, CheckedRemEuclid, CheckedRemEuclidInv, CheckedShl,
-    CheckedShr, DivEuclid, DivRem, DivRemEuclid, DoublePrecisionOf, Endianness, Float, FromBytes,
-    FromStrRadix, Gcd, Oppose, OppositionOf, Oppositive, Parity, Pow, RemEuclid, ToBytes, Unitary,
-    Zeroable,
+    CheckedShr, DivEuclid, DivRem, DivRemEuclid, Endianness, Float, FromBytes, FromStrRadix, Gcd,
+    Oppose, OppositionOf, Oppositive, Parity, Pow, RemEuclid, ToBytes, Unitary, Zeroable,
 };
 use crate::utils;
 
@@ -1470,149 +1469,41 @@ impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd
     type Output = Self;
 
     fn gcd(self, other: Self) -> Self::Output {
-        let mut largest_digits = self.digits;
-        let mut smallest_digits = other.digits;
-        if digits_lesser_than(&largest_digits, &smallest_digits) {
-            (largest_digits, smallest_digits) = (smallest_digits, largest_digits);
-        }
-        loop {
-            let largest_digits_count = largest_digits.len();
-            if largest_digits_count <= 2 {
-                break;
-            }
-            let smallest_digits_count = smallest_digits.len();
-            if smallest_digits_count == 1 && smallest_digits[0].is_zero() {
-                return Self::Output {
-                    sign: Sign::one(),
-                    digits: largest_digits,
-                };
-            }
-            let highest_digit_bit_length = largest_digits[largest_digits.len() - 1].bit_length();
-            let mut largest_leading_bits = (OppositionOf::<DoublePrecisionOf<Digit>>::from(
-                largest_digits[largest_digits_count - 1],
-            ) << (2 * SHIFT - highest_digit_bit_length))
-                | (OppositionOf::<DoublePrecisionOf<Digit>>::from(
-                    largest_digits[largest_digits_count - 2],
-                ) << (SHIFT - highest_digit_bit_length))
-                | OppositionOf::<DoublePrecisionOf<Digit>>::from(
-                    largest_digits[largest_digits_count - 3] >> highest_digit_bit_length,
-                );
-            let mut smallest_leading_bits = if smallest_digits_count >= largest_digits_count - 2 {
-                OppositionOf::<DoublePrecisionOf<Digit>>::from(
-                    smallest_digits[largest_digits_count - 3] >> highest_digit_bit_length,
-                )
-            } else {
-                OppositionOf::<DoublePrecisionOf<Digit>>::zero()
-            } | if smallest_digits_count >= largest_digits_count - 1
-            {
-                OppositionOf::<DoublePrecisionOf<Digit>>::from(
-                    smallest_digits[largest_digits_count - 2],
-                ) << (SHIFT - highest_digit_bit_length)
-            } else {
-                OppositionOf::<DoublePrecisionOf<Digit>>::zero()
-            } | if smallest_digits_count >= largest_digits_count {
-                OppositionOf::<DoublePrecisionOf<Digit>>::from(
-                    smallest_digits[largest_digits_count - 1],
-                ) << (2 * SHIFT - highest_digit_bit_length)
-            } else {
-                OppositionOf::<DoublePrecisionOf<Digit>>::zero()
-            };
-            let mut first_coefficient = OppositionOf::<DoublePrecisionOf<Digit>>::one();
-            let mut second_coefficient = OppositionOf::<DoublePrecisionOf<Digit>>::zero();
-            let mut third_coefficient = OppositionOf::<DoublePrecisionOf<Digit>>::zero();
-            let mut fourth_coefficient = OppositionOf::<DoublePrecisionOf<Digit>>::one();
-            let mut iterations_count = 0usize;
-            loop {
-                if third_coefficient == smallest_leading_bits {
-                    break;
-                }
-                let scale = (largest_leading_bits
-                    + (first_coefficient - OppositionOf::<DoublePrecisionOf<Digit>>::one()))
-                    / (smallest_leading_bits - third_coefficient);
-                let next_third_coefficient = second_coefficient + scale * fourth_coefficient;
-                let next_smallest_leading_bits =
-                    largest_leading_bits - scale * smallest_leading_bits;
-                if next_third_coefficient > next_smallest_leading_bits {
-                    break;
-                }
-                largest_leading_bits = smallest_leading_bits;
-                smallest_leading_bits = next_smallest_leading_bits;
-                let next_fourth_coefficient = first_coefficient + scale * third_coefficient;
-                first_coefficient = fourth_coefficient;
-                second_coefficient = third_coefficient;
-                third_coefficient = next_third_coefficient;
-                fourth_coefficient = next_fourth_coefficient;
-                iterations_count += 1;
-            }
-            if iterations_count == 0 {
-                (largest_digits, smallest_digits) = if smallest_digits_count == 1 {
-                    let (_, remainder) = div_rem_digits_by_digit::<Digit, SHIFT>(
-                        &largest_digits,
-                        smallest_digits[0],
-                    );
-                    (smallest_digits, vec![remainder])
-                } else {
-                    let (_, remainder) = div_rem_two_or_more_digits::<Digit, SHIFT>(
-                        &largest_digits,
-                        &smallest_digits,
-                    );
-                    (smallest_digits, remainder)
-                };
-                continue;
-            }
-            if iterations_count % 2 != 0 {
-                (first_coefficient, second_coefficient) = (-second_coefficient, -first_coefficient);
-                (third_coefficient, fourth_coefficient) = (-fourth_coefficient, -third_coefficient);
-            }
-            let digit_mask = to_digit_mask::<OppositionOf<DoublePrecisionOf<Digit>>>(SHIFT);
-            let mut next_largest_accumulator = OppositionOf::<DoublePrecisionOf<Digit>>::zero();
-            let mut next_smallest_accumulator = OppositionOf::<DoublePrecisionOf<Digit>>::zero();
-            let mut next_largest_digits = Vec::<Digit>::with_capacity(largest_digits_count);
-            let mut next_smallest_digits = Vec::<Digit>::with_capacity(largest_digits_count);
-            for index in 0..smallest_digits_count {
-                next_largest_accumulator = next_largest_accumulator
-                    + (first_coefficient
-                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]))
-                    - (second_coefficient
-                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(smallest_digits[index]));
-                next_smallest_accumulator = next_smallest_accumulator
-                    + (fourth_coefficient
-                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(smallest_digits[index]))
-                    - (third_coefficient
-                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]));
-                next_largest_digits.push(unsafe {
-                    Digit::try_from(next_largest_accumulator & digit_mask).unwrap_unchecked()
-                });
-                next_smallest_digits.push(unsafe {
-                    Digit::try_from(next_smallest_accumulator & digit_mask).unwrap_unchecked()
-                });
-                next_largest_accumulator >>= SHIFT;
-                next_smallest_accumulator >>= SHIFT;
-            }
-            for index in smallest_digits_count..largest_digits_count {
-                next_largest_accumulator += first_coefficient
-                    * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]);
-                next_smallest_accumulator -= third_coefficient
-                    * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest_digits[index]);
-                next_largest_digits.push(unsafe {
-                    Digit::try_from(next_largest_accumulator & digit_mask).unwrap_unchecked()
-                });
-                next_smallest_digits.push(unsafe {
-                    Digit::try_from(next_smallest_accumulator & digit_mask).unwrap_unchecked()
-                });
-                next_largest_accumulator >>= SHIFT;
-                next_smallest_accumulator >>= SHIFT;
-            }
-            trim_leading_zeros(&mut next_largest_digits);
-            trim_leading_zeros(&mut next_smallest_digits);
-            largest_digits = next_largest_digits;
-            smallest_digits = next_smallest_digits;
-        }
-        Self::Output::from(
-            reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&largest_digits).gcd(
-                reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&smallest_digits),
-            ),
-        )
+        let (sign, digits) = to_gcd::<Digit, SHIFT>(self.digits, other.digits);
+        Self::Output { sign, digits }
+    }
+}
+
+impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd<&Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Self;
+
+    fn gcd(self, other: &Self) -> Self::Output {
+        let (sign, digits) = to_gcd::<Digit, SHIFT>(self.digits, other.digits.clone());
+        Self::Output { sign, digits }
+    }
+}
+
+impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize>
+    Gcd<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+
+    fn gcd(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+        let (sign, digits) = to_gcd::<Digit, SHIFT>(self.digits.clone(), other.digits);
+        Self::Output { sign, digits }
+    }
+}
+
+impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+
+    fn gcd(self, other: Self) -> Self::Output {
+        let (sign, digits) = to_gcd::<Digit, SHIFT>(self.digits.clone(), other.digits.clone());
+        Self::Output { sign, digits }
     }
 }
 

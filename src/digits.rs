@@ -1006,40 +1006,37 @@ pub(crate) fn multiply_digits<Digit: MultiplicativeDigit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
 ) -> Vec<Digit> {
-    let mut shortest = &first;
-    let mut longest = &second;
-    let mut size_shortest = shortest.len();
-    let mut size_longest = longest.len();
-    if size_longest < size_shortest {
-        (shortest, longest) = (longest, shortest);
-        (size_shortest, size_longest) = (size_longest, size_shortest);
-    }
+    let (longest, shortest) = if first.len() < second.len() {
+        (&second, &first)
+    } else {
+        (&first, &second)
+    };
     const KARATSUBA_CUTOFF: usize = 70;
     const KARATSUBA_SQUARE_CUTOFF: usize = KARATSUBA_CUTOFF * 2;
-    if size_shortest
+    if shortest.len()
         <= if shortest.as_ptr() == longest.as_ptr() {
             KARATSUBA_SQUARE_CUTOFF
         } else {
             KARATSUBA_CUTOFF
         }
     {
-        return if size_shortest == 1 && shortest[0].is_zero() {
+        return if shortest.len() == 1 && shortest[0].is_zero() {
             vec![Digit::zero()]
         } else {
             multiply_digits_plain::<Digit, SHIFT>(*shortest, *longest)
         };
     };
-    if 2 * size_shortest <= size_longest {
+    if 2 * shortest.len() <= longest.len() {
         return multiply_digits_lopsided::<Digit, SHIFT>(*shortest, *longest);
     }
-    let shift = size_longest >> 1;
+    let shift = longest.len() >> 1;
     let (shortest_high, shortest_low) = split_digits(*shortest, shift);
     let (longest_high, longest_low) = if shortest.as_ptr() == longest.as_ptr() {
         (shortest_high.clone(), shortest_low.clone())
     } else {
         split_digits(*longest, shift)
     };
-    let mut result = vec![Digit::zero(); size_shortest + size_longest];
+    let mut result = vec![Digit::zero(); shortest.len() + longest.len()];
     let highs_product = multiply_digits::<Digit, SHIFT>(&shortest_high, &longest_high);
     for (index, &digit) in highs_product.iter().enumerate() {
         result[index + 2 * shift] = digit;
@@ -1067,18 +1064,18 @@ fn multiply_digits_lopsided<Digit: MultiplicativeDigit, const SHIFT: usize>(
     shortest: &[Digit],
     longest: &[Digit],
 ) -> Vec<Digit> {
-    let size_shortest = shortest.len();
-    let mut size_longest = longest.len();
-    let mut result = vec![Digit::zero(); size_shortest + size_longest];
+    let shortest_size = shortest.len();
+    let mut longest_size = longest.len();
+    let mut result = vec![Digit::zero(); shortest_size + longest_size];
     let mut processed_digits_count = 0;
-    while size_longest > 0 {
-        let step_digits_count = size_longest.min(size_shortest);
+    while longest_size > 0 {
+        let step_digits_count = longest_size.min(shortest_size);
         let product = multiply_digits::<Digit, SHIFT>(
             shortest,
             &longest[processed_digits_count..processed_digits_count + step_digits_count].to_vec(),
         );
         sum_digits_in_place::<Digit, SHIFT>(&mut result[processed_digits_count..], &product);
-        size_longest -= step_digits_count;
+        longest_size -= step_digits_count;
         processed_digits_count += step_digits_count;
     }
     trim_leading_zeros(&mut result);
@@ -1089,12 +1086,10 @@ fn multiply_digits_plain<Digit: MultiplicativeDigit, const SHIFT: usize>(
     shortest: &[Digit],
     longest: &[Digit],
 ) -> Vec<Digit> {
-    let size_shortest = shortest.len();
-    let size_longest = longest.len();
-    let mut result = vec![Digit::zero(); size_shortest + size_longest];
+    let mut result = vec![Digit::zero(); shortest.len() + longest.len()];
     let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
     if shortest.as_ptr() == longest.as_ptr() {
-        for index in 0..size_shortest {
+        for index in 0..shortest.len() {
             let mut digit = DoublePrecisionOf::<Digit>::from(shortest[index]);
             let mut result_position = index << 1;
             let mut accumulator =
@@ -1125,7 +1120,7 @@ fn multiply_digits_plain<Digit: MultiplicativeDigit, const SHIFT: usize>(
             }
         }
     } else {
-        for index in 0..size_shortest {
+        for index in 0..shortest.len() {
             let mut accumulator = DoublePrecisionOf::<Digit>::zero();
             let digit = DoublePrecisionOf::<Digit>::from(shortest[index]);
             let mut result_position = index;
@@ -1446,17 +1441,17 @@ fn subtract_digits<Digit: AdditiveDigit, const SHIFT: usize>(
 ) -> (Sign, Vec<Digit>) {
     let mut longest = &first;
     let mut shortest = &second;
-    let mut size_longest = longest.len();
-    let mut size_shortest = shortest.len();
+    let mut longest_size = longest.len();
+    let mut shortest_size = shortest.len();
     let mut accumulator = Digit::zero();
-    match size_longest.cmp(&size_shortest) {
+    match longest_size.cmp(&shortest_size) {
         Ordering::Less => {
             (longest, shortest) = (shortest, longest);
-            (size_longest, size_shortest) = (size_shortest, size_longest);
+            (longest_size, shortest_size) = (shortest_size, longest_size);
             sign = -sign;
         }
         Ordering::Equal => {
-            let mut index = size_shortest;
+            let mut index = shortest_size;
             loop {
                 index -= 1;
                 if index == 0 || longest[index] != shortest[index] {
@@ -1464,21 +1459,20 @@ fn subtract_digits<Digit: AdditiveDigit, const SHIFT: usize>(
                 }
             }
             if index == 0 && longest[0] == shortest[0] {
-                sign = Sign::zero();
-                return (sign, vec![Digit::zero()]);
+                return (Sign::zero(), vec![Digit::zero()]);
             }
             if longest[index] < shortest[index] {
                 (longest, shortest) = (shortest, longest);
                 sign = -sign;
             }
-            size_longest = index + 1;
-            size_shortest = index + 1;
+            longest_size = index + 1;
+            shortest_size = index + 1;
         }
         _ => {}
     };
-    let mut result = Vec::<Digit>::with_capacity(size_longest);
+    let mut result = Vec::<Digit>::with_capacity(longest_size);
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
-    for index in 0..size_shortest {
+    for index in 0..shortest_size {
         accumulator = longest[index]
             .wrapping_sub(shortest[index])
             .wrapping_sub(accumulator);
@@ -1486,7 +1480,7 @@ fn subtract_digits<Digit: AdditiveDigit, const SHIFT: usize>(
         accumulator >>= SHIFT;
         accumulator &= Digit::one();
     }
-    for index in size_shortest..size_longest {
+    for index in shortest_size..longest_size {
         accumulator = longest[index].wrapping_sub(accumulator);
         result.push(accumulator & digit_mask);
         accumulator >>= SHIFT;
@@ -1546,23 +1540,20 @@ fn sum_digits<Digit: AdditiveDigit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
 ) -> Vec<Digit> {
-    let mut longest = &first;
-    let mut shortest = &second;
-    let mut size_longest = longest.len();
-    let mut size_shortest = shortest.len();
-    if size_longest < size_shortest {
-        (size_longest, size_shortest) = (size_shortest, size_longest);
-        (longest, shortest) = (shortest, longest);
-    }
-    let mut result = Vec::<Digit>::with_capacity(size_longest + 1);
+    let (longest, shortest) = if first.len() < second.len() {
+        (&second, &first)
+    } else {
+        (&first, &second)
+    };
+    let mut result = Vec::<Digit>::with_capacity(longest.len() + 1);
     let mut accumulator: Digit = Digit::zero();
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
-    for index in 0..size_shortest {
+    for index in 0..shortest.len() {
         accumulator += longest[index] + shortest[index];
         result.push(accumulator & digit_mask);
         accumulator >>= SHIFT;
     }
-    for index in size_shortest..size_longest {
+    for index in shortest.len()..longest.len() {
         accumulator += longest[index];
         result.push(accumulator & digit_mask);
         accumulator >>= SHIFT;

@@ -983,6 +983,62 @@ impl<
     }
 }
 
+impl<
+        Digit: BinaryDigitConvertibleToFloat<f64> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivAsF64 for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Result<f64, CheckedDivApproximationError>;
+
+    fn checked_div_as_f64(self, divisor: Self) -> Self::Output {
+        checked_div_approximation::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
+            .map(|modulus| ((self.sign * divisor.sign) as f64) * modulus)
+    }
+}
+
+impl<
+        Digit: BinaryDigitConvertibleToFloat<f64> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivAsF64<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Result<f64, CheckedDivApproximationError>;
+
+    fn checked_div_as_f64(self, divisor: &Self) -> Self::Output {
+        checked_div_approximation::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
+            .map(|modulus| ((self.sign * divisor.sign) as f64) * modulus)
+    }
+}
+
+impl<
+        Digit: BinaryDigitConvertibleToFloat<f64> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivAsF64<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Result<f64, CheckedDivApproximationError>;
+
+    fn checked_div_as_f64(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+        checked_div_approximation::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
+            .map(|modulus| ((self.sign * divisor.sign) as f64) * modulus)
+    }
+}
+
+impl<
+        Digit: BinaryDigitConvertibleToFloat<f64> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivAsF64 for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Result<f64, CheckedDivApproximationError>;
+
+    fn checked_div_as_f64(self, divisor: Self) -> Self::Output {
+        checked_div_approximation::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
+            .map(|modulus| ((self.sign * divisor.sign) as f64) * modulus)
+    }
+}
+
 impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDivEuclid
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
@@ -1706,20 +1762,6 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
         )
         .unwrap();
         Self::Output { sign, digits }
-    }
-}
-
-impl<
-        Digit: BinaryDigitConvertibleToFloat<f64> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivAsF64 for BigInt<Digit, SEPARATOR, SHIFT>
-{
-    type Output = Result<f64, CheckedDivApproximationError>;
-
-    fn checked_div_as_f64(self, divisor: Self) -> Self::Output {
-        checked_div_approximation::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
-            .map(|modulus| ((self.sign * divisor.sign) as f64) * modulus)
     }
 }
 

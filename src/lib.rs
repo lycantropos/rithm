@@ -628,23 +628,19 @@ fn try_pow(base: &BigInt, exponent: &BigInt, py: Python) -> PyResult<PyObject> {
 
 #[inline]
 fn try_pow_mod<
-    Base: CheckedPowRemEuclid<Exponent, Divisor, Output = Option<BigInt>>,
+    Base: CheckedPowRemEuclid<Exponent, Divisor, Output = Result<BigInt, Error>>,
     Exponent,
     Divisor: Zeroable,
+    Error: ToString,
 >(
     base: Base,
     exponent: Exponent,
     divisor: Divisor,
     py: Python,
 ) -> PyResult<PyObject> {
-    let is_zero_divisor = divisor.is_zero();
     match base.checked_pow_rem_euclid(exponent, divisor) {
-        Some(remainder) => Ok(PyInt(remainder).into_py(py)),
-        None => Err(PyValueError::new_err(if is_zero_divisor {
-            "Divisor cannot be zero."
-        } else {
-            "Base is not invertible for the given divisor."
-        })),
+        Ok(remainder) => Ok(PyInt(remainder).into_py(py)),
+        Err(reason) => Err(PyValueError::new_err(reason.to_string())),
     }
 }
 

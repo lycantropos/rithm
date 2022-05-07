@@ -897,6 +897,39 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     }
 }
 
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDivEuclid<&Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Option<Self>;
+
+    fn checked_div_euclid(self, divisor: &Self) -> Self::Output {
+        checked_div_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+            .map(|(sign, digits)| Self { sign, digits })
+    }
+}
+
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDivEuclid<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
+
+    fn checked_div_euclid(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+        checked_div_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+            .map(|(sign, digits)| BigInt::<Digit, SEPARATOR, SHIFT> { sign, digits })
+    }
+}
+
+impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDivEuclid
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
+
+    fn checked_div_euclid(self, divisor: Self) -> Self::Output {
+        checked_div_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+            .map(|(sign, digits)| BigInt::<Digit, SEPARATOR, SHIFT> { sign, digits })
+    }
+}
+
 impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRem
     for BigInt<Digit, SEPARATOR, SHIFT>
 {

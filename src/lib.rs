@@ -300,7 +300,7 @@ impl PyInt {
                     Some(divisor) => try_pow_mod(self.0.clone(), exponent, divisor, py),
                     None => Ok(py.NotImplemented()),
                 },
-                None => try_pow(self.0.clone(), exponent, py),
+                None => try_pow(&self.0, &exponent, py),
             },
             None => Ok(py.NotImplemented()),
         }
@@ -424,7 +424,7 @@ impl PyInt {
                 Some(divisor) => try_pow_mod(base, self.0.clone(), divisor, py),
                 None => Ok(py.NotImplemented()),
             },
-            None => try_pow(base, self.0.clone(), py),
+            None => try_pow(&base, &self.0, py),
         }
     }
 
@@ -611,9 +611,10 @@ fn try_mod_to_near(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
 }
 
 #[inline]
-fn try_pow(base: BigInt, exponent: BigInt, py: Python) -> PyResult<PyObject> {
+fn try_pow(base: &BigInt, exponent: &BigInt, py: Python) -> PyResult<PyObject> {
     if exponent.is_negative() {
-        match unsafe { Fraction::new(base, BigInt::one()).unwrap_unchecked() }.checked_pow(exponent)
+        match unsafe { Fraction::new(base.clone(), BigInt::one()).unwrap_unchecked() }
+            .checked_pow(exponent.clone())
         {
             Some(power) => Ok(PyFraction(power).into_py(py)),
             None => Err(PyZeroDivisionError::new_err(

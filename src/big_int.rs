@@ -583,6 +583,28 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAndAssign
     }
 }
 
+impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAndAssign<&Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    fn bitand_assign(&mut self, other: &Self) {
+        (self.sign, self.digits) = if self.digits.len() > other.digits.len() {
+            bitwise_and::<Digit, SHIFT>(
+                self.digits.clone(),
+                self.sign,
+                other.digits.clone(),
+                other.sign,
+            )
+        } else {
+            bitwise_and::<Digit, SHIFT>(
+                other.digits.clone(),
+                other.sign,
+                self.digits.clone(),
+                self.sign,
+            )
+        };
+    }
+}
+
 impl<
         Digit: BitLength<Output = usize> + BinaryDigit + MultiplicativeDigit + Oppose + TryFrom<usize>,
         const SEPARATOR: char,

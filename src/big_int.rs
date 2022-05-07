@@ -820,6 +820,28 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitXorAssign
     }
 }
 
+impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitXorAssign<&Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    fn bitxor_assign(&mut self, other: &Self) {
+        (self.sign, self.digits) = if self.digits.len() > other.digits.len() {
+            bitwise_xor::<Digit, SHIFT>(
+                self.digits.clone(),
+                self.sign,
+                other.digits.clone(),
+                other.sign,
+            )
+        } else {
+            bitwise_xor::<Digit, SHIFT>(
+                other.digits.clone(),
+                other.sign,
+                self.digits.clone(),
+                self.sign,
+            )
+        };
+    }
+}
+
 impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDiv
     for BigInt<Digit, SEPARATOR, SHIFT>
 {

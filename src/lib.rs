@@ -243,7 +243,7 @@ impl PyInt {
     }
 
     fn __invert__(&self) -> PyInt {
-        PyInt(!self.0.clone())
+        PyInt(!&self.0)
     }
 
     fn __lshift__(&self, shift: &PyAny) -> PyResult<PyObject> {

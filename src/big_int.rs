@@ -2597,7 +2597,7 @@ impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize>
             let mut exponent_digits_iterator = exponent.digits.iter().rev().skip(1);
             loop {
                 while !exponent_digit_mask.is_zero() {
-                    result *= result.clone();
+                    result = &result * &result;
                     if !(exponent_digit & exponent_digit_mask).is_zero() {
                         result *= self;
                     }

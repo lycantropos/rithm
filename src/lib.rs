@@ -224,7 +224,7 @@ impl PyInt {
         let py = divisor.py();
         match try_py_any_to_maybe_big_int(divisor)? {
             Some(divisor) => {
-                try_floordiv(self.0.clone(), divisor).map(|result| PyInt(result).into_py(py))
+                try_floordiv(&self.0, &divisor).map(|result| PyInt(result).into_py(py))
             }
             None => Ok(py.NotImplemented()),
         }
@@ -341,7 +341,7 @@ impl PyInt {
     fn __rfloordiv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
         let py = dividend.py();
         if dividend.is_instance(PyLong::type_object(py))? {
-            try_floordiv(try_py_long_to_big_int(dividend)?, self.0.clone())
+            try_floordiv(&try_py_long_to_big_int(dividend)?, &self.0)
                 .map(|result| PyInt(result).into_py(py))
         } else {
             Ok(py.NotImplemented())
@@ -551,7 +551,7 @@ fn try_divmod<
 }
 
 #[inline]
-fn try_floordiv(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
+fn try_floordiv(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
     match dividend.checked_div_euclid(divisor) {
         Some(result) => Ok(result),
         None => Err(PyZeroDivisionError::new_err(

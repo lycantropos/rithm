@@ -730,9 +730,7 @@ pub(crate) fn checked_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize
             if (dividend_sign.is_negative() && divisor_sign.is_positive())
                 || (dividend_sign.is_positive() && divisor_sign.is_negative())
             {
-                let mut sign = dividend_sign;
-                let digits = subtract_digits::<Digit, SHIFT>(dividend, divisor, &mut sign);
-                (sign, digits)
+                subtract_digits::<Digit, SHIFT>(dividend, divisor, dividend_sign)
             } else {
                 (dividend_sign, dividend.to_vec())
             },
@@ -748,7 +746,7 @@ pub(crate) fn checked_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize
         if (divisor_sign.is_negative() && sign.is_positive())
             || (divisor_sign.is_positive() && sign.is_negative())
         {
-            digits = subtract_digits::<Digit, SHIFT>(&digits, divisor, &mut sign);
+            (sign, digits) = subtract_digits::<Digit, SHIFT>(&digits, divisor, sign);
         }
         Some((sign, digits))
     }
@@ -1427,9 +1425,7 @@ pub(crate) fn subtract_signed_digits<Digit: AdditiveDigit, const SHIFT: usize>(
 ) -> (Sign, Vec<Digit>) {
     if minuend_sign.is_negative() {
         if subtrahend_sign.is_negative() {
-            let mut sign = Sign::one();
-            let digits = subtract_digits::<Digit, SHIFT>(subtrahend, minuend, &mut sign);
-            (sign, digits)
+            subtract_digits::<Digit, SHIFT>(subtrahend, minuend, Sign::one())
         } else {
             (
                 -Sign::one(),
@@ -1439,17 +1435,15 @@ pub(crate) fn subtract_signed_digits<Digit: AdditiveDigit, const SHIFT: usize>(
     } else if subtrahend_sign.is_negative() {
         (Sign::one(), sum_digits::<Digit, SHIFT>(minuend, subtrahend))
     } else {
-        let mut sign = Sign::one();
-        let digits = subtract_digits::<Digit, SHIFT>(minuend, subtrahend, &mut sign);
-        (sign, digits)
+        subtract_digits::<Digit, SHIFT>(minuend, subtrahend, Sign::one())
     }
 }
 
 fn subtract_digits<Digit: AdditiveDigit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
-    sign: &mut Sign,
-) -> Vec<Digit> {
+    mut sign: Sign,
+) -> (Sign, Vec<Digit>) {
     let mut longest = &first;
     let mut shortest = &second;
     let mut size_longest = longest.len();
@@ -1459,7 +1453,7 @@ fn subtract_digits<Digit: AdditiveDigit, const SHIFT: usize>(
         Ordering::Less => {
             (longest, shortest) = (shortest, longest);
             (size_longest, size_shortest) = (size_shortest, size_longest);
-            *sign = -*sign;
+            sign = -sign;
         }
         Ordering::Equal => {
             let mut index = size_shortest;
@@ -1470,12 +1464,12 @@ fn subtract_digits<Digit: AdditiveDigit, const SHIFT: usize>(
                 }
             }
             if index == 0 && longest[0] == shortest[0] {
-                *sign = Sign::zero();
-                return vec![Digit::zero()];
+                sign = Sign::zero();
+                return (sign, vec![Digit::zero()]);
             }
             if longest[index] < shortest[index] {
                 (longest, shortest) = (shortest, longest);
-                *sign = -*sign;
+                sign = -sign;
             }
             size_longest = index + 1;
             size_shortest = index + 1;
@@ -1499,7 +1493,7 @@ fn subtract_digits<Digit: AdditiveDigit, const SHIFT: usize>(
         accumulator &= Digit::one();
     }
     trim_leading_zeros(&mut result);
-    result
+    (sign, result)
 }
 
 fn subtract_digits_in_place<Digit: AdditiveDigit, const SHIFT: usize>(
@@ -1527,23 +1521,19 @@ fn subtract_digits_in_place<Digit: AdditiveDigit, const SHIFT: usize>(
 }
 
 pub(crate) fn sum_signed_digits<Digit: AdditiveDigit, const SHIFT: usize>(
-    first: &[Digit],
     first_sign: Sign,
-    second: &[Digit],
+    first: &[Digit],
     second_sign: Sign,
+    second: &[Digit],
 ) -> (Sign, Vec<Digit>) {
     if first_sign.is_negative() {
         if second_sign.is_negative() {
             (-Sign::one(), sum_digits::<Digit, SHIFT>(first, second))
         } else {
-            let mut sign = Sign::one();
-            let digits = subtract_digits::<Digit, SHIFT>(second, first, &mut sign);
-            (sign, digits)
+            subtract_digits::<Digit, SHIFT>(second, first, Sign::one())
         }
     } else if second_sign.is_negative() {
-        let mut sign = Sign::one();
-        let digits = subtract_digits::<Digit, SHIFT>(first, second, &mut sign);
-        (sign, digits)
+        subtract_digits::<Digit, SHIFT>(first, second, Sign::one())
     } else {
         (
             first_sign.max(second_sign),

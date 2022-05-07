@@ -649,6 +649,61 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitOr
     }
 }
 
+impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitOr<&Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+
+    fn bitor(self, other: &Self) -> Self::Output {
+        let (sign, digits) = if self.digits.len() > other.digits.len() {
+            bitwise_or::<Digit, SHIFT>(self.digits, self.sign, other.digits.clone(), other.sign)
+        } else {
+            bitwise_or::<Digit, SHIFT>(other.digits.clone(), other.sign, self.digits, self.sign)
+        };
+        Self::Output { sign, digits }
+    }
+}
+
+impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize>
+    BitOr<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+
+    fn bitor(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+        let (sign, digits) = if self.digits.len() > other.digits.len() {
+            bitwise_or::<Digit, SHIFT>(self.digits.clone(), self.sign, other.digits, other.sign)
+        } else {
+            bitwise_or::<Digit, SHIFT>(other.digits, other.sign, self.digits.clone(), self.sign)
+        };
+        Self::Output { sign, digits }
+    }
+}
+
+impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitOr
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+
+    fn bitor(self, other: Self) -> Self::Output {
+        let (sign, digits) = if self.digits.len() > other.digits.len() {
+            bitwise_or::<Digit, SHIFT>(
+                self.digits.clone(),
+                self.sign,
+                other.digits.clone(),
+                other.sign,
+            )
+        } else {
+            bitwise_or::<Digit, SHIFT>(
+                other.digits.clone(),
+                other.sign,
+                self.digits.clone(),
+                self.sign,
+            )
+        };
+        Self::Output { sign, digits }
+    }
+}
+
 impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitOrAssign
     for BigInt<Digit, SEPARATOR, SHIFT>
 {

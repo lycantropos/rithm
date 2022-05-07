@@ -656,6 +656,46 @@ pub(crate) fn checked_div_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize
     }
 }
 
+pub fn checked_div_rem<Digit: DivisibleDigit, const SHIFT: usize>(
+    dividend_sign: Sign,
+    dividend: &[Digit],
+    divisor_sign: Sign,
+    divisor: &[Digit],
+) -> Option<(Sign, Vec<Digit>, Sign, Vec<Digit>)> {
+    if divisor_sign.is_zero() {
+        None
+    } else if dividend_sign.is_zero()
+        || dividend.len() < divisor.len()
+        || (dividend.len() == divisor.len()
+            && dividend[dividend.len() - 1] < divisor[divisor.len() - 1])
+    {
+        Some((
+            Sign::zero(),
+            vec![Digit::zero(); 1],
+            dividend_sign,
+            dividend.to_vec(),
+        ))
+    } else if divisor.len() == 1 {
+        let (quotient_digits, remainder_digit) =
+            div_rem_digits_by_digit::<Digit, SHIFT>(dividend, divisor[0]);
+        Some((
+            dividend_sign * divisor_sign,
+            quotient_digits,
+            dividend_sign * ((!remainder_digit.is_zero()) as Sign),
+            vec![remainder_digit],
+        ))
+    } else {
+        let (quotient_digits, remainder_digits) =
+            div_rem_two_or_more_digits::<Digit, SHIFT>(&dividend, &divisor);
+        Some((
+            dividend_sign * divisor_sign * to_digits_sign(&quotient_digits),
+            quotient_digits,
+            dividend_sign * to_digits_sign(&remainder_digits),
+            remainder_digits,
+        ))
+    }
+}
+
 pub(crate) fn checked_rem<Digit: DivisibleDigit, const SHIFT: usize>(
     dividend: &[Digit],
     dividend_sign: Sign,

@@ -936,43 +936,95 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDi
     type Output = Option<(Self, Self)>;
 
     fn checked_div_rem(self, divisor: Self) -> Self::Output {
-        let digits_count = self.digits.len();
-        let divisor_digits_count = divisor.digits.len();
-        if divisor.is_zero() {
-            None
-        } else if self.is_zero()
-            || digits_count < divisor_digits_count
-            || (digits_count == divisor_digits_count
-                && self.digits[self.digits.len() - 1] < divisor.digits[divisor.digits.len() - 1])
-        {
-            Some((Self::zero(), self))
-        } else if divisor_digits_count == 1 {
-            let (quotient_digits, remainder_digit) =
-                div_rem_digits_by_digit::<Digit, SHIFT>(&self.digits, divisor.digits[0]);
-            Some((
-                Self {
-                    sign: self.sign * divisor.sign,
-                    digits: quotient_digits,
-                },
-                Self {
-                    sign: self.sign * ((!remainder_digit.is_zero()) as Sign),
-                    digits: vec![remainder_digit],
-                },
-            ))
-        } else {
-            let (quotient_digits, remainder_digits) =
-                div_rem_two_or_more_digits::<Digit, SHIFT>(&self.digits, &divisor.digits);
-            Some((
-                Self {
-                    sign: self.sign * divisor.sign * to_digits_sign(&quotient_digits),
-                    digits: quotient_digits,
-                },
-                Self {
-                    sign: self.sign * to_digits_sign(&remainder_digits),
-                    digits: remainder_digits,
-                },
-            ))
-        }
+        checked_div_rem::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits).map(
+            |(quotient_sign, quotient_digits, remainder_sign, remainder_digits)| {
+                (
+                    Self {
+                        sign: quotient_sign,
+                        digits: quotient_digits,
+                    },
+                    Self {
+                        sign: remainder_sign,
+                        digits: remainder_digits,
+                    },
+                )
+            },
+        )
+    }
+}
+
+impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRem<&Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Option<(Self, Self)>;
+
+    fn checked_div_rem(self, divisor: &Self) -> Self::Output {
+        checked_div_rem::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits).map(
+            |(quotient_sign, quotient_digits, remainder_sign, remainder_digits)| {
+                (
+                    Self {
+                        sign: quotient_sign,
+                        digits: quotient_digits,
+                    },
+                    Self {
+                        sign: remainder_sign,
+                        digits: remainder_digits,
+                    },
+                )
+            },
+        )
+    }
+}
+
+impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDivRem<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Option<(
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        BigInt<Digit, SEPARATOR, SHIFT>,
+    )>;
+
+    fn checked_div_rem(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+        checked_div_rem::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits).map(
+            |(quotient_sign, quotient_digits, remainder_sign, remainder_digits)| {
+                (
+                    BigInt::<Digit, SEPARATOR, SHIFT> {
+                        sign: quotient_sign,
+                        digits: quotient_digits,
+                    },
+                    BigInt::<Digit, SEPARATOR, SHIFT> {
+                        sign: remainder_sign,
+                        digits: remainder_digits,
+                    },
+                )
+            },
+        )
+    }
+}
+
+impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRem
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Option<(
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        BigInt<Digit, SEPARATOR, SHIFT>,
+    )>;
+
+    fn checked_div_rem(self, divisor: Self) -> Self::Output {
+        checked_div_rem::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits).map(
+            |(quotient_sign, quotient_digits, remainder_sign, remainder_digits)| {
+                (
+                    BigInt::<Digit, SEPARATOR, SHIFT> {
+                        sign: quotient_sign,
+                        digits: quotient_digits,
+                    },
+                    BigInt::<Digit, SEPARATOR, SHIFT> {
+                        sign: remainder_sign,
+                        digits: remainder_digits,
+                    },
+                )
+            },
+        )
     }
 }
 

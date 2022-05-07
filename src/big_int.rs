@@ -1269,6 +1269,15 @@ impl<Digit: MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize> MulA
     }
 }
 
+impl<Digit: MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize> MulAssign<&Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    fn mul_assign(&mut self, other: &Self) {
+        self.sign *= other.sign;
+        self.digits = multiply_digits::<Digit, SHIFT>(&self.digits, &other.digits);
+    }
+}
+
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Neg for BigInt<Digit, SEPARATOR, SHIFT> {
     type Output = Self;
 

@@ -696,6 +696,29 @@ pub fn checked_div_rem<Digit: DivisibleDigit, const SHIFT: usize>(
     }
 }
 
+pub fn checked_div_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
+    dividend_sign: Sign,
+    dividend: &[Digit],
+    divisor_sign: Sign,
+    divisor: &[Digit],
+) -> Option<(Sign, Vec<Digit>, Sign, Vec<Digit>)> {
+    let (mut quotient_sign, mut quotient, mut remainder_sign, mut remainder) =
+        checked_div_rem::<Digit, SHIFT>(dividend_sign, dividend, divisor_sign, divisor)?;
+    if (divisor_sign.is_negative() && remainder_sign.is_positive())
+        || (divisor_sign.is_positive() && remainder_sign.is_negative())
+    {
+        (quotient_sign, quotient) = subtract_signed_digits::<Digit, SHIFT>(
+            quotient_sign,
+            &quotient,
+            Sign::one(),
+            &[Digit::one()],
+        );
+        (remainder_sign, remainder) =
+            sum_signed_digits::<Digit, SHIFT>(remainder_sign, &remainder, dividend_sign, divisor);
+    }
+    Some((quotient_sign, quotient, remainder_sign, remainder))
+}
+
 pub(crate) fn checked_rem<Digit: DivisibleDigit, const SHIFT: usize>(
     dividend_sign: Sign,
     dividend: &[Digit],

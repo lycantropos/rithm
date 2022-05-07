@@ -367,10 +367,10 @@ pub(crate) fn binary_digits_to_lesser_binary_base<
 }
 
 pub(crate) fn bitwise_and<Digit: BinaryDigit, const SHIFT: usize>(
-    mut longest: Vec<Digit>,
     longest_sign: Sign,
-    mut shortest: Vec<Digit>,
+    mut longest: Vec<Digit>,
     shortest_sign: Sign,
+    mut shortest: Vec<Digit>,
 ) -> (Sign, Vec<Digit>) {
     if longest_sign.is_negative() {
         complement_in_place::<Digit, SHIFT>(&mut longest);
@@ -396,10 +396,10 @@ pub(crate) fn bitwise_and<Digit: BinaryDigit, const SHIFT: usize>(
 }
 
 pub(crate) fn bitwise_or<Digit: BinaryDigit, const SHIFT: usize>(
-    mut longest: Vec<Digit>,
     longest_sign: Sign,
-    mut shortest: Vec<Digit>,
+    mut longest: Vec<Digit>,
     shortest_sign: Sign,
+    mut shortest: Vec<Digit>,
 ) -> (Sign, Vec<Digit>) {
     if longest_sign.is_negative() {
         complement_in_place::<Digit, SHIFT>(&mut longest);
@@ -424,10 +424,10 @@ pub(crate) fn bitwise_or<Digit: BinaryDigit, const SHIFT: usize>(
 }
 
 pub(crate) fn bitwise_xor<Digit: BinaryDigit, const SHIFT: usize>(
-    mut longest: Vec<Digit>,
     longest_sign: Sign,
-    mut shortest: Vec<Digit>,
+    mut longest: Vec<Digit>,
     shortest_sign: Sign,
+    mut shortest: Vec<Digit>,
 ) -> (Sign, Vec<Digit>) {
     if longest_sign.is_negative() {
         complement_in_place::<Digit, SHIFT>(&mut longest);
@@ -588,10 +588,10 @@ pub(crate) fn checked_div_approximation<
 }
 
 pub(crate) fn checked_div<Digit: DivisibleDigit, const SHIFT: usize>(
-    dividend: &[Digit],
     dividend_sign: Sign,
-    divisor: &[Digit],
+    dividend: &[Digit],
     divisor_sign: Sign,
+    divisor: &[Digit],
 ) -> Option<(Sign, Vec<Digit>)> {
     if divisor_sign.is_zero() {
         None
@@ -610,10 +610,10 @@ pub(crate) fn checked_div<Digit: DivisibleDigit, const SHIFT: usize>(
 }
 
 pub(crate) fn checked_div_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
-    dividend: &[Digit],
     dividend_sign: Sign,
-    divisor: &[Digit],
+    dividend: &[Digit],
     divisor_sign: Sign,
+    divisor: &[Digit],
 ) -> Option<(Sign, Vec<Digit>)> {
     if divisor_sign.is_zero() {
         None
@@ -697,10 +697,10 @@ pub fn checked_div_rem<Digit: DivisibleDigit, const SHIFT: usize>(
 }
 
 pub(crate) fn checked_rem<Digit: DivisibleDigit, const SHIFT: usize>(
-    dividend: &[Digit],
     dividend_sign: Sign,
-    divisor: &[Digit],
+    dividend: &[Digit],
     divisor_sign: Sign,
+    divisor: &[Digit],
 ) -> Option<(Sign, Vec<Digit>)> {
     if divisor_sign.is_zero() {
         None
@@ -716,10 +716,10 @@ pub(crate) fn checked_rem<Digit: DivisibleDigit, const SHIFT: usize>(
 }
 
 pub(crate) fn checked_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
-    dividend: &[Digit],
     dividend_sign: Sign,
-    divisor: &[Digit],
+    dividend: &[Digit],
     divisor_sign: Sign,
+    divisor: &[Digit],
 ) -> Option<(Sign, Vec<Digit>)> {
     if divisor_sign.is_zero() {
         None
@@ -1420,10 +1420,10 @@ where
 }
 
 pub(crate) fn subtract_signed_digits<Digit: AdditiveDigit, const SHIFT: usize>(
-    minuend: &[Digit],
     minuend_sign: Sign,
-    subtrahend: &[Digit],
+    minuend: &[Digit],
     subtrahend_sign: Sign,
+    subtrahend: &[Digit],
 ) -> (Sign, Vec<Digit>) {
     if minuend_sign.is_negative() {
         if subtrahend_sign.is_negative() {

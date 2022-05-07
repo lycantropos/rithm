@@ -517,9 +517,9 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAnd
 
     fn bitand(self, other: Self) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {
-            bitwise_and::<Digit, SHIFT>(self.digits, self.sign, other.digits, other.sign)
+            bitwise_and::<Digit, SHIFT>(self.sign, self.digits, other.sign, other.digits)
         } else {
-            bitwise_and::<Digit, SHIFT>(other.digits, other.sign, self.digits, self.sign)
+            bitwise_and::<Digit, SHIFT>(other.sign, other.digits, self.sign, self.digits)
         };
         Self::Output { sign, digits }
     }
@@ -532,9 +532,9 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAnd<&Self
 
     fn bitand(self, other: &Self) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {
-            bitwise_and::<Digit, SHIFT>(self.digits, self.sign, other.digits.clone(), other.sign)
+            bitwise_and::<Digit, SHIFT>(self.sign, self.digits, other.sign, other.digits.clone())
         } else {
-            bitwise_and::<Digit, SHIFT>(other.digits.clone(), other.sign, self.digits, self.sign)
+            bitwise_and::<Digit, SHIFT>(other.sign, other.digits.clone(), self.sign, self.digits)
         };
         Self::Output { sign, digits }
     }
@@ -547,9 +547,9 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize>
 
     fn bitand(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {
-            bitwise_and::<Digit, SHIFT>(self.digits.clone(), self.sign, other.digits, other.sign)
+            bitwise_and::<Digit, SHIFT>(self.sign, self.digits.clone(), other.sign, other.digits)
         } else {
-            bitwise_and::<Digit, SHIFT>(other.digits, other.sign, self.digits.clone(), self.sign)
+            bitwise_and::<Digit, SHIFT>(other.sign, other.digits, self.sign, self.digits.clone())
         };
         Self::Output { sign, digits }
     }
@@ -563,17 +563,17 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAnd
     fn bitand(self, other: Self) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {
             bitwise_and::<Digit, SHIFT>(
-                self.digits.clone(),
                 self.sign,
-                other.digits.clone(),
+                self.digits.clone(),
                 other.sign,
+                other.digits.clone(),
             )
         } else {
             bitwise_and::<Digit, SHIFT>(
-                other.digits.clone(),
                 other.sign,
-                self.digits.clone(),
+                other.digits.clone(),
                 self.sign,
+                self.digits.clone(),
             )
         };
         Self::Output { sign, digits }
@@ -585,9 +585,9 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAndAssign
 {
     fn bitand_assign(&mut self, other: Self) {
         (self.sign, self.digits) = if self.digits.len() > other.digits.len() {
-            bitwise_and::<Digit, SHIFT>(self.digits.clone(), self.sign, other.digits, other.sign)
+            bitwise_and::<Digit, SHIFT>(self.sign, self.digits.clone(), other.sign, other.digits)
         } else {
-            bitwise_and::<Digit, SHIFT>(other.digits, other.sign, self.digits.clone(), self.sign)
+            bitwise_and::<Digit, SHIFT>(other.sign, other.digits, self.sign, self.digits.clone())
         };
     }
 }
@@ -598,17 +598,17 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitAndAssign
     fn bitand_assign(&mut self, other: &Self) {
         (self.sign, self.digits) = if self.digits.len() > other.digits.len() {
             bitwise_and::<Digit, SHIFT>(
-                self.digits.clone(),
                 self.sign,
-                other.digits.clone(),
+                self.digits.clone(),
                 other.sign,
+                other.digits.clone(),
             )
         } else {
             bitwise_and::<Digit, SHIFT>(
-                other.digits.clone(),
                 other.sign,
-                self.digits.clone(),
+                other.digits.clone(),
                 self.sign,
+                self.digits.clone(),
             )
         };
     }
@@ -641,9 +641,9 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitOr
 
     fn bitor(self, other: Self) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {
-            bitwise_or::<Digit, SHIFT>(self.digits, self.sign, other.digits, other.sign)
+            bitwise_or::<Digit, SHIFT>(self.sign, self.digits, other.sign, other.digits)
         } else {
-            bitwise_or::<Digit, SHIFT>(other.digits, other.sign, self.digits, self.sign)
+            bitwise_or::<Digit, SHIFT>(other.sign, other.digits, self.sign, self.digits)
         };
         Self::Output { sign, digits }
     }
@@ -656,9 +656,9 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitOr<&Self>
 
     fn bitor(self, other: &Self) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {
-            bitwise_or::<Digit, SHIFT>(self.digits, self.sign, other.digits.clone(), other.sign)
+            bitwise_or::<Digit, SHIFT>(self.sign, self.digits, other.sign, other.digits.clone())
         } else {
-            bitwise_or::<Digit, SHIFT>(other.digits.clone(), other.sign, self.digits, self.sign)
+            bitwise_or::<Digit, SHIFT>(other.sign, other.digits.clone(), self.sign, self.digits)
         };
         Self::Output { sign, digits }
     }
@@ -671,9 +671,9 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize>
 
     fn bitor(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {
-            bitwise_or::<Digit, SHIFT>(self.digits.clone(), self.sign, other.digits, other.sign)
+            bitwise_or::<Digit, SHIFT>(self.sign, self.digits.clone(), other.sign, other.digits)
         } else {
-            bitwise_or::<Digit, SHIFT>(other.digits, other.sign, self.digits.clone(), self.sign)
+            bitwise_or::<Digit, SHIFT>(other.sign, other.digits, self.sign, self.digits.clone())
         };
         Self::Output { sign, digits }
     }
@@ -687,17 +687,17 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitOr
     fn bitor(self, other: Self) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {
             bitwise_or::<Digit, SHIFT>(
-                self.digits.clone(),
                 self.sign,
-                other.digits.clone(),
+                self.digits.clone(),
                 other.sign,
+                other.digits.clone(),
             )
         } else {
             bitwise_or::<Digit, SHIFT>(
-                other.digits.clone(),
                 other.sign,
-                self.digits.clone(),
+                other.digits.clone(),
                 self.sign,
+                self.digits.clone(),
             )
         };
         Self::Output { sign, digits }
@@ -709,9 +709,9 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitOrAssign
 {
     fn bitor_assign(&mut self, other: Self) {
         (self.sign, self.digits) = if self.digits.len() > other.digits.len() {
-            bitwise_or::<Digit, SHIFT>(self.digits.clone(), self.sign, other.digits, other.sign)
+            bitwise_or::<Digit, SHIFT>(self.sign, self.digits.clone(), other.sign, other.digits)
         } else {
-            bitwise_or::<Digit, SHIFT>(other.digits, other.sign, self.digits.clone(), self.sign)
+            bitwise_or::<Digit, SHIFT>(other.sign, other.digits, self.sign, self.digits.clone())
         };
     }
 }
@@ -722,17 +722,17 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitOrAssign<
     fn bitor_assign(&mut self, other: &Self) {
         (self.sign, self.digits) = if self.digits.len() > other.digits.len() {
             bitwise_or::<Digit, SHIFT>(
-                self.digits.clone(),
                 self.sign,
-                other.digits.clone(),
+                self.digits.clone(),
                 other.sign,
+                other.digits.clone(),
             )
         } else {
             bitwise_or::<Digit, SHIFT>(
-                other.digits.clone(),
                 other.sign,
-                self.digits.clone(),
+                other.digits.clone(),
                 self.sign,
+                self.digits.clone(),
             )
         };
     }
@@ -745,9 +745,9 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitXor
 
     fn bitxor(self, other: Self) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {
-            bitwise_xor::<Digit, SHIFT>(self.digits, self.sign, other.digits, other.sign)
+            bitwise_xor::<Digit, SHIFT>(self.sign, self.digits, other.sign, other.digits)
         } else {
-            bitwise_xor::<Digit, SHIFT>(other.digits, other.sign, self.digits, self.sign)
+            bitwise_xor::<Digit, SHIFT>(other.sign, other.digits, self.sign, self.digits)
         };
         Self::Output { sign, digits }
     }
@@ -760,9 +760,9 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitXor<&Self
 
     fn bitxor(self, other: &Self) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {
-            bitwise_xor::<Digit, SHIFT>(self.digits, self.sign, other.digits.clone(), other.sign)
+            bitwise_xor::<Digit, SHIFT>(self.sign, self.digits, other.sign, other.digits.clone())
         } else {
-            bitwise_xor::<Digit, SHIFT>(other.digits.clone(), other.sign, self.digits, self.sign)
+            bitwise_xor::<Digit, SHIFT>(other.sign, other.digits.clone(), self.sign, self.digits)
         };
         Self::Output { sign, digits }
     }
@@ -775,9 +775,9 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize>
 
     fn bitxor(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {
-            bitwise_xor::<Digit, SHIFT>(self.digits.clone(), self.sign, other.digits, other.sign)
+            bitwise_xor::<Digit, SHIFT>(self.sign, self.digits.clone(), other.sign, other.digits)
         } else {
-            bitwise_xor::<Digit, SHIFT>(other.digits, other.sign, self.digits.clone(), self.sign)
+            bitwise_xor::<Digit, SHIFT>(other.sign, other.digits, self.sign, self.digits.clone())
         };
         Self::Output { sign, digits }
     }
@@ -791,17 +791,17 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitXor
     fn bitxor(self, other: Self) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {
             bitwise_xor::<Digit, SHIFT>(
-                self.digits.clone(),
                 self.sign,
-                other.digits.clone(),
+                self.digits.clone(),
                 other.sign,
+                other.digits.clone(),
             )
         } else {
             bitwise_xor::<Digit, SHIFT>(
-                other.digits.clone(),
                 other.sign,
-                self.digits.clone(),
+                other.digits.clone(),
                 self.sign,
+                self.digits.clone(),
             )
         };
         Self::Output { sign, digits }
@@ -813,9 +813,9 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitXorAssign
 {
     fn bitxor_assign(&mut self, other: Self) {
         (self.sign, self.digits) = if self.digits.len() > other.digits.len() {
-            bitwise_xor::<Digit, SHIFT>(self.digits.clone(), self.sign, other.digits, other.sign)
+            bitwise_xor::<Digit, SHIFT>(self.sign, self.digits.clone(), other.sign, other.digits)
         } else {
-            bitwise_xor::<Digit, SHIFT>(other.digits, other.sign, self.digits.clone(), self.sign)
+            bitwise_xor::<Digit, SHIFT>(other.sign, other.digits, self.sign, self.digits.clone())
         };
     }
 }
@@ -826,17 +826,17 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitXorAssign
     fn bitxor_assign(&mut self, other: &Self) {
         (self.sign, self.digits) = if self.digits.len() > other.digits.len() {
             bitwise_xor::<Digit, SHIFT>(
-                self.digits.clone(),
                 self.sign,
-                other.digits.clone(),
+                self.digits.clone(),
                 other.sign,
+                other.digits.clone(),
             )
         } else {
             bitwise_xor::<Digit, SHIFT>(
-                other.digits.clone(),
                 other.sign,
-                self.digits.clone(),
+                other.digits.clone(),
                 self.sign,
+                self.digits.clone(),
             )
         };
     }
@@ -848,7 +848,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDi
     type Output = Option<Self>;
 
     fn checked_div(self, divisor: Self) -> Self::Output {
-        checked_div::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+        checked_div::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
             .map(|(sign, digits)| Self { sign, digits })
     }
 }
@@ -859,7 +859,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDi
     type Output = Option<Self>;
 
     fn checked_div(self, divisor: &Self) -> Self::Output {
-        checked_div::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+        checked_div::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
             .map(|(sign, digits)| Self { sign, digits })
     }
 }
@@ -870,7 +870,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
 
     fn checked_div(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        checked_div::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+        checked_div::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
             .map(|(sign, digits)| BigInt::<Digit, SEPARATOR, SHIFT> { sign, digits })
     }
 }
@@ -881,7 +881,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDi
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
 
     fn checked_div(self, divisor: Self) -> Self::Output {
-        checked_div::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+        checked_div::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
             .map(|(sign, digits)| BigInt::<Digit, SEPARATOR, SHIFT> { sign, digits })
     }
 }
@@ -892,7 +892,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     type Output = Option<Self>;
 
     fn checked_div_euclid(self, divisor: Self) -> Self::Output {
-        checked_div_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+        checked_div_euclid::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
             .map(|(sign, digits)| Self { sign, digits })
     }
 }
@@ -903,7 +903,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     type Output = Option<Self>;
 
     fn checked_div_euclid(self, divisor: &Self) -> Self::Output {
-        checked_div_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+        checked_div_euclid::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
             .map(|(sign, digits)| Self { sign, digits })
     }
 }
@@ -914,7 +914,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
 
     fn checked_div_euclid(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        checked_div_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+        checked_div_euclid::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
             .map(|(sign, digits)| BigInt::<Digit, SEPARATOR, SHIFT> { sign, digits })
     }
 }
@@ -925,7 +925,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
 
     fn checked_div_euclid(self, divisor: Self) -> Self::Output {
-        checked_div_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+        checked_div_euclid::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
             .map(|(sign, digits)| BigInt::<Digit, SEPARATOR, SHIFT> { sign, digits })
     }
 }
@@ -1264,7 +1264,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedRe
     type Output = Option<Self>;
 
     fn checked_rem(self, divisor: Self) -> Self::Output {
-        checked_rem::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+        checked_rem::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
             .map(|(sign, digits)| Self { sign, digits })
     }
 }
@@ -1275,7 +1275,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     type Output = Option<Self>;
 
     fn checked_rem_euclid(self, divisor: Self) -> Self::Output {
-        checked_rem_euclid::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+        checked_rem_euclid::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
             .map(|(sign, digits)| Self { sign, digits })
     }
 }
@@ -1323,10 +1323,10 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
 
     fn div(self, divisor: Self) -> Self::Output {
         let (sign, digits) = checked_div::<Digit, SHIFT>(
-            self.digits.as_slice(),
             self.sign,
-            divisor.digits.as_slice(),
+            self.digits.as_slice(),
             divisor.sign,
+            divisor.digits.as_slice(),
         )
         .unwrap();
         Self::Output { sign, digits }
@@ -1366,10 +1366,10 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivAssign
 {
     fn div_assign(&mut self, divisor: Self) {
         (self.sign, self.digits) = checked_div::<Digit, SHIFT>(
-            self.digits.as_slice(),
             self.sign,
-            divisor.digits.as_slice(),
+            self.digits.as_slice(),
             divisor.sign,
+            divisor.digits.as_slice(),
         )
         .unwrap();
     }
@@ -1382,10 +1382,10 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
 
     fn div_euclid(self, divisor: Self) -> Self::Output {
         let (sign, digits) = checked_div_euclid::<Digit, SHIFT>(
-            &self.digits,
             self.sign,
-            &divisor.digits,
+            &self.digits,
             divisor.sign,
+            &divisor.digits,
         )
         .unwrap();
         Self::Output { sign, digits }
@@ -2155,7 +2155,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Rem
 
     fn rem(self, divisor: Self) -> Self::Output {
         let (sign, digits) =
-            checked_rem::<Digit, SHIFT>(&self.digits, self.sign, &divisor.digits, divisor.sign)
+            checked_rem::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
                 .unwrap();
         Self::Output { sign, digits }
     }
@@ -2168,10 +2168,10 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Rem
 
     fn rem_euclid(self, divisor: Self) -> Self::Output {
         let (sign, digits) = checked_rem_euclid::<Digit, SHIFT>(
-            &self.digits,
             self.sign,
-            &divisor.digits,
+            &self.digits,
             divisor.sign,
+            &divisor.digits,
         )
         .unwrap();
         Self::Output { sign, digits }
@@ -2430,10 +2430,10 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Sub
 
     fn sub(self, subtrahend: Self) -> Self::Output {
         let (sign, digits) = subtract_signed_digits::<Digit, SHIFT>(
-            &self.digits,
             self.sign,
-            &subtrahend.digits,
+            &self.digits,
             subtrahend.sign,
+            &subtrahend.digits,
         );
         Self::Output { sign, digits }
     }
@@ -2444,10 +2444,10 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign
 {
     fn sub_assign(&mut self, subtrahend: Self) {
         (self.sign, self.digits) = subtract_signed_digits::<Digit, SHIFT>(
-            &self.digits,
             self.sign,
-            &subtrahend.digits,
+            &self.digits,
             subtrahend.sign,
+            &subtrahend.digits,
         );
     }
 }

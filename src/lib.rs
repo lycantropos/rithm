@@ -451,7 +451,7 @@ impl PyInt {
     fn __rsub__(&self, minuend: &PyAny) -> PyResult<PyObject> {
         let py = minuend.py();
         if minuend.is_instance(PyLong::type_object(py))? {
-            Ok(PyInt(try_py_long_to_big_int(minuend)? - self.0.clone()).into_py(py))
+            Ok(PyInt(try_py_long_to_big_int(minuend)? - &self.0).into_py(py))
         } else {
             Ok(py.NotImplemented())
         }
@@ -492,7 +492,7 @@ impl PyInt {
     fn __sub__(&self, subtrahend: &PyAny) -> PyResult<PyObject> {
         let py = subtrahend.py();
         match try_py_any_to_maybe_big_int(subtrahend)? {
-            Some(subtrahend) => Ok(PyInt(self.0.clone() - subtrahend).into_py(py)),
+            Some(subtrahend) => Ok(PyInt(&self.0 - subtrahend).into_py(py)),
             None => Ok(py.NotImplemented()),
         }
     }

@@ -403,7 +403,7 @@ impl PyInt {
                             .checked_pow(-try_py_long_to_big_int(digits)?)
                             .unwrap_unchecked()
                     };
-                    PyInt(self.0.clone() - try_mod_to_near(self.0.clone(), ten_to_digits_power)?)
+                    PyInt(&self.0 - try_mod_to_near(&self.0, &ten_to_digits_power)?)
                 } else {
                     self.clone()
                 }
@@ -580,8 +580,8 @@ fn try_mod(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
 }
 
 #[inline]
-fn try_mod_to_near(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
-    let (quotient, remainder) = match dividend.checked_div_rem_euclid(&divisor) {
+fn try_mod_to_near(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
+    let (quotient, remainder) = match dividend.checked_div_rem_euclid(divisor) {
         Some((quotient, remainder)) => Ok((quotient, remainder)),
         None => Err(PyZeroDivisionError::new_err(
             UNDEFINED_DIVISION_ERROR_MESSAGE,
@@ -596,11 +596,11 @@ fn try_mod_to_near(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
             big_int::LeftShiftError::TooLarge => PyOverflowError::new_err(reason.to_string()),
         })?;
     let greater_than_half = if divisor.is_positive() {
-        double_remainder > divisor
+        &double_remainder > divisor
     } else {
-        double_remainder < divisor
+        &double_remainder < divisor
     };
-    let exactly_half = double_remainder == divisor;
+    let exactly_half = &double_remainder == divisor;
     Ok(
         if greater_than_half || (exactly_half && quotient.is_odd()) {
             remainder - divisor

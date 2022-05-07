@@ -395,7 +395,7 @@ macro_rules! plain_signed_checked_pow_rem_euclid_impl {
                     return Some(Self::zero());
                 }
                 let base = if self < 0 || self > divisor {
-                    self.rem_euclid(divisor)
+                    unsafe { self.checked_rem_euclid(divisor).unwrap_unchecked() }
                 } else {
                     self
                 };
@@ -410,9 +410,17 @@ macro_rules! plain_signed_checked_pow_rem_euclid_impl {
                 }
                 exponent_mask >>= 1;
                 while !exponent_mask.is_zero() {
-                    result = (result * result).rem_euclid(divisor);
+                    result = unsafe {
+                        (result * result)
+                            .checked_rem_euclid(divisor)
+                            .unwrap_unchecked()
+                    };
                     if !(exponent & exponent_mask).is_zero() {
-                        result = (result * base).rem_euclid(divisor);
+                        result = unsafe {
+                            (result * base)
+                                .checked_rem_euclid(divisor)
+                                .unwrap_unchecked()
+                        };
                     }
                     exponent_mask >>= 1;
                 }
@@ -440,7 +448,11 @@ macro_rules! plain_unsigned_checked_pow_rem_euclid_impl {
                 } else if divisor.is_one() {
                     Some(Self::zero())
                 } else {
-                    let base = if self > divisor { self.rem_euclid(divisor) } else { self };
+                    let base = if self > divisor {
+                        unsafe { self.checked_rem_euclid(divisor).unwrap_unchecked() }
+                    } else {
+                        self
+                    };
                     let mut result = base;
                     let mut exponent_mask = 2u32;
                     loop {
@@ -452,9 +464,17 @@ macro_rules! plain_unsigned_checked_pow_rem_euclid_impl {
                     }
                     exponent_mask >>= 1;
                     while !exponent_mask.is_zero() {
-                        result = (result * result).rem_euclid(divisor);
+                        result = unsafe {
+                            (result * result)
+                                .checked_rem_euclid(divisor)
+                                .unwrap_unchecked()
+                        };
                         if !(exponent & exponent_mask).is_zero() {
-                            result = (result * base).rem_euclid(divisor);
+                            result = unsafe {
+                                (result * base)
+                                    .checked_rem_euclid(divisor)
+                                    .unwrap_unchecked()
+                            };
                         }
                         exponent_mask >>= 1;
                     }

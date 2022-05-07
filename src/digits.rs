@@ -1020,44 +1020,44 @@ pub(crate) fn multiply_digits<Digit: MultiplicativeDigit, const SHIFT: usize>(
             KARATSUBA_CUTOFF
         }
     {
-        return if shortest.len() == 1 && shortest[0].is_zero() {
+        if shortest.len() == 1 && shortest[0].is_zero() {
             vec![Digit::zero()]
         } else {
             multiply_digits_plain::<Digit, SHIFT>(*shortest, *longest)
+        }
+    } else if 2 * shortest.len() <= longest.len() {
+        multiply_digits_lopsided::<Digit, SHIFT>(*shortest, *longest)
+    } else {
+        let shift = longest.len() >> 1;
+        let (shortest_high, shortest_low) = split_digits(*shortest, shift);
+        let (longest_high, longest_low) = if shortest.as_ptr() == longest.as_ptr() {
+            (shortest_high.clone(), shortest_low.clone())
+        } else {
+            split_digits(*longest, shift)
         };
-    };
-    if 2 * shortest.len() <= longest.len() {
-        return multiply_digits_lopsided::<Digit, SHIFT>(*shortest, *longest);
+        let mut result = vec![Digit::zero(); shortest.len() + longest.len()];
+        let highs_product = multiply_digits::<Digit, SHIFT>(&shortest_high, &longest_high);
+        for (index, &digit) in highs_product.iter().enumerate() {
+            result[index + 2 * shift] = digit;
+        }
+        let lows_product = multiply_digits::<Digit, SHIFT>(&shortest_low, &longest_low);
+        for (index, &digit) in lows_product.iter().enumerate() {
+            result[index] = digit;
+        }
+        subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &lows_product);
+        subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &highs_product);
+        let shortest_components_sum = sum_digits::<Digit, SHIFT>(&shortest_high, &shortest_low);
+        let longest_components_sum = if shortest.as_ptr() == longest.as_ptr() {
+            shortest_components_sum.clone()
+        } else {
+            sum_digits::<Digit, SHIFT>(&longest_high, &longest_low)
+        };
+        let components_sums_product =
+            multiply_digits::<Digit, SHIFT>(&shortest_components_sum, &longest_components_sum);
+        sum_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &components_sums_product);
+        trim_leading_zeros(&mut result);
+        result
     }
-    let shift = longest.len() >> 1;
-    let (shortest_high, shortest_low) = split_digits(*shortest, shift);
-    let (longest_high, longest_low) = if shortest.as_ptr() == longest.as_ptr() {
-        (shortest_high.clone(), shortest_low.clone())
-    } else {
-        split_digits(*longest, shift)
-    };
-    let mut result = vec![Digit::zero(); shortest.len() + longest.len()];
-    let highs_product = multiply_digits::<Digit, SHIFT>(&shortest_high, &longest_high);
-    for (index, &digit) in highs_product.iter().enumerate() {
-        result[index + 2 * shift] = digit;
-    }
-    let lows_product = multiply_digits::<Digit, SHIFT>(&shortest_low, &longest_low);
-    for (index, &digit) in lows_product.iter().enumerate() {
-        result[index] = digit;
-    }
-    subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &lows_product);
-    subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &highs_product);
-    let shortest_components_sum = sum_digits::<Digit, SHIFT>(&shortest_high, &shortest_low);
-    let longest_components_sum = if shortest.as_ptr() == longest.as_ptr() {
-        shortest_components_sum.clone()
-    } else {
-        sum_digits::<Digit, SHIFT>(&longest_high, &longest_low)
-    };
-    let components_sums_product =
-        multiply_digits::<Digit, SHIFT>(&shortest_components_sum, &longest_components_sum);
-    sum_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &components_sums_product);
-    trim_leading_zeros(&mut result);
-    result
 }
 
 fn multiply_digits_lopsided<Digit: MultiplicativeDigit, const SHIFT: usize>(

@@ -297,7 +297,7 @@ impl PyInt {
         match try_py_any_to_maybe_big_int(exponent)? {
             Some(exponent) => match divisor {
                 Some(divisor) => match try_py_any_to_maybe_big_int(divisor)? {
-                    Some(divisor) => try_pow_mod(self.0.clone(), exponent, divisor, py),
+                    Some(divisor) => try_pow_mod(&self.0, exponent, divisor, py),
                     None => Ok(py.NotImplemented()),
                 },
                 None => try_pow(&self.0, &exponent, py),
@@ -421,7 +421,7 @@ impl PyInt {
         };
         match divisor {
             Some(divisor) => match try_py_any_to_maybe_big_int(divisor)? {
-                Some(divisor) => try_pow_mod(base, self.0.clone(), divisor, py),
+                Some(divisor) => try_pow_mod(base, &self.0, divisor, py),
                 None => Ok(py.NotImplemented()),
             },
             None => try_pow(&base, &self.0, py),
@@ -627,7 +627,16 @@ fn try_pow(base: &BigInt, exponent: &BigInt, py: Python) -> PyResult<PyObject> {
 }
 
 #[inline]
-fn try_pow_mod(base: BigInt, exponent: BigInt, divisor: BigInt, py: Python) -> PyResult<PyObject> {
+fn try_pow_mod<
+    Base: CheckedPowRemEuclid<Exponent, Divisor, Output = Option<BigInt>>,
+    Exponent,
+    Divisor: Zeroable,
+>(
+    base: Base,
+    exponent: Exponent,
+    divisor: Divisor,
+    py: Python,
+) -> PyResult<PyObject> {
     let is_zero_divisor = divisor.is_zero();
     match base.checked_pow_rem_euclid(exponent, divisor) {
         Some(remainder) => Ok(PyInt(remainder).into_py(py)),

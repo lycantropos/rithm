@@ -171,7 +171,7 @@ impl PyInt {
     }
 
     fn __abs__(&self) -> PyInt {
-        PyInt(self.0.clone().abs())
+        PyInt((&self.0).abs())
     }
 
     fn __add__(&self, other: &PyAny) -> PyResult<PyObject> {

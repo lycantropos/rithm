@@ -156,8 +156,8 @@ impl PyInt {
     }
 
     #[pyo3(text_signature = "($self, other, /)")]
-    fn gcd(&self, other: Self) -> PyInt {
-        PyInt(self.0.clone().gcd(other.0))
+    fn gcd(&self, other: &Self) -> PyInt {
+        PyInt((&self.0).gcd(&other.0))
     }
 
     #[getter]

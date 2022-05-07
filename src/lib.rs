@@ -276,7 +276,7 @@ impl PyInt {
     }
 
     fn __neg__(&self) -> PyInt {
-        PyInt(-self.0.clone())
+        PyInt(-&self.0)
     }
 
     fn __or__(&self, other: &PyAny) -> PyResult<PyObject> {

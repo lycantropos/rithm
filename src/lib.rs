@@ -203,7 +203,7 @@ impl PyInt {
     fn __divmod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
         match try_py_any_to_maybe_big_int(divisor)? {
-            Some(divisor) => try_divmod(self.0.clone(), divisor)
+            Some(divisor) => try_divmod(&self.0, divisor)
                 .map(|(quotient, remainder)| (PyInt(quotient), PyInt(remainder)).into_py(py)),
             None => Ok(py.NotImplemented()),
         }
@@ -327,7 +327,7 @@ impl PyInt {
     fn __rdivmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
         let py = dividend.py();
         if dividend.is_instance(PyLong::type_object(py))? {
-            try_divmod(try_py_long_to_big_int(dividend)?, self.0.clone())
+            try_divmod(&try_py_long_to_big_int(dividend)?, &self.0)
                 .map(|(quotient, remainder)| (PyInt(quotient), PyInt(remainder)).into_py(py))
         } else {
             Ok(py.NotImplemented())
@@ -581,7 +581,7 @@ fn try_mod(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
 
 #[inline]
 fn try_mod_to_near(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
-    let (quotient, remainder) = match dividend.checked_div_rem_euclid(divisor.clone()) {
+    let (quotient, remainder) = match dividend.checked_div_rem_euclid(&divisor) {
         Some((quotient, remainder)) => Ok((quotient, remainder)),
         None => Err(PyZeroDivisionError::new_err(
             UNDEFINED_DIVISION_ERROR_MESSAGE,

@@ -714,7 +714,7 @@ pub fn checked_div_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
             &[Digit::one()],
         );
         (remainder_sign, remainder) =
-            sum_signed_digits::<Digit, SHIFT>(remainder_sign, &remainder, dividend_sign, divisor);
+            sum_signed_digits::<Digit, SHIFT>(remainder_sign, &remainder, divisor_sign, divisor);
     }
     Some((quotient_sign, quotient, remainder_sign, remainder))
 }

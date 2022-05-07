@@ -652,7 +652,7 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitOr
 impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitOr<&Self>
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = Self;
 
     fn bitor(self, other: &Self) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {
@@ -756,7 +756,7 @@ impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitXor
 impl<Digit: BinaryDigit, const SEPARATOR: char, const SHIFT: usize> BitXor<&Self>
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = Self;
 
     fn bitxor(self, other: &Self) -> Self::Output {
         let (sign, digits) = if self.digits.len() > other.digits.len() {

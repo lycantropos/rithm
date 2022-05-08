@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
 use std::mem::size_of;
-use std::ops::{Div, DivAssign, Rem};
+use std::ops::{DivAssign, Rem};
 
 use crate::traits::{
     AssigningShiftingLeftMonoid, CheckedDivRem, CheckedDivRemEuclid, CheckedShl, CheckedShr,
@@ -10,23 +10,6 @@ use crate::traits::{
 
 use super::digits::*;
 use super::types::BigInt;
-
-impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
-    for BigInt<Digit, SEPARATOR, SHIFT>
-{
-    type Output = Self;
-
-    fn div(self, divisor: Self) -> Self::Output {
-        let (sign, digits) = checked_div::<Digit, SHIFT>(
-            self.sign,
-            self.digits.as_slice(),
-            divisor.sign,
-            divisor.digits.as_slice(),
-        )
-        .unwrap();
-        Self::Output { sign, digits }
-    }
-}
 
 impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivAssign
     for BigInt<Digit, SEPARATOR, SHIFT>

@@ -3,7 +3,9 @@ use std::mem::size_of;
 
 use crate::traits::{AssigningShiftingLeftMonoid, CheckedShr, DivRem, Oppositive};
 
-use super::digits::*;
+use super::digits::{
+    primitive_shift_digits_right, shift_digits_right, to_digits_sign, RightShiftableDigit,
+};
 use super::types::BigInt;
 
 impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr
@@ -17,67 +19,64 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
         } else if self.is_zero() {
             Ok(self)
         } else {
-            let (shift_quotient_digits, shift_remainder) =
-                div_rem_digits_by_digit::<Digit, SHIFT>(&shift.digits, unsafe {
-                    Digit::try_from(SHIFT).unwrap_unchecked()
-                });
-            let shift_quotient =
-                checked_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
-                    .unwrap_or(usize::MAX / size_of::<Digit>());
-            if shift_quotient >= usize::MAX / size_of::<Digit>() {
-                Ok(if self.is_negative() {
-                    !Self::zero()
-                } else {
-                    Self::zero()
-                })
-            } else if self.is_negative() {
-                let inverted = !self;
-                let digits = shift_digits_right::<Digit, SHIFT>(
-                    &inverted.digits,
-                    shift_quotient,
-                    shift_remainder,
-                );
-                Ok(!Self {
-                    sign: inverted.sign * to_digits_sign(&digits),
-                    digits,
-                })
-            } else {
-                let digits = shift_digits_right::<Digit, SHIFT>(
-                    &self.digits,
-                    shift_quotient,
-                    shift_remainder,
-                );
-                Ok(Self {
-                    sign: self.sign * to_digits_sign(&digits),
-                    digits,
-                })
-            }
+            let (sign, digits) =
+                shift_digits_right::<Digit, SHIFT>(self.sign, &self.digits, &shift.digits);
+            Ok(Self { sign, digits })
         }
     }
 }
 
-#[derive(Eq, PartialEq)]
-pub enum RightShiftError {
-    NegativeShift,
-}
+impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr<&Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Result<Self, RightShiftError>;
 
-impl RightShiftError {
-    fn description(&self) -> String {
-        match self {
-            RightShiftError::NegativeShift => String::from("Shift by negative step is undefined."),
+    fn checked_shr(self, shift: &Self) -> Self::Output {
+        if shift.is_negative() {
+            Err(RightShiftError::NegativeShift)
+        } else if self.is_zero() {
+            Ok(self)
+        } else {
+            let (sign, digits) =
+                shift_digits_right::<Digit, SHIFT>(self.sign, &self.digits, &shift.digits);
+            Ok(Self { sign, digits })
         }
     }
 }
 
-impl Debug for RightShiftError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(&self.description())
+impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedShr<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, RightShiftError>;
+
+    fn checked_shr(self, shift: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+        if shift.is_negative() {
+            Err(RightShiftError::NegativeShift)
+        } else if self.is_zero() {
+            Ok(self.clone())
+        } else {
+            let (sign, digits) =
+                shift_digits_right::<Digit, SHIFT>(self.sign, &self.digits, &shift.digits);
+            Ok(BigInt::<Digit, SEPARATOR, SHIFT> { sign, digits })
+        }
     }
 }
 
-impl Display for RightShiftError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.description(), formatter)
+impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+{
+    type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, RightShiftError>;
+
+    fn checked_shr(self, shift: Self) -> Self::Output {
+        if shift.is_negative() {
+            Err(RightShiftError::NegativeShift)
+        } else if self.is_zero() {
+            Ok(self.clone())
+        } else {
+            let (sign, digits) =
+                shift_digits_right::<Digit, SHIFT>(self.sign, &self.digits, &shift.digits);
+            Ok(BigInt::<Digit, SEPARATOR, SHIFT> { sign, digits })
+        }
     }
 }
 
@@ -102,7 +101,7 @@ macro_rules! plain_signed_checked_shr_impl {
                         Ok(Self::zero())
                     } else if self.is_negative() {
                         let inverted = !self;
-                        let digits = shift_digits_right::<Digit, SHIFT>(
+                        let digits = primitive_shift_digits_right::<Digit, SHIFT>(
                             &inverted.digits,
                             shift_quotient as usize,
                             unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
@@ -112,7 +111,7 @@ macro_rules! plain_signed_checked_shr_impl {
                             digits,
                         })
                     } else {
-                        let digits = shift_digits_right::<Digit, SHIFT>(
+                        let digits = primitive_shift_digits_right::<Digit, SHIFT>(
                             &self.digits,
                             shift_quotient as usize,
                             unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
@@ -148,7 +147,7 @@ macro_rules! plain_unsigned_checked_shr_impl {
                     {
                         Ok(Self::zero())
                     } else {
-                        let digits = shift_digits_right::<Digit, SHIFT>(
+                        let digits = primitive_shift_digits_right::<Digit, SHIFT>(
                             &self.digits,
                             shift_quotient as usize,
                             unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
@@ -165,3 +164,28 @@ macro_rules! plain_unsigned_checked_shr_impl {
 }
 
 plain_unsigned_checked_shr_impl!(u8 u16 u32 u64 u128 usize);
+
+#[derive(Eq, PartialEq)]
+pub enum RightShiftError {
+    NegativeShift,
+}
+
+impl RightShiftError {
+    fn description(&self) -> String {
+        match self {
+            RightShiftError::NegativeShift => String::from("Shift by negative step is undefined."),
+        }
+    }
+}
+
+impl Debug for RightShiftError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(&self.description())
+    }
+}
+
+impl Display for RightShiftError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.description(), formatter)
+    }
+}

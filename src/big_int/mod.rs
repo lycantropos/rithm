@@ -1,6 +1,6 @@
+pub use self::checked_shr::*;
 pub(crate) use self::constants::*;
 pub(crate) use self::digits::*;
-pub use self::rest_definitions::*;
 pub use self::try_from::*;
 pub use self::types::*;
 
@@ -26,6 +26,7 @@ mod checked_rem;
 mod checked_rem_euclid;
 mod checked_rem_euclid_inv;
 mod checked_shl;
+mod checked_shr;
 mod constants;
 mod contracts;
 mod digits;
@@ -52,7 +53,6 @@ mod partial_ord;
 mod pow;
 mod rem;
 mod rem_euclid;
-mod rest_definitions;
 mod sub;
 mod sub_assign;
 mod to_bytes;

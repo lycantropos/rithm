@@ -1428,7 +1428,7 @@ where
     accumulator
 }
 
-pub(super) fn shift_digits_right<Digit: RightShiftableDigit, const SHIFT: usize>(
+pub(super) fn primitive_shift_digits_right<Digit: RightShiftableDigit, const SHIFT: usize>(
     digits: &[Digit],
     shift_quotient: usize,
     shift_remainder: Digit,
@@ -1451,6 +1451,38 @@ pub(super) fn shift_digits_right<Digit: RightShiftableDigit, const SHIFT: usize>
     }
     trim_leading_zeros(&mut result);
     result
+}
+
+pub(super) fn shift_digits_right<Digit: RightShiftableDigit, const SHIFT: usize>(
+    base_sign: Sign,
+    base: &[Digit],
+    shift: &[Digit],
+) -> (Sign, Vec<Digit>) {
+    let (shift_quotient_digits, shift_remainder) =
+        div_rem_digits_by_digit::<Digit, SHIFT>(&shift, unsafe {
+            Digit::try_from(SHIFT).unwrap_unchecked()
+        });
+    let shift_quotient = checked_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
+        .unwrap_or(usize::MAX / size_of::<Digit>());
+    if shift_quotient >= usize::MAX / size_of::<Digit>() {
+        if base_sign.is_negative() {
+            (-Sign::one(), vec![Digit::one(); 1])
+        } else {
+            (Sign::zero(), vec![Digit::zero(); 1])
+        }
+    } else if base_sign.is_negative() {
+        let (inverted_sign, inverted_digits) = invert_digits::<Digit, SHIFT>(base_sign, &base);
+        let digits = primitive_shift_digits_right::<Digit, SHIFT>(
+            &inverted_digits,
+            shift_quotient,
+            shift_remainder,
+        );
+        invert_digits::<Digit, SHIFT>(inverted_sign * to_digits_sign(&digits), &digits)
+    } else {
+        let digits =
+            primitive_shift_digits_right::<Digit, SHIFT>(&base, shift_quotient, shift_remainder);
+        (base_sign * to_digits_sign(&digits), digits)
+    }
 }
 
 fn shift_digits_right_in_place<Digit, const SHIFT: usize>(

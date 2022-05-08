@@ -1335,7 +1335,7 @@ where
     result
 }
 
-pub(super) fn shift_digits_left<Digit: LeftShiftableDigit, const SHIFT: usize>(
+pub(super) fn valid_shift_digits_left<Digit: LeftShiftableDigit, const SHIFT: usize>(
     digits: &[Digit],
     shift_quotient: usize,
     shift_remainder: Digit,
@@ -1359,6 +1359,53 @@ pub(super) fn shift_digits_left<Digit: LeftShiftableDigit, const SHIFT: usize>(
     }
     trim_leading_zeros(&mut result);
     Some(result)
+}
+
+#[derive(Eq, PartialEq)]
+pub enum LeftShiftError {
+    NegativeShift,
+    OutOfMemory,
+    TooLarge,
+}
+
+impl LeftShiftError {
+    fn description(&self) -> String {
+        match self {
+            LeftShiftError::NegativeShift => String::from("Shift by negative step is undefined."),
+            LeftShiftError::OutOfMemory => String::from("Not enough memory for shift result."),
+            LeftShiftError::TooLarge => String::from("Too large shift step."),
+        }
+    }
+}
+
+impl Debug for LeftShiftError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(&self.description())
+    }
+}
+
+impl Display for LeftShiftError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.description(), formatter)
+    }
+}
+
+pub(super) fn shift_digits_left<Digit: LeftShiftableDigit, const SHIFT: usize>(
+    base: &[Digit],
+    shift: &[Digit],
+) -> Result<Vec<Digit>, LeftShiftError> {
+    let (shift_quotient_digits, shift_remainder) =
+        div_rem_digits_by_digit::<Digit, SHIFT>(&shift, unsafe {
+            Digit::try_from(SHIFT).unwrap_unchecked()
+        });
+    let shift_quotient = checked_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
+        .ok_or(LeftShiftError::TooLarge)?;
+    if shift_quotient >= usize::MAX / size_of::<Digit>() {
+        Err(LeftShiftError::TooLarge)
+    } else {
+        valid_shift_digits_left::<Digit, SHIFT>(&base, shift_quotient, shift_remainder)
+            .ok_or(LeftShiftError::OutOfMemory)
+    }
 }
 
 fn shift_digits_left_in_place<Digit, const SHIFT: usize>(

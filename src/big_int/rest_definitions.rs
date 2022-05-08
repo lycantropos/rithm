@@ -1,49 +1,10 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::mem::size_of;
-use std::ops::Rem;
 
-use crate::traits::{
-    AssigningShiftingLeftMonoid, CheckedShl, CheckedShr, DivRem, Oppositive, RemEuclid,
-};
+use crate::traits::{AssigningShiftingLeftMonoid, CheckedShr, DivRem, Oppositive};
 
 use super::digits::*;
 use super::types::BigInt;
-
-impl<Digit: LeftShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShl
-    for BigInt<Digit, SEPARATOR, SHIFT>
-{
-    type Output = Result<Self, LeftShiftError>;
-
-    fn checked_shl(self, shift: Self) -> Self::Output {
-        if shift.is_negative() {
-            Err(LeftShiftError::NegativeShift)
-        } else if self.is_zero() {
-            Ok(self)
-        } else {
-            let (shift_quotient_digits, shift_remainder) =
-                div_rem_digits_by_digit::<Digit, SHIFT>(&shift.digits, unsafe {
-                    Digit::try_from(SHIFT).unwrap_unchecked()
-                });
-            let shift_quotient =
-                checked_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
-                    .ok_or(LeftShiftError::TooLarge)?;
-            if shift_quotient >= usize::MAX / size_of::<Digit>() {
-                Err(LeftShiftError::TooLarge)
-            } else {
-                let digits = shift_digits_left::<Digit, SHIFT>(
-                    &self.digits,
-                    shift_quotient,
-                    shift_remainder,
-                )
-                .ok_or(LeftShiftError::OutOfMemory)?;
-                Ok(Self {
-                    sign: self.sign,
-                    digits,
-                })
-            }
-        }
-    }
-}
 
 impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr
     for BigInt<Digit, SEPARATOR, SHIFT>
@@ -96,35 +57,6 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
 }
 
 #[derive(Eq, PartialEq)]
-pub enum LeftShiftError {
-    NegativeShift,
-    OutOfMemory,
-    TooLarge,
-}
-
-impl LeftShiftError {
-    fn description(&self) -> String {
-        match self {
-            LeftShiftError::NegativeShift => String::from("Shift by negative step is undefined."),
-            LeftShiftError::OutOfMemory => String::from("Not enough memory for shift result."),
-            LeftShiftError::TooLarge => String::from("Too large shift step."),
-        }
-    }
-}
-
-impl Debug for LeftShiftError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(&self.description())
-    }
-}
-
-impl Display for LeftShiftError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.description(), formatter)
-    }
-}
-
-#[derive(Eq, PartialEq)]
 pub enum RightShiftError {
     NegativeShift,
 }
@@ -148,80 +80,6 @@ impl Display for RightShiftError {
         Display::fmt(&self.description(), formatter)
     }
 }
-
-macro_rules! plain_signed_checked_shl_impl {
-    ($($t:ty)*) => ($(
-        impl<Digit: LeftShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShl<$t>
-            for BigInt<Digit, SEPARATOR, SHIFT>
-        {
-            type Output = Result<Self, LeftShiftError>;
-
-            fn checked_shl(self, shift: $t) -> Self::Output {
-                debug_assert!(usize::BITS < <$t>::BITS || SHIFT < <$t>::MAX as usize);
-                if shift.is_negative() {
-                    Err(LeftShiftError::NegativeShift)
-                } else if self.is_zero() {
-                    Ok(self)
-                } else {
-                    let (shift_quotient, shift_remainder) = shift.div_rem(SHIFT as $t);
-                    if (<$t>::BITS as usize) + 8 * size_of::<Digit>() >= (usize::BITS as usize)
-                        && shift_quotient >= ((usize::MAX / size_of::<Digit>()) as $t) {
-                        Err(LeftShiftError::TooLarge)
-                    } else {
-                        let digits = shift_digits_left::<Digit, SHIFT>(
-                            &self.digits,
-                            shift_quotient as usize,
-                            unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
-                        )
-                        .ok_or(LeftShiftError::OutOfMemory)?;
-                        Ok(Self {
-                            sign: self.sign,
-                            digits,
-                        })
-                    }
-                }
-            }
-        }
-    )*)
-}
-
-plain_signed_checked_shl_impl!(i8 i16 i32 i64 i128 isize);
-
-macro_rules! plain_unsigned_checked_shl_impl {
-    ($($t:ty)*) => ($(
-        impl<Digit: LeftShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShl<$t>
-            for BigInt<Digit, SEPARATOR, SHIFT>
-        {
-            type Output = Result<Self, LeftShiftError>;
-
-            fn checked_shl(self, shift: $t) -> Self::Output {
-                debug_assert!(usize::BITS < <$t>::BITS || SHIFT < <$t>::MAX as usize);
-                if self.is_zero() {
-                    Ok(self)
-                } else {
-                    let (shift_quotient, shift_remainder) = shift.div_rem(SHIFT as $t);
-                    if (<$t>::BITS as usize) + 8 * size_of::<Digit>() >= (usize::BITS as usize)
-                        && shift_quotient >= ((usize::MAX / size_of::<Digit>()) as $t) {
-                        Err(LeftShiftError::TooLarge)
-                    } else {
-                        let digits = shift_digits_left::<Digit, SHIFT>(
-                            &self.digits,
-                            shift_quotient as usize,
-                            unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
-                        )
-                        .ok_or(LeftShiftError::OutOfMemory)?;
-                        Ok(Self {
-                            sign: self.sign,
-                            digits,
-                        })
-                    }
-                }
-            }
-        }
-    )*)
-}
-
-plain_unsigned_checked_shl_impl!(u8 u16 u32 u64 u128 usize);
 
 macro_rules! plain_signed_checked_shr_impl {
     ($($t:ty)*) => ($(

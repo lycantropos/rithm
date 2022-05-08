@@ -25,6 +25,7 @@ mod checked_pow_rem_euclid;
 mod checked_rem;
 mod checked_rem_euclid;
 mod checked_rem_euclid_inv;
+mod checked_shl;
 mod constants;
 mod contracts;
 mod digits;

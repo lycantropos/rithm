@@ -4,22 +4,12 @@ use std::mem::size_of;
 use std::ops::Rem;
 
 use crate::traits::{
-    AssigningShiftingLeftMonoid, CheckedDivRem, CheckedDivRemEuclid, CheckedShl, CheckedShr,
-    DivRem, DivRemEuclid, Oppositive, RemEuclid,
+    AssigningShiftingLeftMonoid, CheckedDivRemEuclid, CheckedShl, CheckedShr, DivRem, DivRemEuclid,
+    Oppositive, RemEuclid,
 };
 
 use super::digits::*;
 use super::types::BigInt;
-
-impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivRem
-    for BigInt<Digit, SEPARATOR, SHIFT>
-{
-    type Output = (Self, Self);
-
-    fn div_rem(self, divisor: Self) -> Self::Output {
-        self.checked_div_rem(divisor).unwrap()
-    }
-}
 
 impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivRemEuclid
     for BigInt<Digit, SEPARATOR, SHIFT>

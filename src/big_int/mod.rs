@@ -32,6 +32,7 @@ mod display;
 mod div;
 mod div_assign;
 mod div_euclid;
+mod div_rem;
 mod float_to_int;
 mod from;
 mod from_bytes;

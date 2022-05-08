@@ -176,7 +176,7 @@ impl Display for CheckedDivApproximationError {
     }
 }
 
-pub(crate) fn binary_digits_to_base<
+pub(super) fn binary_digits_to_base<
     SourceDigit: BinaryDigitConvertibleTo<TargetDigit>,
     TargetDigit,
 >(
@@ -191,7 +191,7 @@ pub(crate) fn binary_digits_to_base<
     }
 }
 
-pub(crate) fn digits_to_binary_base<
+pub(super) fn digits_to_binary_base<
     SourceDigit: BinaryDigitConvertibleToBinary<TargetDigit> + NonBinaryDigitConvertibleToBinary<TargetDigit>,
     TargetDigit,
     const TARGET_SHIFT: usize,
@@ -218,7 +218,7 @@ pub(crate) fn digits_to_binary_base<
     }
 }
 
-pub(crate) fn binary_digits_to_binary_base<
+pub(super) fn binary_digits_to_binary_base<
     SourceDigit: BinaryDigitConvertibleToBinary<TargetDigit>,
     TargetDigit,
 >(
@@ -282,7 +282,7 @@ fn binary_digits_to_non_binary_base<
     result
 }
 
-pub(crate) fn binary_digits_to_greater_binary_base<
+fn binary_digits_to_greater_binary_base<
     SourceDigit: BinaryDigitUpcastableTo<TargetDigit>,
     TargetDigit,
 >(
@@ -317,7 +317,7 @@ pub(crate) fn binary_digits_to_greater_binary_base<
     result
 }
 
-pub(crate) fn binary_digits_to_lesser_binary_base<
+pub(super) fn binary_digits_to_lesser_binary_base<
     SourceDigit: BinaryDigitDowncastableTo<TargetDigit>,
     TargetDigit,
 >(
@@ -359,7 +359,7 @@ pub(crate) fn binary_digits_to_lesser_binary_base<
     result
 }
 
-pub(crate) fn bitwise_and<Digit: BinaryDigit, const SHIFT: usize>(
+pub(super) fn bitwise_and<Digit: BinaryDigit, const SHIFT: usize>(
     longest_sign: Sign,
     mut longest: Vec<Digit>,
     shortest_sign: Sign,
@@ -388,7 +388,7 @@ pub(crate) fn bitwise_and<Digit: BinaryDigit, const SHIFT: usize>(
     (sign, result)
 }
 
-pub(crate) fn bitwise_or<Digit: BinaryDigit, const SHIFT: usize>(
+pub(super) fn bitwise_or<Digit: BinaryDigit, const SHIFT: usize>(
     longest_sign: Sign,
     mut longest: Vec<Digit>,
     shortest_sign: Sign,
@@ -416,7 +416,7 @@ pub(crate) fn bitwise_or<Digit: BinaryDigit, const SHIFT: usize>(
     (sign, result)
 }
 
-pub(crate) fn bitwise_xor<Digit: BinaryDigit, const SHIFT: usize>(
+pub(super) fn bitwise_xor<Digit: BinaryDigit, const SHIFT: usize>(
     longest_sign: Sign,
     mut longest: Vec<Digit>,
     shortest_sign: Sign,
@@ -580,7 +580,7 @@ pub(super) fn checked_div_as_float<
     }
 }
 
-pub(crate) fn checked_div<Digit: DivisibleDigit, const SHIFT: usize>(
+pub(super) fn checked_div<Digit: DivisibleDigit, const SHIFT: usize>(
     dividend_sign: Sign,
     dividend: &[Digit],
     divisor_sign: Sign,
@@ -602,7 +602,7 @@ pub(crate) fn checked_div<Digit: DivisibleDigit, const SHIFT: usize>(
     }
 }
 
-pub(crate) fn checked_div_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
+pub(super) fn checked_div_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
     dividend_sign: Sign,
     dividend: &[Digit],
     divisor_sign: Sign,
@@ -649,7 +649,7 @@ pub(crate) fn checked_div_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize
     }
 }
 
-pub fn checked_div_rem<Digit: DivisibleDigit, const SHIFT: usize>(
+pub(super) fn checked_div_rem<Digit: DivisibleDigit, const SHIFT: usize>(
     dividend_sign: Sign,
     dividend: &[Digit],
     divisor_sign: Sign,
@@ -689,7 +689,7 @@ pub fn checked_div_rem<Digit: DivisibleDigit, const SHIFT: usize>(
     }
 }
 
-pub fn checked_div_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
+pub(super) fn checked_div_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
     dividend_sign: Sign,
     dividend: &[Digit],
     divisor_sign: Sign,
@@ -712,7 +712,7 @@ pub fn checked_div_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
     Some((quotient_sign, quotient, remainder_sign, remainder))
 }
 
-pub(crate) fn checked_rem<Digit: DivisibleDigit, const SHIFT: usize>(
+pub(super) fn checked_rem<Digit: DivisibleDigit, const SHIFT: usize>(
     dividend_sign: Sign,
     dividend: &[Digit],
     divisor_sign: Sign,
@@ -731,7 +731,7 @@ pub(crate) fn checked_rem<Digit: DivisibleDigit, const SHIFT: usize>(
     }
 }
 
-pub(crate) fn checked_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
+pub(super) fn checked_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
     dividend_sign: Sign,
     dividend: &[Digit],
     divisor_sign: Sign,
@@ -768,7 +768,7 @@ pub(crate) fn checked_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize
     }
 }
 
-pub(crate) fn complement_in_place<Digit: BinaryDigit, const SHIFT: usize>(digits: &mut [Digit]) {
+pub(super) fn complement_in_place<Digit: BinaryDigit, const SHIFT: usize>(digits: &mut [Digit]) {
     let mut accumulator = Digit::one();
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for index in 0..digits.len() {
@@ -779,7 +779,7 @@ pub(crate) fn complement_in_place<Digit: BinaryDigit, const SHIFT: usize>(digits
     debug_assert!(accumulator.is_zero());
 }
 
-pub(crate) fn digits_from_finite_positive_improper_float<
+pub(super) fn digits_from_finite_positive_improper_float<
     Digit: Copy + ZeroableDigit,
     Value: Float,
     const SHIFT: usize,
@@ -802,12 +802,12 @@ where
 }
 
 #[inline]
-pub(crate) fn digits_lesser_than<Digit: PartialOrd>(left: &[Digit], right: &[Digit]) -> bool {
+pub(super) fn digits_lesser_than<Digit: PartialOrd>(left: &[Digit], right: &[Digit]) -> bool {
     left.len() < right.len()
         || left.len() == right.len() && left.iter().rev().lt(right.iter().rev())
 }
 
-pub(crate) fn div_rem_digits_by_digit<Digit: DivisibleDigit, const SHIFT: usize>(
+pub(super) fn div_rem_digits_by_digit<Digit: DivisibleDigit, const SHIFT: usize>(
     dividend: &[Digit],
     divisor: Digit,
 ) -> (Vec<Digit>, Digit) {
@@ -828,7 +828,7 @@ pub(crate) fn div_rem_digits_by_digit<Digit: DivisibleDigit, const SHIFT: usize>
     })
 }
 
-pub(crate) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usize>(
+pub(super) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usize>(
     dividend: &[Digit],
     divisor: &[Digit],
 ) -> (Vec<Digit>, Vec<Digit>) {
@@ -932,7 +932,7 @@ pub(crate) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usi
     (quotient, remainder)
 }
 
-pub(crate) fn fraction_exponent_digits<
+pub(super) fn fraction_exponent_digits<
     Digit: BinaryDigitConvertibleToFloat<Fraction>,
     Fraction: Float,
     const SHIFT: usize,
@@ -1018,7 +1018,7 @@ pub(crate) fn fraction_exponent_digits<
     }
 }
 
-pub(crate) fn invert_digits<Digit: AdditiveDigit, const SHIFT: usize>(
+pub(super) fn invert_digits<Digit: AdditiveDigit, const SHIFT: usize>(
     sign: Sign,
     digits: &[Digit],
 ) -> (Sign, Vec<Digit>) {
@@ -1027,7 +1027,7 @@ pub(crate) fn invert_digits<Digit: AdditiveDigit, const SHIFT: usize>(
     (-sign, digits)
 }
 
-pub(crate) fn multiply_digits<Digit: MultiplicativeDigit, const SHIFT: usize>(
+pub(super) fn multiply_digits<Digit: MultiplicativeDigit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
 ) -> Vec<Digit> {
@@ -1168,7 +1168,7 @@ fn multiply_digits_plain<Digit: MultiplicativeDigit, const SHIFT: usize>(
     result
 }
 
-pub(crate) fn negate_digits(digits: &mut [u8]) {
+pub(super) fn negate_digits(digits: &mut [u8]) {
     let mut carry = true;
     for digit in digits {
         *digit = !*digit;
@@ -1293,7 +1293,7 @@ fn non_binary_digits_to_lesser_binary_base<
     result
 }
 
-pub(crate) fn reduce_digits<Digit, Output, const SHIFT: usize>(digits: &[Digit]) -> Output
+pub(super) fn reduce_digits<Digit, Output, const SHIFT: usize>(digits: &[Digit]) -> Output
 where
     Digit: Copy,
     Output: BinaryDigit + Oppose + From<Digit>,
@@ -1305,7 +1305,7 @@ where
     result
 }
 
-pub(crate) fn checked_reduce_digits<Digit, Output, const SHIFT: usize>(
+pub(super) fn checked_reduce_digits<Digit, Output, const SHIFT: usize>(
     digits: &[Digit],
 ) -> Option<Output>
 where
@@ -1323,7 +1323,7 @@ where
     Some(result)
 }
 
-pub(crate) fn reduce_digits_to_float<Digit, Output, const SHIFT: usize>(digits: &[Digit]) -> Output
+pub(super) fn reduce_digits_to_float<Digit, Output, const SHIFT: usize>(digits: &[Digit]) -> Output
 where
     Digit: Copy,
     Output: Float + From<Digit>,
@@ -1335,7 +1335,7 @@ where
     result
 }
 
-pub(crate) fn shift_digits_left<Digit: LeftShiftableDigit, const SHIFT: usize>(
+pub(super) fn shift_digits_left<Digit: LeftShiftableDigit, const SHIFT: usize>(
     digits: &[Digit],
     shift_quotient: usize,
     shift_remainder: Digit,
@@ -1381,7 +1381,7 @@ where
     accumulator
 }
 
-pub(crate) fn shift_digits_right<Digit: RightShiftableDigit, const SHIFT: usize>(
+pub(super) fn shift_digits_right<Digit: RightShiftableDigit, const SHIFT: usize>(
     digits: &[Digit],
     shift_quotient: usize,
     shift_remainder: Digit,
@@ -1437,7 +1437,7 @@ where
     (high, low)
 }
 
-pub(crate) fn subtract_signed_digits<Digit: AdditiveDigit, const SHIFT: usize>(
+pub(super) fn subtract_signed_digits<Digit: AdditiveDigit, const SHIFT: usize>(
     minuend_sign: Sign,
     minuend: &[Digit],
     subtrahend_sign: Sign,
@@ -1539,7 +1539,7 @@ fn subtract_digits_in_place<Digit: AdditiveDigit, const SHIFT: usize>(
     accumulator
 }
 
-pub(crate) fn sum_signed_digits<Digit: AdditiveDigit, const SHIFT: usize>(
+pub(super) fn sum_signed_digits<Digit: AdditiveDigit, const SHIFT: usize>(
     first_sign: Sign,
     first: &[Digit],
     second_sign: Sign,
@@ -1611,14 +1611,14 @@ fn sum_digits_in_place<Digit: AdditiveDigit, const SHIFT: usize>(
 }
 
 #[inline]
-pub(crate) fn to_digit_mask<Digit: ShiftingLeftMonoid<usize> + SubtractiveMagma + Unitary>(
+pub(super) fn to_digit_mask<Digit: ShiftingLeftMonoid<usize> + SubtractiveMagma + Unitary>(
     shift: usize,
 ) -> Digit {
     (Digit::one() << shift) - Digit::one()
 }
 
 #[inline]
-pub(crate) fn to_digits_sign<Digit: Zeroable>(digits: &[Digit]) -> Sign {
+pub(super) fn to_digits_sign<Digit: Zeroable>(digits: &[Digit]) -> Sign {
     (digits.len() > 1 || !digits[0].is_zero()) as Sign
 }
 
@@ -1768,7 +1768,7 @@ pub(super) fn to_gcd<Digit: GcdDigit, const SHIFT: usize>(
     }
 }
 
-pub(crate) fn trim_leading_zeros<Digit>(digits: &mut Vec<Digit>)
+pub(super) fn trim_leading_zeros<Digit>(digits: &mut Vec<Digit>)
 where
     Digit: Clone + Zeroable,
 {
@@ -1781,7 +1781,7 @@ where
     }
 }
 
-pub(crate) fn non_zero_value_to_digits<Source, Digit, const SHIFT: usize>(
+pub(super) fn non_zero_value_to_digits<Source, Digit, const SHIFT: usize>(
     value: Source,
 ) -> Vec<Digit>
 where
@@ -1835,7 +1835,7 @@ where
 }
 
 #[inline]
-pub(crate) fn value_to_sign<Source>(value: Source) -> Sign
+pub(super) fn value_to_sign<Source>(value: Source) -> Sign
 where
     Source: Oppose + Zeroable,
     OppositionOf<Source>: TryFrom<Source>,
@@ -1848,7 +1848,7 @@ where
 }
 
 #[inline]
-pub(crate) fn non_zero_value_to_sign<Source>(value: Source) -> Sign
+pub(super) fn non_zero_value_to_sign<Source>(value: Source) -> Sign
 where
     Source: Oppose,
     OppositionOf<Source>: TryFrom<Source>,

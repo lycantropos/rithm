@@ -3,7 +3,7 @@ use std::mem::size_of;
 use crate::traits::{CheckedShl, DivRem, Oppositive, Zeroable};
 
 use super::digits::{
-    shift_digits_left, valid_shift_digits_left, LeftShiftError, LeftShiftableDigit,
+    primitive_shift_digits_left, shift_digits_left, LeftShiftError, LeftShiftableDigit,
 };
 use super::types::BigInt;
 
@@ -102,7 +102,7 @@ macro_rules! plain_signed_checked_shl_impl {
                         && shift_quotient >= ((usize::MAX / size_of::<Digit>()) as $t) {
                         Err(LeftShiftError::TooLarge)
                     } else {
-                        let digits = valid_shift_digits_left::<Digit, SHIFT>(
+                        let digits = primitive_shift_digits_left::<Digit, SHIFT>(
                             &self.digits,
                             shift_quotient as usize,
                             unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },
@@ -138,7 +138,7 @@ macro_rules! plain_unsigned_checked_shl_impl {
                         && shift_quotient >= ((usize::MAX / size_of::<Digit>()) as $t) {
                         Err(LeftShiftError::TooLarge)
                     } else {
-                        let digits = valid_shift_digits_left::<Digit, SHIFT>(
+                        let digits = primitive_shift_digits_left::<Digit, SHIFT>(
                             &self.digits,
                             shift_quotient as usize,
                             unsafe { Digit::try_from(shift_remainder as usize).unwrap_unchecked() },

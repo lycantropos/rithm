@@ -1335,7 +1335,7 @@ where
     result
 }
 
-pub(super) fn valid_shift_digits_left<Digit: LeftShiftableDigit, const SHIFT: usize>(
+pub(super) fn primitive_shift_digits_left<Digit: LeftShiftableDigit, const SHIFT: usize>(
     digits: &[Digit],
     shift_quotient: usize,
     shift_remainder: Digit,
@@ -1403,7 +1403,7 @@ pub(super) fn shift_digits_left<Digit: LeftShiftableDigit, const SHIFT: usize>(
     if shift_quotient >= usize::MAX / size_of::<Digit>() {
         Err(LeftShiftError::TooLarge)
     } else {
-        valid_shift_digits_left::<Digit, SHIFT>(&base, shift_quotient, shift_remainder)
+        primitive_shift_digits_left::<Digit, SHIFT>(&base, shift_quotient, shift_remainder)
             .ok_or(LeftShiftError::OutOfMemory)
     }
 }

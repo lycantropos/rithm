@@ -9,19 +9,6 @@ use crate::traits::{
 use super::digits::*;
 use super::types::BigInt;
 
-impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Rem
-    for BigInt<Digit, SEPARATOR, SHIFT>
-{
-    type Output = Self;
-
-    fn rem(self, divisor: Self) -> Self::Output {
-        let (sign, digits) =
-            checked_rem::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
-                .unwrap();
-        Self::Output { sign, digits }
-    }
-}
-
 impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> RemEuclid
     for BigInt<Digit, SEPARATOR, SHIFT>
 {

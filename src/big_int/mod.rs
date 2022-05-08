@@ -36,6 +36,7 @@ mod from_str_radix;
 mod gcd;
 mod mul;
 mod mul_assign;
+mod neg;
 mod not;
 mod oppositive;
 mod parity;

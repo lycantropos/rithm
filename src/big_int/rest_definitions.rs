@@ -1,11 +1,11 @@
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
 use std::mem::size_of;
-use std::ops::{Div, DivAssign, Neg, Rem};
+use std::ops::{Div, DivAssign, Rem};
 
 use crate::traits::{
     AssigningShiftingLeftMonoid, CheckedDivRem, CheckedDivRemEuclid, CheckedPow, CheckedShl,
-    CheckedShr, DivEuclid, DivRem, DivRemEuclid, Float, Oppositive, Pow, RemEuclid,
+    CheckedShr, DivEuclid, DivRem, DivRemEuclid, Oppositive, Pow, RemEuclid,
 };
 
 use super::digits::*;
@@ -76,17 +76,6 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
 
     fn div_rem_euclid(self, divisor: Self) -> Self::Output {
         self.checked_div_rem_euclid(divisor).unwrap()
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Neg for BigInt<Digit, SEPARATOR, SHIFT> {
-    type Output = Self;
-
-    fn neg(self) -> Self::Output {
-        Self::Output {
-            sign: -self.sign,
-            digits: self.digits,
-        }
     }
 }
 
@@ -340,19 +329,6 @@ impl Debug for RightShiftError {
 impl Display for RightShiftError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self.description(), formatter)
-    }
-}
-
-impl<Digit: Clone, const SEPARATOR: char, const SHIFT: usize> Neg
-    for &BigInt<Digit, SEPARATOR, SHIFT>
-{
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
-
-    fn neg(self) -> Self::Output {
-        Self::Output {
-            sign: -self.sign,
-            digits: self.digits.clone(),
-        }
     }
 }
 

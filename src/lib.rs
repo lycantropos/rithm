@@ -124,10 +124,10 @@ impl PyInt {
                     Ok(PyInt(
                         BigInt::try_from(value.extract::<&PyFloat>()?.value()).map_err(
                             |reason| match reason {
-                                big_int::FromFloatConversionError::Infinity => {
+                                big_int::TryFromFloatError::Infinity => {
                                     PyOverflowError::new_err(reason.to_string())
                                 }
-                                big_int::FromFloatConversionError::NaN => {
+                                big_int::TryFromFloatError::NaN => {
                                     PyValueError::new_err(reason.to_string())
                                 }
                             },
@@ -561,9 +561,9 @@ fn try_floordiv(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
 #[inline]
 fn try_lshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
     base.checked_shl(shift).map_err(|reason| match reason {
-        big_int::LeftShiftError::NegativeShift => PyValueError::new_err(reason.to_string()),
-        big_int::LeftShiftError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
-        big_int::LeftShiftError::TooLarge => PyOverflowError::new_err(reason.to_string()),
+        big_int::ShlError::NegativeShift => PyValueError::new_err(reason.to_string()),
+        big_int::ShlError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
+        big_int::ShlError::TooLarge => PyOverflowError::new_err(reason.to_string()),
     })
 }
 
@@ -589,9 +589,9 @@ fn try_mod_to_near(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
         .clone()
         .checked_shl(BigInt::one())
         .map_err(|reason| match reason {
-            big_int::LeftShiftError::NegativeShift => PyValueError::new_err(reason.to_string()),
-            big_int::LeftShiftError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
-            big_int::LeftShiftError::TooLarge => PyOverflowError::new_err(reason.to_string()),
+            big_int::ShlError::NegativeShift => PyValueError::new_err(reason.to_string()),
+            big_int::ShlError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
+            big_int::ShlError::TooLarge => PyOverflowError::new_err(reason.to_string()),
         })?;
     let greater_than_half = if divisor.is_positive() {
         &double_remainder > divisor
@@ -645,7 +645,7 @@ fn try_pow_mod<
 #[inline]
 fn try_rshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
     base.checked_shr(shift).map_err(|reason| match reason {
-        big_int::RightShiftError::NegativeShift => PyValueError::new_err(reason.to_string()),
+        big_int::ShrError::NegativeShift => PyValueError::new_err(reason.to_string()),
     })
 }
 

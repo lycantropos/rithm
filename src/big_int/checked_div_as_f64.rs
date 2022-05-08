@@ -1,8 +1,8 @@
-use super::digits::{
-    checked_div_as_float, BinaryDigitConvertibleToFloat, CheckedDivAsFloatError, DivisibleDigit,
-};
-use super::types::BigInt;
+use crate::big_int::types::CheckedDivAsFloatError;
 use crate::traits::{BitwiseNegatableUnaryAlgebra, CheckedDivAsF64};
+
+use super::digits::{checked_div_as_float, BinaryDigitConvertibleToFloat, DivisibleDigit};
+use super::types::BigInt;
 
 impl<
         Digit: BinaryDigitConvertibleToFloat<f64> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,

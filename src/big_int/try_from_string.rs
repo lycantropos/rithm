@@ -1,4 +1,3 @@
-use std::fmt::{Debug, Display, Formatter};
 use std::iter::Peekable;
 use std::str::Chars;
 
@@ -7,7 +6,7 @@ use crate::traits::Unitary;
 use super::constants::{MAX_REPRESENTABLE_BASE, MIN_REPRESENTABLE_BASE};
 use super::contracts::is_valid_shift;
 use super::digits::{digits_to_binary_base, to_digits_sign, FromStrDigit};
-use super::types::{BigInt, Sign};
+use super::types::{BigInt, Sign, TryFromStringError};
 
 impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
     BigInt<Digit, SEPARATOR, SHIFT>
@@ -128,50 +127,5 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
                 _ => {}
             };
         };
-    }
-}
-
-#[derive(Eq, PartialEq)]
-pub enum TryFromStringError {
-    BaseOutOfBounds(u32),
-    ConsecutiveSeparators,
-    EndsWithSeparator,
-    InvalidDigit(char, u8),
-    StartsWithSeparator,
-}
-
-impl TryFromStringError {
-    fn description(&self) -> String {
-        match self {
-            TryFromStringError::BaseOutOfBounds(base) => {
-                format!(
-                    "Base should be zero or in range from {MIN_REPRESENTABLE_BASE} \
-                     to {MAX_REPRESENTABLE_BASE}, but found: {}.",
-                    base
-                )
-            }
-            TryFromStringError::ConsecutiveSeparators => {
-                String::from("Consecutive separators found.")
-            }
-            TryFromStringError::EndsWithSeparator => String::from("Should not end with separator."),
-            TryFromStringError::InvalidDigit(character, base) => {
-                format!("Invalid digit in base {}: {:?}.", base, character)
-            }
-            TryFromStringError::StartsWithSeparator => {
-                String::from("Should not start with separator.")
-            }
-        }
-    }
-}
-
-impl Debug for TryFromStringError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(&self.description())
-    }
-}
-
-impl Display for TryFromStringError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.description(), formatter)
     }
 }

@@ -1,35 +1,9 @@
 use std::convert::TryFrom;
-use std::fmt::{Debug, Display, Formatter};
 
 use crate::traits::LdExp;
 
 use super::digits::{fraction_exponent_digits, BinaryDigitConvertibleToFloat};
-use super::types::BigInt;
-
-#[derive(Eq, PartialEq)]
-pub enum TryIntoFloatError {
-    TooLarge,
-}
-
-impl TryIntoFloatError {
-    fn description(&self) -> &str {
-        match self {
-            TryIntoFloatError::TooLarge => "Too large to convert to floating point.",
-        }
-    }
-}
-
-impl Debug for TryIntoFloatError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(self.description())
-    }
-}
-
-impl Display for TryIntoFloatError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.description(), formatter)
-    }
-}
+use super::types::{BigInt, TryIntoFloatError};
 
 macro_rules! float_try_from_big_int {
     ($($t:ty)*) => ($(

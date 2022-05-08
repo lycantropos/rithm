@@ -1,9 +1,8 @@
 use std::cmp::Ordering;
 use std::convert::{FloatToInt, TryFrom};
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::{Debug, Display};
 use std::mem::size_of;
 
-use crate::big_int::types::{Sign, WindowDigit};
 use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
     AssigningBitwiseExclusiveDisjunctiveMonoid, AssigningDivisivePartialMagma,
@@ -13,6 +12,8 @@ use crate::traits::{
     ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, ShiftingLeftMonoid,
     ShiftingRightMonoid, SubtractiveMagma, Unitary, Zeroable,
 };
+
+use super::types::{CheckedDivAsFloatError, ShlError, Sign, WindowDigit};
 
 pub trait AdditiveDigit = AssigningAdditiveMonoid
     + AssigningBitwiseConjunctiveMagma
@@ -146,35 +147,6 @@ pub trait RightShiftableDigit =
 pub trait UnitaryDigit = Unitary + OppositiveDigit;
 
 pub trait ZeroableDigit = Oppose + Zeroable;
-
-#[derive(Eq, PartialEq)]
-pub enum CheckedDivAsFloatError {
-    TooLarge,
-    ZeroDivision,
-}
-
-impl CheckedDivAsFloatError {
-    fn description(&self) -> &str {
-        match self {
-            CheckedDivAsFloatError::TooLarge => {
-                "Division result too large to be expressed as floating point."
-            }
-            CheckedDivAsFloatError::ZeroDivision => "Division by zero is undefined.",
-        }
-    }
-}
-
-impl Debug for CheckedDivAsFloatError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(self.description())
-    }
-}
-
-impl Display for CheckedDivAsFloatError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.description(), formatter)
-    }
-}
 
 pub(super) fn binary_digits_to_base<
     SourceDigit: BinaryDigitConvertibleTo<TargetDigit>,
@@ -1361,50 +1333,21 @@ pub(super) fn primitive_shift_digits_left<Digit: LeftShiftableDigit, const SHIFT
     Some(result)
 }
 
-#[derive(Eq, PartialEq)]
-pub enum LeftShiftError {
-    NegativeShift,
-    OutOfMemory,
-    TooLarge,
-}
-
-impl LeftShiftError {
-    fn description(&self) -> String {
-        match self {
-            LeftShiftError::NegativeShift => String::from("Shift by negative step is undefined."),
-            LeftShiftError::OutOfMemory => String::from("Not enough memory for shift result."),
-            LeftShiftError::TooLarge => String::from("Too large shift step."),
-        }
-    }
-}
-
-impl Debug for LeftShiftError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(&self.description())
-    }
-}
-
-impl Display for LeftShiftError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.description(), formatter)
-    }
-}
-
 pub(super) fn shift_digits_left<Digit: LeftShiftableDigit, const SHIFT: usize>(
     base: &[Digit],
     shift: &[Digit],
-) -> Result<Vec<Digit>, LeftShiftError> {
+) -> Result<Vec<Digit>, ShlError> {
     let (shift_quotient_digits, shift_remainder) =
         div_rem_digits_by_digit::<Digit, SHIFT>(&shift, unsafe {
             Digit::try_from(SHIFT).unwrap_unchecked()
         });
     let shift_quotient = checked_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
-        .ok_or(LeftShiftError::TooLarge)?;
+        .ok_or(ShlError::TooLarge)?;
     if shift_quotient >= usize::MAX / size_of::<Digit>() {
-        Err(LeftShiftError::TooLarge)
+        Err(ShlError::TooLarge)
     } else {
         primitive_shift_digits_left::<Digit, SHIFT>(&base, shift_quotient, shift_remainder)
-            .ok_or(LeftShiftError::OutOfMemory)
+            .ok_or(ShlError::OutOfMemory)
     }
 }
 

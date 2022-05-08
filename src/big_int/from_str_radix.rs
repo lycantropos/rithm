@@ -2,8 +2,7 @@ use crate::traits::FromStrRadix;
 
 use super::constants::{MAX_REPRESENTABLE_BASE, MIN_REPRESENTABLE_BASE};
 use super::digits::FromStrDigit;
-use super::try_from_string::TryFromStringError;
-use super::types::BigInt;
+use super::types::{BigInt, TryFromStringError};
 
 impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> FromStrRadix
     for BigInt<Digit, SEPARATOR, SHIFT>

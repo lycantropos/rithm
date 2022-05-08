@@ -1,5 +1,4 @@
-use std::fmt::{Debug, Display, Formatter};
-
+use crate::big_int::types::CheckedPowRemEuclidError;
 use crate::traits::{
     Abs, CheckedPowRemEuclid, CheckedRemEuclid, CheckedRemEuclidInv, Oppositive, Unitary, Zeroable,
 };
@@ -352,34 +351,5 @@ impl<
                 result
             },
         )
-    }
-}
-
-#[derive(Eq, PartialEq)]
-pub enum CheckedPowRemEuclidError {
-    ZeroDivisor,
-    NonInvertibleBase,
-}
-
-impl CheckedPowRemEuclidError {
-    fn description(&self) -> &str {
-        match self {
-            CheckedPowRemEuclidError::ZeroDivisor => "Divisor should not be zero.",
-            CheckedPowRemEuclidError::NonInvertibleBase => {
-                "Base is not invertible for the given divisor."
-            }
-        }
-    }
-}
-
-impl Debug for CheckedPowRemEuclidError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(self.description())
-    }
-}
-
-impl Display for CheckedPowRemEuclidError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.description(), formatter)
     }
 }

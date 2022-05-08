@@ -30,6 +30,7 @@ mod contracts;
 mod digits;
 mod display;
 mod div;
+mod div_assign;
 mod float_to_int;
 mod from;
 mod from_bytes;

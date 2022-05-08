@@ -3,18 +3,17 @@ use std::convert::{FloatToInt, TryFrom, TryInto};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 
-use crate::big_int::BigInt;
-use crate::digits::{
-    AdditiveDigit, DigitConvertibleFromFloat, EuclidDivisibleDigit, GcdDigit, LeftShiftableDigit,
-    MultiplicativeDigit, UnitaryDigit,
+use crate::big_int::{
+    AdditiveDigit, BigInt, DigitConvertibleFromFloat, EuclidDivisibleDigit, GcdDigit,
+    LeftShiftableDigit, MultiplicativeDigit, UnitaryDigit,
 };
+use crate::contracts::is_signed;
 use crate::traits::{
     Abs, AdditiveMonoid, Ceil, CheckedDiv, CheckedDivAsF32, CheckedDivAsF64, CheckedDivEuclid,
     CheckedDivRemEuclid, CheckedPow, CheckedRemEuclid, CheckedShl, DivisivePartialMagma, Float,
     Floor, GcdMagma, Maybe, ModularUnaryAlgebra, MultiplicativeMonoid, NegatableUnaryAlgebra,
     Oppositive, Parity, Pow, Round, SubtractiveMagma, TieBreaking, Trunc, Unitary, Zeroable,
 };
-use crate::utils;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct Fraction<Component: Clone + Eq> {
@@ -50,6 +49,15 @@ impl Display for FromFloatConversionError {
     }
 }
 
+/// Constructs a new fraction from given numerator and denominator.
+/// Examples:
+/// ```rust
+/// use rithm::fraction;
+/// type Fraction = fraction::Fraction<i8>;
+/// assert_eq!(Fraction::new(1, 2), Some(Fraction::from(1) / 2));
+/// assert_eq!(Fraction::new(2, 4), Fraction::new(1, 2));
+/// assert_eq!(Fraction::new(-1, -2), Fraction::new(1, 2));
+/// ```
 impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fraction<Component> {
     pub fn new(mut numerator: Component, mut denominator: Component) -> Option<Self> {
         if denominator.is_zero() {
@@ -1269,7 +1277,7 @@ macro_rules! plain_try_from_float_impl {
                     Err(FromFloatConversionError::OutOfBounds)
                 } else {
                     let (mut fraction, mut exponent) = value.frexp();
-                    const MAX_EXPONENT_MODULUS: u32 = <$t>::BITS - 1 - (utils::is_signed::<$t>() as u32);
+                    const MAX_EXPONENT_MODULUS: u32 = <$t>::BITS - 1 - (is_signed::<$t>() as u32);
                     if (exponent.abs() as u32) > MAX_EXPONENT_MODULUS {
                         if exponent.is_negative() {
                             fraction *= ((exponent + (MAX_EXPONENT_MODULUS as i32)) as $f).exp2();

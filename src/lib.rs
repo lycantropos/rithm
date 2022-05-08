@@ -21,10 +21,9 @@ use crate::traits::{
 };
 
 pub mod big_int;
-mod digits;
+mod contracts;
 pub mod fraction;
 pub mod traits;
-mod utils;
 
 #[cfg(target_arch = "x86")]
 type Digit = u16;

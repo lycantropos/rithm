@@ -3,6 +3,7 @@ use std::convert::{FloatToInt, TryFrom};
 use std::fmt::{Debug, Display, Formatter};
 use std::mem::size_of;
 
+use crate::big_int::types::{Sign, WindowDigit};
 use crate::traits::{
     AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
     AssigningBitwiseExclusiveDisjunctiveMonoid, AssigningDivisivePartialMagma,
@@ -12,7 +13,6 @@ use crate::traits::{
     ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, ShiftingLeftMonoid,
     ShiftingRightMonoid, SubtractiveMagma, Unitary, Zeroable,
 };
-use crate::utils;
 
 pub trait AdditiveDigit = AssigningAdditiveMonoid
     + AssigningBitwiseConjunctiveMagma
@@ -147,9 +147,6 @@ pub trait UnitaryDigit = Unitary + OppositiveDigit;
 
 pub trait ZeroableDigit = Oppose + Zeroable;
 
-pub(crate) type Sign = i8;
-pub(crate) type WindowDigit = u8;
-
 #[derive(Eq, PartialEq)]
 pub enum CheckedDivApproximationError {
     TooLarge,
@@ -188,11 +185,7 @@ pub(crate) fn binary_digits_to_base<
     target_base: usize,
 ) -> Vec<TargetDigit> {
     if target_base & (target_base - 1) == 0 {
-        binary_digits_to_binary_base(
-            source,
-            source_shift,
-            utils::floor_log2::<usize>(target_base),
-        )
+        binary_digits_to_binary_base(source, source_shift, floor_log2::<usize>(target_base))
     } else {
         binary_digits_to_non_binary_base(source, source_shift, target_base)
     }
@@ -209,7 +202,7 @@ pub(crate) fn digits_to_binary_base<
     if source_base & (source_base - 1) == 0 {
         binary_digits_to_binary_base::<SourceDigit, TargetDigit>(
             source,
-            utils::floor_log2::<usize>(source_base),
+            floor_log2::<usize>(source_base),
             TARGET_SHIFT,
         )
     } else if source_base < (1 << TARGET_SHIFT) {
@@ -686,7 +679,7 @@ pub fn checked_div_rem<Digit: DivisibleDigit, const SHIFT: usize>(
         ))
     } else {
         let (quotient_digits, remainder_digits) =
-            div_rem_two_or_more_digits::<Digit, SHIFT>(&dividend, &divisor);
+            div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
         Some((
             dividend_sign * divisor_sign * to_digits_sign(&quotient_digits),
             quotient_digits,
@@ -1629,7 +1622,7 @@ pub(crate) fn to_digits_sign<Digit: Zeroable>(digits: &[Digit]) -> Sign {
     (digits.len() > 1 || !digits[0].is_zero()) as Sign
 }
 
-pub(crate) fn to_gcd<Digit: GcdDigit, const SHIFT: usize>(
+pub(super) fn to_gcd<Digit: GcdDigit, const SHIFT: usize>(
     first: Vec<Digit>,
     second: Vec<Digit>,
 ) -> (Sign, Vec<Digit>) {
@@ -1798,10 +1791,10 @@ where
 {
     if size_of::<Source>() < size_of::<Digit>()
         || (size_of::<Source>() == size_of::<Digit>()
-            && utils::is_signed::<Source>()
-            && utils::is_unsigned::<Digit>())
+            && crate::contracts::is_signed::<Source>()
+            && crate::contracts::is_unsigned::<Digit>())
     {
-        let mut value = if utils::is_signed::<Source>() {
+        let mut value = if crate::contracts::is_signed::<Source>() {
             let value = unsafe { OppositionOf::<Source>::try_from(value).unwrap_unchecked() };
             unsafe {
                 Digit::try_from(
@@ -1821,7 +1814,7 @@ where
         }
         digits
     } else {
-        let mut value = if utils::is_signed::<Source>() {
+        let mut value = if crate::contracts::is_signed::<Source>() {
             let value = unsafe { OppositionOf::<Source>::try_from(value).unwrap_unchecked() };
             if value.is_negative() {
                 unsafe { Source::try_from(-value).unwrap_unchecked() }
@@ -1860,11 +1853,17 @@ where
     Source: Oppose,
     OppositionOf<Source>: TryFrom<Source>,
 {
-    if utils::is_signed::<Source>()
+    if crate::contracts::is_signed::<Source>()
         && unsafe { OppositionOf::<Source>::try_from(value).unwrap_unchecked() }.is_negative()
     {
         -Sign::one()
     } else {
         Sign::one()
     }
+}
+
+#[inline]
+fn floor_log2<T: BitLength<Output = usize> + Zeroable>(value: T) -> usize {
+    debug_assert!(!value.is_zero());
+    value.bit_length() - 1
 }

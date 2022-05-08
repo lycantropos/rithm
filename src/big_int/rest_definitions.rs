@@ -4,8 +4,8 @@ use std::mem::size_of;
 use std::ops::{Div, DivAssign, Rem};
 
 use crate::traits::{
-    AssigningShiftingLeftMonoid, CheckedDivRem, CheckedDivRemEuclid, CheckedPow, CheckedShl,
-    CheckedShr, DivEuclid, DivRem, DivRemEuclid, Oppositive, Pow, RemEuclid,
+    AssigningShiftingLeftMonoid, CheckedDivRem, CheckedDivRemEuclid, CheckedShl, CheckedShr,
+    DivEuclid, DivRem, DivRemEuclid, Oppositive, RemEuclid,
 };
 
 use super::digits::*;
@@ -90,17 +90,6 @@ impl<Digit: Clone + Eq + PartialOrd + ZeroableDigit, const SEPARATOR: char, cons
         } else {
             Ordering::Equal
         }
-    }
-}
-
-impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize> Pow<Self>
-    for BigInt<Digit, SEPARATOR, SHIFT>
-{
-    type Output = Self;
-
-    fn pow(self, exponent: Self) -> Self::Output {
-        self.checked_pow(exponent)
-            .unwrap_or_else(|| panic!("Exponent should be non-negative."))
     }
 }
 

@@ -42,6 +42,7 @@ mod oppositive;
 mod parity;
 mod partial_eq;
 mod partial_ord;
+mod pow;
 mod rest_definitions;
 mod sub;
 mod sub_assign;

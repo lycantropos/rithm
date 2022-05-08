@@ -337,9 +337,3 @@ macro_rules! plain_unsigned_checked_shr_impl {
 }
 
 plain_unsigned_checked_shr_impl!(u8 u16 u32 u64 u128 usize);
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT> {
-    pub(crate) fn digits(&self) -> &[Digit] {
-        &self.digits
-    }
-}

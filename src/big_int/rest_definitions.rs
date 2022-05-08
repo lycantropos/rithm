@@ -9,23 +9,6 @@ use crate::traits::{
 use super::digits::*;
 use super::types::BigInt;
 
-impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> RemEuclid
-    for BigInt<Digit, SEPARATOR, SHIFT>
-{
-    type Output = Self;
-
-    fn rem_euclid(self, divisor: Self) -> Self::Output {
-        let (sign, digits) = checked_rem_euclid::<Digit, SHIFT>(
-            self.sign,
-            &self.digits,
-            divisor.sign,
-            &divisor.digits,
-        )
-        .unwrap();
-        Self::Output { sign, digits }
-    }
-}
-
 impl<Digit: LeftShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShl
     for BigInt<Digit, SEPARATOR, SHIFT>
 {

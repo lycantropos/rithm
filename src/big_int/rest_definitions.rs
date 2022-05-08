@@ -93,64 +93,6 @@ impl<Digit: Clone + Eq + PartialOrd + ZeroableDigit, const SEPARATOR: char, cons
     }
 }
 
-impl<Digit: Clone + PartialOrd + ZeroableDigit, const SEPARATOR: char, const SHIFT: usize>
-    PartialOrd for BigInt<Digit, SEPARATOR, SHIFT>
-{
-    fn ge(&self, other: &Self) -> bool {
-        self.sign > other.sign
-            || self.sign == other.sign
-                && !{
-                    if self.is_positive() {
-                        digits_lesser_than(&self.digits, &other.digits)
-                    } else {
-                        digits_lesser_than(&other.digits, &self.digits)
-                    }
-                }
-    }
-
-    fn gt(&self, other: &Self) -> bool {
-        self.sign > other.sign
-            || self.sign == other.sign
-                && if self.is_positive() {
-                    digits_lesser_than(&other.digits, &self.digits)
-                } else {
-                    digits_lesser_than(&self.digits, &other.digits)
-                }
-    }
-
-    fn le(&self, other: &Self) -> bool {
-        self.sign < other.sign
-            || self.sign == other.sign
-                && !{
-                    if self.is_positive() {
-                        digits_lesser_than(&other.digits, &self.digits)
-                    } else {
-                        digits_lesser_than(&self.digits, &other.digits)
-                    }
-                }
-    }
-
-    fn lt(&self, other: &Self) -> bool {
-        self.sign < other.sign
-            || self.sign == other.sign
-                && if self.is_positive() {
-                    digits_lesser_than(&self.digits, &other.digits)
-                } else {
-                    digits_lesser_than(&other.digits, &self.digits)
-                }
-    }
-
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(if self.lt(other) {
-            Ordering::Less
-        } else if self.gt(other) {
-            Ordering::Greater
-        } else {
-            Ordering::Equal
-        })
-    }
-}
-
 impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize> Pow<Self>
     for BigInt<Digit, SEPARATOR, SHIFT>
 {

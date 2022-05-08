@@ -5,28 +5,11 @@ use std::ops::Rem;
 
 use crate::traits::{
     AssigningShiftingLeftMonoid, CheckedDivRem, CheckedDivRemEuclid, CheckedShl, CheckedShr,
-    DivEuclid, DivRem, DivRemEuclid, Oppositive, RemEuclid,
+    DivRem, DivRemEuclid, Oppositive, RemEuclid,
 };
 
 use super::digits::*;
 use super::types::BigInt;
-
-impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivEuclid
-    for BigInt<Digit, SEPARATOR, SHIFT>
-{
-    type Output = Self;
-
-    fn div_euclid(self, divisor: Self) -> Self::Output {
-        let (sign, digits) = checked_div_euclid::<Digit, SHIFT>(
-            self.sign,
-            &self.digits,
-            divisor.sign,
-            &divisor.digits,
-        )
-        .unwrap();
-        Self::Output { sign, digits }
-    }
-}
 
 impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivRem
     for BigInt<Digit, SEPARATOR, SHIFT>

@@ -44,6 +44,7 @@ mod mul_assign;
 mod neg;
 mod not;
 mod oppositive;
+mod ord;
 mod parity;
 mod partial_eq;
 mod partial_ord;

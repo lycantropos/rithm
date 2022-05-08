@@ -1,4 +1,3 @@
-use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
 use std::mem::size_of;
 use std::ops::Rem;
@@ -9,20 +8,6 @@ use crate::traits::{
 
 use super::digits::*;
 use super::types::BigInt;
-
-impl<Digit: Clone + Eq + PartialOrd + ZeroableDigit, const SEPARATOR: char, const SHIFT: usize> Ord
-    for BigInt<Digit, SEPARATOR, SHIFT>
-{
-    fn cmp(&self, other: &Self) -> Ordering {
-        if self.lt(other) {
-            Ordering::Less
-        } else if self.gt(other) {
-            Ordering::Greater
-        } else {
-            Ordering::Equal
-        }
-    }
-}
 
 impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Rem
     for BigInt<Digit, SEPARATOR, SHIFT>

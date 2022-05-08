@@ -1,5 +1,5 @@
 use super::digits::{
-    checked_div_approximation, BinaryDigitConvertibleToFloat, CheckedDivApproximationError,
+    checked_div_as_float, BinaryDigitConvertibleToFloat, CheckedDivApproximationError,
     DivisibleDigit,
 };
 use super::types::BigInt;
@@ -14,7 +14,7 @@ impl<
     type Output = Result<f64, CheckedDivApproximationError>;
 
     fn checked_div_as_f64(self, divisor: Self) -> Self::Output {
-        checked_div_approximation::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
+        checked_div_as_float::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
             .map(|modulus| ((self.sign * divisor.sign) as f64) * modulus)
     }
 }
@@ -28,7 +28,7 @@ impl<
     type Output = Result<f64, CheckedDivApproximationError>;
 
     fn checked_div_as_f64(self, divisor: &Self) -> Self::Output {
-        checked_div_approximation::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
+        checked_div_as_float::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
             .map(|modulus| ((self.sign * divisor.sign) as f64) * modulus)
     }
 }
@@ -42,7 +42,7 @@ impl<
     type Output = Result<f64, CheckedDivApproximationError>;
 
     fn checked_div_as_f64(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        checked_div_approximation::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
+        checked_div_as_float::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
             .map(|modulus| ((self.sign * divisor.sign) as f64) * modulus)
     }
 }
@@ -56,7 +56,7 @@ impl<
     type Output = Result<f64, CheckedDivApproximationError>;
 
     fn checked_div_as_f64(self, divisor: Self) -> Self::Output {
-        checked_div_approximation::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
+        checked_div_as_float::<Digit, f64, SHIFT>(&self.digits, &divisor.digits)
             .map(|modulus| ((self.sign * divisor.sign) as f64) * modulus)
     }
 }

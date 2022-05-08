@@ -454,7 +454,7 @@ pub(crate) fn bitwise_xor<Digit: BinaryDigit, const SHIFT: usize>(
     )
 }
 
-pub(crate) fn checked_div_approximation<
+pub(super) fn checked_div_as_float<
     Digit: BinaryDigitConvertibleToFloat<Output> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
     Output: Float,
     const SHIFT: usize,

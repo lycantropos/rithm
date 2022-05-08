@@ -907,19 +907,19 @@ macro_rules! plain_partial_ord_fraction_impl {
     impl PartialOrd<Fraction<Self>> for $t
     {
         fn ge(&self, other: &Fraction<Self>) -> bool {
-            self.clone() * other.denominator.clone() >= other.numerator
+            self * other.denominator >= other.numerator
         }
 
         fn gt(&self, other: &Fraction<Self>) -> bool {
-            self.clone() * other.denominator.clone() > other.numerator
+            self * other.denominator > other.numerator
         }
 
         fn le(&self, other: &Fraction<Self>) -> bool {
-            self.clone() * other.denominator.clone() <= other.numerator
+            self * other.denominator <= other.numerator
         }
 
         fn lt(&self, other: &Fraction<Self>) -> bool {
-            self.clone() * other.denominator.clone() < other.numerator
+            self * other.denominator < other.numerator
         }
 
         fn partial_cmp(&self, other: &Fraction<Self>) -> Option<Ordering> {

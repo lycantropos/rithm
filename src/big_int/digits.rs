@@ -148,29 +148,29 @@ pub trait UnitaryDigit = Unitary + OppositiveDigit;
 pub trait ZeroableDigit = Oppose + Zeroable;
 
 #[derive(Eq, PartialEq)]
-pub enum CheckedDivApproximationError {
+pub enum CheckedDivAsFloatError {
     TooLarge,
     ZeroDivision,
 }
 
-impl CheckedDivApproximationError {
+impl CheckedDivAsFloatError {
     fn description(&self) -> &str {
         match self {
-            CheckedDivApproximationError::TooLarge => {
+            CheckedDivAsFloatError::TooLarge => {
                 "Division result too large to be expressed as floating point."
             }
-            CheckedDivApproximationError::ZeroDivision => "Division by zero is undefined.",
+            CheckedDivAsFloatError::ZeroDivision => "Division by zero is undefined.",
         }
     }
 }
 
-impl Debug for CheckedDivApproximationError {
+impl Debug for CheckedDivAsFloatError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         formatter.write_str(self.description())
     }
 }
 
-impl Display for CheckedDivApproximationError {
+impl Display for CheckedDivAsFloatError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self.description(), formatter)
     }
@@ -461,9 +461,9 @@ pub(super) fn checked_div_as_float<
 >(
     dividend_digits: &[Digit],
     divisor_digits: &[Digit],
-) -> Result<Output, CheckedDivApproximationError> {
+) -> Result<Output, CheckedDivAsFloatError> {
     if divisor_digits.len() == 1 && divisor_digits[0].is_zero() {
-        return Err(CheckedDivApproximationError::ZeroDivision);
+        return Err(CheckedDivAsFloatError::ZeroDivision);
     }
     if dividend_digits.len() == 1 && dividend_digits[0].is_zero() {
         return Ok(Output::zero());
@@ -488,7 +488,7 @@ pub(super) fn checked_div_as_float<
     let digits_count_difference =
         (dividend_digits_count as isize) - (divisor_digits_count as isize);
     if digits_count_difference > (((usize::MAX / SHIFT) - 1) as isize) {
-        return Err(CheckedDivApproximationError::TooLarge);
+        return Err(CheckedDivAsFloatError::TooLarge);
     } else if digits_count_difference < 1isize - ((usize::MAX / SHIFT) as isize) {
         return Ok(Output::zero());
     }
@@ -496,7 +496,7 @@ pub(super) fn checked_div_as_float<
         + (((dividend_digits[dividend_digits.len() - 1].bit_length()) as isize)
             - (divisor_digits[divisor_digits.len() - 1].bit_length() as isize));
     if bit_lengths_difference > (Output::MAX_EXP as isize) {
-        return Err(CheckedDivApproximationError::TooLarge);
+        return Err(CheckedDivAsFloatError::TooLarge);
     } else if bit_lengths_difference
         < (Output::MIN_EXP as isize) - ((Output::MANTISSA_DIGITS as isize) - 1)
     {
@@ -509,7 +509,7 @@ pub(super) fn checked_div_as_float<
     let mut quotient_digits = if shift <= 0 {
         let shift_digits = ((-shift) as usize) / SHIFT;
         if dividend_digits_count >= ((isize::MAX - 1) as usize) - shift_digits {
-            return Err(CheckedDivApproximationError::TooLarge);
+            return Err(CheckedDivAsFloatError::TooLarge);
         }
         let quotient_digits_count = dividend_digits_count + shift_digits + 1;
         let mut quotient_data = vec![Digit::zero(); quotient_digits_count];
@@ -574,7 +574,7 @@ pub(super) fn checked_div_as_float<
         && (shift + quotient_bit_length > (Output::MAX_EXP as isize)
             || reduced_quotient == Output::one().ldexp(quotient_bit_length as i32))
     {
-        Err(CheckedDivApproximationError::TooLarge)
+        Err(CheckedDivAsFloatError::TooLarge)
     } else {
         Ok(reduced_quotient.ldexp(shift as i32))
     }

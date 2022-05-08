@@ -1,6 +1,5 @@
 use super::digits::{
-    checked_div_as_float, BinaryDigitConvertibleToFloat, CheckedDivApproximationError,
-    DivisibleDigit,
+    checked_div_as_float, BinaryDigitConvertibleToFloat, CheckedDivAsFloatError, DivisibleDigit,
 };
 use super::types::BigInt;
 use crate::traits::{BitwiseNegatableUnaryAlgebra, CheckedDivAsF32};
@@ -11,7 +10,7 @@ impl<
         const SHIFT: usize,
     > CheckedDivAsF32 for BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Output = Result<f32, CheckedDivApproximationError>;
+    type Output = Result<f32, CheckedDivAsFloatError>;
 
     fn checked_div_as_f32(self, divisor: Self) -> Self::Output {
         checked_div_as_float::<Digit, f32, SHIFT>(&self.digits, &divisor.digits)
@@ -25,7 +24,7 @@ impl<
         const SHIFT: usize,
     > CheckedDivAsF32<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Output = Result<f32, CheckedDivApproximationError>;
+    type Output = Result<f32, CheckedDivAsFloatError>;
 
     fn checked_div_as_f32(self, divisor: &Self) -> Self::Output {
         checked_div_as_float::<Digit, f32, SHIFT>(&self.digits, &divisor.digits)
@@ -39,7 +38,7 @@ impl<
         const SHIFT: usize,
     > CheckedDivAsF32<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Output = Result<f32, CheckedDivApproximationError>;
+    type Output = Result<f32, CheckedDivAsFloatError>;
 
     fn checked_div_as_f32(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
         checked_div_as_float::<Digit, f32, SHIFT>(&self.digits, &divisor.digits)
@@ -53,7 +52,7 @@ impl<
         const SHIFT: usize,
     > CheckedDivAsF32 for &BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Output = Result<f32, CheckedDivApproximationError>;
+    type Output = Result<f32, CheckedDivAsFloatError>;
 
     fn checked_div_as_f32(self, divisor: Self) -> Self::Output {
         checked_div_as_float::<Digit, f32, SHIFT>(&self.digits, &divisor.digits)

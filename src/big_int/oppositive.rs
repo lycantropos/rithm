@@ -1,9 +1,8 @@
-use crate::traits::Oppositive;
+use crate::traits::{Oppositive, Zeroable};
 
-use super::digits::OppositiveDigit;
 use super::types::BigInt;
 
-impl<Digit: OppositiveDigit, const SEPARATOR: char, const SHIFT: usize> Oppositive
+impl<Digit: Zeroable, const SEPARATOR: char, const SHIFT: usize> Oppositive
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn is_negative(&self) -> bool {

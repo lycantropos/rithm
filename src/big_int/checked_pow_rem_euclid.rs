@@ -4,12 +4,12 @@ use crate::traits::{
 
 use super::constants::{WINDOW_BASE, WINDOW_CUTOFF, WINDOW_SHIFT};
 use super::digits::{
-    binary_digits_to_lesser_binary_base, EuclidDivisibleDigit, ExponentiativeDigit,
+    binary_digits_to_lesser_binary_base, ExponentiativeDigit, ModularInvertibleDigit,
 };
 use super::types::{BigInt, CheckedPowRemEuclidError, WindowDigit};
 
 impl<
-        Digit: ExponentiativeDigit + EuclidDivisibleDigit,
+        Digit: ExponentiativeDigit + ModularInvertibleDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedPowRemEuclid<Self, Self> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -35,7 +35,7 @@ impl<
 }
 
 impl<
-        Digit: ExponentiativeDigit + EuclidDivisibleDigit,
+        Digit: ExponentiativeDigit + ModularInvertibleDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedPowRemEuclid<Self, &Self> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -61,7 +61,7 @@ impl<
 }
 
 impl<
-        Digit: ExponentiativeDigit + EuclidDivisibleDigit,
+        Digit: ExponentiativeDigit + ModularInvertibleDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedPowRemEuclid<&Self, Self> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -87,7 +87,7 @@ impl<
 }
 
 impl<
-        Digit: ExponentiativeDigit + EuclidDivisibleDigit,
+        Digit: ExponentiativeDigit + ModularInvertibleDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedPowRemEuclid<&Self, &Self> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -113,7 +113,7 @@ impl<
 }
 
 impl<
-        Digit: ExponentiativeDigit + EuclidDivisibleDigit,
+        Digit: ExponentiativeDigit + ModularInvertibleDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedPowRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>, BigInt<Digit, SEPARATOR, SHIFT>>
@@ -145,7 +145,7 @@ impl<
 }
 
 impl<
-        Digit: ExponentiativeDigit + EuclidDivisibleDigit,
+        Digit: ExponentiativeDigit + ModularInvertibleDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedPowRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>, Self>
@@ -177,7 +177,7 @@ impl<
 }
 
 impl<
-        Digit: ExponentiativeDigit + EuclidDivisibleDigit,
+        Digit: ExponentiativeDigit + ModularInvertibleDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedPowRemEuclid<Self, BigInt<Digit, SEPARATOR, SHIFT>>
@@ -209,7 +209,7 @@ impl<
 }
 
 impl<
-        Digit: ExponentiativeDigit + EuclidDivisibleDigit,
+        Digit: ExponentiativeDigit + ModularInvertibleDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedPowRemEuclid<Self, Self> for &BigInt<Digit, SEPARATOR, SHIFT>
@@ -236,7 +236,7 @@ impl<
 }
 
 impl<
-        Digit: ExponentiativeDigit + EuclidDivisibleDigit,
+        Digit: ExponentiativeDigit + ModularInvertibleDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > BigInt<Digit, SEPARATOR, SHIFT>

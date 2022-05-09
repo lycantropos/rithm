@@ -1,12 +1,10 @@
-use std::convert::TryFrom;
+use crate::traits::BitLength;
 
-use crate::traits::{BitLength, Oppose};
-
-use super::digits::{BinaryDigit, MultiplicativeDigit};
+use super::digits::{ConstructibleFrom, MultiplicativeDigit};
 use super::types::BigInt;
 
 impl<
-        Digit: BitLength<Output = usize> + BinaryDigit + MultiplicativeDigit + Oppose + TryFrom<usize>,
+        Digit: BitLength<Output = usize> + ConstructibleFrom<usize> + MultiplicativeDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > BitLength for BigInt<Digit, SEPARATOR, SHIFT>

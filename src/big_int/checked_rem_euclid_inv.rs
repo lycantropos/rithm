@@ -1,9 +1,9 @@
 use crate::traits::{CheckedDivRemEuclid, CheckedRemEuclidInv, Oppositive};
 
-use super::digits::EuclidDivisibleDigit;
+use super::digits::ModularInvertibleDigit;
 use super::types::BigInt;
 
-impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclidInv
+impl<Digit: ModularInvertibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclidInv
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<Self>;
@@ -13,7 +13,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     }
 }
 
-impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: ModularInvertibleDigit, const SEPARATOR: char, const SHIFT: usize>
     CheckedRemEuclidInv<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<Self>;
@@ -45,7 +45,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: ModularInvertibleDigit, const SEPARATOR: char, const SHIFT: usize>
     CheckedRemEuclidInv<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
@@ -55,7 +55,7 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclidInv
+impl<Digit: ModularInvertibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclidInv
     for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;

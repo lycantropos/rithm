@@ -1,13 +1,10 @@
-use crate::traits::{BitwiseNegatableUnaryAlgebra, CheckedDivAsF32};
+use crate::traits::CheckedDivAsF32;
 
-use super::digits::{checked_div_as_float, BinaryDigitConvertibleToFloat, DivisibleDigit};
+use super::digits::{checked_div_as_float, DivisibleAsFloatDigit};
 use super::types::{BigInt, CheckedDivAsFloatError};
 
-impl<
-        Digit: BinaryDigitConvertibleToFloat<f32> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivAsF32 for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: DivisibleAsFloatDigit<f32>, const SEPARATOR: char, const SHIFT: usize> CheckedDivAsF32
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<f32, CheckedDivAsFloatError>;
 
@@ -17,11 +14,8 @@ impl<
     }
 }
 
-impl<
-        Digit: BinaryDigitConvertibleToFloat<f32> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivAsF32<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: DivisibleAsFloatDigit<f32>, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDivAsF32<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<f32, CheckedDivAsFloatError>;
 
@@ -31,11 +25,8 @@ impl<
     }
 }
 
-impl<
-        Digit: BinaryDigitConvertibleToFloat<f32> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivAsF32<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: DivisibleAsFloatDigit<f32>, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDivAsF32<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<f32, CheckedDivAsFloatError>;
 
@@ -45,11 +36,8 @@ impl<
     }
 }
 
-impl<
-        Digit: BinaryDigitConvertibleToFloat<f32> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivAsF32 for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: DivisibleAsFloatDigit<f32>, const SEPARATOR: char, const SHIFT: usize> CheckedDivAsF32
+    for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<f32, CheckedDivAsFloatError>;
 

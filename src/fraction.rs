@@ -4,8 +4,8 @@ use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use crate::big_int::{
-    AdditiveDigit, BigInt, DigitConvertibleFromFloat, EuclidDivisibleDigit, GcdDigit,
-    LeftShiftableDigit, MultiplicativeDigit, UnitaryDigit,
+    AdditiveGroupDigit, BigInt, DigitConvertibleFromF64, EuclidDivisibleDigit, GcdDigit,
+    LeftShiftableDigit, MultiplicativeDigit,
 };
 use crate::contracts::is_signed;
 use crate::traits::{
@@ -151,7 +151,7 @@ impl<
     }
 }
 
-macro_rules! plain_add_fraction_impl {
+macro_rules! primitive_add_fraction_impl {
     ($($t:ty)*) => ($(
     impl Add<Fraction<Self>> for $t {
         type Output = Fraction<Self>;
@@ -163,10 +163,13 @@ macro_rules! plain_add_fraction_impl {
     )*)
 }
 
-plain_add_fraction_impl!(i8 i16 i32 i64 i128 isize);
+primitive_add_fraction_impl!(i8 i16 i32 i64 i128 isize);
 
-impl<Digit: AdditiveDigit + Eq + GcdDigit, const SEPARATOR: char, const SHIFT: usize>
-    Add<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: AdditiveGroupDigit + Eq + GcdDigit + MultiplicativeDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > Add<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Fraction<Self>;
 
@@ -260,7 +263,7 @@ impl<
     }
 }
 
-macro_rules! plain_checked_div_fraction_impl {
+macro_rules! primitive_checked_div_fraction_impl {
     ($($t:ty)*) => ($(
     impl CheckedDiv<Fraction<Self>> for $t
     {
@@ -282,7 +285,7 @@ macro_rules! plain_checked_div_fraction_impl {
     )*)
 }
 
-plain_checked_div_fraction_impl!(i8 i16 i32 i64 i128 isize);
+primitive_checked_div_fraction_impl!(i8 i16 i32 i64 i128 isize);
 
 impl<Digit: Eq + GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
     CheckedDiv<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -327,7 +330,7 @@ impl<
     }
 }
 
-macro_rules! plain_checked_div_euclid_fraction_impl {
+macro_rules! primitive_checked_div_euclid_fraction_impl {
     ($($t:ty)*) => ($(
     impl CheckedDivEuclid<Fraction<Self>> for $t
     {
@@ -340,7 +343,7 @@ macro_rules! plain_checked_div_euclid_fraction_impl {
     )*)
 }
 
-plain_checked_div_euclid_fraction_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_div_euclid_fraction_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 impl<
         Digit: Eq + EuclidDivisibleDigit + MultiplicativeDigit,
@@ -411,7 +414,7 @@ impl<
     }
 }
 
-macro_rules! plain_checked_div_rem_euclid_fraction_impl {
+macro_rules! primitive_checked_div_rem_euclid_fraction_impl {
     ($($t:ty)*) => ($(
     impl CheckedDivRemEuclid<Fraction<Self>> for $t
     {
@@ -435,7 +438,7 @@ macro_rules! plain_checked_div_rem_euclid_fraction_impl {
     )*)
 }
 
-plain_checked_div_rem_euclid_fraction_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_div_rem_euclid_fraction_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 impl<
         Digit: Eq + EuclidDivisibleDigit + GcdDigit + MultiplicativeDigit,
@@ -499,7 +502,7 @@ impl<
     }
 }
 
-macro_rules! plain_fraction_checked_pow_impl {
+macro_rules! primitive_fraction_checked_pow_impl {
     ($($t:ty)*) => ($(
         impl CheckedPow<u32> for Fraction<$t> {
             type Output = Option<Self>;
@@ -514,7 +517,7 @@ macro_rules! plain_fraction_checked_pow_impl {
         )*)
 }
 
-plain_fraction_checked_pow_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_fraction_checked_pow_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 impl<
         Component: Clone
@@ -566,7 +569,7 @@ impl<
     }
 }
 
-macro_rules! plain_checked_rem_euclid_fraction_impl {
+macro_rules! primitive_checked_rem_euclid_fraction_impl {
     ($($t:ty)*) => ($(
         impl CheckedRemEuclid<Fraction<Self>> for $t
         {
@@ -591,7 +594,7 @@ macro_rules! plain_checked_rem_euclid_fraction_impl {
         )*)
 }
 
-plain_checked_rem_euclid_fraction_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_rem_euclid_fraction_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 impl<
         Digit: Eq + EuclidDivisibleDigit + GcdDigit + MultiplicativeDigit,
@@ -670,7 +673,7 @@ impl<
     }
 }
 
-macro_rules! plain_div_fraction_impl {
+macro_rules! primitive_div_fraction_impl {
     ($($t:ty)*) => ($(
     impl Div<Fraction<Self>> for $t
     {
@@ -683,7 +686,7 @@ macro_rules! plain_div_fraction_impl {
     )*)
 }
 
-plain_div_fraction_impl!(i8 i16 i32 i64 i128 isize);
+primitive_div_fraction_impl!(i8 i16 i32 i64 i128 isize);
 
 impl<Digit: Eq + GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
     Div<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -743,7 +746,7 @@ impl<
     }
 }
 
-macro_rules! plain_mul_fraction_impl {
+macro_rules! primitive_mul_fraction_impl {
     ($($t:ty)*) => ($(
     impl Mul<Fraction<Self>> for $t {
         type Output = Fraction<Self>;
@@ -755,7 +758,7 @@ macro_rules! plain_mul_fraction_impl {
     )*)
 }
 
-plain_mul_fraction_impl!(i8 i16 i32 i64 i128 isize);
+primitive_mul_fraction_impl!(i8 i16 i32 i64 i128 isize);
 
 impl<Digit: Eq + GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
     Mul<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -820,7 +823,7 @@ impl<Component: Clone + Eq + Unitary> PartialEq<Component> for Fraction<Componen
     }
 }
 
-macro_rules! plain_partial_eq_fraction_impl {
+macro_rules! primitive_partial_eq_fraction_impl {
     ($($t:ty)*) => ($(
     impl PartialEq<Fraction<Self>> for $t {
         fn eq(&self, other: &Fraction<Self>) -> bool {
@@ -830,9 +833,9 @@ macro_rules! plain_partial_eq_fraction_impl {
     )*)
 }
 
-plain_partial_eq_fraction_impl!(i8 i16 i32 i64 i128 isize);
+primitive_partial_eq_fraction_impl!(i8 i16 i32 i64 i128 isize);
 
-impl<Digit: Clone + Eq + UnitaryDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: Clone + Eq + Unitary, const SEPARATOR: char, const SHIFT: usize>
     PartialEq<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn eq(&self, other: &Fraction<Self>) -> bool {
@@ -902,7 +905,7 @@ impl<Component: Clone + Eq + MultiplicativeMonoid + PartialOrd> PartialOrd<Compo
     }
 }
 
-macro_rules! plain_partial_ord_fraction_impl {
+macro_rules! primitive_partial_ord_fraction_impl {
     ($($t:ty)*) => ($(
     impl PartialOrd<Fraction<Self>> for $t
     {
@@ -935,7 +938,7 @@ macro_rules! plain_partial_ord_fraction_impl {
     )*)
 }
 
-plain_partial_ord_fraction_impl!(i8 i16 i32 i64 i128 isize);
+primitive_partial_ord_fraction_impl!(i8 i16 i32 i64 i128 isize);
 
 impl<
         Digit: Clone + Eq + GcdDigit + MultiplicativeDigit + PartialOrd,
@@ -1089,7 +1092,7 @@ impl<
     }
 }
 
-macro_rules! plain_sub_fraction_impl {
+macro_rules! primitive_sub_fraction_impl {
     ($($t:ty)*) => ($(
     impl Sub<Fraction<Self>> for $t {
         type Output = Fraction<Self>;
@@ -1108,10 +1111,13 @@ macro_rules! plain_sub_fraction_impl {
     )*)
 }
 
-plain_sub_fraction_impl!(i8 i16 i32 i64 i128 isize);
+primitive_sub_fraction_impl!(i8 i16 i32 i64 i128 isize);
 
-impl<Digit: AdditiveDigit + Eq + GcdDigit, const SEPARATOR: char, const SHIFT: usize>
-    Sub<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: AdditiveGroupDigit + Eq + GcdDigit + MultiplicativeDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > Sub<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Fraction<Self>;
 
@@ -1220,7 +1226,7 @@ impl<Component: Clone + Eq + Unitary + Zeroable> Zeroable for Fraction<Component
 macro_rules! big_int_try_from_float_impl {
     ($($f:ty)*) => ($(
         impl<
-                Digit: DigitConvertibleFromFloat + Eq + LeftShiftableDigit + UnitaryDigit,
+                Digit: DigitConvertibleFromF64 + Eq + LeftShiftableDigit + Unitary,
                 const SEPARATOR: char,
                 const SHIFT: usize,
             > TryFrom<$f> for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
@@ -1263,7 +1269,7 @@ macro_rules! big_int_try_from_float_impl {
 
 big_int_try_from_float_impl!(f32 f64);
 
-macro_rules! plain_try_from_float_impl {
+macro_rules! primitive_try_from_float_impl {
     ($f:ty => $($t:ty)*) => ($(
         impl TryFrom<$f> for Fraction<$t> {
             type Error = FromFloatConversionError;
@@ -1316,8 +1322,8 @@ macro_rules! plain_try_from_float_impl {
     )*)
 }
 
-plain_try_from_float_impl!(f32 => i8 i16 i32 i64 u8 u16 u32 u64);
-plain_try_from_float_impl!(f64 => i8 i16 i32 i64 u8 u16 u32 u64);
+primitive_try_from_float_impl!(f32 => i8 i16 i32 i64 u8 u16 u32 u64);
+primitive_try_from_float_impl!(f64 => i8 i16 i32 i64 u8 u16 u32 u64);
 
 #[inline]
 fn normalize_components_moduli<Component: Clone + DivisivePartialMagma + GcdMagma>(

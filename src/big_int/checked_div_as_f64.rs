@@ -1,13 +1,10 @@
-use crate::traits::{BitwiseNegatableUnaryAlgebra, CheckedDivAsF64};
+use crate::traits::CheckedDivAsF64;
 
-use super::digits::{checked_div_as_float, BinaryDigitConvertibleToFloat, DivisibleDigit};
+use super::digits::{checked_div_as_float, DivisibleAsFloatDigit};
 use super::types::{BigInt, CheckedDivAsFloatError};
 
-impl<
-        Digit: BinaryDigitConvertibleToFloat<f64> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivAsF64 for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: DivisibleAsFloatDigit<f64>, const SEPARATOR: char, const SHIFT: usize> CheckedDivAsF64
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<f64, CheckedDivAsFloatError>;
 
@@ -17,11 +14,8 @@ impl<
     }
 }
 
-impl<
-        Digit: BinaryDigitConvertibleToFloat<f64> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivAsF64<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: DivisibleAsFloatDigit<f64>, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDivAsF64<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<f64, CheckedDivAsFloatError>;
 
@@ -31,11 +25,8 @@ impl<
     }
 }
 
-impl<
-        Digit: BinaryDigitConvertibleToFloat<f64> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivAsF64<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: DivisibleAsFloatDigit<f64>, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDivAsF64<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<f64, CheckedDivAsFloatError>;
 
@@ -45,11 +36,8 @@ impl<
     }
 }
 
-impl<
-        Digit: BinaryDigitConvertibleToFloat<f64> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivAsF64 for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: DivisibleAsFloatDigit<f64>, const SEPARATOR: char, const SHIFT: usize> CheckedDivAsF64
+    for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<f64, CheckedDivAsFloatError>;
 

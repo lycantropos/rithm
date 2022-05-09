@@ -1,27 +1,23 @@
-use core::convert::TryFrom;
-
-use crate::traits::{Oppose, OppositionOf};
-
-use super::contracts::is_valid_shift;
-use super::digits::{non_zero_value_to_digits, non_zero_value_to_sign, BinaryDigit};
+use super::digits::{non_zero_value_to_digits, non_zero_value_to_sign, ConstructibleFrom};
 use super::types::BigInt;
 
-impl<Source, Digit, const SEPARATOR: char, const SHIFT: usize> From<Source>
-    for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    Source: BinaryDigit + Oppose + TryFrom<OppositionOf<Source>>,
-    Digit: BinaryDigit + Oppose + TryFrom<Source>,
-    OppositionOf<Source>: TryFrom<Source>,
-{
-    fn from(value: Source) -> Self {
-        debug_assert!(is_valid_shift::<Digit, SHIFT>());
-        if value.is_zero() {
-            Self::zero()
-        } else {
-            Self {
-                sign: non_zero_value_to_sign(value),
-                digits: non_zero_value_to_digits::<Source, Digit, SHIFT>(value),
+macro_rules! primitive_partial_eq_to_big_int_impl {
+    ($($t:ty)*) => ($(
+        impl<Digit: ConstructibleFrom<$t>, const SEPARATOR: char, const SHIFT: usize> From<$t>
+            for BigInt<Digit, SEPARATOR, SHIFT>
+        {
+            fn from(value: $t) -> Self {
+                if value.is_zero() {
+                    Self::zero()
+                } else {
+                    Self {
+                        sign: non_zero_value_to_sign(value),
+                        digits: non_zero_value_to_digits::<$t, Digit, SHIFT>(value),
+                    }
+                }
             }
         }
-    }
+    )*)
 }
+
+primitive_partial_eq_to_big_int_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);

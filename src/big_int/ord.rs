@@ -1,9 +1,10 @@
 use std::cmp::Ordering;
 
-use super::digits::ZeroableDigit;
+use crate::traits::Zeroable;
+
 use super::types::BigInt;
 
-impl<Digit: Clone + Eq + PartialOrd + ZeroableDigit, const SEPARATOR: char, const SHIFT: usize> Ord
+impl<Digit: Clone + Eq + PartialOrd + Zeroable, const SEPARATOR: char, const SHIFT: usize> Ord
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn cmp(&self, other: &Self) -> Ordering {

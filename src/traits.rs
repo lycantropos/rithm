@@ -9,7 +9,12 @@ use std::ops::{
 
 pub trait AdditiveMonoid<Other = Self> = Add<Other, Output = Self> + Zeroable;
 
+pub trait AdditiveGroup<Other = Self> = AdditiveMonoid<Other> + SubtractiveMagma<Other>;
+
 pub trait AssigningAdditiveMonoid<Other = Self> = AdditiveMonoid<Other> + AddAssign<Other>;
+
+pub trait AssigningAdditiveGroup<Other = Self> =
+    AssigningAdditiveMonoid<Other> + AssigningSubtractiveMagma<Other>;
 
 pub trait AssigningBitwiseConjunctiveMagma<Other = Self> =
     BitwiseConjunctiveMagma<Other> + BitAndAssign<Other>;
@@ -82,7 +87,7 @@ pub trait Abs {
     fn abs(self) -> Self::Output;
 }
 
-macro_rules! plain_abs_impl {
+macro_rules! primitive_abs_impl {
     ($($t:ty)*) => ($(
         impl Abs for $t {
             type Output = $t;
@@ -95,7 +100,7 @@ macro_rules! plain_abs_impl {
     )*)
 }
 
-plain_abs_impl!(f32 f64 i8 i16 i32 i64 i128 isize);
+primitive_abs_impl!(f32 f64 i8 i16 i32 i64 i128 isize);
 
 pub trait Ceil {
     type Output;
@@ -103,7 +108,7 @@ pub trait Ceil {
     fn ceil(self) -> Self::Output;
 }
 
-macro_rules! plain_ceil_impl {
+macro_rules! primitive_ceil_impl {
     ($($t:ty)*) => ($(
         impl Ceil for $t {
             type Output = $t;
@@ -116,7 +121,7 @@ macro_rules! plain_ceil_impl {
     )*)
 }
 
-plain_ceil_impl!(f32 f64);
+primitive_ceil_impl!(f32 f64);
 
 #[derive(Clone, Eq, PartialEq)]
 pub enum Endianness {
@@ -128,7 +133,7 @@ pub trait FromBytes {
     fn from_bytes(bytes: &[u8], endianness: Endianness) -> Self;
 }
 
-macro_rules! plain_from_bytes_impl {
+macro_rules! primitive_from_bytes_impl {
     ($($t:ty)*) => ($(
         impl FromBytes for $t {
             #[inline(always)]
@@ -142,7 +147,7 @@ macro_rules! plain_from_bytes_impl {
     )*)
 }
 
-plain_from_bytes_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_from_bytes_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait ToBytes {
     type Output;
@@ -150,7 +155,7 @@ pub trait ToBytes {
     fn to_bytes(self, endianness: Endianness) -> Self::Output;
 }
 
-macro_rules! plain_to_bytes_impl {
+macro_rules! primitive_to_bytes_impl {
     ($($t:ty)*) => ($(
         impl ToBytes for $t {
             type Output = [u8; mem::size_of::<Self>()];
@@ -166,7 +171,7 @@ macro_rules! plain_to_bytes_impl {
     )*)
 }
 
-plain_to_bytes_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_to_bytes_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait BitLength {
     type Output;
@@ -174,7 +179,7 @@ pub trait BitLength {
     fn bit_length(self) -> Self::Output;
 }
 
-macro_rules! plain_bit_length_impl {
+macro_rules! primitive_bit_length_impl {
     ($($t:ty)*) => ($(
         impl BitLength for $t {
             type Output = usize;
@@ -187,7 +192,7 @@ macro_rules! plain_bit_length_impl {
     )*)
 }
 
-plain_bit_length_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_bit_length_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait DivEuclid<Divisor = Self> {
     type Output;
@@ -195,7 +200,7 @@ pub trait DivEuclid<Divisor = Self> {
     fn div_euclid(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_div_euclid_impl {
+macro_rules! primitive_div_euclid_impl {
     ($($t:ty)*) => ($(
         impl DivEuclid for $t {
             type Output = Self;
@@ -208,7 +213,7 @@ macro_rules! plain_div_euclid_impl {
     )*)
 }
 
-plain_div_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_div_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedDiv<Divisor = Self> {
     type Output;
@@ -216,7 +221,7 @@ pub trait CheckedDiv<Divisor = Self> {
     fn checked_div(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_checked_div_impl {
+macro_rules! primitive_checked_div_impl {
     ($($t:ty)*) => ($(
         impl CheckedDiv for $t {
             type Output = Option<Self>;
@@ -229,7 +234,7 @@ macro_rules! plain_checked_div_impl {
     )*)
 }
 
-plain_checked_div_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_div_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedDivAsF32<Divisor = Self> {
     type Output: Maybe<Result = f32>;
@@ -237,7 +242,7 @@ pub trait CheckedDivAsF32<Divisor = Self> {
     fn checked_div_as_f32(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_checked_div_as_f32_impl {
+macro_rules! primitive_checked_div_as_f32_impl {
     ($($t:ty)*) => ($(
         impl CheckedDivAsF32 for $t {
             type Output = Option<f32>;
@@ -254,7 +259,7 @@ macro_rules! plain_checked_div_as_f32_impl {
     )*)
 }
 
-plain_checked_div_as_f32_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_div_as_f32_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedDivAsF64<Divisor = Self> {
     type Output: Maybe<Result = f64>;
@@ -262,7 +267,7 @@ pub trait CheckedDivAsF64<Divisor = Self> {
     fn checked_div_as_f64(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_checked_div_as_f64_impl {
+macro_rules! primitive_checked_div_as_f64_impl {
     ($($t:ty)*) => ($(
         impl CheckedDivAsF64 for $t {
             type Output = Option<f64>;
@@ -279,7 +284,7 @@ macro_rules! plain_checked_div_as_f64_impl {
     )*)
 }
 
-plain_checked_div_as_f64_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_div_as_f64_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedDivEuclid<Divisor = Self> {
     type Output;
@@ -287,7 +292,7 @@ pub trait CheckedDivEuclid<Divisor = Self> {
     fn checked_div_euclid(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_checked_div_euclid_impl {
+macro_rules! primitive_checked_div_euclid_impl {
     ($($t:ty)*) => ($(
         impl CheckedDivEuclid for $t {
             type Output = Option<Self>;
@@ -300,7 +305,7 @@ macro_rules! plain_checked_div_euclid_impl {
     )*)
 }
 
-plain_checked_div_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_div_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedDivRem<Divisor = Self> {
     type Output;
@@ -308,7 +313,7 @@ pub trait CheckedDivRem<Divisor = Self> {
     fn checked_div_rem(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_checked_div_rem_impl {
+macro_rules! primitive_checked_div_rem_impl {
     ($($t:ty)*) => ($(
         impl CheckedDivRem for $t {
             type Output = Option<(Self, Self)>;
@@ -325,7 +330,7 @@ macro_rules! plain_checked_div_rem_impl {
     )*)
 }
 
-plain_checked_div_rem_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_div_rem_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedDivRemEuclid<Divisor = Self> {
     type Output;
@@ -333,7 +338,7 @@ pub trait CheckedDivRemEuclid<Divisor = Self> {
     fn checked_div_rem_euclid(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_checked_div_rem_euclid_impl {
+macro_rules! primitive_checked_div_rem_euclid_impl {
     ($($t:ty)*) => ($(
         impl CheckedDivRemEuclid for $t {
             type Output = Option<(Self, Self)>;
@@ -350,7 +355,7 @@ macro_rules! plain_checked_div_rem_euclid_impl {
     )*)
 }
 
-plain_checked_div_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_div_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedPow<Exponent> {
     type Output;
@@ -358,7 +363,7 @@ pub trait CheckedPow<Exponent> {
     fn checked_pow(self, exponent: Exponent) -> Self::Output;
 }
 
-macro_rules! plain_checked_pow_impl {
+macro_rules! primitive_checked_pow_impl {
     ($($t:ty)*) => ($(
         impl CheckedPow<u32> for $t {
             type Output = Option<$t>;
@@ -371,7 +376,7 @@ macro_rules! plain_checked_pow_impl {
     )*)
 }
 
-plain_checked_pow_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_pow_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedPowRemEuclid<Exponent, Divisor> {
     type Output;
@@ -379,7 +384,7 @@ pub trait CheckedPowRemEuclid<Exponent, Divisor> {
     fn checked_pow_rem_euclid(self, exponent: Exponent, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_signed_checked_pow_rem_euclid_impl {
+macro_rules! primitive_signed_checked_pow_rem_euclid_impl {
     ($($t:ty)*) => ($(
         impl CheckedPowRemEuclid<u32, $t> for $t {
             type Output = Option<$t>;
@@ -434,9 +439,9 @@ macro_rules! plain_signed_checked_pow_rem_euclid_impl {
     )*)
 }
 
-plain_signed_checked_pow_rem_euclid_impl!(i8 i16 i32 i64 i128 isize);
+primitive_signed_checked_pow_rem_euclid_impl!(i8 i16 i32 i64 i128 isize);
 
-macro_rules! plain_unsigned_checked_pow_rem_euclid_impl {
+macro_rules! primitive_unsigned_checked_pow_rem_euclid_impl {
     ($($t:ty)*) => ($(
         impl CheckedPowRemEuclid<u32, $t> for $t {
             type Output = Option<$t>;
@@ -485,7 +490,7 @@ macro_rules! plain_unsigned_checked_pow_rem_euclid_impl {
     )*)
 }
 
-plain_unsigned_checked_pow_rem_euclid_impl!(u8 u16 u32 u64 u128 usize);
+primitive_unsigned_checked_pow_rem_euclid_impl!(u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedRem<Divisor = Self> {
     type Output;
@@ -493,7 +498,7 @@ pub trait CheckedRem<Divisor = Self> {
     fn checked_rem(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_checked_rem_impl {
+macro_rules! primitive_checked_rem_impl {
     ($($t:ty)*) => ($(
         impl CheckedRem for $t {
             type Output = Option<Self>;
@@ -506,7 +511,7 @@ macro_rules! plain_checked_rem_impl {
     )*)
 }
 
-plain_checked_rem_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_rem_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedRemEuclidInv<Divisor = Self> {
     type Output;
@@ -514,7 +519,7 @@ pub trait CheckedRemEuclidInv<Divisor = Self> {
     fn checked_rem_euclid_inv(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_signed_checked_rem_euclid_inv_impl {
+macro_rules! primitive_signed_checked_rem_euclid_inv_impl {
     ($($t:ty)*) => ($(
         impl CheckedRemEuclidInv for $t {
             type Output = Option<Self>;
@@ -545,9 +550,9 @@ macro_rules! plain_signed_checked_rem_euclid_inv_impl {
     )*)
 }
 
-plain_signed_checked_rem_euclid_inv_impl!(i8 i16 i32 i64 i128 isize);
+primitive_signed_checked_rem_euclid_inv_impl!(i8 i16 i32 i64 i128 isize);
 
-macro_rules! plain_unsigned_checked_rem_euclid_inv_impl {
+macro_rules! primitive_unsigned_checked_rem_euclid_inv_impl {
     ($($t:ty)*) => ($(
         impl CheckedRemEuclidInv for $t {
             type Output = Option<Self>;
@@ -605,7 +610,7 @@ macro_rules! plain_unsigned_checked_rem_euclid_inv_impl {
     )*)
 }
 
-plain_unsigned_checked_rem_euclid_inv_impl!(u8 u16 u32 u64 u128 usize);
+primitive_unsigned_checked_rem_euclid_inv_impl!(u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedRemEuclid<Divisor = Self> {
     type Output;
@@ -613,7 +618,7 @@ pub trait CheckedRemEuclid<Divisor = Self> {
     fn checked_rem_euclid(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_checked_rem_euclid_impl {
+macro_rules! primitive_checked_rem_euclid_impl {
     ($($t:ty)*) => ($(
         impl CheckedRemEuclid for $t {
             type Output = Option<Self>;
@@ -626,7 +631,7 @@ macro_rules! plain_checked_rem_euclid_impl {
     )*)
 }
 
-plain_checked_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedShl<Shift = Self> {
     type Output: Maybe;
@@ -672,7 +677,7 @@ macro_rules! unsigned_checked_shl_impl {
     };
 }
 
-macro_rules! plain_checked_shl_impl {
+macro_rules! primitive_checked_shl_impl {
     ($($t:ty)*) => ($(
         signed_checked_shl_impl! { $t, i8 }
         signed_checked_shl_impl! { $t, i16 }
@@ -690,7 +695,7 @@ macro_rules! plain_checked_shl_impl {
     )*)
 }
 
-plain_checked_shl_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_shl_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait CheckedShr<Shift = Self> {
     type Output: Maybe;
@@ -728,7 +733,7 @@ macro_rules! unsigned_checked_shr_impl {
     };
 }
 
-macro_rules! plain_checked_shr_impl {
+macro_rules! primitive_checked_shr_impl {
     ($($t:ty)*) => ($(
         signed_checked_shr_impl! { $t, i8 }
         signed_checked_shr_impl! { $t, i16 }
@@ -746,7 +751,7 @@ macro_rules! plain_checked_shr_impl {
     )*)
 }
 
-plain_checked_shr_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_checked_shr_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait DivRem<Divisor = Self> {
     type Output;
@@ -754,7 +759,7 @@ pub trait DivRem<Divisor = Self> {
     fn div_rem(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_div_rem_impl {
+macro_rules! primitive_div_rem_impl {
     ($($t:ty)*) => ($(
         impl DivRem for $t {
             type Output = (Self, Self);
@@ -767,7 +772,7 @@ macro_rules! plain_div_rem_impl {
     )*)
 }
 
-plain_div_rem_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_div_rem_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait DivRemEuclid<Divisor = Self> {
     type Output;
@@ -775,7 +780,7 @@ pub trait DivRemEuclid<Divisor = Self> {
     fn div_rem_euclid(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_div_rem_euclid_impl {
+macro_rules! primitive_div_rem_euclid_impl {
     ($($t:ty)*) => ($(
         impl DivRemEuclid for $t {
             type Output = (Self, Self);
@@ -788,7 +793,7 @@ macro_rules! plain_div_rem_euclid_impl {
     )*)
 }
 
-plain_div_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_div_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait DoublePrecision: Sized {
     type Result: From<Self>;
@@ -832,7 +837,7 @@ pub trait Floor {
     fn floor(self) -> Self::Output;
 }
 
-macro_rules! plain_floor_impl {
+macro_rules! primitive_floor_impl {
     ($($t:ty)*) => ($(
         impl Floor for $t {
             type Output = $t;
@@ -845,7 +850,7 @@ macro_rules! plain_floor_impl {
     )*)
 }
 
-plain_floor_impl!(f32 f64);
+primitive_floor_impl!(f32 f64);
 
 pub trait FrExp {
     type Output;
@@ -909,7 +914,7 @@ pub trait FromStrRadix: Sized {
     fn from_str_radix(string: &str, radix: u32) -> Result<Self, Self::Error>;
 }
 
-macro_rules! plain_from_str_radix_impl {
+macro_rules! primitive_from_str_radix_impl {
     ($($t:ty)*) => ($(
         impl FromStrRadix for $t {
             type Error = ParseIntError;
@@ -922,7 +927,7 @@ macro_rules! plain_from_str_radix_impl {
     )*)
 }
 
-plain_from_str_radix_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_from_str_radix_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait Gcd<Other = Self> {
     type Output;
@@ -930,7 +935,7 @@ pub trait Gcd<Other = Self> {
     fn gcd(self, other: Other) -> Self::Output;
 }
 
-macro_rules! plain_gcd_impl {
+macro_rules! primitive_gcd_impl {
     ($($t:ty)*) => ($(
         impl Gcd for $t {
             type Output = Self;
@@ -948,7 +953,7 @@ macro_rules! plain_gcd_impl {
     )*)
 }
 
-plain_gcd_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_gcd_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait LdExp<Exponent> {
     type Output;
@@ -1024,7 +1029,7 @@ pub trait MantissaDigits {
     const MANTISSA_DIGITS: usize;
 }
 
-macro_rules! plain_mantissa_digits_impl {
+macro_rules! primitive_mantissa_digits_impl {
     ($($t:ty)*) => ($(
         impl MantissaDigits for $t {
             const MANTISSA_DIGITS: usize = <$t>::MANTISSA_DIGITS as usize;
@@ -1032,13 +1037,13 @@ macro_rules! plain_mantissa_digits_impl {
     )*)
 }
 
-plain_mantissa_digits_impl!(f32 f64);
+primitive_mantissa_digits_impl!(f32 f64);
 
 pub trait MaxExp {
     const MAX_EXP: i32;
 }
 
-macro_rules! plain_max_exp_impl {
+macro_rules! primitive_max_exp_impl {
     ($($t:ty)*) => ($(
         impl MaxExp for $t {
             const MAX_EXP: i32 = <$t>::MAX_EXP;
@@ -1046,7 +1051,7 @@ macro_rules! plain_max_exp_impl {
     )*)
 }
 
-plain_max_exp_impl!(f32 f64);
+primitive_max_exp_impl!(f32 f64);
 
 pub trait Maybe {
     type Result;
@@ -1115,7 +1120,7 @@ pub trait MinExp {
     const MIN_EXP: i32;
 }
 
-macro_rules! plain_min_exp_impl {
+macro_rules! primitive_min_exp_impl {
     ($($t:ty)*) => ($(
         impl MinExp for $t {
             const MIN_EXP: i32 = <$t>::MIN_EXP;
@@ -1123,7 +1128,7 @@ macro_rules! plain_min_exp_impl {
     )*)
 }
 
-plain_min_exp_impl!(f32 f64);
+primitive_min_exp_impl!(f32 f64);
 
 pub trait Oppose {
     type Result: Oppositive;
@@ -1182,7 +1187,7 @@ pub trait Oppositive: NegatableUnaryAlgebra + Zeroable {
     fn is_positive(&self) -> bool;
 }
 
-macro_rules! plain_oppositive_impl {
+macro_rules! primitive_oppositive_impl {
     ($($t:ty)*) => ($(
         impl Oppositive for $t {
             #[inline(always)]
@@ -1198,7 +1203,7 @@ macro_rules! plain_oppositive_impl {
     )*)
 }
 
-plain_oppositive_impl!(i8 i16 i32 i64 i128 isize);
+primitive_oppositive_impl!(i8 i16 i32 i64 i128 isize);
 
 pub trait Parity {
     fn is_even(&self) -> bool;
@@ -1206,7 +1211,7 @@ pub trait Parity {
     fn is_odd(&self) -> bool;
 }
 
-macro_rules! plain_parity_impl {
+macro_rules! primitive_parity_impl {
     ($($t:ty)*) => ($(
         impl Parity for $t {
             #[inline(always)]
@@ -1222,7 +1227,7 @@ macro_rules! plain_parity_impl {
     )*)
 }
 
-plain_parity_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_parity_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait Pow<Exponent> {
     type Output;
@@ -1230,7 +1235,7 @@ pub trait Pow<Exponent> {
     fn pow(self, exponent: Exponent) -> Self::Output;
 }
 
-macro_rules! plain_pow_impl {
+macro_rules! primitive_pow_impl {
     ($($t:ty)*) => ($(
         impl Pow<u32> for $t {
             type Output = $t;
@@ -1243,7 +1248,7 @@ macro_rules! plain_pow_impl {
     )*)
 }
 
-plain_pow_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_pow_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait RemEuclid<Divisor = Self> {
     type Output;
@@ -1251,7 +1256,7 @@ pub trait RemEuclid<Divisor = Self> {
     fn rem_euclid(self, divisor: Divisor) -> Self::Output;
 }
 
-macro_rules! plain_rem_euclid_impl {
+macro_rules! primitive_rem_euclid_impl {
     ($($t:ty)*) => ($(
         impl RemEuclid for $t {
             type Output = $t;
@@ -1264,7 +1269,7 @@ macro_rules! plain_rem_euclid_impl {
     )*)
 }
 
-plain_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 #[derive(Clone, Eq, PartialEq)]
 pub enum TieBreaking {
@@ -1280,7 +1285,7 @@ pub trait Round {
     fn round(self, tie_breaking: TieBreaking) -> Self::Output;
 }
 
-macro_rules! plain_round_impl {
+macro_rules! primitive_round_impl {
     ($($t:ty)*) => ($(
         impl Round for $t {
             type Output = $t;
@@ -1312,7 +1317,7 @@ macro_rules! plain_round_impl {
     )*)
 }
 
-plain_round_impl!(f32 f64);
+primitive_round_impl!(f32 f64);
 
 pub trait Trunc {
     type Output;
@@ -1320,7 +1325,7 @@ pub trait Trunc {
     fn trunc(self) -> Self::Output;
 }
 
-macro_rules! plain_trunc_impl {
+macro_rules! primitive_trunc_impl {
     ($($t:ty)*) => ($(
         impl Trunc for $t {
             type Output = $t;
@@ -1333,7 +1338,7 @@ macro_rules! plain_trunc_impl {
     )*)
 }
 
-plain_trunc_impl!(f32 f64);
+primitive_trunc_impl!(f32 f64);
 
 pub trait Unitary {
     fn one() -> Self;
@@ -1341,7 +1346,7 @@ pub trait Unitary {
     fn is_one(&self) -> bool;
 }
 
-macro_rules! plain_unitary_impl {
+macro_rules! primitive_unitary_impl {
     ($($t:ty)*) => ($(
         impl Unitary for $t {
             #[inline(always)]
@@ -1355,7 +1360,7 @@ macro_rules! plain_unitary_impl {
     )*)
 }
 
-plain_unitary_impl!(f32 f64 i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_unitary_impl!(f32 f64 i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait WrappingSub<Subtrahend = Self> {
     type Output;
@@ -1363,7 +1368,7 @@ pub trait WrappingSub<Subtrahend = Self> {
     fn wrapping_sub(self, subtrahend: Subtrahend) -> Self::Output;
 }
 
-macro_rules! plain_wrapping_sub_impl {
+macro_rules! primitive_wrapping_sub_impl {
     ($($t:ty)*) => ($(
         impl WrappingSub for $t {
             type Output = $t;
@@ -1376,7 +1381,7 @@ macro_rules! plain_wrapping_sub_impl {
     )*)
 }
 
-plain_wrapping_sub_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_wrapping_sub_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub trait Zeroable {
     fn zero() -> Self;
@@ -1384,7 +1389,7 @@ pub trait Zeroable {
     fn is_zero(&self) -> bool;
 }
 
-macro_rules! plain_zero_impl {
+macro_rules! primitive_zeroable_impl {
     ($($t:ty)*) => ($(
         impl Zeroable for $t {
             #[inline(always)]
@@ -1398,7 +1403,7 @@ macro_rules! plain_zero_impl {
     )*)
 }
 
-plain_zero_impl!(f32 f64 i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_zeroable_impl!(f32 f64 i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub type DoublePrecisionOf<T> = <T as DoublePrecision>::Result;
 pub type OppositionOf<T> = <T as Oppose>::Result;

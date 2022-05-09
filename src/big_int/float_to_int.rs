@@ -1,9 +1,9 @@
 use std::convert::{FloatToInt, TryFrom};
 
-use super::digits::DigitConvertibleFromFloat;
+use super::digits::DigitConvertibleFromF64;
 use super::types::BigInt;
 
-impl<Digit: DigitConvertibleFromFloat, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: DigitConvertibleFromF64, const SEPARATOR: char, const SHIFT: usize>
     FloatToInt<BigInt<Digit, SEPARATOR, SHIFT>> for f32
 {
     unsafe fn to_int_unchecked(self) -> BigInt<Digit, SEPARATOR, SHIFT> {
@@ -11,7 +11,7 @@ impl<Digit: DigitConvertibleFromFloat, const SEPARATOR: char, const SHIFT: usize
     }
 }
 
-impl<Digit: DigitConvertibleFromFloat, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: DigitConvertibleFromF64, const SEPARATOR: char, const SHIFT: usize>
     FloatToInt<BigInt<Digit, SEPARATOR, SHIFT>> for f64
 {
     unsafe fn to_int_unchecked(self) -> BigInt<Digit, SEPARATOR, SHIFT> {

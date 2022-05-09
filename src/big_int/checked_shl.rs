@@ -81,7 +81,7 @@ impl<Digit: LeftShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Check
     }
 }
 
-macro_rules! plain_signed_checked_shl_impl {
+macro_rules! primitive_signed_checked_shl_impl {
     ($($t:ty)*) => ($(
         impl<Digit: LeftShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShl<$t>
             for BigInt<Digit, SEPARATOR, SHIFT>
@@ -117,9 +117,9 @@ macro_rules! plain_signed_checked_shl_impl {
     )*)
 }
 
-plain_signed_checked_shl_impl!(i8 i16 i32 i64 i128 isize);
+primitive_signed_checked_shl_impl!(i8 i16 i32 i64 i128 isize);
 
-macro_rules! plain_unsigned_checked_shl_impl {
+macro_rules! primitive_unsigned_checked_shl_impl {
     ($($t:ty)*) => ($(
         impl<Digit: LeftShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShl<$t>
             for BigInt<Digit, SEPARATOR, SHIFT>
@@ -153,4 +153,4 @@ macro_rules! plain_unsigned_checked_shl_impl {
     )*)
 }
 
-plain_unsigned_checked_shl_impl!(u8 u16 u32 u64 u128 usize);
+primitive_unsigned_checked_shl_impl!(u8 u16 u32 u64 u128 usize);

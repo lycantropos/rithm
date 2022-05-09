@@ -5,7 +5,7 @@ use crate::traits::Oppose;
 use super::digits::{non_zero_value_to_digits, value_to_sign, BinaryDigit};
 use super::types::BigInt;
 
-macro_rules! plain_partial_eq_to_big_int_impl {
+macro_rules! primitive_partial_eq_to_big_int_impl {
     ($($t:ty)*) => ($(
         impl<Digit: PartialEq, const SEPARATOR: char, const SHIFT: usize>
             PartialEq<BigInt<Digit, SEPARATOR, SHIFT>> for $t
@@ -33,4 +33,4 @@ macro_rules! plain_partial_eq_to_big_int_impl {
     )*)
 }
 
-plain_partial_eq_to_big_int_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_partial_eq_to_big_int_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);

@@ -1,16 +1,13 @@
 use std::cmp::Ordering;
 use std::convert::TryFrom;
 
-use crate::traits::{Oppose, Oppositive};
+use crate::traits::{Oppose, Oppositive, Zeroable};
 
-use super::digits::{
-    digits_lesser_than, non_zero_value_to_digits, value_to_sign, BinaryDigit, OppositiveDigit,
-    ZeroableDigit,
-};
+use super::digits::{digits_lesser_than, non_zero_value_to_digits, value_to_sign, BinaryDigit};
 use super::types::{BigInt, Sign};
 
-impl<Digit: Clone + PartialOrd + ZeroableDigit, const SEPARATOR: char, const SHIFT: usize>
-    PartialOrd for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: Clone + PartialOrd + Zeroable, const SEPARATOR: char, const SHIFT: usize> PartialOrd
+    for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn ge(&self, other: &Self) -> bool {
         self.sign > other.sign
@@ -69,7 +66,7 @@ impl<Digit: Clone + PartialOrd + ZeroableDigit, const SEPARATOR: char, const SHI
 
 macro_rules! big_int_partial_ord_to_signed_primitive_impl {
     ($($t:ty)*) => ($(
-        impl<Digit: PartialEq + OppositiveDigit, const SEPARATOR: char, const SHIFT: usize>
+        impl<Digit: PartialEq + Zeroable, const SEPARATOR: char, const SHIFT: usize>
             PartialOrd<$t> for BigInt<Digit, SEPARATOR, SHIFT>
         where
             Digit: BinaryDigit + Oppose + TryFrom<$t>,
@@ -163,7 +160,7 @@ big_int_partial_ord_to_signed_primitive_impl!(i8 i16 i32 i64 i128 isize);
 
 macro_rules! big_int_partial_ord_to_unsigned_primitive_impl {
     ($($t:ty)*) => ($(
-        impl<Digit: PartialEq + OppositiveDigit, const SEPARATOR: char, const SHIFT: usize>
+        impl<Digit: PartialEq + Zeroable, const SEPARATOR: char, const SHIFT: usize>
             PartialOrd<$t> for BigInt<Digit, SEPARATOR, SHIFT>
         where
             Digit: BinaryDigit + Oppose + TryFrom<$t>,
@@ -223,7 +220,7 @@ big_int_partial_ord_to_unsigned_primitive_impl!(u8 u16 u32 u64 u128 usize);
 
 macro_rules! signed_primitive_partial_ord_to_big_int_impl {
     ($($t:ty)*) => ($(
-        impl<Digit: PartialEq + OppositiveDigit, const SEPARATOR: char, const SHIFT: usize>
+        impl<Digit: PartialEq + Zeroable, const SEPARATOR: char, const SHIFT: usize>
             PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $t
         where
             Digit: BinaryDigit + Oppose + TryFrom<$t>,
@@ -313,7 +310,7 @@ signed_primitive_partial_ord_to_big_int_impl!(i8 i16 i32 i64 i128 isize);
 
 macro_rules! unsigned_primitive_partial_ord_to_big_int_impl {
     ($($t:ty)*) => ($(
-        impl<Digit: PartialEq + OppositiveDigit, const SEPARATOR: char, const SHIFT: usize>
+        impl<Digit: PartialEq + Zeroable, const SEPARATOR: char, const SHIFT: usize>
             PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $t
         where
             Digit: BinaryDigit + Oppose + TryFrom<$t>,

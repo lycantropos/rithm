@@ -79,7 +79,7 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
     }
 }
 
-macro_rules! plain_signed_checked_shr_impl {
+macro_rules! primitive_signed_checked_shr_impl {
     ($($t:ty)*) => ($(
         impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr<$t>
             for BigInt<Digit, SEPARATOR, SHIFT>
@@ -126,9 +126,9 @@ macro_rules! plain_signed_checked_shr_impl {
     )*)
 }
 
-plain_signed_checked_shr_impl!(i8 i16 i32 i64 i128 isize);
+primitive_signed_checked_shr_impl!(i8 i16 i32 i64 i128 isize);
 
-macro_rules! plain_unsigned_checked_shr_impl {
+macro_rules! primitive_unsigned_checked_shr_impl {
     ($($t:ty)*) => ($(
         impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr<$t>
             for BigInt<Digit, SEPARATOR, SHIFT>
@@ -162,4 +162,4 @@ macro_rules! plain_unsigned_checked_shr_impl {
     )*)
 }
 
-plain_unsigned_checked_shr_impl!(u8 u16 u32 u64 u128 usize);
+primitive_unsigned_checked_shr_impl!(u8 u16 u32 u64 u128 usize);

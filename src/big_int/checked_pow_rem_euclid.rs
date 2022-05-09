@@ -1,4 +1,3 @@
-use crate::big_int::types::CheckedPowRemEuclidError;
 use crate::traits::{
     Abs, CheckedPowRemEuclid, CheckedRemEuclid, CheckedRemEuclidInv, Oppositive, Unitary, Zeroable,
 };
@@ -7,7 +6,7 @@ use super::constants::{WINDOW_BASE, WINDOW_CUTOFF, WINDOW_SHIFT};
 use super::digits::{
     binary_digits_to_lesser_binary_base, EuclidDivisibleDigit, ExponentiativeDigit,
 };
-use super::types::{BigInt, WindowDigit};
+use super::types::{BigInt, CheckedPowRemEuclidError, WindowDigit};
 
 impl<
         Digit: ExponentiativeDigit + EuclidDivisibleDigit,

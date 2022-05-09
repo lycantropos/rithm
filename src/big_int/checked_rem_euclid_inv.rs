@@ -1,6 +1,7 @@
+use crate::traits::{CheckedDivRemEuclid, CheckedRemEuclidInv, Oppositive};
+
 use super::digits::EuclidDivisibleDigit;
 use super::types::BigInt;
-use crate::traits::{CheckedDivRemEuclid, CheckedRemEuclidInv, Oppositive};
 
 impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclidInv
     for BigInt<Digit, SEPARATOR, SHIFT>

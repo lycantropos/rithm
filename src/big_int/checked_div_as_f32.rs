@@ -1,8 +1,7 @@
-use crate::big_int::types::CheckedDivAsFloatError;
 use crate::traits::{BitwiseNegatableUnaryAlgebra, CheckedDivAsF32};
 
 use super::digits::{checked_div_as_float, BinaryDigitConvertibleToFloat, DivisibleDigit};
-use super::types::BigInt;
+use super::types::{BigInt, CheckedDivAsFloatError};
 
 impl<
         Digit: BinaryDigitConvertibleToFloat<f32> + BitwiseNegatableUnaryAlgebra + DivisibleDigit,

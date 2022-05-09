@@ -1,4 +1,3 @@
-use crate::big_int::types::Sign;
 use crate::traits::{Endianness, FromBytes, Oppose, Unitary, Zeroable};
 
 use super::constants::MIDDLE_BYTE;
@@ -6,7 +5,7 @@ use super::contracts::is_valid_shift;
 use super::digits::{
     binary_digits_to_binary_base, negate_digits, to_digits_sign, BinaryDigitConvertibleToBinary,
 };
-use super::types::BigInt;
+use super::types::{BigInt, Sign};
 
 impl<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> FromBytes
     for BigInt<Digit, SEPARATOR, SHIFT>

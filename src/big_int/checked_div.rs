@@ -1,6 +1,7 @@
+use crate::traits::CheckedDiv;
+
 use super::digits::{checked_div, DivisibleDigit};
 use super::types::BigInt;
-use crate::traits::CheckedDiv;
 
 impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDiv
     for BigInt<Digit, SEPARATOR, SHIFT>

@@ -1,8 +1,9 @@
 use std::convert::TryFrom;
 
+use crate::traits::{BitLength, Oppose};
+
 use super::digits::{BinaryDigit, MultiplicativeDigit};
 use super::types::BigInt;
-use crate::traits::{BitLength, Oppose};
 
 impl<
         Digit: BitLength<Output = usize> + BinaryDigit + MultiplicativeDigit + Oppose + TryFrom<usize>,

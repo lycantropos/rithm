@@ -1,10 +1,9 @@
 use std::mem::size_of;
 
-use crate::big_int::types::ShlError;
 use crate::traits::{CheckedShl, DivRem, Oppositive, Zeroable};
 
 use super::digits::{primitive_shift_digits_left, shift_digits_left, LeftShiftableDigit};
-use super::types::BigInt;
+use super::types::{BigInt, ShlError};
 
 impl<Digit: LeftShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShl
     for BigInt<Digit, SEPARATOR, SHIFT>

@@ -1,6 +1,7 @@
+use crate::traits::CheckedRem;
+
 use super::digits::{checked_rem, DivisibleDigit};
 use super::types::BigInt;
-use crate::traits::CheckedRem;
 
 impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedRem
     for BigInt<Digit, SEPARATOR, SHIFT>

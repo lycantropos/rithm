@@ -1,7 +1,7 @@
 use std::ops::Add;
 
+use super::digits::{sum_signed_digits, AdditiveDigit};
 use super::types::BigInt;
-use crate::big_int::digits::{sum_signed_digits, AdditiveDigit};
 
 impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Add
     for BigInt<Digit, SEPARATOR, SHIFT>

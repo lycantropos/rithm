@@ -1,6 +1,7 @@
 use std::fmt::{Debug, Display, Formatter};
 
 use super::constants::{MAX_REPRESENTABLE_BASE, MIN_REPRESENTABLE_BASE};
+
 pub(super) type Sign = i8;
 pub(super) type WindowDigit = u8;
 

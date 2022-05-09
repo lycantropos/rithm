@@ -147,7 +147,8 @@ use rithm::traits::{CheckedDivAsF32, CheckedDivAsF64, FromStrRadix, Pow, Opposit
 type Digit = u16;
 #[cfg(not(target_arch = "x86"))]
 type Digit = u32;
-const BINARY_SHIFT: usize = (OppositionOf::<Digit>::BITS - 2) as usize;
+const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
+const _: () = assert!(big_int::is_valid_shift::<Digit, BINARY_SHIFT>());
 type BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
 
 assert_eq!(BigInt::zero(), 0);

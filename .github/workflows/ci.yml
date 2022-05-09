@@ -79,13 +79,6 @@ jobs:
       - name: 'Install Rust coverage dependencies'
         run: cargo install grcov
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
-      - name: 'Install in editable mode'
-        run: python -m pip -v install -e .
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: >
-            -Zprofile -Ccodegen-units=1 -Copt-level=0 -Coverflow-checks=off
-            -Zpanic_abort_tests -Cpanic=abort
       - name: 'Install tests dependencies'
         run: python -m pip install -r requirements-tests.txt
       - name: 'Run Rust doctests'
@@ -96,6 +89,11 @@ jobs:
             -Zprofile -Ccodegen-units=1 -Copt-level=0 -Coverflow-checks=off
             -Zpanic_abort_tests
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Install in editable mode'
+        run: python -m pip -v install -e .
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: -Zprofile -Ccodegen-units=1 -Copt-level=0 -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort
       - name: 'Run Python doctests'
         run: >
           coverage run -m doctest README.md

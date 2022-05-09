@@ -29,8 +29,8 @@ pub mod traits;
 type Digit = u16;
 #[cfg(not(target_arch = "x86"))]
 type Digit = u32;
-
-const BINARY_SHIFT: usize = (traits::OppositionOf::<Digit>::BITS - 2) as usize;
+const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
+const _: () = assert!(big_int::is_valid_shift::<Digit, BINARY_SHIFT>());
 const PICKLE_SERIALIZATION_ENDIANNESS: Endianness = Endianness::Little;
 
 type BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;

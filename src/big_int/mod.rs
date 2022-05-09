@@ -1,4 +1,5 @@
 pub(crate) use self::constants::*;
+pub use self::contracts::*;
 pub(crate) use self::digits::*;
 pub use self::types::*;
 

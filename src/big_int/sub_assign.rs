@@ -1,9 +1,9 @@
 use std::ops::SubAssign;
 
-use super::digits::{subtract_components, AdditiveGroupDigit};
+use super::digits::{subtract_components, AdditiveDigit};
 use super::types::BigInt;
 
-impl<Digit: AdditiveGroupDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn sub_assign(&mut self, subtrahend: Self) {
@@ -16,7 +16,7 @@ impl<Digit: AdditiveGroupDigit, const SEPARATOR: char, const SHIFT: usize> SubAs
     }
 }
 
-impl<Digit: AdditiveGroupDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign<&Self>
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign<&Self>
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn sub_assign(&mut self, subtrahend: &Self) {

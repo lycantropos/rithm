@@ -15,13 +15,13 @@ use crate::traits::{
 
 use super::types::{CheckedDivAsFloatError, ShlError, Sign, WindowDigit};
 
-pub trait AdditiveGroupDigit = AdditiveDigit + SubtractiveDigit;
-
 pub trait AdditiveDigit = AssigningAdditiveMonoid
     + AssigningBitwiseConjunctiveMagma
     + AssigningShiftingRightMonoid<usize>
     + Copy
-    + MaskableDigit;
+    + MaskableDigit
+    + ModularSubtractiveMagma
+    + PartialOrd;
 
 pub trait BitwiseConjunctiveDigit = ComplementableDigit;
 
@@ -142,7 +142,7 @@ where
         + From<Self>
         + From<OppositionOf<Self>>;
 
-pub trait EuclidDivisibleDigit = AdditiveGroupDigit + DivisibleDigit;
+pub trait EuclidDivisibleDigit = AdditiveDigit + DivisibleDigit;
 
 pub trait ExponentiativeDigit =
     MultiplicativeDigit + From<u8> + BinaryDigitDowncastableTo<WindowDigit>;
@@ -162,7 +162,7 @@ where
         + PartialOrd
         + TryFrom<DoublePrecisionOf<Self>>;
 
-pub trait InvertibleDigit = AdditiveGroupDigit;
+pub trait InvertibleDigit = AdditiveDigit;
 
 pub trait LeftShiftableDigit = Debug + DivisibleDigit + MaybeReducibleTo<usize> + TryFrom<usize>
 where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
@@ -173,15 +173,14 @@ pub trait MaskableDigit<Subtrahend = Self> =
 pub trait ModularInvertibleDigit = EuclidDivisibleDigit + MultiplicativeDigit;
 
 pub trait MultiplicativeDigit =
-    AdditiveGroupDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + TryFrom<usize>
+    AdditiveDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + TryFrom<usize>
     where
         DoublePrecisionOf<Self>: AssigningAdditiveMonoid
             + AssigningBitwiseConjunctiveMagma
             + AssigningMultiplicativeMonoid
-            + AssigningShiftingLeftMonoid<usize>
             + AssigningShiftingRightMonoid<usize>
-            + AssigningSubtractiveMagma
-            + Copy;
+            + Copy
+            + MaskableDigit;
 
 pub trait NonBinaryDigitConvertibleToBinary<Target> = Copy
 where
@@ -228,14 +227,6 @@ pub trait RightShiftableDigit = InvertibleDigit + PrimitiveRightShiftableDigit;
 pub trait ShiftableInPlaceDigit =
     Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + Zeroable
     where DoublePrecisionOf<Self>: BitwiseDisjunctiveDigit;
-
-pub trait SubtractiveDigit = AssigningBitwiseConjunctiveMagma
-    + AssigningShiftingRightMonoid<usize>
-    + AssigningSubtractiveMagma
-    + Copy
-    + MaskableDigit
-    + ModularSubtractiveMagma
-    + PartialOrd;
 
 pub(super) fn binary_digits_to_base<
     SourceDigit: BinaryDigitConvertibleTo<TargetDigit>,
@@ -1552,7 +1543,7 @@ where
     (high, low)
 }
 
-pub(super) fn subtract_components<Digit: AdditiveGroupDigit, const SHIFT: usize>(
+pub(super) fn subtract_components<Digit: AdditiveDigit, const SHIFT: usize>(
     minuend_sign: Sign,
     minuend: &[Digit],
     subtrahend_sign: Sign,
@@ -1574,7 +1565,7 @@ pub(super) fn subtract_components<Digit: AdditiveGroupDigit, const SHIFT: usize>
     }
 }
 
-fn subtract_digits<Digit: SubtractiveDigit, const SHIFT: usize>(
+fn subtract_digits<Digit: AdditiveDigit, const SHIFT: usize>(
     first: &[Digit],
     second: &[Digit],
     mut sign: Sign,
@@ -1630,7 +1621,7 @@ fn subtract_digits<Digit: SubtractiveDigit, const SHIFT: usize>(
     (sign, result)
 }
 
-fn subtract_digits_in_place<Digit: AdditiveGroupDigit, const SHIFT: usize>(
+fn subtract_digits_in_place<Digit: AdditiveDigit, const SHIFT: usize>(
     longest: &mut [Digit],
     shortest: &[Digit],
 ) -> Digit {
@@ -1654,7 +1645,7 @@ fn subtract_digits_in_place<Digit: AdditiveGroupDigit, const SHIFT: usize>(
     accumulator
 }
 
-pub(super) fn sum_components<Digit: AdditiveGroupDigit, const SHIFT: usize>(
+pub(super) fn sum_components<Digit: AdditiveDigit, const SHIFT: usize>(
     first_sign: Sign,
     first: &[Digit],
     second_sign: Sign,
@@ -1703,7 +1694,7 @@ fn sum_digits<Digit: AdditiveDigit, const SHIFT: usize>(
     result
 }
 
-fn sum_digits_in_place<Digit: AdditiveGroupDigit, const SHIFT: usize>(
+fn sum_digits_in_place<Digit: AdditiveDigit, const SHIFT: usize>(
     longest: &mut [Digit],
     shortest: &[Digit],
 ) -> Digit {

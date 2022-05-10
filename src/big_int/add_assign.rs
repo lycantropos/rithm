@@ -1,9 +1,9 @@
 use std::ops::AddAssign;
 
-use super::digits::{sum_components, AdditiveGroupDigit};
+use super::digits::{sum_components, AdditiveDigit};
 use super::types::BigInt;
 
-impl<Digit: AdditiveGroupDigit, const SEPARATOR: char, const SHIFT: usize> AddAssign<&Self>
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> AddAssign<&Self>
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn add_assign(&mut self, other: &Self) {
@@ -12,7 +12,7 @@ impl<Digit: AdditiveGroupDigit, const SEPARATOR: char, const SHIFT: usize> AddAs
     }
 }
 
-impl<Digit: AdditiveGroupDigit, const SEPARATOR: char, const SHIFT: usize> AddAssign
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> AddAssign
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn add_assign(&mut self, other: Self) {

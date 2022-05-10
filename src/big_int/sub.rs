@@ -1,9 +1,9 @@
 use std::ops::Sub;
 
-use super::digits::{subtract_components, AdditiveGroupDigit};
+use super::digits::{subtract_components, AdditiveDigit};
 use super::types::BigInt;
 
-impl<Digit: AdditiveGroupDigit, const SEPARATOR: char, const SHIFT: usize> Sub
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Sub
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
@@ -19,7 +19,7 @@ impl<Digit: AdditiveGroupDigit, const SEPARATOR: char, const SHIFT: usize> Sub
     }
 }
 
-impl<Digit: AdditiveGroupDigit, const SEPARATOR: char, const SHIFT: usize> Sub<&Self>
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Sub<&Self>
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
@@ -35,7 +35,7 @@ impl<Digit: AdditiveGroupDigit, const SEPARATOR: char, const SHIFT: usize> Sub<&
     }
 }
 
-impl<Digit: AdditiveGroupDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize>
     Sub<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
@@ -51,7 +51,7 @@ impl<Digit: AdditiveGroupDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: AdditiveGroupDigit, const SEPARATOR: char, const SHIFT: usize> Sub
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Sub
     for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;

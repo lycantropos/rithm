@@ -4,7 +4,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use crate::big_int::{
-    AdditiveGroupDigit, BigInt, DigitConvertibleFromF64, EuclidDivisibleDigit, GcdDigit,
+    AdditiveDigit, BigInt, DigitConvertibleFromF64, EuclidDivisibleDigit, GcdDigit,
     LeftShiftableDigit, MultiplicativeDigit,
 };
 use crate::contracts::is_signed;
@@ -166,7 +166,7 @@ macro_rules! primitive_add_fraction_impl {
 primitive_add_fraction_impl!(i8 i16 i32 i64 i128 isize);
 
 impl<
-        Digit: AdditiveGroupDigit + Eq + GcdDigit + MultiplicativeDigit,
+        Digit: AdditiveDigit + Eq + GcdDigit + MultiplicativeDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > Add<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -1114,7 +1114,7 @@ macro_rules! primitive_sub_fraction_impl {
 primitive_sub_fraction_impl!(i8 i16 i32 i64 i128 isize);
 
 impl<
-        Digit: AdditiveGroupDigit + Eq + GcdDigit + MultiplicativeDigit,
+        Digit: AdditiveDigit + Eq + GcdDigit + MultiplicativeDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > Sub<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>

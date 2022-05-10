@@ -23,29 +23,8 @@ pub trait AdditiveDigit = AssigningAdditiveMonoid
     + ModularSubtractiveMagma
     + PartialOrd;
 
-pub trait BitwiseConjunctiveDigit = ComplementableDigit;
-
-pub trait BitwiseDisjunctiveDigit = ComplementableDigit + AssigningBitwiseDisjunctiveMonoid;
-
-pub trait BitwiseExclusiveDisjunctiveDigit = ComplementableDigit;
-
 pub trait BinaryDigitConvertibleTo<Target> =
     BinaryDigitConvertibleToBinary<Target> + BinaryDigitConvertibleToNonBinary<Target>;
-
-pub trait ConstructibleFrom<Source> = AssigningBitwiseConjunctiveMagma
-    + AssigningShiftingRightMonoid<usize>
-    + MaskableDigit
-    + Copy
-    + Oppose
-    + TryFrom<Source>
-where
-    Source: AssigningBitwiseConjunctiveMagma
-        + AssigningShiftingRightMonoid<usize>
-        + MaskableDigit
-        + Copy
-        + Oppose
-        + TryFrom<OppositionOf<Source>>,
-    OppositionOf<Source>: TryFrom<Source>;
 
 pub trait BinaryDigitConvertibleToBinary<Target> =
     BinaryDigitDowncastableTo<Target> + BinaryDigitUpcastableTo<Target> where Target: TryFrom<Self>;
@@ -96,12 +75,33 @@ where
         + MaskableDigit
         + From<Self>;
 
+pub trait BitwiseConjunctiveDigit = ComplementableDigit;
+
+pub trait BitwiseDisjunctiveDigit = ComplementableDigit + AssigningBitwiseDisjunctiveMonoid;
+
+pub trait BitwiseExclusiveDisjunctiveDigit = ComplementableDigit;
+
 pub trait ComplementableDigit = AssigningAdditiveMonoid
     + AssigningBitwiseConjunctiveMagma
     + AssigningBitwiseExclusiveDisjunctiveMonoid
     + AssigningShiftingRightMonoid<usize>
     + Copy
     + MaskableDigit;
+
+pub trait ConstructibleFrom<Source> = AssigningBitwiseConjunctiveMagma
+    + AssigningShiftingRightMonoid<usize>
+    + MaskableDigit
+    + Copy
+    + Oppose
+    + TryFrom<Source>
+where
+    Source: AssigningBitwiseConjunctiveMagma
+        + AssigningShiftingRightMonoid<usize>
+        + MaskableDigit
+        + Copy
+        + Oppose
+        + TryFrom<OppositionOf<Source>>,
+    OppositionOf<Source>: TryFrom<Source>;
 
 pub trait DigitConvertibleFromF64 = Copy + Zeroable where f64: FloatToInt<Self> + From<Self>;
 

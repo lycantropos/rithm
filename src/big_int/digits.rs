@@ -58,8 +58,9 @@ where
         + TryFrom<OppositionOf<Source>>,
     OppositionOf<Source>: TryFrom<Source>;
 
-pub trait BinaryDigitConvertibleToBinary<Target> =
-    BinaryDigitDowncastableTo<Target> + BinaryDigitUpcastableTo<Target> where Target: TryFrom<Self>;
+pub trait BinaryDigitConvertibleToBinary<Target> = BinaryDigitDowncastableTo<Target>
+    + BinaryDigitUpcastableTo<Target>
+where Target: TryFrom<Self>;
 
 pub trait BinaryDigitConvertibleToFloat<Target> = AssigningBitwiseConjunctiveMagma
     + AssigningBitwiseDisjunctiveMonoid
@@ -84,12 +85,14 @@ where
         + ModularPartialMagma
         + TryFrom<usize>;
 
-pub trait BinaryDigitDowncastableTo<Target> =
-    BinaryDigit + BitLength<Output = usize> + DoublePrecision + From<u8>
-    where
-        Target: TryFrom<DoublePrecisionOf<Self>>,
-        DoublePrecisionOf<Self>: BinaryDigit,
-        usize: TryFrom<Self>;
+pub trait BinaryDigitDowncastableTo<Target> = Copy + BitLength<Output = usize> + DoublePrecision
+where
+    Target: TryFrom<DoublePrecisionOf<Self>>,
+    DoublePrecisionOf<Self>: AssigningBitwiseConjunctiveMagma
+        + AssigningBitwiseDisjunctiveMonoid
+        + AssigningShiftingRightMonoid<usize>
+        + Copy
+        + MaskableDigit;
 
 pub trait BinaryDigitUpcastableTo<Target> = BinaryDigit
 where
@@ -109,7 +112,8 @@ pub trait DisplayableDigit = AssigningDivisivePartialMagma
     + BinaryDigitConvertibleTo<Self>
     + ModularPartialMagma
     + Zeroable
-    + TryFrom<usize>;
+    + TryFrom<usize>
+where usize: TryFrom<Self>;
 
 pub trait DivisibleAsFloatDigit<Target> = AssigningMultiplicativeMonoid
     + BinaryDigitConvertibleToFloat<Target>
@@ -143,7 +147,8 @@ where
 
 pub trait EuclidDivisibleDigit = AdditiveGroupDigit + DivisibleDigit;
 
-pub trait ExponentiativeDigit = MultiplicativeDigit + BinaryDigitDowncastableTo<WindowDigit>;
+pub trait ExponentiativeDigit =
+    MultiplicativeDigit + From<u8> + BinaryDigitDowncastableTo<WindowDigit>;
 
 pub trait FromStrDigit =
     Oppose where u8: BinaryDigitConvertibleToBinary<Self> + NonBinaryDigitConvertibleToBinary<Self>;

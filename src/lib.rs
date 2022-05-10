@@ -1191,7 +1191,11 @@ fn hash(value: &BigInt) -> usize {
     if value.is_negative() {
         result = usize::MAX - result + 1
     };
-    result - ((result == usize::MAX) as usize)
+    if result == usize::MAX {
+        result - 1
+    } else {
+        result
+    }
 }
 
 fn compare<T: PartialOrd<U>, U>(left: &T, right: &U, op: CompareOp) -> bool {

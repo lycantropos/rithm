@@ -7,7 +7,7 @@ use super::digits::{binary_digits_to_binary_base, negate_digits, BinaryDigitConv
 use super::types::BigInt;
 
 impl<
-        Digit: BinaryDigitConvertibleToBinary<Digit> + From<u8> + Oppose,
+        Digit: BinaryDigitConvertibleToBinary<Digit> + From<u8> + Oppose + Zeroable,
         const SEPARATOR: char,
         const SHIFT: usize,
     > ToBytes for &BigInt<Digit, SEPARATOR, SHIFT>

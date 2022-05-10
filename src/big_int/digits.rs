@@ -77,7 +77,7 @@ where
 
 pub trait BitwiseConjunctiveDigit = ComplementableDigit;
 
-pub trait BitwiseDisjunctiveDigit = ComplementableDigit + AssigningBitwiseDisjunctiveMonoid;
+pub trait BitwiseDisjunctiveDigit = AssigningBitwiseDisjunctiveMonoid + ComplementableDigit;
 
 pub trait BitwiseExclusiveDisjunctiveDigit = ComplementableDigit;
 

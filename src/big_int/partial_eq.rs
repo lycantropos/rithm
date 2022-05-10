@@ -1,16 +1,13 @@
-use std::convert::TryFrom;
-
-use crate::traits::Oppose;
-
-use super::digits::{non_zero_value_to_digits, value_to_sign, BinaryDigit};
+use super::digits::{non_zero_value_to_digits, value_to_sign, ConstructibleFrom};
 use super::types::BigInt;
 
 macro_rules! primitive_partial_eq_to_big_int_impl {
     ($($t:ty)*) => ($(
-        impl<Digit: PartialEq, const SEPARATOR: char, const SHIFT: usize>
-            PartialEq<BigInt<Digit, SEPARATOR, SHIFT>> for $t
-        where
-            Digit: BinaryDigit + Oppose + TryFrom<$t>,
+        impl<
+                Digit: ConstructibleFrom<$t> + PartialEq,
+                const SEPARATOR: char,
+                const SHIFT: usize,
+            > PartialEq<BigInt<Digit, SEPARATOR, SHIFT>> for $t
         {
             fn eq(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
                 value_to_sign(*self) == other.sign
@@ -19,10 +16,11 @@ macro_rules! primitive_partial_eq_to_big_int_impl {
             }
         }
 
-        impl<Digit: PartialEq, const SEPARATOR: char, const SHIFT: usize> PartialEq<$t>
-            for BigInt<Digit, SEPARATOR, SHIFT>
-        where
-            Digit: BinaryDigit + Oppose + TryFrom<$t>,
+        impl<
+                Digit: ConstructibleFrom<$t> + PartialEq,
+                const SEPARATOR: char,
+                const SHIFT: usize,
+            > PartialEq<$t> for BigInt<Digit, SEPARATOR, SHIFT>
         {
             fn eq(&self, other: &$t) -> bool {
                 self.sign == value_to_sign(*other)

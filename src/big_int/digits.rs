@@ -116,13 +116,7 @@ pub trait DivisibleAsFloatDigit<Target> = AssigningMultiplicativeMonoid
     + BitwiseNegatableUnaryAlgebra
     + DivisibleDigit;
 
-pub trait DivisibleDigit = DivisibleByOneDigit + DivisibleByTwoOrMoreDigit;
-
-pub trait DivisibleByOneDigit = ShiftableInPlaceDigit
-where
-    DoublePrecisionOf<Self>: AssigningMultiplicativeMonoid + AssigningDivisivePartialMagma;
-
-pub trait DivisibleByTwoOrMoreDigit = AssigningAdditiveMonoid
+pub trait DivisibleDigit = AssigningAdditiveMonoid
     + AssigningBitwiseConjunctiveMagma
     + AssigningShiftingRightMonoid<usize>
     + BitLength<Output = usize>
@@ -874,7 +868,7 @@ pub(super) fn digits_lesser_than<Digit: PartialOrd>(left: &[Digit], right: &[Dig
         || left.len() == right.len() && left.iter().rev().lt(right.iter().rev())
 }
 
-pub(super) fn div_rem_digits_by_digit<Digit: DivisibleByOneDigit, const SHIFT: usize>(
+pub(super) fn div_rem_digits_by_digit<Digit: DivisibleDigit, const SHIFT: usize>(
     dividend: &[Digit],
     divisor: Digit,
 ) -> (Vec<Digit>, Digit) {
@@ -895,7 +889,7 @@ pub(super) fn div_rem_digits_by_digit<Digit: DivisibleByOneDigit, const SHIFT: u
     })
 }
 
-pub(super) fn div_rem_two_or_more_digits<Digit: DivisibleByTwoOrMoreDigit, const SHIFT: usize>(
+pub(super) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usize>(
     dividend: &[Digit],
     divisor: &[Digit],
 ) -> (Vec<Digit>, Vec<Digit>) {

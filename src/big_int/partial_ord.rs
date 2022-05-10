@@ -1,9 +1,9 @@
+use crate::traits::{Oppositive, Zeroable};
 use std::cmp::Ordering;
-use std::convert::TryFrom;
 
-use crate::traits::{Oppose, Oppositive, Zeroable};
-
-use super::digits::{digits_lesser_than, non_zero_value_to_digits, value_to_sign, BinaryDigit};
+use super::digits::{
+    digits_lesser_than, non_zero_value_to_digits, value_to_sign, ConstructibleFrom,
+};
 use super::types::{BigInt, Sign};
 
 impl<Digit: Clone + PartialOrd + Zeroable, const SEPARATOR: char, const SHIFT: usize> PartialOrd
@@ -66,10 +66,11 @@ impl<Digit: Clone + PartialOrd + Zeroable, const SEPARATOR: char, const SHIFT: u
 
 macro_rules! big_int_partial_ord_to_signed_primitive_impl {
     ($($t:ty)*) => ($(
-        impl<Digit: PartialEq + Zeroable, const SEPARATOR: char, const SHIFT: usize>
-            PartialOrd<$t> for BigInt<Digit, SEPARATOR, SHIFT>
-        where
-            Digit: BinaryDigit + Oppose + TryFrom<$t>,
+        impl<
+                Digit: ConstructibleFrom<$t> + PartialOrd + Zeroable,
+                const SEPARATOR: char,
+                const SHIFT: usize,
+            > PartialOrd<$t> for BigInt<Digit, SEPARATOR, SHIFT>
         {
             fn ge(&self, other: &$t) -> bool {
                 self.sign > ((*other).signum() as Sign)
@@ -160,10 +161,11 @@ big_int_partial_ord_to_signed_primitive_impl!(i8 i16 i32 i64 i128 isize);
 
 macro_rules! big_int_partial_ord_to_unsigned_primitive_impl {
     ($($t:ty)*) => ($(
-        impl<Digit: PartialEq + Zeroable, const SEPARATOR: char, const SHIFT: usize>
-            PartialOrd<$t> for BigInt<Digit, SEPARATOR, SHIFT>
-        where
-            Digit: BinaryDigit + Oppose + TryFrom<$t>,
+        impl<
+                Digit: ConstructibleFrom<$t> + PartialOrd + Zeroable,
+                const SEPARATOR: char,
+                const SHIFT: usize,
+            > PartialOrd<$t> for BigInt<Digit, SEPARATOR, SHIFT>
         {
             fn ge(&self, other: &$t) -> bool {
                 self.is_zero() && other.is_zero()
@@ -220,10 +222,11 @@ big_int_partial_ord_to_unsigned_primitive_impl!(u8 u16 u32 u64 u128 usize);
 
 macro_rules! signed_primitive_partial_ord_to_big_int_impl {
     ($($t:ty)*) => ($(
-        impl<Digit: PartialEq + Zeroable, const SEPARATOR: char, const SHIFT: usize>
-            PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $t
-        where
-            Digit: BinaryDigit + Oppose + TryFrom<$t>,
+        impl<
+                Digit: ConstructibleFrom<$t> + PartialOrd + Zeroable,
+                const SEPARATOR: char,
+                const SHIFT: usize,
+            > PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $t
         {
             fn le(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
                 value_to_sign(*self) < other.sign
@@ -310,10 +313,11 @@ signed_primitive_partial_ord_to_big_int_impl!(i8 i16 i32 i64 i128 isize);
 
 macro_rules! unsigned_primitive_partial_ord_to_big_int_impl {
     ($($t:ty)*) => ($(
-        impl<Digit: PartialEq + Zeroable, const SEPARATOR: char, const SHIFT: usize>
-            PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $t
-        where
-            Digit: BinaryDigit + Oppose + TryFrom<$t>,
+        impl<
+                Digit: ConstructibleFrom<$t> + PartialOrd + Zeroable,
+                const SEPARATOR: char,
+                const SHIFT: usize,
+            > PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $t
         {
             fn ge(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
                 !other.is_positive()

@@ -13,6 +13,7 @@ except ImportError:
     from numbers import (Integral as _Integral,
                          Rational as _Rational)
     from operator import mul as _mul
+    from sys import hash_info as _hash_info
     from typing import (Tuple as _Tuple,
                         Union as _Union)
 
@@ -309,6 +310,8 @@ except ImportError:
 
     _ONE = Int(1)
     _ZERO = Int()
+    _HASH_INF = Int(_hash_info.inf)
+    _HASH_MODULUS = Int(_hash_info.modulus)
 
 
     @_Rational.register
@@ -448,6 +451,17 @@ except ImportError:
                     else (self.numerator > other * self.denominator
                           if isinstance(other, (Int, int))
                           else NotImplemented))
+
+        def __hash__(self) -> int:
+            inverted_denominator = pow(self._denominator, _HASH_MODULUS - 2,
+                                       _HASH_MODULUS)
+            if inverted_denominator:
+                result = ((abs(self._numerator) * inverted_denominator)
+                          % _HASH_MODULUS)
+            else:
+                result = _HASH_INF
+            result = result if self >= 0 else -result
+            return -2 if result == -1 else int(result)
 
         def __le__(self, other):
             return (self.numerator * other.denominator

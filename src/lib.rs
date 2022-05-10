@@ -29,6 +29,12 @@ pub mod traits;
 type Digit = u16;
 #[cfg(not(target_arch = "x86"))]
 type Digit = u32;
+#[cfg(target_arch = "x86")]
+const PyHASH_BITS: usize = 31;
+#[cfg(not(target_arch = "x86"))]
+const HASH_BITS: usize = 61;
+const HASH_INF: ffi::Py_hash_t = 314159;
+const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
 const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
 const _: () = assert!(big_int::is_valid_shift::<Digit, BINARY_SHIFT>());
 const PICKLE_SERIALIZATION_ENDIANNESS: Endianness = Endianness::Little;
@@ -884,6 +890,36 @@ impl PyFraction {
             self.denominator().__getstate__(py),
         )
             .to_object(py)
+    }
+
+    fn __hash__(&self) -> ffi::Py_hash_t {
+        let inverted_denominator = unsafe {
+            self.0
+                .denominator()
+                .checked_pow_rem_euclid(BigInt::from(HASH_MODULUS - 2), BigInt::from(HASH_MODULUS))
+                .unwrap_unchecked()
+        };
+        let result = if inverted_denominator.is_zero() {
+            HASH_INF
+        } else {
+            unsafe {
+                ffi::Py_hash_t::try_from(
+                    (self.0.numerator().abs() * inverted_denominator)
+                        .checked_rem_euclid(BigInt::from(HASH_MODULUS))
+                        .unwrap_unchecked(),
+                )
+                .unwrap_unchecked()
+            }
+        };
+        if self.0.is_negative() {
+            if result.is_one() {
+                -2
+            } else {
+                -result
+            }
+        } else {
+            result
+        }
     }
 
     fn __mod__(&self, divisor: &PyAny) -> PyResult<PyObject> {

@@ -275,6 +275,9 @@ class Fraction:
     def __gt__(self, other: _Union['Fraction', Int, int]) -> bool:
         ...
 
+    def __hash__(self) -> int:
+        ...
+
     def __le__(self, other: _Union['Fraction', Int, int]) -> bool:
         ...
 

@@ -225,3 +225,61 @@ impl Display for TryIntoFloatError {
         Display::fmt(&self.description(), formatter)
     }
 }
+
+#[derive(Eq, PartialEq)]
+pub enum TryIntoSignedIntegerError {
+    TooLarge,
+}
+
+impl TryIntoSignedIntegerError {
+    fn description(&self) -> &str {
+        match self {
+            TryIntoSignedIntegerError::TooLarge => {
+                "Value too large to be expressed as given signed integer type."
+            }
+        }
+    }
+}
+
+impl Debug for TryIntoSignedIntegerError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(self.description())
+    }
+}
+
+impl Display for TryIntoSignedIntegerError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.description(), formatter)
+    }
+}
+
+#[derive(Eq, PartialEq)]
+pub enum TryIntoUnsignedIntegerError {
+    TooLarge,
+    Negative,
+}
+
+impl TryIntoUnsignedIntegerError {
+    fn description(&self) -> &str {
+        match self {
+            TryIntoUnsignedIntegerError::Negative => {
+                "Negative value cannot be expressed by unsigned integer type."
+            }
+            TryIntoUnsignedIntegerError::TooLarge => {
+                "Value too large to be expressed by given unsigned integer type."
+            }
+        }
+    }
+}
+
+impl Debug for TryIntoUnsignedIntegerError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(self.description())
+    }
+}
+
+impl Display for TryIntoUnsignedIntegerError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.description(), formatter)
+    }
+}

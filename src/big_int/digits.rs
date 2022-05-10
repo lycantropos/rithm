@@ -58,9 +58,8 @@ where
         + TryFrom<OppositionOf<Source>>,
     OppositionOf<Source>: TryFrom<Source>;
 
-pub trait BinaryDigitConvertibleToBinary<Target> = BinaryDigitDowncastableTo<Target>
-    + BinaryDigitUpcastableTo<Target>
-where Target: TryFrom<Self>;
+pub trait BinaryDigitConvertibleToBinary<Target> =
+    BinaryDigitDowncastableTo<Target> + BinaryDigitUpcastableTo<Target> where Target: TryFrom<Self>;
 
 pub trait BinaryDigitConvertibleToFloat<Target> = AssigningBitwiseConjunctiveMagma
     + AssigningBitwiseDisjunctiveMonoid

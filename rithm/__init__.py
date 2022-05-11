@@ -1,6 +1,6 @@
 """Arbitrary precision arithmetic."""
 
-__version__ = '7.1.0-alpha'
+__version__ = '7.1.0'
 
 try:
     from ._rithm import (Endianness,

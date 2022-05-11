@@ -49,15 +49,6 @@ impl Display for FromFloatConversionError {
     }
 }
 
-/// Constructs a new fraction from given numerator and denominator.
-/// Examples:
-/// ```rust
-/// use rithm::fraction;
-/// type Fraction = fraction::Fraction<i8>;
-/// assert_eq!(Fraction::new(1, 2), Some(Fraction::from(1) / 2));
-/// assert_eq!(Fraction::new(2, 4), Fraction::new(1, 2));
-/// assert_eq!(Fraction::new(-1, -2), Fraction::new(1, 2));
-/// ```
 impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fraction<Component> {
     pub fn new(mut numerator: Component, mut denominator: Component) -> Option<Self> {
         if denominator.is_zero() {

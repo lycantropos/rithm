@@ -29,14 +29,14 @@ pub mod traits;
 type Digit = u16;
 #[cfg(not(target_arch = "x86"))]
 type Digit = u32;
+const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
+const _: () = assert!(big_int::is_valid_shift::<Digit, BINARY_SHIFT>());
 #[cfg(target_arch = "x86")]
 const HASH_BITS: usize = 31;
 #[cfg(not(target_arch = "x86"))]
 const HASH_BITS: usize = 61;
 const HASH_INF: ffi::Py_hash_t = 314159;
 const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
-const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
-const _: () = assert!(big_int::is_valid_shift::<Digit, BINARY_SHIFT>());
 const PICKLE_SERIALIZATION_ENDIANNESS: Endianness = Endianness::Little;
 
 type BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;

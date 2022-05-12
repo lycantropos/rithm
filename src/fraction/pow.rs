@@ -2,9 +2,8 @@ use crate::traits::{Oppositive, Pow, Unitary, Zeroable};
 
 use super::types::{normalize_components_sign, Fraction};
 
-impl<
-        Component: Clone + Eq + Oppositive + Pow<Component, Output = Component> + Unitary + Zeroable,
-    > Pow<Component> for Fraction<Component>
+impl<Component: Clone + Oppositive + Pow<Component, Output = Component> + Unitary + Zeroable>
+    Pow<Component> for Fraction<Component>
 {
     type Output = Self;
 

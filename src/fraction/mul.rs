@@ -5,9 +5,8 @@ use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Opposi
 
 use super::types::{normalize_components_moduli, Fraction};
 
-impl<
-        Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
-    > Mul for Fraction<Component>
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + MultiplicativeMonoid> Mul
+    for Fraction<Component>
 {
     type Output = Self;
 
@@ -23,9 +22,8 @@ impl<
     }
 }
 
-impl<
-        Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
-    > Mul<Component> for Fraction<Component>
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + MultiplicativeMonoid>
+    Mul<Component> for Fraction<Component>
 {
     type Output = Self;
 
@@ -38,7 +36,7 @@ impl<
     }
 }
 
-impl<Digit: Eq + GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
     Mul<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Fraction<Self>;

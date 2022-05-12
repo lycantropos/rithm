@@ -4,7 +4,7 @@ use crate::traits::{CheckedDivEuclid, MultiplicativeMonoid, Zeroable};
 use super::types::Fraction;
 
 impl<
-        Component: Clone + CheckedDivEuclid<Output = Option<Component>> + Eq + MultiplicativeMonoid + Zeroable,
+        Component: Clone + CheckedDivEuclid<Output = Option<Component>> + MultiplicativeMonoid + Zeroable,
     > CheckedDivEuclid for Fraction<Component>
 {
     type Output = Option<Component>;
@@ -15,9 +15,8 @@ impl<
     }
 }
 
-impl<
-        Component: Clone + CheckedDivEuclid<Output = Option<Component>> + Eq + MultiplicativeMonoid,
-    > CheckedDivEuclid<Component> for Fraction<Component>
+impl<Component: Clone + CheckedDivEuclid<Output = Option<Component>> + MultiplicativeMonoid>
+    CheckedDivEuclid<Component> for Fraction<Component>
 {
     type Output = Option<Component>;
 
@@ -28,7 +27,7 @@ impl<
 }
 
 impl<
-        Digit: Eq + EuclidDivisibleDigit + MultiplicativeDigit,
+        Digit: EuclidDivisibleDigit + MultiplicativeDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedDivEuclid<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>

@@ -4,9 +4,8 @@ use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Opposi
 
 use super::types::{normalize_components_moduli, Fraction};
 
-impl<
-        Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
-    > MulAssign for Fraction<Component>
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + MultiplicativeMonoid>
+    MulAssign for Fraction<Component>
 {
     fn mul_assign(&mut self, other: Self) {
         let (numerator, other_denominator) =

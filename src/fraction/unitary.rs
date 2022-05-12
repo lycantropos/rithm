@@ -2,7 +2,7 @@ use crate::traits::Unitary;
 
 use super::types::Fraction;
 
-impl<Component: Clone + Eq + Unitary> Unitary for Fraction<Component> {
+impl<Component: Clone + Unitary> Unitary for Fraction<Component> {
     fn one() -> Self {
         Self {
             numerator: Component::one(),

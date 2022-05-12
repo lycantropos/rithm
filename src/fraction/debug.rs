@@ -4,7 +4,7 @@ use crate::traits::Unitary;
 
 use super::types::Fraction;
 
-impl<Component: Clone + Debug + Eq + Unitary> Debug for Fraction<Component> {
+impl<Component: Clone + Debug + Unitary> Debug for Fraction<Component> {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
         if self.denominator.is_one() {
             write!(

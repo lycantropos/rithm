@@ -11,7 +11,6 @@ impl<
         Component: AdditiveMonoid
             + Clone
             + CheckedDivRemEuclid<Output = Option<(Component, Component)>>
-            + Eq
             + From<u8>
             + MultiplicativeMonoid
             + Oppositive

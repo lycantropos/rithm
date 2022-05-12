@@ -5,12 +5,11 @@ use crate::traits::{
     DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Oppositive, SubtractiveMagma,
 };
 
-use super::types::{normalize_components_moduli, Fraction};
+use super::types::{Fraction, normalize_components_moduli};
 
 impl<
         Component: Clone
             + DivisivePartialMagma
-            + Eq
             + GcdMagma
             + Oppositive
             + MultiplicativeMonoid
@@ -57,7 +56,7 @@ impl<
 }
 
 impl<
-        Digit: AdditiveDigit + Eq + GcdDigit + MultiplicativeDigit,
+        Digit: AdditiveDigit + GcdDigit + MultiplicativeDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > Sub<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>

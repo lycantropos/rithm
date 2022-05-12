@@ -4,7 +4,7 @@ use crate::traits::{CheckedDivAsF32, CheckedDivAsF64, Maybe};
 
 use super::types::Fraction;
 
-impl<Component: Clone + Eq + CheckedDivAsF32> TryFrom<Fraction<Component>> for f32 {
+impl<Component: Clone + CheckedDivAsF32> TryFrom<Fraction<Component>> for f32 {
     type Error = <<Component as CheckedDivAsF32>::Output as Maybe>::Error;
 
     fn try_from(value: Fraction<Component>) -> Result<f32, Self::Error> {
@@ -17,7 +17,7 @@ impl<Component: Clone + Eq + CheckedDivAsF32> TryFrom<Fraction<Component>> for f
     }
 }
 
-impl<Component: Clone + Eq + CheckedDivAsF64> TryFrom<Fraction<Component>> for f64 {
+impl<Component: Clone + CheckedDivAsF64> TryFrom<Fraction<Component>> for f64 {
     type Error = <<Component as CheckedDivAsF64>::Output as Maybe>::Error;
 
     fn try_from(value: Fraction<Component>) -> Result<f64, Self::Error> {

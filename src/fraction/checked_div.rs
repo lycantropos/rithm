@@ -3,9 +3,8 @@ use crate::traits::{CheckedDiv, DivisivePartialMagma, GcdMagma, MultiplicativeMo
 
 use super::types::{normalize_components_moduli, normalize_components_sign, Fraction};
 
-impl<
-        Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
-    > CheckedDiv for Fraction<Component>
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + MultiplicativeMonoid>
+    CheckedDiv for Fraction<Component>
 {
     type Output = Option<Self>;
 
@@ -28,9 +27,8 @@ impl<
     }
 }
 
-impl<
-        Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
-    > CheckedDiv<Component> for Fraction<Component>
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + MultiplicativeMonoid>
+    CheckedDiv<Component> for Fraction<Component>
 {
     type Output = Option<Self>;
 
@@ -49,7 +47,7 @@ impl<
     }
 }
 
-impl<Digit: Eq + GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
     CheckedDiv<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<Fraction<Self>>;

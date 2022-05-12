@@ -1,4 +1,3 @@
-use std::cmp::Eq;
 use std::convert::{FloatToInt, TryFrom};
 
 use crate::big_int::{BigInt, DigitConvertibleFromF64, LeftShiftableDigit};
@@ -10,7 +9,7 @@ use super::types::{normalize_components_moduli, Fraction, FromFloatConversionErr
 macro_rules! big_int_fraction_try_from_float_impl {
     ($($f:ty)*) => ($(
         impl<
-                Digit: DigitConvertibleFromF64 + Eq + LeftShiftableDigit + Unitary,
+                Digit: DigitConvertibleFromF64 + LeftShiftableDigit + Unitary,
                 const SEPARATOR: char,
                 const SHIFT: usize,
             > TryFrom<$f> for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>

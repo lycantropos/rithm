@@ -9,7 +9,6 @@ impl<
         Component: Clone
             + CheckedDivRemEuclid<Output = Option<(Component, Component)>>
             + DivisivePartialMagma
-            + Eq
             + GcdMagma
             + MultiplicativeMonoid
             + Zeroable,
@@ -38,7 +37,6 @@ impl<
         Component: Clone
             + CheckedDivRemEuclid<Output = Option<(Component, Component)>>
             + DivisivePartialMagma
-            + Eq
             + GcdMagma
             + MultiplicativeMonoid
             + Zeroable,
@@ -62,7 +60,7 @@ impl<
 }
 
 impl<
-        Digit: Eq + EuclidDivisibleDigit + GcdDigit + MultiplicativeDigit,
+        Digit: EuclidDivisibleDigit + GcdDigit + MultiplicativeDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedDivRemEuclid<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>

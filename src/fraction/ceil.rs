@@ -7,7 +7,6 @@ use super::types::Fraction;
 impl<
         Component: Clone
             + CheckedDivEuclid<Output = Option<Component>>
-            + Eq
             + MultiplicativeMonoid
             + NegatableUnaryAlgebra
             + Zeroable,

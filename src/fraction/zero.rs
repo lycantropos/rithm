@@ -2,7 +2,7 @@ use crate::traits::{Unitary, Zeroable};
 
 use super::types::Fraction;
 
-impl<Component: Clone + Eq + Unitary + Zeroable> Zeroable for Fraction<Component> {
+impl<Component: Clone + Unitary + Zeroable> Zeroable for Fraction<Component> {
     fn zero() -> Self {
         Self {
             numerator: Component::zero(),

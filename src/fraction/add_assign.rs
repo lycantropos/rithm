@@ -10,7 +10,6 @@ impl<
         Component: AdditiveMonoid
             + Clone
             + DivisivePartialMagma
-            + Eq
             + GcdMagma
             + Oppositive
             + MultiplicativeMonoid,

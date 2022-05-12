@@ -9,7 +9,6 @@ use super::types::{normalize_components_moduli, Fraction};
 impl<
         Component: Clone
             + DivisivePartialMagma
-            + Eq
             + GcdMagma
             + Oppositive
             + MultiplicativeMonoid

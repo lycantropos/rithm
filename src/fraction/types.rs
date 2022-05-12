@@ -2,13 +2,13 @@ use std::fmt;
 
 use crate::traits::{DivisivePartialMagma, GcdMagma, Oppositive};
 
-#[derive(Clone, Eq, PartialEq)]
-pub struct Fraction<Component: Clone + Eq> {
+#[derive(Clone)]
+pub struct Fraction<Component: Clone> {
     pub(super) numerator: Component,
     pub(super) denominator: Component,
 }
 
-impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fraction<Component> {
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive> Fraction<Component> {
     pub fn new(mut numerator: Component, mut denominator: Component) -> Option<Self> {
         if denominator.is_zero() {
             None
@@ -23,7 +23,7 @@ impl<Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive> Fract
     }
 }
 
-impl<Component: Clone + Eq> Fraction<Component> {
+impl<Component: Clone> Fraction<Component> {
     pub fn denominator(&self) -> &Component {
         &self.denominator
     }

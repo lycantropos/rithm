@@ -5,7 +5,7 @@ use crate::traits::MultiplicativeMonoid;
 
 use super::types::Fraction;
 
-impl<Component: Clone + Eq + MultiplicativeMonoid + PartialOrd> PartialOrd for Fraction<Component> {
+impl<Component: Clone + MultiplicativeMonoid + PartialOrd> PartialOrd for Fraction<Component> {
     fn ge(&self, other: &Self) -> bool {
         self.numerator.clone() * other.denominator.clone()
             >= other.numerator.clone() * self.denominator.clone()
@@ -37,7 +37,7 @@ impl<Component: Clone + Eq + MultiplicativeMonoid + PartialOrd> PartialOrd for F
     }
 }
 
-impl<Component: Clone + Eq + MultiplicativeMonoid + PartialOrd> PartialOrd<Component>
+impl<Component: Clone + MultiplicativeMonoid + PartialOrd> PartialOrd<Component>
     for Fraction<Component>
 {
     fn ge(&self, other: &Component) -> bool {
@@ -68,7 +68,7 @@ impl<Component: Clone + Eq + MultiplicativeMonoid + PartialOrd> PartialOrd<Compo
 }
 
 impl<
-        Digit: Clone + Eq + GcdDigit + MultiplicativeDigit + PartialOrd,
+        Digit: Clone + GcdDigit + MultiplicativeDigit + PartialOrd,
         const SEPARATOR: char,
         const SHIFT: usize,
     > PartialOrd<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>

@@ -6,9 +6,8 @@ use crate::traits::{CheckedDiv, DivisivePartialMagma, GcdMagma, MultiplicativeMo
 
 use super::types::Fraction;
 
-impl<
-        Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
-    > Div for Fraction<Component>
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + MultiplicativeMonoid> Div
+    for Fraction<Component>
 {
     type Output = Self;
 
@@ -18,9 +17,8 @@ impl<
     }
 }
 
-impl<
-        Component: Clone + DivisivePartialMagma + Eq + GcdMagma + Oppositive + MultiplicativeMonoid,
-    > Div<Component> for Fraction<Component>
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + MultiplicativeMonoid>
+    Div<Component> for Fraction<Component>
 {
     type Output = Self;
 
@@ -30,7 +28,7 @@ impl<
     }
 }
 
-impl<Digit: Eq + GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
     Div<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Fraction<Self>;

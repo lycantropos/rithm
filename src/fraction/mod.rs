@@ -12,6 +12,7 @@ mod checked_rem_euclid;
 mod debug;
 mod display;
 mod div;
+mod eq;
 mod floor;
 mod from;
 mod mul;

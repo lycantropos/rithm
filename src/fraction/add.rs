@@ -11,7 +11,6 @@ impl<
         Component: AdditiveMonoid
             + Clone
             + DivisivePartialMagma
-            + Eq
             + GcdMagma
             + Oppositive
             + MultiplicativeMonoid,
@@ -35,7 +34,6 @@ impl<
         Component: AdditiveMonoid
             + Clone
             + DivisivePartialMagma
-            + Eq
             + GcdMagma
             + Oppositive
             + MultiplicativeMonoid,
@@ -56,7 +54,7 @@ impl<
 }
 
 impl<
-        Digit: AdditiveDigit + Eq + GcdDigit + MultiplicativeDigit,
+        Digit: AdditiveDigit + GcdDigit + MultiplicativeDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
     > Add<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>

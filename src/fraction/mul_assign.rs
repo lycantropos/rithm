@@ -16,3 +16,13 @@ impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + Multiplic
         self.denominator = denominator * other_denominator;
     }
 }
+
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + MultiplicativeMonoid>
+    MulAssign<Component> for Fraction<Component>
+{
+    fn mul_assign(&mut self, other: Component) {
+        let (other, denominator) = normalize_components_moduli(other, self.denominator.clone());
+        self.numerator = self.numerator.clone() * other;
+        self.denominator = denominator;
+    }
+}

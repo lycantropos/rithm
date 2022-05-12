@@ -40,6 +40,7 @@ mod from;
 mod from_bytes;
 mod from_str_radix;
 mod gcd;
+mod hash;
 mod mul;
 mod mul_assign;
 mod neg;

@@ -16,6 +16,7 @@ mod div_assign;
 mod eq;
 mod floor;
 mod from;
+mod hash;
 mod mul;
 mod mul_assign;
 mod neg;

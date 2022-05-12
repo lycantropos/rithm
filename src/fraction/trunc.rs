@@ -3,10 +3,7 @@ use crate::traits::{Ceil, CheckedDivEuclid, Floor, MultiplicativeMonoid, Opposit
 use super::types::Fraction;
 
 impl<
-        Component: Clone
-            + CheckedDivEuclid<Output = Option<Component>>
-            + MultiplicativeMonoid
-            + Oppositive,
+        Component: Clone + CheckedDivEuclid<Output = Option<Component>> + MultiplicativeMonoid + Oppositive,
     > Trunc for Fraction<Component>
 {
     type Output = Component;

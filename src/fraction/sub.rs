@@ -5,7 +5,7 @@ use crate::traits::{
     DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Oppositive, SubtractiveMagma,
 };
 
-use super::types::{Fraction, normalize_components_moduli};
+use super::types::{normalize_components_moduli, Fraction};
 
 impl<
         Component: Clone

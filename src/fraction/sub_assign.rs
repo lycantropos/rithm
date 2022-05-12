@@ -23,3 +23,20 @@ impl<
         );
     }
 }
+
+impl<
+        Component: Clone
+            + DivisivePartialMagma
+            + GcdMagma
+            + Oppositive
+            + MultiplicativeMonoid
+            + SubtractiveMagma,
+    > SubAssign<Component> for Fraction<Component>
+{
+    fn sub_assign(&mut self, subtrahend: Component) {
+        (self.numerator, self.denominator) = normalize_components_moduli(
+            self.numerator.clone() - subtrahend * self.denominator.clone(),
+            self.denominator.clone(),
+        );
+    }
+}

@@ -1,13 +1,13 @@
 use std::mem::size_of;
 
-use crate::traits::{AssigningShiftingLeftMonoid, CheckedShr, DivRem, Oppositive};
+use crate::traits::{CheckedShr, DivRem, Oppositive};
 
 use super::digits::{
-    primitive_shift_digits_right, shift_digits_right, to_digits_sign, RightShiftableDigit,
+    primitive_shift_digits_right, shift_digits_right, to_digits_sign, ShiftableRightDigit,
 };
 use super::types::{BigInt, ShrError};
 
-impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr
+impl<Digit: ShiftableRightDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<Self, ShrError>;
@@ -25,7 +25,7 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
     }
 }
 
-impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr<&Self>
+impl<Digit: ShiftableRightDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr<&Self>
     for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<Self, ShrError>;
@@ -43,7 +43,7 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
     }
 }
 
-impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: ShiftableRightDigit, const SEPARATOR: char, const SHIFT: usize>
     CheckedShr<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShrError>;
@@ -61,7 +61,7 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr
+impl<Digit: ShiftableRightDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr
     for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShrError>;
@@ -81,7 +81,7 @@ impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> Chec
 
 macro_rules! primitive_signed_checked_shr_impl {
     ($($t:ty)*) => ($(
-        impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr<$t>
+        impl<Digit: ShiftableRightDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr<$t>
             for BigInt<Digit, SEPARATOR, SHIFT>
         {
             type Output = Result<Self, ShrError>;
@@ -130,7 +130,7 @@ primitive_signed_checked_shr_impl!(i8 i16 i32 i64 i128 isize);
 
 macro_rules! primitive_unsigned_checked_shr_impl {
     ($($t:ty)*) => ($(
-        impl<Digit: RightShiftableDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr<$t>
+        impl<Digit: ShiftableRightDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr<$t>
             for BigInt<Digit, SEPARATOR, SHIFT>
         {
             type Output = Result<Self, ShrError>;

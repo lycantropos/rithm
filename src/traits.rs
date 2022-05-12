@@ -7,47 +7,40 @@ use std::ops::{
     Mul, MulAssign, Neg, Not, Rem, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
 };
 
-pub trait AdditiveMonoid<Other = Self> = Add<Other, Output = Self> + Zeroable;
+pub trait AdditiveMonoid = Add<Self, Output = Self> + Sized + Zeroable;
 
-pub trait AdditiveGroup<Other = Self> = AdditiveMonoid<Other> + SubtractiveMagma<Other>;
+pub trait AdditiveGroup = AdditiveMonoid + SubtractiveMagma;
 
-pub trait AssigningAdditiveMonoid<Other = Self> = AdditiveMonoid<Other> + AddAssign<Other>;
+pub trait AssigningAdditiveMonoid = AdditiveMonoid + AddAssign<Self>;
 
-pub trait AssigningAdditiveGroup<Other = Self> =
-    AssigningAdditiveMonoid<Other> + AssigningSubtractiveMagma<Other>;
+pub trait AssigningAdditiveGroup = AssigningAdditiveMonoid + AssigningSubtractiveMagma;
 
-pub trait AssigningBitwiseConjunctiveMagma<Other = Self> =
-    BitwiseConjunctiveMagma<Other> + BitAndAssign<Other>;
+pub trait AssigningBitwiseConjunctiveMagma = BitwiseConjunctiveMagma + BitAndAssign<Self>;
 
-pub trait AssigningBitwiseDisjunctiveMonoid<Other = Self> =
-    BitwiseDisjunctiveMonoid<Other> + BitOrAssign<Other>;
+pub trait AssigningBitwiseDisjunctiveMonoid = BitwiseDisjunctiveMonoid + BitOrAssign<Self>;
 
-pub trait AssigningBitwiseExclusiveDisjunctiveMonoid<Other = Self> =
-    BitwiseExclusiveDisjunctiveMonoid<Other> + BitXorAssign<Other>;
+pub trait AssigningBitwiseExclusiveDisjunctiveMonoid =
+    BitwiseExclusiveDisjunctiveMonoid + BitXorAssign<Self>;
 
-pub trait AssigningDivisivePartialMagma<Divisor = Self> =
-    DivisivePartialMagma<Divisor> + DivAssign<Divisor>;
+pub trait AssigningDivisivePartialMagma = DivisivePartialMagma + DivAssign<Self>;
 
-pub trait AssigningMultiplicativeMonoid<Other = Self> =
-    MultiplicativeMonoid<Other> + MulAssign<Other>;
+pub trait AssigningMultiplicativeMonoid = MultiplicativeMonoid + MulAssign<Self>;
 
-pub trait AssigningShiftingLeftMonoid<Shift = Self> = ShiftingLeftMonoid<Shift> + ShlAssign<Shift>;
+pub trait AssigningShiftableLeftBy<Shift = Self> = ShiftableLeftBy<Shift> + ShlAssign<Shift>;
 
-pub trait AssigningShiftingRightMonoid<Shift = Self> =
-    ShiftingRightMonoid<Shift> + ShrAssign<Shift>;
+pub trait AssigningShiftableRightBy<Shift = Self> = ShiftableRightBy<Shift> + ShrAssign<Shift>;
 
-pub trait AssigningSubtractiveMagma<Subtrahend = Self> =
-    SubtractiveMagma<Subtrahend> + SubAssign<Subtrahend>;
+pub trait AssigningSubtractiveMagma = SubtractiveMagma + SubAssign<Self>;
 
-pub trait BitwiseConjunctiveMagma<Other = Self> = BitAnd<Other, Output = Self> + Zeroable;
+pub trait BitwiseConjunctiveMagma = BitAnd<Self, Output = Self> + Sized + Zeroable;
 
-pub trait BitwiseDisjunctiveMonoid<Other = Self> = BitOr<Other, Output = Self> + Zeroable;
+pub trait BitwiseDisjunctiveMonoid = BitOr<Self, Output = Self> + Sized + Zeroable;
 
-pub trait BitwiseExclusiveDisjunctiveMonoid<Other = Self> = BitXor<Other, Output = Self> + Zeroable;
+pub trait BitwiseExclusiveDisjunctiveMonoid = BitXor<Self, Output = Self> + Sized + Zeroable;
 
 pub trait BitwiseNegatableUnaryAlgebra = Not<Output = Self>;
 
-pub trait DivisivePartialMagma<Divisor = Self> = Div<Divisor, Output = Self>;
+pub trait DivisivePartialMagma = Div<Self, Output = Self> + Sized;
 
 pub trait Float = AssigningAdditiveMonoid
     + AssigningDivisivePartialMagma
@@ -63,23 +56,23 @@ pub trait Float = AssigningAdditiveMonoid
     + MinExp
     + PartialEq;
 
-pub trait GcdMagma<Other = Self> = Gcd<Other, Output = Self>;
+pub trait GcdMagma = Gcd<Self, Output = Self> + Sized;
 
 pub trait ModularUnaryAlgebra = Abs<Output = Self>;
 
-pub trait ModularPartialMagma<Divisor = Self> = RemEuclid<Divisor, Output = Self>;
+pub trait ModularPartialMagma = RemEuclid<Self, Output = Self> + Sized;
 
-pub trait ModularSubtractiveMagma<Subtrahend = Self> = WrappingSub<Subtrahend, Output = Self>;
+pub trait ModularSubtractiveMagma = WrappingSub<Self, Output = Self> + Sized;
 
-pub trait MultiplicativeMonoid<Other = Self> = Mul<Other, Output = Self> + Unitary;
+pub trait MultiplicativeMonoid = Mul<Self, Output = Self> + Sized + Unitary;
 
 pub trait NegatableUnaryAlgebra = Neg<Output = Self>;
 
-pub trait ShiftingLeftMonoid<Shift = Self> = Shl<Shift, Output = Self> + Zeroable;
+pub trait ShiftableLeftBy<Shift = Self> = Shl<Shift, Output = Self>;
 
-pub trait ShiftingRightMonoid<Shift = Self> = Shr<Shift, Output = Self> + Zeroable;
+pub trait ShiftableRightBy<Shift = Self> = Shr<Shift, Output = Self>;
 
-pub trait SubtractiveMagma<Subtrahend = Self> = Sub<Subtrahend, Output = Self>;
+pub trait SubtractiveMagma = Sized + Sub<Self, Output = Self>;
 
 pub trait Abs {
     type Output;

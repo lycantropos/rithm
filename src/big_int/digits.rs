@@ -6,18 +6,17 @@ use std::mem::size_of;
 use crate::traits::{
     AssigningAdditiveGroup, AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma,
     AssigningBitwiseDisjunctiveMonoid, AssigningBitwiseExclusiveDisjunctiveMonoid,
-    AssigningDivisivePartialMagma, AssigningMultiplicativeMonoid, AssigningShiftingLeftMonoid,
-    AssigningShiftingRightMonoid, AssigningSubtractiveMagma, BitLength,
-    BitwiseNegatableUnaryAlgebra, CheckedShl, DoublePrecision, DoublePrecisionOf, Float, Gcd,
-    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Unitary,
-    Zeroable,
+    AssigningDivisivePartialMagma, AssigningMultiplicativeMonoid, AssigningShiftableLeftBy,
+    AssigningShiftableRightBy, AssigningSubtractiveMagma, BitLength, BitwiseNegatableUnaryAlgebra,
+    CheckedShl, DoublePrecision, DoublePrecisionOf, Float, Gcd, ModularPartialMagma,
+    ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Unitary, Zeroable,
 };
 
 use super::types::{CheckedDivAsFloatError, ShlError, Sign, WindowDigit};
 
 pub trait AdditiveDigit = AssigningAdditiveMonoid
     + AssigningBitwiseConjunctiveMagma
-    + AssigningShiftingRightMonoid<usize>
+    + AssigningShiftableRightBy<usize>
     + Copy
     + MaskableDigit
     + ModularSubtractiveMagma
@@ -48,7 +47,7 @@ where
     DoublePrecisionOf<Target>: AssigningDivisivePartialMagma
         + AssigningBitwiseDisjunctiveMonoid
         + AssigningMultiplicativeMonoid
-        + AssigningShiftingLeftMonoid<usize>
+        + AssigningShiftableLeftBy<usize>
         + AssigningSubtractiveMagma
         + Copy
         + From<Self>
@@ -61,7 +60,7 @@ where
     Target: TryFrom<DoublePrecisionOf<Self>>,
     DoublePrecisionOf<Self>: AssigningBitwiseConjunctiveMagma
         + AssigningBitwiseDisjunctiveMonoid
-        + AssigningShiftingRightMonoid<usize>
+        + AssigningShiftableRightBy<usize>
         + Copy
         + MaskableDigit;
 
@@ -70,7 +69,7 @@ where
     Target: DoublePrecision + TryFrom<DoublePrecisionOf<Target>>,
     DoublePrecisionOf<Target>: AssigningBitwiseConjunctiveMagma
         + AssigningBitwiseDisjunctiveMonoid
-        + AssigningShiftingRightMonoid<usize>
+        + AssigningShiftableRightBy<usize>
         + Copy
         + MaskableDigit
         + From<Self>;
@@ -84,19 +83,19 @@ pub trait BitwiseExclusiveDisjunctiveDigit = ComplementableDigit;
 pub trait ComplementableDigit = AssigningAdditiveMonoid
     + AssigningBitwiseConjunctiveMagma
     + AssigningBitwiseExclusiveDisjunctiveMonoid
-    + AssigningShiftingRightMonoid<usize>
+    + AssigningShiftableRightBy<usize>
     + Copy
     + MaskableDigit;
 
 pub trait ConstructibleFrom<Source> = AssigningBitwiseConjunctiveMagma
-    + AssigningShiftingRightMonoid<usize>
+    + AssigningShiftableRightBy<usize>
     + MaskableDigit
     + Copy
     + Oppose
     + TryFrom<Source>
 where
     Source: AssigningBitwiseConjunctiveMagma
-        + AssigningShiftingRightMonoid<usize>
+        + AssigningShiftableRightBy<usize>
         + MaskableDigit
         + Copy
         + Oppose
@@ -119,7 +118,7 @@ pub trait DivisibleAsFloatDigit<Target> = AssigningMultiplicativeMonoid
 
 pub trait DivisibleDigit = AssigningAdditiveMonoid
     + AssigningBitwiseConjunctiveMagma
-    + AssigningShiftingRightMonoid<usize>
+    + AssigningShiftableRightBy<usize>
     + BitLength<Output = usize>
     + MaskableDigit
     + Oppose
@@ -137,7 +136,7 @@ where
     OppositionOf<DoublePrecisionOf<Self>>: AssigningAdditiveGroup
         + AssigningBitwiseConjunctiveMagma
         + AssigningMultiplicativeMonoid
-        + AssigningShiftingRightMonoid<usize>
+        + AssigningShiftableRightBy<usize>
         + Copy
         + From<Self>
         + From<OppositionOf<Self>>;
@@ -164,55 +163,8 @@ where
 
 pub trait InvertibleDigit = AdditiveDigit;
 
-pub trait LeftShiftableDigit = Debug + DivisibleDigit + MaybeReducibleTo<usize> + TryFrom<usize>
-where DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
-
 pub trait MaskableDigit<Subtrahend = Self> =
-    AssigningShiftingLeftMonoid<usize> + AssigningSubtractiveMagma<Subtrahend> + Unitary;
-
-pub trait ModularInvertibleDigit = EuclidDivisibleDigit + MultiplicativeDigit;
-
-pub trait MultiplicativeDigit =
-    AdditiveDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + TryFrom<usize>
-    where
-        DoublePrecisionOf<Self>: AssigningAdditiveMonoid
-            + AssigningBitwiseConjunctiveMagma
-            + AssigningMultiplicativeMonoid
-            + AssigningShiftingRightMonoid<usize>
-            + Copy
-            + MaskableDigit;
-
-pub trait NonBinaryDigitConvertibleToBinary<Target> = Copy
-where
-    Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
-    DoublePrecisionOf<Target>: AssigningAdditiveMonoid
-        + AssigningBitwiseConjunctiveMagma
-        + AssigningMultiplicativeMonoid
-        + AssigningShiftingRightMonoid<usize>
-        + Copy
-        + From<Self>
-        + From<Target>
-        + MaskableDigit
-        + TryFrom<usize>;
-
-pub trait ParitiableDigit = AssigningBitwiseConjunctiveMagma + Copy + Unitary;
-
-pub trait PrimitiveRightShiftableDigit = AssigningBitwiseDisjunctiveMonoid
-    + AssigningBitwiseExclusiveDisjunctiveMonoid
-    + AssigningShiftingRightMonoid
-    + DivisibleDigit
-    + Debug
-    + MaybeReducibleTo<usize>
-    + TryFrom<usize>
-where
-    DoublePrecisionOf<Self>: AssigningShiftingLeftMonoid<Self>;
-
-pub(super) trait ReducibleTo<Target> = Copy
-where
-    Target: AssigningBitwiseDisjunctiveMonoid
-        + AssigningShiftingLeftMonoid<usize>
-        + From<Self>
-        + Zeroable;
+    AssigningShiftableLeftBy<usize> + AssigningSubtractiveMagma + Unitary;
 
 pub trait MaybeReducibleTo<Target> = Copy
 where
@@ -222,11 +174,54 @@ where
         + TryFrom<Self>
         + Zeroable;
 
-pub trait RightShiftableDigit = InvertibleDigit + PrimitiveRightShiftableDigit;
+pub trait ModularInvertibleDigit = EuclidDivisibleDigit + MultiplicativeDigit;
+
+pub trait MultiplicativeDigit =
+    AdditiveDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + TryFrom<usize>
+    where
+        DoublePrecisionOf<Self>: AssigningAdditiveMonoid
+            + AssigningBitwiseConjunctiveMagma
+            + AssigningMultiplicativeMonoid
+            + AssigningShiftableRightBy<usize>
+            + Copy
+            + MaskableDigit;
+
+pub trait NonBinaryDigitConvertibleToBinary<Target> = Copy
+where
+    Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
+    DoublePrecisionOf<Target>: AssigningAdditiveMonoid
+        + AssigningBitwiseConjunctiveMagma
+        + AssigningMultiplicativeMonoid
+        + AssigningShiftableRightBy<usize>
+        + Copy
+        + From<Self>
+        + From<Target>
+        + MaskableDigit
+        + TryFrom<usize>;
+
+pub trait ParitiableDigit = AssigningBitwiseConjunctiveMagma + Copy + Unitary;
+
+pub(super) trait ReducibleTo<Target> = Copy
+where
+    Target:
+        AssigningBitwiseDisjunctiveMonoid + AssigningShiftableLeftBy<usize> + From<Self> + Zeroable;
 
 pub trait ShiftableInPlaceDigit =
     Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + Zeroable
     where DoublePrecisionOf<Self>: BitwiseDisjunctiveDigit;
+
+pub trait ShiftableLeftDigit = Debug + DivisibleDigit + MaybeReducibleTo<usize> + TryFrom<usize>
+where DoublePrecisionOf<Self>: AssigningShiftableLeftBy<Self>;
+
+pub trait ShiftableRightDigit = AssigningBitwiseDisjunctiveMonoid
+    + AssigningBitwiseExclusiveDisjunctiveMonoid
+    + AssigningShiftableRightBy
+    + DivisibleDigit
+    + Debug
+    + InvertibleDigit
+    + MaybeReducibleTo<usize>
+    + TryFrom<usize>
+where DoublePrecisionOf<Self>: AssigningShiftableLeftBy<Self>;
 
 pub(super) fn binary_digits_to_base<
     SourceDigit: BinaryDigitConvertibleTo<TargetDigit>,
@@ -1396,7 +1391,7 @@ where
     result
 }
 
-pub(super) fn primitive_shift_digits_left<Digit: LeftShiftableDigit, const SHIFT: usize>(
+pub(super) fn primitive_shift_digits_left<Digit: ShiftableLeftDigit, const SHIFT: usize>(
     digits: &[Digit],
     shift_quotient: usize,
     shift_remainder: Digit,
@@ -1422,7 +1417,7 @@ pub(super) fn primitive_shift_digits_left<Digit: LeftShiftableDigit, const SHIFT
     Some(result)
 }
 
-pub(super) fn shift_digits_left<Digit: LeftShiftableDigit, const SHIFT: usize>(
+pub(super) fn shift_digits_left<Digit: ShiftableLeftDigit, const SHIFT: usize>(
     base: &[Digit],
     shift: &[Digit],
 ) -> Result<Vec<Digit>, ShlError> {
@@ -1472,10 +1467,7 @@ fn shift_digits_right_in_place<Digit: ShiftableInPlaceDigit, const SHIFT: usize>
     accumulator
 }
 
-pub(super) fn primitive_shift_digits_right<
-    Digit: PrimitiveRightShiftableDigit,
-    const SHIFT: usize,
->(
+pub(super) fn primitive_shift_digits_right<Digit: ShiftableRightDigit, const SHIFT: usize>(
     digits: &[Digit],
     shift_quotient: usize,
     shift_remainder: Digit,
@@ -1500,7 +1492,7 @@ pub(super) fn primitive_shift_digits_right<
     result
 }
 
-pub(super) fn shift_digits_right<Digit: RightShiftableDigit, const SHIFT: usize>(
+pub(super) fn shift_digits_right<Digit: ShiftableRightDigit, const SHIFT: usize>(
     base_sign: Sign,
     base: &[Digit],
     shift: &[Digit],

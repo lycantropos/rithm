@@ -1,6 +1,6 @@
 use std::convert::{FloatToInt, TryFrom};
 
-use crate::big_int::{BigInt, DigitConvertibleFromF64, LeftShiftableDigit};
+use crate::big_int::{BigInt, DigitConvertibleFromF64, ShiftableLeftDigit};
 use crate::contracts::is_signed;
 use crate::traits::{CheckedShl, FrExp, Maybe, Unitary};
 
@@ -9,7 +9,7 @@ use super::types::{normalize_components_moduli, Fraction, FromFloatConversionErr
 macro_rules! big_int_fraction_try_from_float_impl {
     ($($f:ty)*) => ($(
         impl<
-                Digit: DigitConvertibleFromF64 + LeftShiftableDigit + Unitary,
+                Digit: DigitConvertibleFromF64 + ShiftableLeftDigit + Unitary,
                 const SEPARATOR: char,
                 const SHIFT: usize,
             > TryFrom<$f> for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>

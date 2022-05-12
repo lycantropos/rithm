@@ -1,6 +1,7 @@
 use std::ops::Rem;
 
-use super::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
+use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
+
 use super::digits::{checked_rem, DivisibleDigit};
 use super::types::BigInt;
 

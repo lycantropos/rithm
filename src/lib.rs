@@ -14,6 +14,7 @@ use pyo3::types::{PyBytes, PyFloat, PyLong, PyString, PyType};
 use pyo3::{intern, AsPyPointer, IntoPy, Py, PyAny, PyErr, PyObject, PyRef, ToPyObject};
 use pyo3_ffi as ffi;
 
+use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 use crate::traits::{
     Abs, BitLength, Ceil, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,
     CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, Endianness, Floor, FromBytes,
@@ -21,6 +22,7 @@ use crate::traits::{
 };
 
 pub mod big_int;
+mod constants;
 mod contracts;
 pub mod fraction;
 pub mod traits;
@@ -549,7 +551,7 @@ fn try_divmod<
     match dividend.checked_div_rem_euclid(divisor) {
         Some((quotient, remainder)) => Ok((quotient, remainder)),
         None => Err(PyZeroDivisionError::new_err(
-            big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+            UNDEFINED_DIVISION_ERROR_MESSAGE,
         )),
     }
 }
@@ -559,7 +561,7 @@ fn try_floordiv(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
     match dividend.checked_div_euclid(divisor) {
         Some(result) => Ok(result),
         None => Err(PyZeroDivisionError::new_err(
-            big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+            UNDEFINED_DIVISION_ERROR_MESSAGE,
         )),
     }
 }
@@ -578,7 +580,7 @@ fn try_mod(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
     match dividend.checked_rem_euclid(divisor) {
         Some(result) => Ok(result),
         None => Err(PyZeroDivisionError::new_err(
-            big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+            UNDEFINED_DIVISION_ERROR_MESSAGE,
         )),
     }
 }
@@ -588,7 +590,7 @@ fn try_mod_to_near(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
     let (quotient, remainder) = match dividend.checked_div_rem_euclid(divisor) {
         Some((quotient, remainder)) => Ok((quotient, remainder)),
         None => Err(PyZeroDivisionError::new_err(
-            big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+            UNDEFINED_DIVISION_ERROR_MESSAGE,
         )),
     }?;
     let double_remainder = remainder
@@ -622,7 +624,7 @@ fn try_pow(base: &BigInt, exponent: &BigInt, py: Python) -> PyResult<PyObject> {
         {
             Some(power) => Ok(PyFraction(power).into_py(py)),
             None => Err(PyZeroDivisionError::new_err(
-                big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+                UNDEFINED_DIVISION_ERROR_MESSAGE,
             )),
         }
     } else {
@@ -735,7 +737,7 @@ fn try_truediv(dividend: BigInt, divisor: BigInt) -> PyResult<Fraction> {
     match Fraction::new(dividend, divisor) {
         Some(quotient) => Ok(quotient),
         None => Err(PyZeroDivisionError::new_err(
-            big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+            UNDEFINED_DIVISION_ERROR_MESSAGE,
         )),
     }
 }
@@ -753,7 +755,7 @@ impl PyFraction {
                     ) {
                         Some(fraction) => Ok(PyFraction(fraction)),
                         None => Err(PyZeroDivisionError::new_err(
-                            big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+                            UNDEFINED_DIVISION_ERROR_MESSAGE,
                         )),
                     }
                 }
@@ -868,7 +870,7 @@ impl PyFraction {
             {
                 Some(quotient) => Ok(PyInt(quotient).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
-                    big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+                    UNDEFINED_DIVISION_ERROR_MESSAGE,
                 )),
             }
         } else {
@@ -876,7 +878,7 @@ impl PyFraction {
                 Some(divisor) => match self.0.clone().checked_div_euclid(divisor) {
                     Some(quotient) => Ok(PyInt(quotient).into_py(py)),
                     None => Err(PyZeroDivisionError::new_err(
-                        big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+                        UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )),
                 },
                 None => Ok(py.NotImplemented()),
@@ -932,7 +934,7 @@ impl PyFraction {
             {
                 Some(remainder) => Ok(PyFraction(remainder).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
-                    big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+                    UNDEFINED_DIVISION_ERROR_MESSAGE,
                 )),
             }
         } else {
@@ -940,7 +942,7 @@ impl PyFraction {
                 Some(divisor) => match self.0.clone().checked_rem_euclid(divisor) {
                     Some(remainder) => Ok(PyFraction(remainder).into_py(py)),
                     None => Err(PyZeroDivisionError::new_err(
-                        big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+                        UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )),
                 },
                 None => Ok(py.NotImplemented()),
@@ -974,7 +976,7 @@ impl PyFraction {
                 Some(exponent) => match self.0.clone().checked_pow(exponent) {
                     Some(power) => Ok(PyFraction(power).into_py(py)),
                     None => Err(PyZeroDivisionError::new_err(
-                        big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+                        UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )),
                 },
                 None => Ok(py.NotImplemented()),
@@ -1025,7 +1027,7 @@ impl PyFraction {
             Some(dividend) => match dividend.checked_div_euclid(self.0.clone()) {
                 Some(quotient) => Ok(PyInt(quotient).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
-                    big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+                    UNDEFINED_DIVISION_ERROR_MESSAGE,
                 )),
             },
             None => Ok(py.NotImplemented()),
@@ -1038,7 +1040,7 @@ impl PyFraction {
             Some(dividend) => match dividend.checked_rem_euclid(self.0.clone()) {
                 Some(remainder) => Ok(PyFraction(remainder).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
-                    big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+                    UNDEFINED_DIVISION_ERROR_MESSAGE,
                 )),
             },
             None => Ok(py.NotImplemented()),
@@ -1096,7 +1098,7 @@ impl PyFraction {
             Some(dividend) => match dividend.checked_div(self.0.clone()) {
                 Some(quotient) => Ok(PyFraction(quotient).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
-                    big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+                    UNDEFINED_DIVISION_ERROR_MESSAGE,
                 )),
             },
             None => Ok(py.NotImplemented()),
@@ -1115,7 +1117,7 @@ impl PyFraction {
                 Ok(())
             }
             None => Err(PyZeroDivisionError::new_err(
-                big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+                UNDEFINED_DIVISION_ERROR_MESSAGE,
             )),
         }
     }
@@ -1146,7 +1148,7 @@ impl PyFraction {
             {
                 Some(quotient) => Ok(PyFraction(quotient).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
-                    big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+                    UNDEFINED_DIVISION_ERROR_MESSAGE,
                 )),
             }
         } else {
@@ -1154,7 +1156,7 @@ impl PyFraction {
                 Some(divisor) => match self.0.clone().checked_div(divisor) {
                     Some(quotient) => Ok(PyFraction(quotient).into_py(py)),
                     None => Err(PyZeroDivisionError::new_err(
-                        big_int::UNDEFINED_DIVISION_ERROR_MESSAGE,
+                        UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )),
                 },
                 None => Ok(py.NotImplemented()),

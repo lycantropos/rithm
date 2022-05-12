@@ -1,6 +1,6 @@
+use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 use crate::traits::{CheckedDivRemEuclid, DivRemEuclid};
 
-use super::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 use super::digits::EuclidDivisibleDigit;
 use super::types::BigInt;
 

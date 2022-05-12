@@ -1,5 +1,6 @@
-use crate::traits::{Oppositive, Zeroable};
 use std::cmp::Ordering;
+
+use crate::traits::{Oppositive, Zeroable};
 
 use super::digits::{
     digits_lesser_than, non_zero_value_to_digits, value_to_sign, ConstructibleFrom,

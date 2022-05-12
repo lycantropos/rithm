@@ -23,3 +23,20 @@ impl<
         );
     }
 }
+
+impl<
+        Component: AdditiveMonoid
+            + Clone
+            + DivisivePartialMagma
+            + GcdMagma
+            + Oppositive
+            + MultiplicativeMonoid,
+    > AddAssign<Component> for Fraction<Component>
+{
+    fn add_assign(&mut self, other: Component) {
+        (self.numerator, self.denominator) = normalize_components_moduli(
+            self.numerator.clone() + other * self.denominator.clone(),
+            self.denominator.clone(),
+        );
+    }
+}

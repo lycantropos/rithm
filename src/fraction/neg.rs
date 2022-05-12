@@ -1,0 +1,16 @@
+use std::ops::Neg;
+
+use crate::traits::NegatableUnaryAlgebra;
+
+use super::types::Fraction;
+
+impl<Component: Clone + Eq + NegatableUnaryAlgebra> Neg for Fraction<Component> {
+    type Output = Self;
+
+    fn neg(self) -> <Self as Neg>::Output {
+        Self {
+            numerator: -self.numerator,
+            denominator: self.denominator,
+        }
+    }
+}

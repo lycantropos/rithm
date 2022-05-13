@@ -1,7 +1,7 @@
 use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 use crate::traits::{
-    CheckedDivEuclid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Oppositive, DivEuclid,
+    CheckedDivEuclid, DivEuclid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Oppositive,
 };
 
 use super::types::Fraction;

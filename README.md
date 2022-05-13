@@ -96,17 +96,21 @@ we can:
   ```
 - calculate
   ```python
+  >>> abs(Int(-9))
+  rithm.Int(9)
   >>> Int(4) + Int(5)
   rithm.Int(9)
   >>> Int(9) & Int(11)
   rithm.Int(9)
   >>> Int(19) // Int(2)
   rithm.Int(9)
+  >>> ~Int(-10)
+  rithm.Int(9)
   >>> Int(19) % Int(10)
   rithm.Int(9)
   >>> Int(3) * Int(3)
   rithm.Int(9)
-  >>> ~Int(-10)
+  >>> -Int(-9)
   rithm.Int(9)
   >>> Int(1) | Int(8)
   rithm.Int(9)
@@ -159,6 +163,8 @@ we can:
   ```
 - calculate
   ```python
+  >>> abs(Fraction(-1, 2))
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
   >>> Fraction(1, 3) + Fraction(1, 6)
   rithm.Fraction(rithm.Int(1), rithm.Int(2))
   >>> Fraction(3, 2) // Fraction(1)
@@ -166,6 +172,8 @@ we can:
   >>> Fraction(3, 2) % Fraction(1)
   rithm.Fraction(rithm.Int(1), rithm.Int(2))
   >>> Fraction(1, 3) * Fraction(3, 2)
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> -Fraction(-1, 2)
   rithm.Fraction(rithm.Int(1), rithm.Int(2))
   >>> Fraction(1, 2) ** 2
   rithm.Fraction(rithm.Int(1), rithm.Int(4))
@@ -186,8 +194,8 @@ use std::convert::TryFrom;
 
 use rithm::big_int;
 use rithm::traits::{
-    CheckedDivAsF32, CheckedDivAsF64, DivEuclid, FromStrRadix, Pow, RemEuclid,
-    Zeroable,
+    Abs, CheckedDivAsF32, CheckedDivAsF64, DivEuclid, FromStrRadix, Pow, 
+    RemEuclid, Zeroable,
 };
 
 #[cfg(target_arch = "x86")]
@@ -216,15 +224,19 @@ assert!(BigInt::from(9) > BigInt::from(8));
 assert!(BigInt::from(9) <= BigInt::from(9));
 assert!(BigInt::from(9) < BigInt::from(10));
 /// - calculate
+assert_eq!(BigInt::from(-9).abs(), 9);
 assert_eq!(BigInt::from(4) + BigInt::from(5), 9);
 assert_eq!(BigInt::from(9) & BigInt::from(11), 9);
 assert_eq!(BigInt::from(1) | BigInt::from(8), 9);
+assert_eq!(BigInt::from(2) ^ BigInt::from(11), 9);
 #[cfg(target_arch = "x86")] // not supported by `u32` digits because conversion to `f32` is lossy
 assert_eq!(BigInt::from(18).checked_div_as_f32(BigInt::from(2)), Ok(9.0));
 assert_eq!(BigInt::from(18).checked_div_as_f64(BigInt::from(2)), Ok(9.0));
 assert_eq!(BigInt::from(19) / BigInt::from(2), 9);
 assert_eq!(BigInt::from(19).div_euclid(BigInt::from(2)), 9);
 assert_eq!(BigInt::from(3) * BigInt::from(3), 9);
+assert_eq!(!BigInt::from(-10), 9);
+assert_eq!(-BigInt::from(-9), 9);
 assert_eq!(BigInt::from(3).pow(BigInt::from(2)), 9);
 assert_eq!(BigInt::from(19) % BigInt::from(10), 9);
 assert_eq!(BigInt::from(19).rem_euclid(BigInt::from(10)), 9);
@@ -237,7 +249,7 @@ assert_eq!(BigInt::from(25) - BigInt::from(16), 9);
 /// With setup
 use std::convert::TryFrom;
 use rithm::fraction;
-use rithm::traits::{DivEuclid, Pow, RemEuclid, Unitary, Zeroable};
+use rithm::traits::{Abs, DivEuclid, Pow, RemEuclid, Unitary, Zeroable};
 
 type Fraction = fraction::Fraction<i8>;
 /// we can:
@@ -255,6 +267,7 @@ assert!(Fraction::new(1, 2).unwrap() <= Fraction::new(1, 2).unwrap());
 assert!(Fraction::new(1, 2).unwrap() < Fraction::new(2, 3).unwrap());
 assert!(Fraction::new(1, 2).unwrap() != Fraction::new(1, 3).unwrap());
 /// - calculate
+assert_eq!(Fraction::new(-1, 2).unwrap().abs(), Fraction::new(1, 2).unwrap());
 assert_eq!(Fraction::new(1, 3).unwrap() + Fraction::new(1, 6).unwrap(),
            Fraction::new(1, 2).unwrap());
 assert_eq!(Fraction::new(1, 3).unwrap() / Fraction::new(2, 3).unwrap(),
@@ -262,6 +275,7 @@ assert_eq!(Fraction::new(1, 3).unwrap() / Fraction::new(2, 3).unwrap(),
 assert_eq!(Fraction::new(3, 2).unwrap().div_euclid(Fraction::from(1)), 1);
 assert_eq!(Fraction::new(1, 3).unwrap() * Fraction::new(3, 2).unwrap(),
            Fraction::new(1, 2).unwrap());
+assert_eq!(-Fraction::new(-1, 2).unwrap(), Fraction::new(1, 2).unwrap());
 assert_eq!(Fraction::new(1, 2).unwrap().pow(2), Fraction::new(1, 4).unwrap());
 assert_eq!(Fraction::new(3, 2).unwrap() % Fraction::from(1),
            Fraction::new(1, 2).unwrap());

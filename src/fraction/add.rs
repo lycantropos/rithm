@@ -23,7 +23,7 @@ impl<
             self.numerator * other.denominator.clone() + other.numerator * self.denominator.clone(),
             self.denominator * other.denominator,
         );
-        Self {
+        Self::Output {
             numerator,
             denominator,
         }
@@ -46,7 +46,7 @@ impl<
             self.numerator + other * self.denominator.clone(),
             self.denominator,
         );
-        Self {
+        Self::Output {
             numerator,
             denominator,
         }

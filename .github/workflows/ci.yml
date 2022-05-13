@@ -83,6 +83,7 @@ jobs:
         run: >
           rm -rf target
           && cargo test --doc --target=${{ matrix.platform.rust_target }}
+        shell: bash
         env:
           CARGO_INCREMENTAL: 0
           RUSTDOCFLAGS: >
@@ -101,6 +102,7 @@ jobs:
         run: >
           rm -rf target
           && python -m pip -v install -e .
+        shell: bash
         env:
           CARGO_INCREMENTAL: 0
           RUSTDOCFLAGS: >

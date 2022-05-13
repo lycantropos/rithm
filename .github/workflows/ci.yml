@@ -105,7 +105,7 @@ jobs:
         shell: bash
         env:
           CARGO_INCREMENTAL: 0
-          RUSTDOCFLAGS: >
+          RUSTFLAGS: >
             -Zprofile -Ccodegen-units=1 -Copt-level=0 -Coverflow-checks=off
             -Zpanic_abort_tests -Cpanic=abort
       - name: 'Install tests dependencies'

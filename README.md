@@ -48,96 +48,141 @@ Usage
 
 ### Python
 
-Arbitrary precision integer:
+#### Arbitrary precision integer
+
+With setup
 ```python
 >>> from rithm import Int
->>> Int()
-rithm.Int(0)
->>> Int(16)
-rithm.Int(16)
->>> Int("16")
-rithm.Int(16)
->>> Int("0b10000", 2)
-rithm.Int(16)
->>> Int("0o20", 8)
-rithm.Int(16)
->>> Int("0x10", 16)
-rithm.Int(16)
->>> Int("10000", 2)
-rithm.Int(16)
->>> Int("20", 8)
-rithm.Int(16)
->>> Int("10", 16)
-rithm.Int(16)
->>> Int(16.99)
-rithm.Int(16)
->>> Int(7) + Int(9)
-rithm.Int(16)
->>> Int(25) - Int(9)
-rithm.Int(16)
->>> Int(2) * Int(8)
-rithm.Int(16)
->>> Int(32) / Int(2)
-rithm.Fraction(rithm.Int(16), rithm.Int(1))
->>> Int(32) // Int(2)
-rithm.Int(16)
->>> Int(33) % Int(17)
-rithm.Int(16)
->>> Int(2) ** Int(4)
-rithm.Int(16)
 
 ```
+we can:
+- construct
+  ```python
+  >>> Int()
+  rithm.Int(0)
+  >>> Int(9)
+  rithm.Int(9)
+  >>> Int('9')
+  rithm.Int(9)
+  >>> Int('0b1001', 2)
+  rithm.Int(9)
+  >>> Int('0o11', 8)
+  rithm.Int(9)
+  >>> Int('0x9', 16)
+  rithm.Int(9)
+  >>> Int('1001', 2)
+  rithm.Int(9)
+  >>> Int('0o11', 8)
+  rithm.Int(9)
+  >>> Int('9', 16)
+  rithm.Int(9)
+  >>> Int(9.99)
+  rithm.Int(9)
 
-Exact fraction:
+  ```
+- compare
+  ```python
+  >>> Int(9) == Int(9)
+  True
+  >>> Int(9) >= Int(9)
+  True
+  >>> Int(9) > Int(8)
+  True
+  >>> Int(9) <= Int(9)
+  True
+  >>> Int(9) < Int(10)
+  True
+  
+  ```
+- calculate
+  ```python
+  >>> Int(4) + Int(5)
+  rithm.Int(9)
+  >>> Int(9) & Int(11)
+  rithm.Int(9)
+  >>> Int(19) // Int(2)
+  rithm.Int(9)
+  >>> Int(19) % Int(10)
+  rithm.Int(9)
+  >>> Int(3) * Int(3)
+  rithm.Int(9)
+  >>> ~Int(-10)
+  rithm.Int(9)
+  >>> Int(1) | Int(8)
+  rithm.Int(9)
+  >>> Int(3) ** Int(2)
+  rithm.Int(9)
+  >>> Int(25) - Int(16)
+  rithm.Int(9)
+  >>> Int(18) / Int(2)
+  rithm.Fraction(rithm.Int(9), rithm.Int(1))
+  >>> Int(2) ^ Int(11)
+  rithm.Int(9)
+  
+  ```
+
+#### Exact fraction
+
+With setup
 ```python
 >>> from rithm import Fraction
->>> Fraction()
-rithm.Fraction(rithm.Int(0), rithm.Int(1))
->>> Fraction(1, 2)
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> Fraction(50, 100)
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> Fraction(0.5)
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> Fraction(1, 2) + 0
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> 0 + Fraction(1, 2)
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> Fraction(1, 3) + Fraction(1, 6)
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> Fraction(3, 2) - 1
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> 1 - Fraction(1, 2)
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> Fraction(1, 3) * Fraction(3, 2)
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> Fraction(1, 3) / Fraction(2, 3)
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> Fraction(1, 6) * 3
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> 1 / Fraction(2)
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> Fraction(3, 2) / 3
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> Fraction(3, 2) // 1
-rithm.Int(1)
->>> 2 // Fraction(3, 2)
-rithm.Int(1)
->>> Fraction(3, 2) % 1
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> 2 % Fraction(3, 2)
-rithm.Fraction(rithm.Int(1), rithm.Int(2))
->>> Fraction(1, 2) ** 2
-rithm.Fraction(rithm.Int(1), rithm.Int(4))
->>> str(Fraction(1, 2))
-'1/2'
 
 ```
+we can:
+- construct
+  ```python
+  >>> Fraction()
+  rithm.Fraction(rithm.Int(0), rithm.Int(1))
+  >>> Fraction(1, 2)
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> Fraction(50, 100)
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> Fraction(0.5)
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  ```
+- calculate
+  ```python
+  >>> Fraction(1, 3) + Fraction(1, 6)
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> Fraction(1, 2) + 0
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> Fraction(3, 2) // 1
+  rithm.Int(1)
+  >>> Fraction(3, 2) % 1
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> Fraction(1, 3) * Fraction(3, 2)
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> Fraction(1, 6) * 3
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> Fraction(1, 2) ** 2
+  rithm.Fraction(rithm.Int(1), rithm.Int(4))
+  >>> 0 + Fraction(1, 2)
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> 2 // Fraction(3, 2)
+  rithm.Int(1)
+  >>> 2 % Fraction(3, 2)
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> 3 * Fraction(1, 6)
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> 1 - Fraction(1, 2)
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> 1 / Fraction(2)
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> Fraction(3, 2) - 1
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> Fraction(1, 3) / Fraction(2, 3)
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  >>> Fraction(3, 2) / 3
+  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+
+  ```
 
 ### Rust
 
-Arbitrary precision integer:
+#### Arbitrary precision integer
+
 ```rust
+/// With setup
 use std::convert::TryFrom;
 
 use rithm::big_int;
@@ -147,43 +192,57 @@ use rithm::traits::{CheckedDivAsF32, CheckedDivAsF64, FromStrRadix, Pow, Opposit
 type Digit = u16;
 #[cfg(not(target_arch = "x86"))]
 type Digit = u32;
-const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
-const _: () = assert!(big_int::is_valid_shift::<Digit, BINARY_SHIFT>());
+const BINARY_SHIFT: usize = (OppositionOf::<Digit>::BITS - 2) as usize;
 type BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
-
+/// we can:
+/// - construct
 assert_eq!(BigInt::zero(), 0);
-assert_eq!(BigInt::from(16), 16);
-assert_eq!(BigInt::try_from("16").unwrap(), 16);
-assert_eq!(BigInt::try_from("0b10000").unwrap(), 16);
-assert_eq!(BigInt::try_from("0o20").unwrap(), 16);
-assert_eq!(BigInt::try_from("0x10").unwrap(), 16);
-assert_eq!(BigInt::from_str_radix("10000", 2).unwrap(), 16);
-assert_eq!(BigInt::from_str_radix("20", 8).unwrap(), 16);
-assert_eq!(BigInt::from_str_radix("10", 16).unwrap(), 16);
-assert_eq!(BigInt::try_from(16.99).unwrap(), 16);
-assert_eq!(BigInt::from(7) + BigInt::from(9), 16);
-assert_eq!(BigInt::from(25) - BigInt::from(9), 16);
-assert_eq!(BigInt::from(2) * BigInt::from(8), 16);
-assert_eq!(BigInt::from(32) / BigInt::from(2), 16);
-assert_eq!(BigInt::from(33) % BigInt::from(17), 16);
+assert_eq!(BigInt::from(9), 9);
+assert_eq!(BigInt::try_from("9").unwrap(), 9);
+assert_eq!(BigInt::try_from("0b1001").unwrap(), 9);
+assert_eq!(BigInt::try_from("0o11").unwrap(), 9);
+assert_eq!(BigInt::try_from("0x9").unwrap(), 9);
+assert_eq!(BigInt::from_str_radix("1001", 2).unwrap(), 9);
+assert_eq!(BigInt::from_str_radix("11", 8).unwrap(), 9);
+assert_eq!(BigInt::from_str_radix("9", 16).unwrap(), 9);
+assert_eq!(BigInt::try_from(9.99).unwrap(), 9);
+/// - compare
+assert!(BigInt::from(9) == BigInt::from(9));
+assert!(BigInt::from(9) >= BigInt::from(9));
+assert!(BigInt::from(9) > BigInt::from(8));
+assert!(BigInt::from(9) <= BigInt::from(9));
+assert!(BigInt::from(9) < BigInt::from(10));
+/// - calculate
+assert_eq!(BigInt::from(4) + BigInt::from(5), 9);
+assert_eq!(BigInt::from(9) & BigInt::from(11), 9);
+assert_eq!(BigInt::from(1) | BigInt::from(8), 9);
 #[cfg(target_arch = "x86")] // not supported by `u32` digits because conversion to `f32` is lossy
-assert_eq!(BigInt::from(32).checked_div_as_f32(BigInt::from(2)), Ok(16.0));
-assert_eq!(BigInt::from(32).checked_div_as_f64(BigInt::from(2)), Ok(16.0));
-assert_eq!(BigInt::from(2).pow(BigInt::from(4)), 16);
+assert_eq!(BigInt::from(18).checked_div_as_f32(BigInt::from(2)), Ok(9.0));
+assert_eq!(BigInt::from(18).checked_div_as_f64(BigInt::from(2)), Ok(9.0));
+assert_eq!(BigInt::from(19) / BigInt::from(2), 9);
+assert_eq!(BigInt::from(3) * BigInt::from(3), 9);
+assert_eq!(BigInt::from(3).pow(BigInt::from(2)), 9);
+assert_eq!(BigInt::from(19) % BigInt::from(10), 9);
+assert_eq!(BigInt::from(25) - BigInt::from(16), 9);
 ```
 
-Exact fraction:
+#### Exact fraction
+
 ```rust
+/// With setup
 use std::convert::TryFrom;
 use rithm::fraction;
 use rithm::traits::{CheckedDivEuclid, CheckedPow, CheckedRemEuclid, Zeroable};
 
 type Fraction = fraction::Fraction<i8>;
-
+/// we can:
+/// - construct
 assert_eq!(Fraction::zero(), 0);
 assert_eq!(Fraction::new(1, 2), Some(Fraction::from(1) / 2));
 assert_eq!(Fraction::new(50, 100), Fraction::new(1, 2));
 assert_eq!(Fraction::try_from(0.5).unwrap(), Fraction::new(1, 2).unwrap());
+/// - compare
+/// - calculate
 assert_eq!(Fraction::new(1, 2).unwrap() + 0, Fraction::new(1, 2).unwrap());
 assert_eq!(0 + Fraction::new(1, 2).unwrap(), Fraction::new(1, 2).unwrap());
 assert_eq!(Fraction::new(1, 3).unwrap() + Fraction::new(1, 6).unwrap(),

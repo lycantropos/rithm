@@ -64,13 +64,13 @@ we can:
   rithm.Int(9)
   >>> Int('9')
   rithm.Int(9)
-  >>> Int('0b1001', 2)
+  >>> Int('0b1_001', 2)
   rithm.Int(9)
   >>> Int('0o11', 8)
   rithm.Int(9)
   >>> Int('0x9', 16)
   rithm.Int(9)
-  >>> Int('1001', 2)
+  >>> Int('1_001', 2)
   rithm.Int(9)
   >>> Int('0o11', 8)
   rithm.Int(9)
@@ -202,10 +202,10 @@ type BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
 assert_eq!(BigInt::zero(), 0);
 assert_eq!(BigInt::from(9), 9);
 assert_eq!(BigInt::try_from("9").unwrap(), 9);
-assert_eq!(BigInt::try_from("0b1001").unwrap(), 9);
+assert_eq!(BigInt::try_from("0b1_001").unwrap(), 9);
 assert_eq!(BigInt::try_from("0o11").unwrap(), 9);
 assert_eq!(BigInt::try_from("0x9").unwrap(), 9);
-assert_eq!(BigInt::from_str_radix("1001", 2).unwrap(), 9);
+assert_eq!(BigInt::from_str_radix("1_001", 2).unwrap(), 9);
 assert_eq!(BigInt::from_str_radix("11", 8).unwrap(), 9);
 assert_eq!(BigInt::from_str_radix("9", 16).unwrap(), 9);
 assert_eq!(BigInt::try_from(9.99).unwrap(), 9);

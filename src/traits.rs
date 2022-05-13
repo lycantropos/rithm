@@ -638,14 +638,14 @@ macro_rules! signed_checked_shl_impl {
             type Output = Option<$t>;
 
             #[inline(always)]
-            fn checked_shl(self, other: $f) -> Self::Output {
-                if other < 0 {
+            fn checked_shl(self, shift: $f) -> Self::Output {
+                if shift < 0 {
                     None
                 } else {
-                    if self.leading_zeros() < u32::try_from(other).ok()? {
+                    if self.leading_zeros() < u32::try_from(shift).ok()? {
                         None
                     } else {
-                        Some(self << other)
+                        Some(self << shift)
                     }
                 }
             }
@@ -654,16 +654,16 @@ macro_rules! signed_checked_shl_impl {
 }
 
 macro_rules! unsigned_checked_shl_impl {
-    ($t:ty, $f:ty) => {
-        impl CheckedShl<$f> for $t {
+    ($b:ty, $s:ty) => {
+        impl CheckedShl<$s> for $b {
             type Output = Option<Self>;
 
             #[inline(always)]
-            fn checked_shl(self, other: $f) -> Self::Output {
-                if self.leading_zeros() < u32::try_from(other).ok()? {
+            fn checked_shl(self, shift: $s) -> Self::Output {
+                if self.leading_zeros() < u32::try_from(shift).ok()? {
                     None
                 } else {
-                    Some(self << other)
+                    Some(self << shift)
                 }
             }
         }
@@ -671,20 +671,20 @@ macro_rules! unsigned_checked_shl_impl {
 }
 
 macro_rules! primitive_checked_shl_impl {
-    ($($t:ty)*) => ($(
-        signed_checked_shl_impl! { $t, i8 }
-        signed_checked_shl_impl! { $t, i16 }
-        signed_checked_shl_impl! { $t, i32 }
-        signed_checked_shl_impl! { $t, i64 }
-        signed_checked_shl_impl! { $t, i128 }
-        signed_checked_shl_impl! { $t, isize }
+    ($($b:ty)*) => ($(
+        signed_checked_shl_impl! { $b, i8 }
+        signed_checked_shl_impl! { $b, i16 }
+        signed_checked_shl_impl! { $b, i32 }
+        signed_checked_shl_impl! { $b, i64 }
+        signed_checked_shl_impl! { $b, i128 }
+        signed_checked_shl_impl! { $b, isize }
 
-        unsigned_checked_shl_impl! { $t, u8 }
-        unsigned_checked_shl_impl! { $t, u16 }
-        unsigned_checked_shl_impl! { $t, u32 }
-        unsigned_checked_shl_impl! { $t, u64 }
-        unsigned_checked_shl_impl! { $t, u128 }
-        unsigned_checked_shl_impl! { $t, usize }
+        unsigned_checked_shl_impl! { $b, u8 }
+        unsigned_checked_shl_impl! { $b, u16 }
+        unsigned_checked_shl_impl! { $b, u32 }
+        unsigned_checked_shl_impl! { $b, u64 }
+        unsigned_checked_shl_impl! { $b, u128 }
+        unsigned_checked_shl_impl! { $b, usize }
     )*)
 }
 
@@ -697,16 +697,16 @@ pub trait CheckedShr<Shift = Self> {
 }
 
 macro_rules! signed_checked_shr_impl {
-    ($t:ty, $f:ty) => {
-        impl CheckedShr<$f> for $t {
-            type Output = Option<$t>;
+    ($b:ty, $s:ty) => {
+        impl CheckedShr<$s> for $b {
+            type Output = Option<$b>;
 
             #[inline(always)]
-            fn checked_shr(self, other: $f) -> Self::Output {
+            fn checked_shr(self, other: $s) -> Self::Output {
                 if other < 0 {
                     None
                 } else {
-                    <$t>::checked_shr(self, u32::try_from(other).ok()?)
+                    <$b>::checked_shr(self, u32::try_from(other).ok()?)
                 }
             }
         }
@@ -714,33 +714,33 @@ macro_rules! signed_checked_shr_impl {
 }
 
 macro_rules! unsigned_checked_shr_impl {
-    ($t:ty, $f:ty) => {
-        impl CheckedShr<$f> for $t {
+    ($b:ty, $s:ty) => {
+        impl CheckedShr<$s> for $b {
             type Output = Option<Self>;
 
             #[inline(always)]
-            fn checked_shr(self, other: $f) -> Self::Output {
-                <$t>::checked_shr(self, u32::try_from(other).ok()?)
+            fn checked_shr(self, other: $s) -> Self::Output {
+                <$b>::checked_shr(self, u32::try_from(other).ok()?)
             }
         }
     };
 }
 
 macro_rules! primitive_checked_shr_impl {
-    ($($t:ty)*) => ($(
-        signed_checked_shr_impl! { $t, i8 }
-        signed_checked_shr_impl! { $t, i16 }
-        signed_checked_shr_impl! { $t, i32 }
-        signed_checked_shr_impl! { $t, i64 }
-        signed_checked_shr_impl! { $t, i128 }
-        signed_checked_shr_impl! { $t, isize }
+    ($($b:ty)*) => ($(
+        signed_checked_shr_impl! { $b, i8 }
+        signed_checked_shr_impl! { $b, i16 }
+        signed_checked_shr_impl! { $b, i32 }
+        signed_checked_shr_impl! { $b, i64 }
+        signed_checked_shr_impl! { $b, i128 }
+        signed_checked_shr_impl! { $b, isize }
 
-        unsigned_checked_shr_impl! { $t, u8 }
-        unsigned_checked_shr_impl! { $t, u16 }
-        unsigned_checked_shr_impl! { $t, u32 }
-        unsigned_checked_shr_impl! { $t, u64 }
-        unsigned_checked_shr_impl! { $t, u128 }
-        unsigned_checked_shr_impl! { $t, usize }
+        unsigned_checked_shr_impl! { $b, u8 }
+        unsigned_checked_shr_impl! { $b, u16 }
+        unsigned_checked_shr_impl! { $b, u32 }
+        unsigned_checked_shr_impl! { $b, u64 }
+        unsigned_checked_shr_impl! { $b, u128 }
+        unsigned_checked_shr_impl! { $b, usize }
     )*)
 }
 

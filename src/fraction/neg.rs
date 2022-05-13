@@ -8,7 +8,7 @@ impl<Component: Clone + NegatableUnaryAlgebra> Neg for Fraction<Component> {
     type Output = Self;
 
     fn neg(self) -> <Self as Neg>::Output {
-        Self {
+        Self::Output {
             numerator: -self.numerator,
             denominator: self.denominator,
         }

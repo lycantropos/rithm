@@ -27,6 +27,7 @@ mod partial_eq;
 mod partial_ord;
 mod pow;
 mod rem;
+mod rem_euclid;
 mod round;
 mod sub;
 mod sub_assign;

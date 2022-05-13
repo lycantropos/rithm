@@ -21,10 +21,10 @@ impl<
     fn sub(self, subtrahend: Self) -> Self::Output {
         let (numerator, denominator) = normalize_components_moduli(
             self.numerator * subtrahend.denominator.clone()
-                - subtrahend.numerator * self.denominator.clone(),
+                - self.denominator.clone() * subtrahend.numerator,
             self.denominator * subtrahend.denominator,
         );
-        Self {
+        Self::Output {
             numerator,
             denominator,
         }
@@ -45,10 +45,10 @@ impl<
 
     fn sub(self, other: Component) -> Self::Output {
         let (numerator, denominator) = normalize_components_moduli(
-            self.numerator - other * self.denominator.clone(),
+            self.numerator - self.denominator.clone() * other,
             self.denominator,
         );
-        Self {
+        Self::Output {
             numerator,
             denominator,
         }

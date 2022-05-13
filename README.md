@@ -133,46 +133,45 @@ we can:
   ```python
   >>> Fraction()
   rithm.Fraction(rithm.Int(0), rithm.Int(1))
+  >>> Fraction(1)
+  rithm.Fraction(rithm.Int(1), rithm.Int(1))
   >>> Fraction(1, 2)
   rithm.Fraction(rithm.Int(1), rithm.Int(2))
   >>> Fraction(50, 100)
   rithm.Fraction(rithm.Int(1), rithm.Int(2))
   >>> Fraction(0.5)
   rithm.Fraction(rithm.Int(1), rithm.Int(2))
+
+  ```
+- compare
+  ```python
+  >>> Fraction(1, 2) == Fraction(1, 2)
+  True
+  >>> Fraction(1, 2) >= Fraction(1, 2)
+  True
+  >>> Fraction(1, 2) > Fraction(1, 3)
+  True
+  >>> Fraction(1, 2) < Fraction(2, 3)
+  True
+  >>> Fraction(1, 2) != Fraction(1, 3)
+  True
+
   ```
 - calculate
   ```python
   >>> Fraction(1, 3) + Fraction(1, 6)
   rithm.Fraction(rithm.Int(1), rithm.Int(2))
-  >>> Fraction(1, 2) + 0
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
-  >>> Fraction(3, 2) // 1
+  >>> Fraction(3, 2) // Fraction(1)
   rithm.Int(1)
-  >>> Fraction(3, 2) % 1
+  >>> Fraction(3, 2) % Fraction(1)
   rithm.Fraction(rithm.Int(1), rithm.Int(2))
   >>> Fraction(1, 3) * Fraction(3, 2)
   rithm.Fraction(rithm.Int(1), rithm.Int(2))
-  >>> Fraction(1, 6) * 3
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
   >>> Fraction(1, 2) ** 2
   rithm.Fraction(rithm.Int(1), rithm.Int(4))
-  >>> 0 + Fraction(1, 2)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
-  >>> 2 // Fraction(3, 2)
-  rithm.Int(1)
-  >>> 2 % Fraction(3, 2)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
-  >>> 3 * Fraction(1, 6)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
-  >>> 1 - Fraction(1, 2)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
-  >>> 1 / Fraction(2)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
-  >>> Fraction(3, 2) - 1
+  >>> Fraction(3, 2) - Fraction(1)
   rithm.Fraction(rithm.Int(1), rithm.Int(2))
   >>> Fraction(1, 3) / Fraction(2, 3)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
-  >>> Fraction(3, 2) / 3
   rithm.Fraction(rithm.Int(1), rithm.Int(2))
 
   ```
@@ -186,13 +185,16 @@ we can:
 use std::convert::TryFrom;
 
 use rithm::big_int;
-use rithm::traits::{CheckedDivAsF32, CheckedDivAsF64, FromStrRadix, Pow, OppositionOf, Zeroable};
+use rithm::traits::{
+    CheckedDivAsF32, CheckedDivAsF64, DivEuclid, FromStrRadix, Pow, RemEuclid,
+    Zeroable,
+};
 
 #[cfg(target_arch = "x86")]
 type Digit = u16;
 #[cfg(not(target_arch = "x86"))]
 type Digit = u32;
-const BINARY_SHIFT: usize = (OppositionOf::<Digit>::BITS - 2) as usize;
+const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
 type BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
 /// we can:
 /// - construct
@@ -220,9 +222,11 @@ assert_eq!(BigInt::from(1) | BigInt::from(8), 9);
 assert_eq!(BigInt::from(18).checked_div_as_f32(BigInt::from(2)), Ok(9.0));
 assert_eq!(BigInt::from(18).checked_div_as_f64(BigInt::from(2)), Ok(9.0));
 assert_eq!(BigInt::from(19) / BigInt::from(2), 9);
+assert_eq!(BigInt::from(19).div_euclid(BigInt::from(2)), 9);
 assert_eq!(BigInt::from(3) * BigInt::from(3), 9);
 assert_eq!(BigInt::from(3).pow(BigInt::from(2)), 9);
 assert_eq!(BigInt::from(19) % BigInt::from(10), 9);
+assert_eq!(BigInt::from(19).rem_euclid(BigInt::from(10)), 9);
 assert_eq!(BigInt::from(25) - BigInt::from(16), 9);
 ```
 
@@ -232,36 +236,38 @@ assert_eq!(BigInt::from(25) - BigInt::from(16), 9);
 /// With setup
 use std::convert::TryFrom;
 use rithm::fraction;
-use rithm::traits::{CheckedDivEuclid, CheckedPow, CheckedRemEuclid, Zeroable};
+use rithm::traits::{DivEuclid, Pow, RemEuclid, Unitary, Zeroable};
 
 type Fraction = fraction::Fraction<i8>;
 /// we can:
 /// - construct
 assert_eq!(Fraction::zero(), 0);
+assert_eq!(Fraction::one(), 1);
 assert_eq!(Fraction::new(1, 2), Some(Fraction::from(1) / 2));
 assert_eq!(Fraction::new(50, 100), Fraction::new(1, 2));
 assert_eq!(Fraction::try_from(0.5).unwrap(), Fraction::new(1, 2).unwrap());
 /// - compare
+assert!(Fraction::new(1, 2).unwrap() == Fraction::new(1, 2).unwrap());
+assert!(Fraction::new(1, 2).unwrap() >= Fraction::new(1, 2).unwrap());
+assert!(Fraction::new(1, 2).unwrap() > Fraction::new(1, 3).unwrap());
+assert!(Fraction::new(1, 2).unwrap() <= Fraction::new(1, 2).unwrap());
+assert!(Fraction::new(1, 2).unwrap() < Fraction::new(2, 3).unwrap());
+assert!(Fraction::new(1, 2).unwrap() != Fraction::new(1, 3).unwrap());
 /// - calculate
-assert_eq!(Fraction::new(1, 2).unwrap() + 0, Fraction::new(1, 2).unwrap());
-assert_eq!(0 + Fraction::new(1, 2).unwrap(), Fraction::new(1, 2).unwrap());
 assert_eq!(Fraction::new(1, 3).unwrap() + Fraction::new(1, 6).unwrap(),
-           Fraction::new(1, 2).unwrap());
-assert_eq!(Fraction::new(3, 2).unwrap() - 1, Fraction::new(1, 2).unwrap());
-assert_eq!(1 - Fraction::new(1, 2).unwrap(), Fraction::new(1, 2).unwrap());
-assert_eq!(Fraction::new(1, 3).unwrap() * Fraction::new(3, 2).unwrap(),
            Fraction::new(1, 2).unwrap());
 assert_eq!(Fraction::new(1, 3).unwrap() / Fraction::new(2, 3).unwrap(),
            Fraction::new(1, 2).unwrap());
-assert_eq!(Fraction::new(1, 6).unwrap() * 3, Fraction::new(1, 2).unwrap());
-assert_eq!(Fraction::new(3, 2).unwrap() / 3, Fraction::new(1, 2).unwrap());
-assert_eq!(1 / Fraction::from(2), Fraction::new(1, 2).unwrap());
-assert_eq!(Fraction::new(3, 2).unwrap().checked_div_euclid(1), Some(1));
-assert_eq!(2.checked_div_euclid(Fraction::new(3, 2).unwrap()), Some(1));
-assert_eq!(Fraction::new(3, 2).unwrap().checked_rem_euclid(1), Fraction::new(1, 2));
-assert_eq!(2.checked_rem_euclid(Fraction::new(3, 2).unwrap()), Fraction::new(1, 2));
-assert_eq!(Fraction::new(1, 2).unwrap().checked_pow(2), Fraction::new(1, 4));
-assert_eq!(Fraction::new(1, 2).unwrap().to_string(), "1/2");
+assert_eq!(Fraction::new(3, 2).unwrap().div_euclid(Fraction::from(1)), 1);
+assert_eq!(Fraction::new(1, 3).unwrap() * Fraction::new(3, 2).unwrap(),
+           Fraction::new(1, 2).unwrap());
+assert_eq!(Fraction::new(1, 2).unwrap().pow(2), Fraction::new(1, 4).unwrap());
+assert_eq!(Fraction::new(3, 2).unwrap() % Fraction::from(1),
+           Fraction::new(1, 2).unwrap());
+assert_eq!(Fraction::new(3, 2).unwrap().rem_euclid(Fraction::from(1)),
+           Fraction::new(1, 2).unwrap());
+assert_eq!(Fraction::new(3, 2).unwrap() - Fraction::from(1),
+           Fraction::new(1, 2).unwrap());
 ```
 
 Development

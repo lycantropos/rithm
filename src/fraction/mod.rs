@@ -14,6 +14,7 @@ mod debug;
 mod display;
 mod div;
 mod div_assign;
+mod div_euclid;
 mod eq;
 mod floor;
 mod from;

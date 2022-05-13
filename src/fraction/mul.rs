@@ -15,7 +15,7 @@ impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + Multiplic
             normalize_components_moduli(self.numerator, other.denominator);
         let (other_numerator, denominator) =
             normalize_components_moduli(other.numerator, self.denominator);
-        Self {
+        Self::Output {
             numerator: numerator * other_numerator,
             denominator: denominator * other_denominator,
         }
@@ -29,7 +29,7 @@ impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + Multiplic
 
     fn mul(self, other: Component) -> Self::Output {
         let (other, denominator) = normalize_components_moduli(other, self.denominator);
-        Self {
+        Self::Output {
             numerator: self.numerator * other,
             denominator,
         }

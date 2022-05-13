@@ -43,9 +43,9 @@ impl<
 {
     type Output = Self;
 
-    fn sub(self, other: Component) -> Self::Output {
+    fn sub(self, subtrahend: Component) -> Self::Output {
         let (numerator, denominator) = normalize_components_moduli(
-            self.numerator - self.denominator.clone() * other,
+            self.numerator - self.denominator.clone() * subtrahend,
             self.denominator,
         );
         Self::Output {

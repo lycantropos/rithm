@@ -83,15 +83,23 @@ jobs:
         run: cargo test --doc --target=${{ matrix.platform.rust_target }}
         env:
           CARGO_INCREMENTAL: 0
+          RUSTDOCFLAGS: >
+            -Zprofile -Ccodegen-units=1 -Copt-level=0 -Coverflow-checks=off
+            -Zpanic_abort_tests -Cpanic=abort
           RUSTFLAGS: >
             -Zprofile -Ccodegen-units=1 -Copt-level=0 -Coverflow-checks=off
-            -Zpanic_abort_tests
+            -Zpanic_abort_tests -Cpanic=abort
+        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Collect Rust docstests coverage'
+        run: >
+          grcov target -s . -t cobertura --llvm --branch --ignore-not-existing
+          --ignore "/*" -o coverage_rust_doctests.xml
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install in editable mode'
         run: python -m pip -v install -e .
         env:
           CARGO_INCREMENTAL: 0
-          RUSTFLAGS: >
+          RUSTDOCFLAGS: >
             -Zprofile -Ccodegen-units=1 -Copt-level=0 -Coverflow-checks=off
             -Zpanic_abort_tests -Cpanic=abort
       - name: 'Install tests dependencies'
@@ -105,7 +113,9 @@ jobs:
       - name: 'Collect Python coverage'
         run: coverage xml
       - name: 'Collect Rust coverage'
-        run: grcov target -s . -t cobertura --llvm --branch --ignore-not-existing --ignore "/*" -o coverage_rust.xml
+        run: >
+          grcov target -s . -t cobertura --llvm --branch --ignore-not-existing
+          --ignore "/*" -o coverage_rust.xml
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload PyPy coverage'
         uses: codecov/codecov-action@v2.1.0
@@ -118,7 +128,7 @@ jobs:
         uses: codecov/codecov-action@v2.1.0
         with:
           fail_ci_if_error: false
-          files: ./coverage.xml,./coverage_rust.xml
+          files: ./coverage.xml,./coverage_rust.xml,./coverage_rust_doctests.xml
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
         continue-on-error: true
 

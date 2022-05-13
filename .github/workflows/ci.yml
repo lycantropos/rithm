@@ -80,7 +80,9 @@ jobs:
         run: cargo install grcov
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Run Rust doctests'
-        run: cargo test --doc --target=${{ matrix.platform.rust_target }}
+        run: >
+          rm -rf target
+          && cargo test --doc --target=${{ matrix.platform.rust_target }}
         env:
           CARGO_INCREMENTAL: 0
           RUSTDOCFLAGS: >
@@ -96,7 +98,9 @@ jobs:
           --ignore "/*" -o coverage_rust_doctests.xml
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install in editable mode'
-        run: python -m pip -v install -e .
+        run: >
+          rm -rf target
+          && python -m pip -v install -e .
         env:
           CARGO_INCREMENTAL: 0
           RUSTDOCFLAGS: >

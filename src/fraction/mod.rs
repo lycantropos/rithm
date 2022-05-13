@@ -8,6 +8,7 @@ mod checked_div;
 mod checked_div_euclid;
 mod checked_div_rem_euclid;
 mod checked_pow;
+mod checked_rem;
 mod checked_rem_euclid;
 mod debug;
 mod display;

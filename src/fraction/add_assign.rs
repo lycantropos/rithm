@@ -11,8 +11,8 @@ impl<
             + Clone
             + DivisivePartialMagma
             + GcdMagma
-            + Oppositive
-            + MultiplicativeMonoid,
+            + MultiplicativeMonoid
+            + Oppositive,
     > AddAssign for Fraction<Component>
 {
     fn add_assign(&mut self, other: Self) {
@@ -29,8 +29,8 @@ impl<
             + Clone
             + DivisivePartialMagma
             + GcdMagma
-            + Oppositive
-            + MultiplicativeMonoid,
+            + MultiplicativeMonoid
+            + Oppositive,
     > AddAssign<Component> for Fraction<Component>
 {
     fn add_assign(&mut self, other: Component) {

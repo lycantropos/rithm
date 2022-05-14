@@ -103,7 +103,7 @@ jobs:
       - name: 'Run tests'
         run: coverage run --append -m pytest
       - name: 'Collect Python coverage'
-        run: coverage xml
+        run: coverage xml -o coverage_python.xml
       - name: 'Install Rust coverage dependencies'
         run: cargo install grcov
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
@@ -116,14 +116,14 @@ jobs:
         uses: codecov/codecov-action@v2.1.0
         with:
           fail_ci_if_error: false
-          files: ./coverage.xml
+          files: ./coverage_python.xml
         if: ${{ startsWith(matrix.python_version, 'pypy') }}
         continue-on-error: true
       - name: 'Upload СPython coverage'
         uses: codecov/codecov-action@v2.1.0
         with:
           fail_ci_if_error: false
-          files: ./coverage.xml,./coverage_rust.xml
+          files: ./coverage_python.xml,./coverage_rust.xml
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
         continue-on-error: true
 

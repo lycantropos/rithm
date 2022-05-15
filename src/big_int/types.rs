@@ -17,7 +17,7 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, 
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum CheckedDivAsFloatError {
     TooLarge,
     ZeroDivision,
@@ -46,7 +46,7 @@ impl Display for CheckedDivAsFloatError {
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum CheckedPowRemEuclidError {
     ZeroDivisor,
     NonInvertibleBase,
@@ -75,7 +75,7 @@ impl Display for CheckedPowRemEuclidError {
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum ShlError {
     NegativeShift,
     OutOfMemory,
@@ -104,7 +104,7 @@ impl Display for ShlError {
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum ShrError {
     NegativeShift,
 }
@@ -129,7 +129,7 @@ impl Display for ShrError {
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum TryFromFloatError {
     Infinity,
     NaN,
@@ -156,7 +156,7 @@ impl Display for TryFromFloatError {
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum TryFromStringError {
     BaseOutOfBounds(u32),
     ConsecutiveSeparators,
@@ -201,7 +201,7 @@ impl Display for TryFromStringError {
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum TryIntoFloatError {
     TooLarge,
 }
@@ -226,7 +226,7 @@ impl Display for TryIntoFloatError {
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum TryIntoSignedIntegerError {
     TooLarge,
 }
@@ -253,7 +253,7 @@ impl Display for TryIntoSignedIntegerError {
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum TryIntoUnsignedIntegerError {
     TooLarge,
     Negative,

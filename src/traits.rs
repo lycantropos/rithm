@@ -1241,7 +1241,7 @@ macro_rules! primitive_rem_euclid_impl {
 
 primitive_rem_euclid_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum TieBreaking {
     AwayFromZero,
     ToEven,
@@ -1289,6 +1289,7 @@ macro_rules! primitive_round_impl {
 
 primitive_round_impl!(f32 f64);
 
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Sign {
     Negative,
     Zero,

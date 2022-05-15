@@ -54,7 +54,7 @@ pub(super) fn normalize_components_sign<Component: Signed>(
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum FromFloatConversionError {
     Infinity,
     NaN,

@@ -20,7 +20,7 @@ except ImportError:
 
     class _BaseEnum(_Enum):
         def __repr__(self):
-            return f'rithm.{type(self).__qualname__}.{self.name}'
+            return f'{__name__}.{type(self).__qualname__}.{self.name}'
 
 
     class Endianness(_BaseEnum):
@@ -215,7 +215,7 @@ except ImportError:
                     else NotImplemented)
 
         def __repr__(self):
-            return f'rithm.Int({self._value})'
+            return f'{__name__}.{type(self).__qualname__}({self._value})'
 
         def __rfloordiv__(self, other):
             return (Int(other // self._value)
@@ -529,7 +529,8 @@ except ImportError:
                     else NotImplemented)
 
         def __repr__(self):
-            return f'rithm.Fraction({self.numerator!r}, {self.denominator!r})'
+            return (f'{__name__}.{type(self).__qualname__}'
+                    f'({self.numerator!r}, {self.denominator!r})')
 
         def __rfloordiv__(self, dividend):
             return ((dividend * self.denominator) // self.numerator

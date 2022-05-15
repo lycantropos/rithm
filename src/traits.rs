@@ -1292,8 +1292,8 @@ primitive_round_impl!(f32 f64);
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Sign {
     Negative,
-    Zero,
     Positive,
+    Zero,
 }
 
 pub trait Signed: NegatableUnaryAlgebra + Zeroable {

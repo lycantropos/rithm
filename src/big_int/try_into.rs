@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-use crate::traits::{LdExp, Oppositive, Zeroable};
+use crate::traits::{LdExp, Signed, Zeroable};
 
 use super::digits::{
     fraction_exponent_digits, maybe_reduce_digits, BinaryDigitConvertibleToFloat, MaybeReducibleTo,

@@ -1,9 +1,9 @@
-use crate::traits::{CheckedPow, Oppositive, Unitary, Zeroable};
+use crate::traits::{CheckedPow, Signed, Unitary, Zeroable};
 
 use super::types::{normalize_components_sign, Fraction};
 
 impl<
-        Component: Clone + Oppositive + CheckedPow<Component, Output = Option<Component>> + Unitary + Zeroable,
+        Component: Clone + Signed + CheckedPow<Component, Output = Option<Component>> + Unitary + Zeroable,
     > CheckedPow<Component> for Fraction<Component>
 {
     type Output = Option<Self>;

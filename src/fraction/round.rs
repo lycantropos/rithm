@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 
 use crate::traits::{
-    AdditiveMonoid, CheckedDivRemEuclid, MultiplicativeMonoid, Oppositive, Parity, Round,
+    AdditiveMonoid, CheckedDivRemEuclid, MultiplicativeMonoid, Parity, Round, Signed,
     SubtractiveMagma, TieBreaking,
 };
 
@@ -13,7 +13,7 @@ impl<
             + CheckedDivRemEuclid<Output = Option<(Component, Component)>>
             + From<u8>
             + MultiplicativeMonoid
-            + Oppositive
+            + Signed
             + Ord
             + Parity
             + SubtractiveMagma,

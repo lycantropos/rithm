@@ -18,7 +18,7 @@ use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 use crate::traits::{
     Abs, BitLength, Ceil, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,
     CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, Endianness, Floor, FromBytes,
-    FromStrRadix, Gcd, Oppositive, Parity, Round, TieBreaking, ToBytes, Trunc, Unitary, Zeroable,
+    FromStrRadix, Gcd, Parity, Round, Signed, TieBreaking, ToBytes, Trunc, Unitary, Zeroable,
 };
 
 pub mod big_int;

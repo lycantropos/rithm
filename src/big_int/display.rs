@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
 
-use crate::traits::Oppositive;
+use crate::traits::Signed;
 
 use super::constants::MAX_REPRESENTABLE_BASE;
 use super::digits::{binary_digits_to_base, DisplayableDigit};

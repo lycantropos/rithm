@@ -1,6 +1,6 @@
 use std::convert::{From, TryFrom};
 
-use crate::traits::{Endianness, Oppose, Oppositive, ToBytes, Zeroable};
+use crate::traits::{Endianness, Oppose, Signed, ToBytes, Zeroable};
 
 use super::constants::MIDDLE_BYTE;
 use super::digits::{binary_digits_to_binary_base, negate_digits, BinaryDigitConvertibleToBinary};

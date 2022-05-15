@@ -1,9 +1,9 @@
-use crate::traits::{Ceil, CheckedDivEuclid, Floor, MultiplicativeMonoid, Oppositive, Trunc};
+use crate::traits::{Ceil, CheckedDivEuclid, Floor, MultiplicativeMonoid, Signed, Trunc};
 
 use super::types::Fraction;
 
 impl<
-        Component: Clone + CheckedDivEuclid<Output = Option<Component>> + MultiplicativeMonoid + Oppositive,
+        Component: Clone + CheckedDivEuclid<Output = Option<Component>> + MultiplicativeMonoid + Signed,
     > Trunc for Fraction<Component>
 {
     type Output = Component;

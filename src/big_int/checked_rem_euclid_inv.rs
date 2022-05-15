@@ -1,4 +1,4 @@
-use crate::traits::{CheckedDivRemEuclid, CheckedRemEuclidInv, Oppositive};
+use crate::traits::{CheckedDivRemEuclid, CheckedRemEuclidInv, Signed};
 
 use super::digits::ModularInvertibleDigit;
 use super::types::BigInt;

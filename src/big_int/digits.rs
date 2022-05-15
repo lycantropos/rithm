@@ -9,7 +9,7 @@ use crate::traits::{
     AssigningDivisivePartialMagma, AssigningMultiplicativeMonoid, AssigningShiftableLeftBy,
     AssigningShiftableRightBy, AssigningSubtractiveMagma, BitLength, BitwiseNegatableUnaryAlgebra,
     CheckedShl, DoublePrecision, DoublePrecisionOf, Float, Gcd, ModularPartialMagma,
-    ModularSubtractiveMagma, Oppose, OppositionOf, Oppositive, Unitary, Zeroable,
+    ModularSubtractiveMagma, Oppose, OppositionOf, Signed, Unitary, Zeroable,
 };
 
 use super::types::{CheckedDivAsFloatError, ShlError, Sign, WindowDigit};

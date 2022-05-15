@@ -2,7 +2,7 @@ use std::ops::Rem;
 
 use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use crate::traits::{CheckedRem, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Oppositive};
+use crate::traits::{CheckedRem, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed};
 
 use super::types::Fraction;
 
@@ -11,7 +11,7 @@ impl<
             + CheckedRem<Output = Option<Component>>
             + DivisivePartialMagma
             + GcdMagma
-            + Oppositive
+            + Signed
             + MultiplicativeMonoid,
     > Rem for Fraction<Component>
 {
@@ -28,7 +28,7 @@ impl<
             + CheckedRem<Output = Option<Component>>
             + DivisivePartialMagma
             + GcdMagma
-            + Oppositive
+            + Signed
             + MultiplicativeMonoid,
     > Rem<Component> for Fraction<Component>
 {

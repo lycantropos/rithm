@@ -1,11 +1,11 @@
 use std::ops::MulAssign;
 
-use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Oppositive};
+use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed};
 
 use super::types::{normalize_components_moduli, Fraction};
 
-impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + MultiplicativeMonoid>
-    MulAssign for Fraction<Component>
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed + MultiplicativeMonoid> MulAssign
+    for Fraction<Component>
 {
     fn mul_assign(&mut self, other: Self) {
         let (numerator, other_denominator) =
@@ -17,7 +17,7 @@ impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + Multiplic
     }
 }
 
-impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + MultiplicativeMonoid>
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed + MultiplicativeMonoid>
     MulAssign<Component> for Fraction<Component>
 {
     fn mul_assign(&mut self, other: Component) {

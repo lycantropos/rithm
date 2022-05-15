@@ -1,6 +1,6 @@
 use std::mem::size_of;
 
-use crate::traits::{CheckedShr, DivRem, Oppositive};
+use crate::traits::{CheckedShr, DivRem, Signed};
 
 use super::digits::{
     primitive_shift_digits_right, shift_digits_right, to_digits_sign, ShiftableRightDigit,

@@ -2,18 +2,13 @@ use std::ops::Sub;
 
 use crate::big_int::{AdditiveDigit, BigInt, GcdDigit, MultiplicativeDigit};
 use crate::traits::{
-    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Oppositive, SubtractiveMagma,
+    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed, SubtractiveMagma,
 };
 
 use super::types::{normalize_components_moduli, Fraction};
 
 impl<
-        Component: Clone
-            + DivisivePartialMagma
-            + GcdMagma
-            + Oppositive
-            + MultiplicativeMonoid
-            + SubtractiveMagma,
+        Component: Clone + DivisivePartialMagma + GcdMagma + Signed + MultiplicativeMonoid + SubtractiveMagma,
     > Sub for Fraction<Component>
 {
     type Output = Self;
@@ -36,7 +31,7 @@ impl<
             + DivisivePartialMagma
             + Eq
             + GcdMagma
-            + Oppositive
+            + Signed
             + MultiplicativeMonoid
             + SubtractiveMagma,
     > Sub<Component> for Fraction<Component>

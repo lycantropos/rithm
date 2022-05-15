@@ -1124,7 +1124,7 @@ macro_rules! primitive_min_exp_impl {
 primitive_min_exp_impl!(f32 f64);
 
 pub trait Oppose {
-    type Result: Oppositive;
+    type Result: Signed;
 }
 
 impl Oppose for i8 {
@@ -1175,14 +1175,32 @@ impl Oppose for usize {
     type Result = isize;
 }
 
-pub trait Oppositive: NegatableUnaryAlgebra + Zeroable {
-    fn is_negative(&self) -> bool;
-    fn is_positive(&self) -> bool;
+pub enum Sign {
+    Negative,
+    Zero,
+    Positive,
 }
 
-macro_rules! primitive_oppositive_impl {
+pub trait Signed: NegatableUnaryAlgebra + Zeroable {
+    fn is_negative(&self) -> bool;
+
+    fn is_positive(&self) -> bool;
+
+    #[inline(always)]
+    fn sign(&self) -> Sign {
+        if self.is_positive() {
+            Sign::Positive
+        } else if self.is_negative() {
+            Sign::Negative
+        } else {
+            Sign::Zero
+        }
+    }
+}
+
+macro_rules! primitive_signed_impl {
     ($($t:ty)*) => ($(
-        impl Oppositive for $t {
+        impl Signed for $t {
             #[inline(always)]
             fn is_negative(&self) -> bool {
                 <$t>::is_negative(*self)
@@ -1196,7 +1214,7 @@ macro_rules! primitive_oppositive_impl {
     )*)
 }
 
-primitive_oppositive_impl!(i8 i16 i32 i64 i128 isize);
+primitive_signed_impl!(i8 i16 i32 i64 i128 isize);
 
 pub trait Parity {
     fn is_even(&self) -> bool;

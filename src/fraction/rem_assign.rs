@@ -1,7 +1,7 @@
 use std::ops::RemAssign;
 
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use crate::traits::{CheckedRem, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Oppositive};
+use crate::traits::{CheckedRem, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed};
 
 use super::types::{normalize_components_moduli, Fraction};
 
@@ -11,7 +11,7 @@ impl<
             + DivisivePartialMagma
             + GcdMagma
             + MultiplicativeMonoid
-            + Oppositive,
+            + Signed,
     > RemAssign for Fraction<Component>
 {
     fn rem_assign(&mut self, divisor: Self) {
@@ -30,7 +30,7 @@ impl<
             + DivisivePartialMagma
             + GcdMagma
             + MultiplicativeMonoid
-            + Oppositive,
+            + Signed,
     > RemAssign<Component> for Fraction<Component>
 {
     fn rem_assign(&mut self, divisor: Component) {

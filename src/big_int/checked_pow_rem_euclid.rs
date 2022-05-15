@@ -1,5 +1,5 @@
 use crate::traits::{
-    Abs, CheckedPowRemEuclid, CheckedRemEuclid, CheckedRemEuclidInv, Oppositive, Unitary, Zeroable,
+    Abs, CheckedPowRemEuclid, CheckedRemEuclid, CheckedRemEuclidInv, Signed, Unitary, Zeroable,
 };
 
 use super::constants::{WINDOW_BASE, WINDOW_CUTOFF, WINDOW_SHIFT};

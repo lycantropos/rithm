@@ -1,10 +1,10 @@
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use crate::traits::{CheckedPow, Oppositive, Pow, Unitary, Zeroable};
+use crate::traits::{CheckedPow, Pow, Signed, Unitary, Zeroable};
 
 use super::types::Fraction;
 
 impl<
-        Component: Clone + Oppositive + CheckedPow<Component, Output = Option<Component>> + Unitary + Zeroable,
+        Component: Clone + Signed + CheckedPow<Component, Output = Option<Component>> + Unitary + Zeroable,
     > Pow<Component> for Fraction<Component>
 {
     type Output = Self;

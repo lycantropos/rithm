@@ -1,11 +1,11 @@
 use std::ops::DivAssign;
 
-use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Oppositive};
+use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed};
 
 use super::types::{normalize_components_moduli, normalize_components_sign, Fraction};
 
-impl<Component: Clone + DivisivePartialMagma + GcdMagma + MultiplicativeMonoid + Oppositive>
-    DivAssign for Fraction<Component>
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + MultiplicativeMonoid + Signed> DivAssign
+    for Fraction<Component>
 {
     fn div_assign(&mut self, divisor: Self) {
         let (numerator, divisor_numerator) =
@@ -19,7 +19,7 @@ impl<Component: Clone + DivisivePartialMagma + GcdMagma + MultiplicativeMonoid +
     }
 }
 
-impl<Component: Clone + DivisivePartialMagma + GcdMagma + MultiplicativeMonoid + Oppositive>
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + MultiplicativeMonoid + Signed>
     DivAssign<Component> for Fraction<Component>
 {
     fn div_assign(&mut self, divisor: Component) {

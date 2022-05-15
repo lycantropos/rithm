@@ -1,11 +1,11 @@
 use std::ops::Mul;
 
 use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
-use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Oppositive};
+use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed};
 
 use super::types::{normalize_components_moduli, Fraction};
 
-impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + MultiplicativeMonoid> Mul
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed + MultiplicativeMonoid> Mul
     for Fraction<Component>
 {
     type Output = Self;
@@ -22,7 +22,7 @@ impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + Multiplic
     }
 }
 
-impl<Component: Clone + DivisivePartialMagma + GcdMagma + Oppositive + MultiplicativeMonoid>
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed + MultiplicativeMonoid>
     Mul<Component> for Fraction<Component>
 {
     type Output = Self;

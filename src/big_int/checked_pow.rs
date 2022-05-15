@@ -1,4 +1,4 @@
-use crate::traits::{CheckedPow, Oppositive};
+use crate::traits::{CheckedPow, Signed};
 
 use super::constants::{WINDOW_BASE, WINDOW_CUTOFF, WINDOW_SHIFT};
 use super::digits::{binary_digits_to_lesser_binary_base, ExponentiativeDigit};

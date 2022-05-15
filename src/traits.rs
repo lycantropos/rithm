@@ -1175,47 +1175,6 @@ impl Oppose for usize {
     type Result = isize;
 }
 
-pub enum Sign {
-    Negative,
-    Zero,
-    Positive,
-}
-
-pub trait Signed: NegatableUnaryAlgebra + Zeroable {
-    fn is_negative(&self) -> bool;
-
-    fn is_positive(&self) -> bool;
-
-    #[inline(always)]
-    fn sign(&self) -> Sign {
-        if self.is_positive() {
-            Sign::Positive
-        } else if self.is_negative() {
-            Sign::Negative
-        } else {
-            Sign::Zero
-        }
-    }
-}
-
-macro_rules! primitive_signed_impl {
-    ($($t:ty)*) => ($(
-        impl Signed for $t {
-            #[inline(always)]
-            fn is_negative(&self) -> bool {
-                <$t>::is_negative(*self)
-            }
-
-            #[inline(always)]
-            fn is_positive(&self) -> bool {
-                <$t>::is_positive(*self)
-            }
-        }
-    )*)
-}
-
-primitive_signed_impl!(i8 i16 i32 i64 i128 isize);
-
 pub trait Parity {
     fn is_even(&self) -> bool;
 
@@ -1329,6 +1288,47 @@ macro_rules! primitive_round_impl {
 }
 
 primitive_round_impl!(f32 f64);
+
+pub enum Sign {
+    Negative,
+    Zero,
+    Positive,
+}
+
+pub trait Signed: NegatableUnaryAlgebra + Zeroable {
+    fn is_negative(&self) -> bool;
+
+    fn is_positive(&self) -> bool;
+
+    #[inline(always)]
+    fn sign(&self) -> Sign {
+        if self.is_positive() {
+            Sign::Positive
+        } else if self.is_negative() {
+            Sign::Negative
+        } else {
+            Sign::Zero
+        }
+    }
+}
+
+macro_rules! primitive_signed_impl {
+    ($($t:ty)*) => ($(
+        impl Signed for $t {
+            #[inline(always)]
+            fn is_negative(&self) -> bool {
+                <$t>::is_negative(*self)
+            }
+
+            #[inline(always)]
+            fn is_positive(&self) -> bool {
+                <$t>::is_positive(*self)
+            }
+        }
+    )*)
+}
+
+primitive_signed_impl!(i8 i16 i32 i64 i128 isize);
 
 pub trait Trunc {
     type Output;

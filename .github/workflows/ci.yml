@@ -204,6 +204,20 @@ jobs:
             rust_target: 'x86_64-apple-darwin'
           },
           {
+            architecture: 'aarch64',
+            build: '*-manylinux_aarch64',
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'aarch64-unknown-linux-gnu'
+          },
+          {
+            architecture: 'aarch64',
+            build: '*-musllinux_aarch64',
+            os: 'ubuntu-latest',
+            python_architecture: 'x64',
+            rust_target: 'aarch64-unknown-linux-musl'
+          },
+          {
             architecture: 'i686',
             build: '*-manylinux_i686',
             os: 'ubuntu-latest',
@@ -275,7 +289,7 @@ jobs:
           platforms: all
         if: ${{ runner.os == 'Linux' }}
       - name: 'Build wheels'
-        uses: pypa/cibuildwheel@v2.3.1
+        uses: pypa/cibuildwheel@v2
         env:
           CIBW_ARCHS: ${{ matrix.platform.architecture }}
           CIBW_BEFORE_ALL_LINUX: >

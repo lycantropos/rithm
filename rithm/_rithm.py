@@ -687,6 +687,7 @@ def _divmod_rationals(dividend: _Union[Fraction, Int, int],
             dividend.numerator * divisor.denominator,
             dividend.denominator * divisor.numerator
     )
+    assert isinstance(quotient, Int)
     return quotient, Fraction(remainder_numerator,
                               dividend.denominator * divisor.denominator)
 

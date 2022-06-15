@@ -1216,7 +1216,7 @@ fn compare<T: PartialOrd<U>, U>(left: &T, right: &U, op: CompareOp) -> bool {
 }
 
 #[pymodule]
-fn _rithm(py: Python, module: &PyModule) -> PyResult<()> {
+fn _crithm(py: Python, module: &PyModule) -> PyResult<()> {
     module.setattr(intern!(py, "__doc__"), env!("CARGO_PKG_DESCRIPTION"))?;
     module.setattr(intern!(py, "__version__"), env!("CARGO_PKG_VERSION"))?;
     module.add_class::<PyEndianness>()?;

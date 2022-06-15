@@ -295,7 +295,11 @@ jobs:
           CIBW_BEFORE_ALL_LINUX: >
             curl https://sh.rustup.rs -sSf
             | sh -s -- -y --default-toolchain=nightly
-            && rustup install nightly-2022-05-15
+            # caused by https://github.com/rust-lang/cargo/issues/9167
+            && cat > ~/.cargo/config.toml <<EOF
+            [net]
+            git-fetch-with-cli = true
+            EOF
           CIBW_BUILD: ${{ matrix.platform.build }}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT_LINUX: PATH="$HOME/.cargo/bin:$PATH"

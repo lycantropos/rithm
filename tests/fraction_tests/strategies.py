@@ -20,6 +20,8 @@ non_zero_ints = ints.filter(bool)
 zero_ints = strategies.builds(Int)
 fractions = (strategies.builds(Fraction, ints)
              | strategies.builds(Fraction, ints, non_zero_ints))
+fractions |= (strategies.builds(Fraction, ints)
+              .map(lambda value: value + Fraction(1, 2)))
 zero_fractions = strategies.builds(Fraction)
 non_zero_fractions = fractions.filter(bool)
 fractions_or_ints_or_builtin_ints = fractions | ints | integers

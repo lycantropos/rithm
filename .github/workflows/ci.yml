@@ -183,78 +183,71 @@ jobs:
       matrix:
         platform: [
           {
-            archs: 'arm64 universal2',
-            builds: '*-macosx_arm64 *-macosx_universal2',
+            architecture: 'arm64',
+            build: '*-macosx_arm64',
             os: 'macos-latest',
             python_architecture: 'x64',
             rust_target: 'aarch64-apple-darwin'
           },
           {
-            archs: 'x86_64',
-            builds: '*-macosx_x86_64',
+            architecture: 'universal2',
+            build: '*-macosx_universal2',
+            os: 'macos-latest',
+            python_architecture: 'x64',
+            rust_target: 'aarch64-apple-darwin'
+          },
+          {
+            architecture: 'x86_64',
+            build: '*-macosx_x86_64',
             os: 'macos-latest',
             python_architecture: 'x64',
             rust_target: 'x86_64-apple-darwin'
           },
           {
-            archs: 'aarch64',
-            builds: '*-manylinux_aarch64',
-            os: 'ubuntu-latest',
-            python_architecture: 'x64',
-            rust_target: 'aarch64-unknown-linux-gnu'
-          },
-#          {
-#            archs: 'aarch64',
-#            builds: '*-musllinux_aarch64',
-#            os: 'ubuntu-latest',
-#            python_architecture: 'x64',
-#            rust_target: 'aarch64-unknown-linux-musl'
-#          },
-          {
-            archs: 'i686',
-            builds: '*-manylinux_i686',
+            architecture: 'i686',
+            build: '*-manylinux_i686',
             os: 'ubuntu-latest',
             python_architecture: 'x64',
             rust_target: 'i686-unknown-linux-gnu'
           },
           {
-            archs: 'ppc64le',
-            builds: '*-manylinux_ppc64le',
+            architecture: 'ppc64le',
+            build: '*-manylinux_ppc64le',
             os: 'ubuntu-latest',
             python_architecture: 'x64',
             rust_target: 'powerpc64le-unknown-linux-gnu'
           },
           {
-            archs: 's390x',
-            builds: '*-manylinux_s390x',
+            architecture: 's390x',
+            build: '*-manylinux_s390x',
             os: 'ubuntu-latest',
             python_architecture: 'x64',
             rust_target: 's390x-unknown-linux-gnu'
           },
           {
-            archs: 'x86_64',
-            builds: '*-manylinux_x86_64',
+            architecture: 'x86_64',
+            build: '*-manylinux_x86_64',
             os: 'ubuntu-latest',
             python_architecture: 'x64',
             rust_target: 'x86_64-unknown-linux-gnu'
           },
           {
-            archs: 'x86_64',
-            builds: '*-musllinux_x86_64',
+            architecture: 'x86_64',
+            build: '*-musllinux_x86_64',
             os: 'ubuntu-latest',
             python_architecture: 'x64',
             rust_target: 'x86_64-unknown-linux-musl'
           },
           {
-            archs: 'AMD64',
-            builds: '*-win_amd64',
+            architecture: 'AMD64',
+            build: '*-win_amd64',
             os: 'windows-latest',
             python_architecture: 'x64',
             rust_target: 'x86_64-pc-windows-msvc'
           },
           {
-            archs: 'x86',
-            builds: '*-win32',
+            architecture: 'x86',
+            build: '*-win32',
             os: 'windows-latest',
             python_architecture: 'x86',
             rust_target: 'i686-pc-windows-msvc'
@@ -277,18 +270,18 @@ jobs:
           toolchain: nightly
         if: ${{ runner.os != 'Linux' }}
       - name: 'Setup QEMU'
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
         with:
           platforms: all
         if: ${{ runner.os == 'Linux' }}
       - name: 'Build wheels'
         uses: pypa/cibuildwheel@v2.3.1
         env:
-          CIBW_ARCHS: ${{ matrix.platform.archs }}
+          CIBW_ARCHS: ${{ matrix.platform.architecture }}
           CIBW_BEFORE_ALL_LINUX: >
             curl https://sh.rustup.rs -sSf
             | sh -s -- -y --default-toolchain=nightly
-          CIBW_BUILD: ${{ matrix.platform.builds }}
+          CIBW_BUILD: ${{ matrix.platform.build }}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT_LINUX: PATH="$HOME/.cargo/bin:$PATH"
           CIBW_SKIP: pp*

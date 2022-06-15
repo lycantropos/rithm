@@ -1,9 +1,11 @@
 import fractions
+from typing import Any
 
 import pytest
 from hypothesis import given
 from rithm import Fraction
-from tests.utils import (IntWithBuiltin,
+from tests.utils import (IntOrBuiltin,
+                         IntWithBuiltin,
                          is_equivalent_to_builtin_fraction)
 
 from . import strategies
@@ -55,3 +57,23 @@ def test_numerator_only_connection_with_builtin(numerators: IntWithBuiltin
     assert is_equivalent_to_builtin_fraction(
             result, fractions.Fraction(builtin_numerator)
     )
+
+
+@given(strategies.invalid_fractions_single_arguments)
+def test_invalid_single_argument(value: Any) -> None:
+    with pytest.raises(TypeError):
+        Fraction(value)
+
+
+@given(strategies.invalid_fractions_components,
+       strategies.non_zero_ints_or_builtins)
+def test_invalid_numerator(numerator: Any, denominator: IntOrBuiltin) -> None:
+    with pytest.raises(TypeError):
+        Fraction(numerator, denominator)
+
+
+@given(strategies.ints_or_builtins, strategies.invalid_fractions_components)
+def test_invalid_denominator(numerator: IntOrBuiltin, denominator: Any
+                             ) -> None:
+    with pytest.raises(TypeError):
+        Fraction(numerator, denominator)

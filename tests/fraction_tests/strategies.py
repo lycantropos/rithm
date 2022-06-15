@@ -17,6 +17,7 @@ non_zero_integers = integers.filter(bool)
 ints = integers.map(Int)
 ints_or_builtins = ints | integers
 non_zero_ints = ints.filter(bool)
+non_zero_ints_or_builtins = non_zero_ints | non_zero_integers
 zero_ints = strategies.builds(Int)
 fractions = (strategies.builds(Fraction, ints)
              | strategies.builds(Fraction, ints, non_zero_ints))
@@ -25,6 +26,8 @@ fractions |= (strategies.builds(Fraction, ints)
 zero_fractions = strategies.builds(Fraction)
 non_zero_fractions = fractions.filter(bool)
 fractions_or_ints_or_builtin_ints = fractions | ints | integers
+invalid_fractions_components = strategies.floats()
+invalid_fractions_single_arguments = strategies.decimals()
 ints_with_builtins = strategies.builds(to_int_with_builtin, integers)
 non_zero_ints_with_builtins = ints_with_builtins.filter(all)
 fractions_with_builtins = (strategies.builds(to_fraction_with_builtin,

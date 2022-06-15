@@ -184,20 +184,6 @@ jobs:
         build_prefix: ['cp37', 'cp38', 'cp39', 'cp310']
         build: [
           {
-            architecture: 'arm64',
-            postfix: 'macosx_arm64',
-            os: 'macos-latest',
-            python_architecture: 'x64',
-            rust_target: 'aarch64-apple-darwin'
-          },
-          {
-            architecture: 'universal2',
-            postfix: 'macosx_universal2',
-            os: 'macos-latest',
-            python_architecture: 'x64',
-            rust_target: 'aarch64-apple-darwin'
-          },
-          {
             architecture: 'x86_64',
             postfix: 'macosx_x86_64',
             os: 'macos-latest',
@@ -275,6 +261,56 @@ jobs:
             rust_target: 'i686-pc-windows-msvc'
           },
         ]
+        include:
+          - build_prefix: 'cp38'
+            build: {
+              architecture: 'arm64',
+              postfix: 'macosx_arm64',
+              os: 'macos-latest',
+              python_architecture: 'x64',
+              rust_target: 'aarch64-apple-darwin'
+            }
+          - build_prefix: 'cp38'
+            build: {
+              architecture: 'universal2',
+              postfix: 'macosx_universal2',
+              os: 'macos-latest',
+              python_architecture: 'x64',
+              rust_target: 'aarch64-apple-darwin'
+            }
+          - build_prefix: 'cp39'
+            build: {
+              architecture: 'arm64',
+              postfix: 'macosx_arm64',
+              os: 'macos-latest',
+              python_architecture: 'x64',
+              rust_target: 'aarch64-apple-darwin'
+            }
+          - build_prefix: 'cp39'
+            build: {
+              architecture: 'universal2',
+              postfix: 'macosx_universal2',
+              os: 'macos-latest',
+              python_architecture: 'x64',
+              rust_target: 'aarch64-apple-darwin'
+            }
+          - build_prefix: 'cp310'
+            build: {
+              architecture: 'arm64',
+              postfix: 'macosx_arm64',
+              os: 'macos-latest',
+              python_architecture: 'x64',
+              rust_target: 'aarch64-apple-darwin'
+            }
+          - build_prefix: 'cp310'
+            build: {
+              architecture: 'universal2',
+              postfix: 'macosx_universal2',
+              os: 'macos-latest',
+              python_architecture: 'x64',
+              rust_target: 'aarch64-apple-darwin'
+            }
+
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v3

@@ -103,10 +103,13 @@ class Int:
     def __hash__(self) -> int:
         ...
 
-    def __invert__(self) -> 'Int':
+    def __index__(self) -> int:
         ...
 
     def __int__(self) -> int:
+        ...
+
+    def __invert__(self) -> 'Int':
         ...
 
     def __le__(self, other: 'Int') -> bool:

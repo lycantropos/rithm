@@ -141,8 +141,10 @@ except ImportError:
         def __invert__(self):
             return Int(~self._value)
 
-        def __int__(self):
+        def __index__(self):
             return self._value
+
+        __int__ = __index__
 
         def __le__(self, other):
             return (self._value <= other._value

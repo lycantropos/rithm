@@ -244,6 +244,10 @@ impl PyInt {
         hash(&self.0) as ffi::Py_hash_t
     }
 
+    fn __index__(&self, py: Python) -> PyObject {
+        big_int_to_py_long(&self.0, py)
+    }
+
     fn __int__(&self, py: Python) -> PyObject {
         big_int_to_py_long(&self.0, py)
     }

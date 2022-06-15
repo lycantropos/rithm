@@ -206,35 +206,35 @@ jobs:
           {
             architecture: 'i686',
             build: '*-manylinux_i686',
-            os: 'ubuntu-latest',
+            os: 'ubuntu-18.04',
             python_architecture: 'x64',
             rust_target: 'i686-unknown-linux-gnu'
           },
           {
             architecture: 'ppc64le',
             build: '*-manylinux_ppc64le',
-            os: 'ubuntu-latest',
+            os: 'ubuntu-18.04',
             python_architecture: 'x64',
             rust_target: 'powerpc64le-unknown-linux-gnu'
           },
           {
             architecture: 's390x',
             build: '*-manylinux_s390x',
-            os: 'ubuntu-latest',
+            os: 'ubuntu-18.04',
             python_architecture: 'x64',
             rust_target: 's390x-unknown-linux-gnu'
           },
           {
             architecture: 'x86_64',
             build: '*-manylinux_x86_64',
-            os: 'ubuntu-latest',
+            os: 'ubuntu-18.04',
             python_architecture: 'x64',
             rust_target: 'x86_64-unknown-linux-gnu'
           },
           {
             architecture: 'x86_64',
             build: '*-musllinux_x86_64',
-            os: 'ubuntu-latest',
+            os: 'ubuntu-18.04',
             python_architecture: 'x64',
             rust_target: 'x86_64-unknown-linux-musl'
           },

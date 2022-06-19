@@ -948,6 +948,88 @@ macro_rules! primitive_gcd_impl {
 
 primitive_gcd_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
+pub trait IsPowerOfTwo {
+    fn is_power_of_two(&self) -> bool;
+}
+
+macro_rules! unsigned_primitive_is_power_of_two_impl {
+    ($($t:ty)*) => ($(
+        impl IsPowerOfTwo for $t {
+            #[inline(always)]
+            fn is_power_of_two(&self) -> bool {
+                <$t>::is_power_of_two(*self)
+            }
+        }
+    )*)
+}
+
+unsigned_primitive_is_power_of_two_impl!(u8 u16 u32 u64 u128 usize);
+
+trait Unsigned {
+    type Output;
+}
+
+impl Unsigned for i8 {
+    type Output = u8;
+}
+
+impl Unsigned for i16 {
+    type Output = u8;
+}
+
+impl Unsigned for i32 {
+    type Output = u16;
+}
+
+impl Unsigned for i64 {
+    type Output = u32;
+}
+
+impl Unsigned for i128 {
+    type Output = u64;
+}
+
+impl Unsigned for isize {
+    type Output = usize;
+}
+
+impl Unsigned for u8 {
+    type Output = u8;
+}
+
+impl Unsigned for u16 {
+    type Output = u16;
+}
+
+impl Unsigned for u32 {
+    type Output = u32;
+}
+
+impl Unsigned for u64 {
+    type Output = u64;
+}
+
+impl Unsigned for u128 {
+    type Output = u128;
+}
+
+impl Unsigned for usize {
+    type Output = usize;
+}
+
+macro_rules! signed_primitive_is_power_of_two_impl {
+    ($($t:ty)*) => ($(
+        impl IsPowerOfTwo for $t {
+            #[inline(always)]
+            fn is_power_of_two(&self) -> bool {
+                <$t>::is_positive(*self) && (*self as <$t as Unsigned>::Output).is_power_of_two()
+            }
+        }
+    )*)
+}
+
+signed_primitive_is_power_of_two_impl!(i8 i16 i32 i64 i128 isize);
+
 pub trait LdExp<Exponent> {
     type Output;
 

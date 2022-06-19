@@ -437,7 +437,7 @@ impl PyInt {
     fn __rrshift__(&self, base: &PyAny) -> PyResult<PyObject> {
         let py = base.py();
         if base.is_instance(PyLong::type_object(py))? {
-            try_rshift(try_py_long_to_big_int(base)?, self.0.clone())
+            try_rshift(try_py_long_to_big_int(base)?, &self.0)
                 .map(|result| PyInt(result).into_py(py))
         } else {
             Ok(py.NotImplemented())
@@ -447,9 +447,7 @@ impl PyInt {
     fn __rshift__(&self, shift: &PyAny) -> PyResult<PyObject> {
         let py = shift.py();
         match try_py_any_to_maybe_big_int(shift)? {
-            Some(shift) => {
-                try_rshift(self.0.clone(), shift).map(|result| PyInt(result).into_py(py))
-            }
+            Some(shift) => try_rshift(&self.0, shift).map(|result| PyInt(result).into_py(py)),
             None => Ok(py.NotImplemented()),
         }
     }
@@ -657,7 +655,10 @@ fn try_pow_mod<
 }
 
 #[inline]
-fn try_rshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
+fn try_rshift<Base: CheckedShr<Shift, Output = Result<Value, big_int::ShrError>>, Shift, Value>(
+    base: Base,
+    shift: Shift,
+) -> PyResult<Value> {
     base.checked_shr(shift).map_err(|reason| match reason {
         big_int::ShrError::NegativeShift => PyValueError::new_err(reason.to_string()),
     })

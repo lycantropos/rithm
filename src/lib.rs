@@ -599,14 +599,14 @@ fn try_mod_to_near(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
             UNDEFINED_DIVISION_ERROR_MESSAGE,
         )),
     }?;
-    let double_remainder = remainder
-        .clone()
-        .checked_shl(BigInt::one())
-        .map_err(|reason| match reason {
-            big_int::ShlError::NegativeShift => PyValueError::new_err(reason.to_string()),
-            big_int::ShlError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
-            big_int::ShlError::TooLarge => PyOverflowError::new_err(reason.to_string()),
-        })?;
+    let double_remainder =
+        (&remainder)
+            .checked_shl(BigInt::one())
+            .map_err(|reason| match reason {
+                big_int::ShlError::NegativeShift => PyValueError::new_err(reason.to_string()),
+                big_int::ShlError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
+                big_int::ShlError::TooLarge => PyOverflowError::new_err(reason.to_string()),
+            })?;
     let greater_than_half = if divisor.is_positive() {
         &double_remainder > divisor
     } else {

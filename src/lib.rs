@@ -259,9 +259,7 @@ impl PyInt {
     fn __lshift__(&self, shift: &PyAny) -> PyResult<PyObject> {
         let py = shift.py();
         match try_py_any_to_maybe_big_int(shift)? {
-            Some(shift) => {
-                try_lshift(self.0.clone(), shift).map(|result| PyInt(result).into_py(py))
-            }
+            Some(shift) => try_lshift(&self.0, shift).map(|result| PyInt(result).into_py(py)),
             None => Ok(py.NotImplemented()),
         }
     }
@@ -367,7 +365,7 @@ impl PyInt {
     fn __rlshift__(&self, base: &PyAny) -> PyResult<PyObject> {
         let py = base.py();
         if base.is_instance(PyLong::type_object(py))? {
-            try_lshift(try_py_long_to_big_int(base)?, self.0.clone())
+            try_lshift(try_py_long_to_big_int(base)?, &self.0)
                 .map(|result| PyInt(result).into_py(py))
         } else {
             Ok(py.NotImplemented())
@@ -569,7 +567,10 @@ fn try_floordiv(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
 }
 
 #[inline]
-fn try_lshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
+fn try_lshift<Base: CheckedShl<Shift, Output = Result<Value, big_int::ShlError>>, Shift, Value>(
+    base: Base,
+    shift: Shift,
+) -> PyResult<Value> {
     base.checked_shl(shift).map_err(|reason| match reason {
         big_int::ShlError::NegativeShift => PyValueError::new_err(reason.to_string()),
         big_int::ShlError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),

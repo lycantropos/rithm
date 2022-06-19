@@ -18,7 +18,8 @@ use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 use crate::traits::{
     Abs, BitLength, Ceil, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,
     CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, Endianness, Floor, FromBytes,
-    FromStrRadix, Gcd, Parity, Round, Signed, TieBreaking, ToBytes, Trunc, Unitary, Zeroable,
+    FromStrRadix, Gcd, IsPowerOfTwo, Parity, Round, Signed, TieBreaking, ToBytes, Trunc, Unitary,
+    Zeroable,
 };
 
 pub mod big_int;
@@ -159,6 +160,10 @@ impl PyInt {
 
     fn bit_length(&self) -> PyInt {
         PyInt(self.0.bit_length())
+    }
+
+    fn is_power_of_two(&self) -> bool {
+        self.0.is_power_of_two()
     }
 
     #[pyo3(text_signature = "($self, other, /)")]

@@ -41,6 +41,9 @@ class Int:
     def gcd(self, other: 'Int') -> 'Int':
         ...
 
+    def is_power_of_two(self) -> bool:
+        ...
+
     def to_bytes(self, endianness: Endianness) -> bytes:
         ...
 

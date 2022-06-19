@@ -43,6 +43,9 @@ class Int:
     def gcd(self, other):
         return Int(_gcd(self._value, other._value))
 
+    def is_power_of_two(self):
+        return self._value > 0 and not (self._value & (self._value - 1))
+
     def to_bytes(self, endianness):
         return self._value.to_bytes(_to_bytes_count(self._value),
                                     endianness.value,

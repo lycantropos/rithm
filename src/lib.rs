@@ -216,7 +216,7 @@ impl PyInt {
     }
 
     fn __float__(&self) -> PyResult<PyObject> {
-        match f64::try_from(self.0.clone()) {
+        match f64::try_from(&self.0) {
             Ok(value) => Ok(Python::with_gil(|py| value.into_py(py))),
             Err(reason) => Err(PyOverflowError::new_err(reason.to_string())),
         }

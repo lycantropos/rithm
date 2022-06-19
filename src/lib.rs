@@ -306,7 +306,13 @@ impl PyInt {
                     Some(divisor) => try_pow_mod(&self.0, exponent, divisor, py),
                     None => Ok(py.NotImplemented()),
                 },
-                None => try_pow(&self.0, &exponent, py),
+                None => {
+                    if exponent.is_negative() {
+                        try_pow_negative_exponent(self.0.clone(), exponent, py)
+                    } else {
+                        Ok(PyInt(pow_non_negative_exponent(&self.0, &exponent)).into_py(py))
+                    }
+                }
             },
             None => Ok(py.NotImplemented()),
         }
@@ -430,7 +436,13 @@ impl PyInt {
                 Some(divisor) => try_pow_mod(base, &self.0, divisor, py),
                 None => Ok(py.NotImplemented()),
             },
-            None => try_pow(&base, &self.0, py),
+            None => {
+                if self.0.is_negative() {
+                    try_pow_negative_exponent(base, self.0.clone(), py)
+                } else {
+                    Ok(PyInt(pow_non_negative_exponent(&base, &self.0)).into_py(py))
+                }
+            }
         }
     }
 
@@ -621,18 +633,19 @@ fn try_mod_to_near(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
 }
 
 #[inline]
-fn try_pow(base: &BigInt, exponent: &BigInt, py: Python) -> PyResult<PyObject> {
-    if exponent.is_negative() {
-        match unsafe { Fraction::new(base.clone(), BigInt::one()).unwrap_unchecked() }
-            .checked_pow(exponent.clone())
-        {
-            Some(power) => Ok(PyFraction(power).into_py(py)),
-            None => Err(PyZeroDivisionError::new_err(
-                UNDEFINED_DIVISION_ERROR_MESSAGE,
-            )),
-        }
-    } else {
-        Ok(PyInt(unsafe { base.checked_pow(exponent).unwrap_unchecked() }).into_py(py))
+fn pow_non_negative_exponent(base: &BigInt, exponent: &BigInt) -> BigInt {
+    debug_assert!(!exponent.is_negative());
+    unsafe { base.checked_pow(exponent).unwrap_unchecked() }
+}
+
+#[inline]
+fn try_pow_negative_exponent(base: BigInt, exponent: BigInt, py: Python) -> PyResult<PyObject> {
+    debug_assert!(exponent.is_negative());
+    match Fraction::from(base).checked_pow(exponent) {
+        Some(power) => Ok(PyFraction(power).into_py(py)),
+        None => Err(PyZeroDivisionError::new_err(
+            UNDEFINED_DIVISION_ERROR_MESSAGE,
+        )),
     }
 }
 

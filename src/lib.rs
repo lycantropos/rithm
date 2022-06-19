@@ -158,7 +158,7 @@ impl PyInt {
     }
 
     fn bit_length(&self) -> PyInt {
-        PyInt(self.0.clone().bit_length())
+        PyInt(self.0.bit_length())
     }
 
     #[pyo3(text_signature = "($self, other, /)")]

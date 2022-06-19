@@ -41,6 +41,7 @@ mod from_bytes;
 mod from_str_radix;
 mod gcd;
 mod hash;
+mod is_power_of_two;
 mod mul;
 mod mul_assign;
 mod neg;

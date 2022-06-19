@@ -269,9 +269,7 @@ impl PyInt {
     fn __mod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
         match try_py_any_to_maybe_big_int(divisor)? {
-            Some(divisor) => {
-                try_mod(self.0.clone(), divisor).map(|result| PyInt(result).into_py(py))
-            }
+            Some(divisor) => try_mod(&self.0, divisor).map(|result| PyInt(result).into_py(py)),
             None => Ok(py.NotImplemented()),
         }
     }
@@ -379,7 +377,7 @@ impl PyInt {
     fn __rmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
         let py = dividend.py();
         if dividend.is_instance(PyLong::type_object(py))? {
-            try_mod(try_py_long_to_big_int(dividend)?, self.0.clone())
+            try_mod(try_py_long_to_big_int(dividend)?, &self.0)
                 .map(|result| PyInt(result).into_py(py))
         } else {
             Ok(py.NotImplemented())
@@ -580,7 +578,10 @@ fn try_lshift(base: BigInt, shift: BigInt) -> PyResult<BigInt> {
 }
 
 #[inline]
-fn try_mod(dividend: BigInt, divisor: BigInt) -> PyResult<BigInt> {
+fn try_mod<Dividend: CheckedRemEuclid<Divisor, Output = Option<Value>>, Divisor, Value>(
+    dividend: Dividend,
+    divisor: Divisor,
+) -> PyResult<Value> {
     match dividend.checked_rem_euclid(divisor) {
         Some(result) => Ok(result),
         None => Err(PyZeroDivisionError::new_err(

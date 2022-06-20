@@ -1,5 +1,19 @@
+use crate::traits::{Unitary, Zeroable};
+
 use super::digits::{non_zero_value_to_digits, non_zero_value_to_sign, ConstructibleFrom};
 use super::types::BigInt;
+
+impl<Digit: Unitary + Zeroable, const SEPARATOR: char, const SHIFT: usize> From<bool>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
+    fn from(value: bool) -> Self {
+        if value {
+            Self::one()
+        } else {
+            Self::zero()
+        }
+    }
+}
 
 macro_rules! primitive_partial_eq_to_big_int_impl {
     ($($t:ty)*) => ($(

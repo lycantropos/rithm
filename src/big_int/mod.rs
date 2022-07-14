@@ -1,7 +1,13 @@
-pub(crate) use self::constants::*;
-pub use self::contracts::*;
-pub(crate) use self::digits::*;
-pub use self::types::*;
+pub(crate) use self::constants::{
+    MAX_REPRESENTABLE_BASE, MIN_REPRESENTABLE_BASE,
+};
+pub use self::contracts::is_valid_shift;
+pub(crate) use self::digits::{
+    AdditiveDigit, DigitConvertibleFromF64, DivisibleDigit,
+    EuclidDivisibleDigit, GcdDigit, MultiplicativeDigit, ShiftableLeftDigit,
+};
+pub use self::types::BigInt;
+pub(crate) use self::types::{ShlError, ShrError, TryFromFloatError};
 
 mod abs;
 mod add;

@@ -1,4 +1,5 @@
-pub use types::*;
+pub use types::Fraction;
+pub(crate) use types::FromFloatConversionError;
 
 mod abs;
 mod add;

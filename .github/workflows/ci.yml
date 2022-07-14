@@ -157,6 +157,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           default: true
+          profile: minimal
           toolchain: nightly
       - name: 'Upload'
         run: cargo publish --no-verify

@@ -24,6 +24,10 @@ jobs:
           },
           {
             os: 'ubuntu-latest',
+            rust_target: 'i686-unknown-linux-gnu',
+          },
+          {
+            os: 'ubuntu-latest',
             python_architecture: 'x64',
             rust_target: 'x86_64-unknown-linux-gnu'
           },

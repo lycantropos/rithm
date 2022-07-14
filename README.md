@@ -195,7 +195,6 @@ use traiter::numbers::{
     Abs, DivEuclid, FromStrRadix, Pow, RemEuclid, Zeroable
 };
 use rithm::big_int;
-use rithm::traits::{CheckedDivAsF32, CheckedDivAsF64};
 
 #[cfg(target_arch = "x86")]
 type Digit = u16;
@@ -228,9 +227,6 @@ assert_eq!(BigInt::from(4) + BigInt::from(5), 9);
 assert_eq!(BigInt::from(9) & BigInt::from(11), 9);
 assert_eq!(BigInt::from(1) | BigInt::from(8), 9);
 assert_eq!(BigInt::from(2) ^ BigInt::from(11), 9);
-#[cfg(target_arch = "x86")] // not supported by `u32` digits because conversion to `f32` is lossy
-assert_eq!(BigInt::from(18).checked_div_as_f32(BigInt::from(2)), Ok(9.0));
-assert_eq!(BigInt::from(18).checked_div_as_f64(BigInt::from(2)), Ok(9.0));
 assert_eq!(BigInt::from(19) / BigInt::from(2), 9);
 assert_eq!(BigInt::from(19).div_euclid(BigInt::from(2)), 9);
 assert_eq!(BigInt::from(3) * BigInt::from(3), 9);

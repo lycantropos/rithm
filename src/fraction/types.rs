@@ -8,13 +8,20 @@ pub struct Fraction<Component: Clone> {
     pub(super) denominator: Component,
 }
 
-impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed> Fraction<Component> {
-    pub fn new(mut numerator: Component, mut denominator: Component) -> Option<Self> {
+impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed>
+    Fraction<Component>
+{
+    pub fn new(
+        mut numerator: Component,
+        mut denominator: Component,
+    ) -> Option<Self> {
         if denominator.is_zero() {
             None
         } else {
-            (numerator, denominator) = normalize_components_sign(numerator, denominator);
-            (numerator, denominator) = normalize_components_moduli(numerator, denominator);
+            (numerator, denominator) =
+                normalize_components_sign(numerator, denominator);
+            (numerator, denominator) =
+                normalize_components_moduli(numerator, denominator);
             Some(Self {
                 numerator,
                 denominator,
@@ -34,7 +41,9 @@ impl<Component: Clone> Fraction<Component> {
 }
 
 #[inline]
-pub(super) fn normalize_components_moduli<Component: Clone + DivisivePartialMagma + GcdMagma>(
+pub(super) fn normalize_components_moduli<
+    Component: Clone + DivisivePartialMagma + GcdMagma,
+>(
     numerator: Component,
     denominator: Component,
 ) -> (Component, Component) {
@@ -64,7 +73,9 @@ pub enum FromFloatConversionError {
 impl FromFloatConversionError {
     fn description(&self) -> &str {
         match self {
-            FromFloatConversionError::Infinity => "Conversion of infinity is undefined.",
+            FromFloatConversionError::Infinity => {
+                "Conversion of infinity is undefined."
+            }
             FromFloatConversionError::NaN => "Conversion of NaN is undefined.",
             FromFloatConversionError::OutOfBounds => "Value is out of bounds.",
         }

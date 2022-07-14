@@ -20,7 +20,8 @@ impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd<&Self>
     type Output = Self;
 
     fn gcd(self, other: &Self) -> Self::Output {
-        let (sign, digits) = to_gcd::<Digit, SHIFT>(self.digits, other.digits.clone());
+        let (sign, digits) =
+            to_gcd::<Digit, SHIFT>(self.digits, other.digits.clone());
         Self::Output { sign, digits }
     }
 }
@@ -31,7 +32,8 @@ impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize>
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
     fn gcd(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        let (sign, digits) = to_gcd::<Digit, SHIFT>(self.digits.clone(), other.digits);
+        let (sign, digits) =
+            to_gcd::<Digit, SHIFT>(self.digits.clone(), other.digits);
         Self::Output { sign, digits }
     }
 }
@@ -42,7 +44,8 @@ impl<Digit: GcdDigit, const SEPARATOR: char, const SHIFT: usize> Gcd
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
     fn gcd(self, other: Self) -> Self::Output {
-        let (sign, digits) = to_gcd::<Digit, SHIFT>(self.digits.clone(), other.digits.clone());
+        let (sign, digits) =
+            to_gcd::<Digit, SHIFT>(self.digits.clone(), other.digits.clone());
         Self::Output { sign, digits }
     }
 }

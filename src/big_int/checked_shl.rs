@@ -2,11 +2,13 @@ use std::mem::size_of;
 
 use crate::traits::{CheckedShl, DivRem, Signed, Zeroable};
 
-use super::digits::{primitive_shift_digits_left, shift_digits_left, ShiftableLeftDigit};
+use super::digits::{
+    primitive_shift_digits_left, shift_digits_left, ShiftableLeftDigit,
+};
 use super::types::{BigInt, ShlError};
 
-impl<Digit: ShiftableLeftDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShl
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: ShiftableLeftDigit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedShl for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<Self, ShlError>;
 
@@ -18,14 +20,17 @@ impl<Digit: ShiftableLeftDigit, const SEPARATOR: char, const SHIFT: usize> Check
         } else {
             Ok(Self {
                 sign: self.sign,
-                digits: shift_digits_left::<Digit, SHIFT>(&self.digits, &shift.digits)?,
+                digits: shift_digits_left::<Digit, SHIFT>(
+                    &self.digits,
+                    &shift.digits,
+                )?,
             })
         }
     }
 }
 
-impl<Digit: ShiftableLeftDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShl<&Self>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: ShiftableLeftDigit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedShl<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<Self, ShlError>;
 
@@ -37,18 +42,25 @@ impl<Digit: ShiftableLeftDigit, const SEPARATOR: char, const SHIFT: usize> Check
         } else {
             Ok(Self {
                 sign: self.sign,
-                digits: shift_digits_left::<Digit, SHIFT>(&self.digits, &shift.digits)?,
+                digits: shift_digits_left::<Digit, SHIFT>(
+                    &self.digits,
+                    &shift.digits,
+                )?,
             })
         }
     }
 }
 
 impl<Digit: ShiftableLeftDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedShl<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+    CheckedShl<BigInt<Digit, SEPARATOR, SHIFT>>
+    for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShlError>;
 
-    fn checked_shl(self, shift: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn checked_shl(
+        self,
+        shift: BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
         if shift.is_negative() {
             Err(ShlError::NegativeShift)
         } else if self.is_zero() {
@@ -56,14 +68,17 @@ impl<Digit: ShiftableLeftDigit, const SEPARATOR: char, const SHIFT: usize>
         } else {
             Ok(BigInt::<Digit, SEPARATOR, SHIFT> {
                 sign: self.sign,
-                digits: shift_digits_left::<Digit, SHIFT>(&self.digits, &shift.digits)?,
+                digits: shift_digits_left::<Digit, SHIFT>(
+                    &self.digits,
+                    &shift.digits,
+                )?,
             })
         }
     }
 }
 
-impl<Digit: ShiftableLeftDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShl
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: ShiftableLeftDigit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedShl for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShlError>;
 
@@ -75,7 +90,10 @@ impl<Digit: ShiftableLeftDigit, const SEPARATOR: char, const SHIFT: usize> Check
         } else {
             Ok(BigInt::<Digit, SEPARATOR, SHIFT> {
                 sign: self.sign,
-                digits: shift_digits_left::<Digit, SHIFT>(&self.digits, &shift.digits)?,
+                digits: shift_digits_left::<Digit, SHIFT>(
+                    &self.digits,
+                    &shift.digits,
+                )?,
             })
         }
     }

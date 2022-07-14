@@ -3,8 +3,9 @@ use std::fmt::Debug;
 use std::mem;
 use std::num::ParseIntError;
 use std::ops::{
-    Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Div, DivAssign,
-    Mul, MulAssign, Neg, Not, Rem, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign,
+    Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor,
+    BitXorAssign, Div, DivAssign, Mul, MulAssign, Neg, Not, Rem, Shl,
+    ShlAssign, Shr, ShrAssign, Sub, SubAssign,
 };
 
 pub trait AdditiveMonoid = Add<Self, Output = Self> + Sized + Zeroable;
@@ -13,30 +14,40 @@ pub trait AdditiveGroup = AdditiveMonoid + SubtractiveMagma;
 
 pub trait AssigningAdditiveMonoid = AdditiveMonoid + AddAssign<Self>;
 
-pub trait AssigningAdditiveGroup = AssigningAdditiveMonoid + AssigningSubtractiveMagma;
+pub trait AssigningAdditiveGroup =
+    AssigningAdditiveMonoid + AssigningSubtractiveMagma;
 
-pub trait AssigningBitwiseConjunctiveMagma = BitwiseConjunctiveMagma + BitAndAssign<Self>;
+pub trait AssigningBitwiseConjunctiveMagma =
+    BitwiseConjunctiveMagma + BitAndAssign<Self>;
 
-pub trait AssigningBitwiseDisjunctiveMonoid = BitwiseDisjunctiveMonoid + BitOrAssign<Self>;
+pub trait AssigningBitwiseDisjunctiveMonoid =
+    BitwiseDisjunctiveMonoid + BitOrAssign<Self>;
 
 pub trait AssigningBitwiseExclusiveDisjunctiveMonoid =
     BitwiseExclusiveDisjunctiveMonoid + BitXorAssign<Self>;
 
-pub trait AssigningDivisivePartialMagma = DivisivePartialMagma + DivAssign<Self>;
+pub trait AssigningDivisivePartialMagma =
+    DivisivePartialMagma + DivAssign<Self>;
 
-pub trait AssigningMultiplicativeMonoid = MultiplicativeMonoid + MulAssign<Self>;
+pub trait AssigningMultiplicativeMonoid =
+    MultiplicativeMonoid + MulAssign<Self>;
 
-pub trait AssigningShiftableLeftBy<Shift = Self> = ShiftableLeftBy<Shift> + ShlAssign<Shift>;
+pub trait AssigningShiftableLeftBy<Shift = Self> =
+    ShiftableLeftBy<Shift> + ShlAssign<Shift>;
 
-pub trait AssigningShiftableRightBy<Shift = Self> = ShiftableRightBy<Shift> + ShrAssign<Shift>;
+pub trait AssigningShiftableRightBy<Shift = Self> =
+    ShiftableRightBy<Shift> + ShrAssign<Shift>;
 
 pub trait AssigningSubtractiveMagma = SubtractiveMagma + SubAssign<Self>;
 
-pub trait BitwiseConjunctiveMagma = BitAnd<Self, Output = Self> + Sized + Zeroable;
+pub trait BitwiseConjunctiveMagma =
+    BitAnd<Self, Output = Self> + Sized + Zeroable;
 
-pub trait BitwiseDisjunctiveMonoid = BitOr<Self, Output = Self> + Sized + Zeroable;
+pub trait BitwiseDisjunctiveMonoid =
+    BitOr<Self, Output = Self> + Sized + Zeroable;
 
-pub trait BitwiseExclusiveDisjunctiveMonoid = BitXor<Self, Output = Self> + Sized + Zeroable;
+pub trait BitwiseExclusiveDisjunctiveMonoid =
+    BitXor<Self, Output = Self> + Sized + Zeroable;
 
 pub trait BitwiseNegatableUnaryAlgebra = Not<Output = Self>;
 
@@ -374,7 +385,11 @@ primitive_checked_pow_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize)
 pub trait CheckedPowRemEuclid<Exponent, Divisor> {
     type Output;
 
-    fn checked_pow_rem_euclid(self, exponent: Exponent, divisor: Divisor) -> Self::Output;
+    fn checked_pow_rem_euclid(
+        self,
+        exponent: Exponent,
+        divisor: Divisor,
+    ) -> Self::Output;
 }
 
 macro_rules! primitive_signed_checked_pow_rem_euclid_impl {
@@ -1145,7 +1160,9 @@ impl<T: Debug> Maybe for Option<T> {
     #[inline(always)]
     fn error(self) -> Self::Error {
         match self {
-            Some(value) => panic!("called `Option::error()` on `Some{:?}` value", value),
+            Some(value) => {
+                panic!("called `Option::error()` on `Some{:?}` value", value)
+            }
             None => None,
         }
     }

@@ -3,12 +3,16 @@ use std::cmp::Ordering;
 use crate::traits::{Signed, Zeroable};
 
 use super::digits::{
-    digits_lesser_than, non_zero_value_to_digits, value_to_sign, ConstructibleFrom,
+    digits_lesser_than, non_zero_value_to_digits, value_to_sign,
+    ConstructibleFrom,
 };
 use super::types::{BigInt, Sign};
 
-impl<Digit: Clone + PartialOrd + Zeroable, const SEPARATOR: char, const SHIFT: usize> PartialOrd
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: Clone + PartialOrd + Zeroable,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > PartialOrd for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn ge(&self, other: &Self) -> bool {
         self.sign > other.sign

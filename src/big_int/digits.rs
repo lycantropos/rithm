@@ -4,11 +4,13 @@ use std::fmt::{Debug, Display};
 use std::mem::size_of;
 
 use crate::traits::{
-    AssigningAdditiveGroup, AssigningAdditiveMonoid, AssigningBitwiseConjunctiveMagma,
-    AssigningBitwiseDisjunctiveMonoid, AssigningBitwiseExclusiveDisjunctiveMonoid,
-    AssigningDivisivePartialMagma, AssigningMultiplicativeMonoid, AssigningShiftableLeftBy,
-    AssigningShiftableRightBy, AssigningSubtractiveMagma, BitLength, BitwiseNegatableUnaryAlgebra,
-    CheckedShl, DoublePrecision, DoublePrecisionOf, Float, Gcd, ModularPartialMagma,
+    AssigningAdditiveGroup, AssigningAdditiveMonoid,
+    AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
+    AssigningBitwiseExclusiveDisjunctiveMonoid, AssigningDivisivePartialMagma,
+    AssigningMultiplicativeMonoid, AssigningShiftableLeftBy,
+    AssigningShiftableRightBy, AssigningSubtractiveMagma, BitLength,
+    BitwiseNegatableUnaryAlgebra, CheckedShl, DoublePrecision,
+    DoublePrecisionOf, Float, Gcd, ModularPartialMagma,
     ModularSubtractiveMagma, Oppose, OppositionOf, Signed, Unitary, Zeroable,
 };
 
@@ -22,28 +24,31 @@ pub trait AdditiveDigit = AssigningAdditiveMonoid
     + ModularSubtractiveMagma
     + PartialOrd;
 
-pub trait BinaryDigitConvertibleTo<Target> =
-    BinaryDigitConvertibleToBinary<Target> + BinaryDigitConvertibleToNonBinary<Target>;
+pub trait BinaryDigitConvertibleTo<Target> = BinaryDigitConvertibleToBinary<Target>
+    + BinaryDigitConvertibleToNonBinary<Target>;
 
-pub trait BinaryDigitConvertibleToBinary<Target> =
-    BinaryDigitDowncastableTo<Target> + BinaryDigitUpcastableTo<Target> where Target: TryFrom<Self>;
+pub trait BinaryDigitConvertibleToBinary<Target> = BinaryDigitDowncastableTo<Target>
+    + BinaryDigitUpcastableTo<Target>
+where Target: TryFrom<Self>;
 
-pub trait BinaryDigitConvertibleToFloat<Target> = AssigningBitwiseConjunctiveMagma
-    + AssigningBitwiseDisjunctiveMonoid
-    + BitLength<Output = usize>
-    + Oppose
-    + From<u8>
-    + ShiftableInPlaceDigit
-    + TryFrom<OppositionOf<Self>>
-    + Unitary
-where
-    OppositionOf<Self>: AssigningAdditiveMonoid + From<i8> + TryFrom<Self>,
-    Target: From<Self>,
-    usize: TryFrom<Self>;
+pub trait BinaryDigitConvertibleToFloat<Target> =
+    AssigningBitwiseConjunctiveMagma
+        + AssigningBitwiseDisjunctiveMonoid
+        + BitLength<Output = usize>
+        + Oppose
+        + From<u8>
+        + ShiftableInPlaceDigit
+        + TryFrom<OppositionOf<Self>>
+        + Unitary
+    where
+        OppositionOf<Self>: AssigningAdditiveMonoid + From<i8> + TryFrom<Self>,
+        Target: From<Self>,
+        usize: TryFrom<Self>;
 
 pub trait BinaryDigitConvertibleToNonBinary<Target> = Copy
 where
-    Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
+    Target:
+        Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
     DoublePrecisionOf<Target>: AssigningDivisivePartialMagma
         + AssigningBitwiseDisjunctiveMonoid
         + AssigningMultiplicativeMonoid
@@ -55,14 +60,15 @@ where
         + ModularPartialMagma
         + TryFrom<usize>;
 
-pub trait BinaryDigitDowncastableTo<Target> = Copy + BitLength<Output = usize> + DoublePrecision
-where
-    Target: TryFrom<DoublePrecisionOf<Self>>,
-    DoublePrecisionOf<Self>: AssigningBitwiseConjunctiveMagma
-        + AssigningBitwiseDisjunctiveMonoid
-        + AssigningShiftableRightBy<usize>
-        + Copy
-        + MaskableDigit;
+pub trait BinaryDigitDowncastableTo<Target> =
+    Copy + BitLength<Output = usize> + DoublePrecision
+    where
+        Target: TryFrom<DoublePrecisionOf<Self>>,
+        DoublePrecisionOf<Self>: AssigningBitwiseConjunctiveMagma
+            + AssigningBitwiseDisjunctiveMonoid
+            + AssigningShiftableRightBy<usize>
+            + Copy
+            + MaskableDigit;
 
 pub trait BinaryDigitUpcastableTo<Target> = Copy
 where
@@ -76,7 +82,8 @@ where
 
 pub trait BitwiseConjunctiveDigit = ComplementableDigit;
 
-pub trait BitwiseDisjunctiveDigit = AssigningBitwiseDisjunctiveMonoid + ComplementableDigit;
+pub trait BitwiseDisjunctiveDigit =
+    AssigningBitwiseDisjunctiveMonoid + ComplementableDigit;
 
 pub trait BitwiseExclusiveDisjunctiveDigit = ComplementableDigit;
 
@@ -102,7 +109,8 @@ where
         + TryFrom<OppositionOf<Source>>,
     OppositionOf<Source>: TryFrom<Source>;
 
-pub trait DigitConvertibleFromF64 = Copy + Zeroable where f64: FloatToInt<Self> + From<Self>;
+pub trait DigitConvertibleFromF64 =
+    Copy + Zeroable where f64: FloatToInt<Self> + From<Self>;
 
 pub trait DisplayableDigit = AssigningDivisivePartialMagma
     + BinaryDigitConvertibleTo<Self>
@@ -126,8 +134,10 @@ pub trait DivisibleDigit = AssigningAdditiveMonoid
     + ShiftableInPlaceDigit
     + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>
 where
-    DoublePrecisionOf<Self>:
-        AssigningMultiplicativeMonoid + AssigningDivisivePartialMagma + Oppose + PartialOrd,
+    DoublePrecisionOf<Self>: AssigningMultiplicativeMonoid
+        + AssigningDivisivePartialMagma
+        + Oppose
+        + PartialOrd,
     OppositionOf<Self>: AssigningAdditiveMonoid
         + Copy
         + PartialOrd
@@ -146,8 +156,10 @@ pub trait EuclidDivisibleDigit = AdditiveDigit + DivisibleDigit;
 pub trait ExponentiativeDigit =
     MultiplicativeDigit + From<u8> + BinaryDigitDowncastableTo<WindowDigit>;
 
-pub trait FromStrDigit =
-    Oppose where u8: BinaryDigitConvertibleToBinary<Self> + NonBinaryDigitConvertibleToBinary<Self>;
+pub trait FromStrDigit = Oppose
+where
+    u8: BinaryDigitConvertibleToBinary<Self>
+        + NonBinaryDigitConvertibleToBinary<Self>;
 
 pub trait GcdDigit = DivisibleDigit + ModularSubtractiveMagma
 where
@@ -176,19 +188,22 @@ where
 
 pub trait ModularInvertibleDigit = EuclidDivisibleDigit + MultiplicativeDigit;
 
-pub trait MultiplicativeDigit =
-    AdditiveDigit + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + TryFrom<usize>
-    where
-        DoublePrecisionOf<Self>: AssigningAdditiveMonoid
-            + AssigningBitwiseConjunctiveMagma
-            + AssigningMultiplicativeMonoid
-            + AssigningShiftableRightBy<usize>
-            + Copy
-            + MaskableDigit;
+pub trait MultiplicativeDigit = AdditiveDigit
+    + DoublePrecision
+    + TryFrom<DoublePrecisionOf<Self>>
+    + TryFrom<usize>
+where
+    DoublePrecisionOf<Self>: AssigningAdditiveMonoid
+        + AssigningBitwiseConjunctiveMagma
+        + AssigningMultiplicativeMonoid
+        + AssigningShiftableRightBy<usize>
+        + Copy
+        + MaskableDigit;
 
 pub trait NonBinaryDigitConvertibleToBinary<Target> = Copy
 where
-    Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
+    Target:
+        Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
     DoublePrecisionOf<Target>: AssigningAdditiveMonoid
         + AssigningBitwiseConjunctiveMagma
         + AssigningMultiplicativeMonoid
@@ -203,15 +218,18 @@ pub trait ParitiableDigit = AssigningBitwiseConjunctiveMagma + Copy + Unitary;
 
 pub(super) trait ReducibleTo<Target> = Copy
 where
-    Target:
-        AssigningBitwiseDisjunctiveMonoid + AssigningShiftableLeftBy<usize> + From<Self> + Zeroable;
+    Target: AssigningBitwiseDisjunctiveMonoid
+        + AssigningShiftableLeftBy<usize>
+        + From<Self>
+        + Zeroable;
 
 pub trait ShiftableInPlaceDigit =
     Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + Zeroable
     where DoublePrecisionOf<Self>: BitwiseDisjunctiveDigit;
 
-pub trait ShiftableLeftDigit = Debug + DivisibleDigit + MaybeReducibleTo<usize> + TryFrom<usize>
-where DoublePrecisionOf<Self>: AssigningShiftableLeftBy<Self>;
+pub trait ShiftableLeftDigit =
+    Debug + DivisibleDigit + MaybeReducibleTo<usize> + TryFrom<usize>
+    where DoublePrecisionOf<Self>: AssigningShiftableLeftBy<Self>;
 
 pub trait ShiftableRightDigit = AssigningBitwiseDisjunctiveMonoid
     + AssigningBitwiseExclusiveDisjunctiveMonoid
@@ -221,7 +239,8 @@ pub trait ShiftableRightDigit = AssigningBitwiseDisjunctiveMonoid
     + InvertibleDigit
     + MaybeReducibleTo<usize>
     + TryFrom<usize>
-where DoublePrecisionOf<Self>: AssigningShiftableLeftBy<Self>;
+where
+    DoublePrecisionOf<Self>: AssigningShiftableLeftBy<Self>;
 
 pub(super) fn binary_digits_to_base<
     SourceDigit: BinaryDigitConvertibleTo<TargetDigit>,
@@ -232,14 +251,19 @@ pub(super) fn binary_digits_to_base<
     target_base: usize,
 ) -> Vec<TargetDigit> {
     if target_base & (target_base - 1) == 0 {
-        binary_digits_to_binary_base(source, source_shift, floor_log2::<usize>(target_base))
+        binary_digits_to_binary_base(
+            source,
+            source_shift,
+            floor_log2::<usize>(target_base),
+        )
     } else {
         binary_digits_to_non_binary_base(source, source_shift, target_base)
     }
 }
 
 pub(super) fn digits_to_binary_base<
-    SourceDigit: BinaryDigitConvertibleToBinary<TargetDigit> + NonBinaryDigitConvertibleToBinary<TargetDigit>,
+    SourceDigit: BinaryDigitConvertibleToBinary<TargetDigit>
+        + NonBinaryDigitConvertibleToBinary<TargetDigit>,
     TargetDigit,
     const TARGET_SHIFT: usize,
 >(
@@ -253,15 +277,17 @@ pub(super) fn digits_to_binary_base<
             TARGET_SHIFT,
         )
     } else if source_base < (1 << TARGET_SHIFT) {
-        non_binary_digits_to_greater_binary_base::<SourceDigit, TargetDigit, TARGET_SHIFT>(
-            source,
-            source_base,
-        )
+        non_binary_digits_to_greater_binary_base::<
+            SourceDigit,
+            TargetDigit,
+            TARGET_SHIFT,
+        >(source, source_base)
     } else {
-        non_binary_digits_to_lesser_binary_base::<SourceDigit, TargetDigit, TARGET_SHIFT>(
-            source,
-            source_base,
-        )
+        non_binary_digits_to_lesser_binary_base::<
+            SourceDigit,
+            TargetDigit,
+            TARGET_SHIFT,
+        >(source, source_base)
     }
 }
 
@@ -276,18 +302,18 @@ pub(super) fn binary_digits_to_binary_base<
     match target_shift.cmp(&source_shift) {
         Ordering::Equal => source
             .iter()
-            .map(|&digit| unsafe { TargetDigit::try_from(digit).unwrap_unchecked() })
+            .map(|&digit| unsafe {
+                TargetDigit::try_from(digit).unwrap_unchecked()
+            })
             .collect(),
-        Ordering::Greater => binary_digits_to_greater_binary_base::<SourceDigit, TargetDigit>(
-            source,
-            source_shift,
-            target_shift,
-        ),
-        Ordering::Less => binary_digits_to_lesser_binary_base::<SourceDigit, TargetDigit>(
-            source,
-            source_shift,
-            target_shift,
-        ),
+        Ordering::Greater => binary_digits_to_greater_binary_base::<
+            SourceDigit,
+            TargetDigit,
+        >(source, source_shift, target_shift),
+        Ordering::Less => binary_digits_to_lesser_binary_base::<
+            SourceDigit,
+            TargetDigit,
+        >(source, source_shift, target_shift),
     }
 }
 
@@ -299,26 +325,33 @@ fn binary_digits_to_non_binary_base<
     source_shift: usize,
     target_base: usize,
 ) -> Vec<TargetDigit> {
-    let result_max_digits_count: usize =
-        1 + ((((source.len() * source_shift) as f64) / (target_base as f64).log2()) as usize);
-    let mut result = Vec::<TargetDigit>::with_capacity(result_max_digits_count);
-    let target_base =
-        unsafe { DoublePrecisionOf::<TargetDigit>::try_from(target_base).unwrap_unchecked() };
+    let result_max_digits_count: usize = 1
+        + ((((source.len() * source_shift) as f64)
+            / (target_base as f64).log2()) as usize);
+    let mut result =
+        Vec::<TargetDigit>::with_capacity(result_max_digits_count);
+    let target_base = unsafe {
+        DoublePrecisionOf::<TargetDigit>::try_from(target_base)
+            .unwrap_unchecked()
+    };
     for digit in source.iter().rev() {
         let mut accumulator: DoublePrecisionOf<TargetDigit> =
             DoublePrecisionOf::<TargetDigit>::from(*digit);
         for result_position in result.iter_mut() {
             let step: DoublePrecisionOf<TargetDigit> =
-                (DoublePrecisionOf::<TargetDigit>::from(*result_position) << source_shift)
+                (DoublePrecisionOf::<TargetDigit>::from(*result_position)
+                    << source_shift)
                     | accumulator;
             accumulator = step / target_base;
             *result_position = unsafe {
-                TargetDigit::try_from(step - accumulator * target_base).unwrap_unchecked()
+                TargetDigit::try_from(step - accumulator * target_base)
+                    .unwrap_unchecked()
             };
         }
         while !accumulator.is_zero() {
             result.push(unsafe {
-                TargetDigit::try_from(accumulator.rem_euclid(target_base)).unwrap_unchecked()
+                TargetDigit::try_from(accumulator.rem_euclid(target_base))
+                    .unwrap_unchecked()
             });
             accumulator /= target_base;
         }
@@ -338,18 +371,22 @@ fn binary_digits_to_greater_binary_base<
     target_shift: usize,
 ) -> Vec<TargetDigit> {
     debug_assert!(target_shift > source_shift && source_shift > 0);
-    let target_digit_mask = to_digit_mask::<DoublePrecisionOf<TargetDigit>>(target_shift);
-    let result_capacity: usize = (source.len() * target_shift + (target_shift - 1)) / target_shift;
+    let target_digit_mask =
+        to_digit_mask::<DoublePrecisionOf<TargetDigit>>(target_shift);
+    let result_capacity: usize =
+        (source.len() * target_shift + (target_shift - 1)) / target_shift;
     let mut result = Vec::<TargetDigit>::with_capacity(result_capacity);
     let mut accumulator = DoublePrecisionOf::<TargetDigit>::zero();
     let mut accumulator_bits_count: usize = 0;
     for digit in source {
-        accumulator |= DoublePrecisionOf::<TargetDigit>::from(*digit) << accumulator_bits_count;
+        accumulator |= DoublePrecisionOf::<TargetDigit>::from(*digit)
+            << accumulator_bits_count;
         accumulator_bits_count += source_shift;
         if accumulator_bits_count >= target_shift {
             unsafe {
                 result.push(
-                    TargetDigit::try_from(accumulator & target_digit_mask).unwrap_unchecked(),
+                    TargetDigit::try_from(accumulator & target_digit_mask)
+                        .unwrap_unchecked(),
                 );
             }
             accumulator >>= target_shift;
@@ -373,17 +410,20 @@ pub(super) fn binary_digits_to_lesser_binary_base<
     target_shift: usize,
 ) -> Vec<TargetDigit> {
     debug_assert!(source_shift > target_shift && target_shift > 0);
-    let target_digit_mask = to_digit_mask::<DoublePrecisionOf<SourceDigit>>(target_shift);
-    let digits_bits_count: usize =
-        (source.len() - 1) * source_shift + source[source.len() - 1].bit_length();
-    let digits_count: usize = (digits_bits_count + (target_shift - 1)) / target_shift;
+    let target_digit_mask =
+        to_digit_mask::<DoublePrecisionOf<SourceDigit>>(target_shift);
+    let digits_bits_count: usize = (source.len() - 1) * source_shift
+        + source[source.len() - 1].bit_length();
+    let digits_count: usize =
+        (digits_bits_count + (target_shift - 1)) / target_shift;
     let mut result = Vec::<TargetDigit>::with_capacity(digits_count);
     let mut accumulator = DoublePrecisionOf::<SourceDigit>::from(source[0]);
     let mut accumulator_bits_count = source_shift;
     for &digit in source.iter().skip(1usize) {
         loop {
             result.push(unsafe {
-                TargetDigit::try_from(accumulator & target_digit_mask).unwrap_unchecked()
+                TargetDigit::try_from(accumulator & target_digit_mask)
+                    .unwrap_unchecked()
             });
             accumulator >>= target_shift;
             accumulator_bits_count -= target_shift;
@@ -391,12 +431,14 @@ pub(super) fn binary_digits_to_lesser_binary_base<
                 break;
             }
         }
-        accumulator |= DoublePrecisionOf::<SourceDigit>::from(digit) << accumulator_bits_count;
+        accumulator |= DoublePrecisionOf::<SourceDigit>::from(digit)
+            << accumulator_bits_count;
         accumulator_bits_count += source_shift;
     }
     loop {
         result.push(unsafe {
-            TargetDigit::try_from(accumulator & target_digit_mask).unwrap_unchecked()
+            TargetDigit::try_from(accumulator & target_digit_mask)
+                .unwrap_unchecked()
         });
         accumulator >>= target_shift;
         if accumulator.is_zero() {
@@ -406,17 +448,21 @@ pub(super) fn binary_digits_to_lesser_binary_base<
     result
 }
 
-pub(super) fn bitwise_and_components<Digit: BitwiseConjunctiveDigit, const SHIFT: usize>(
+pub(super) fn bitwise_and_components<
+    Digit: BitwiseConjunctiveDigit,
+    const SHIFT: usize,
+>(
     first_sign: Sign,
     first: Vec<Digit>,
     second_sign: Sign,
     second: Vec<Digit>,
 ) -> (Sign, Vec<Digit>) {
-    let (longest_sign, mut longest, shortest_sign, mut shortest) = if first.len() < second.len() {
-        (second_sign, second, first_sign, first)
-    } else {
-        (first_sign, first, second_sign, second)
-    };
+    let (longest_sign, mut longest, shortest_sign, mut shortest) =
+        if first.len() < second.len() {
+            (second_sign, second, first_sign, first)
+        } else {
+            (first_sign, first, second_sign, second)
+        };
     if longest_sign.is_negative() {
         complement_in_place::<Digit, SHIFT>(&mut longest);
     };
@@ -440,17 +486,21 @@ pub(super) fn bitwise_and_components<Digit: BitwiseConjunctiveDigit, const SHIFT
     (sign, result)
 }
 
-pub(super) fn bitwise_or_components<Digit: BitwiseDisjunctiveDigit, const SHIFT: usize>(
+pub(super) fn bitwise_or_components<
+    Digit: BitwiseDisjunctiveDigit,
+    const SHIFT: usize,
+>(
     first_sign: Sign,
     first: Vec<Digit>,
     second_sign: Sign,
     second: Vec<Digit>,
 ) -> (Sign, Vec<Digit>) {
-    let (longest_sign, mut longest, shortest_sign, mut shortest) = if first.len() < second.len() {
-        (second_sign, second, first_sign, first)
-    } else {
-        (first_sign, first, second_sign, second)
-    };
+    let (longest_sign, mut longest, shortest_sign, mut shortest) =
+        if first.len() < second.len() {
+            (second_sign, second, first_sign, first)
+        } else {
+            (first_sign, first, second_sign, second)
+        };
     if longest_sign.is_negative() {
         complement_in_place::<Digit, SHIFT>(&mut longest);
     };
@@ -482,11 +532,12 @@ pub(super) fn bitwise_xor_components<
     second_sign: Sign,
     second: Vec<Digit>,
 ) -> (Sign, Vec<Digit>) {
-    let (longest_sign, mut longest, shortest_sign, mut shortest) = if first.len() < second.len() {
-        (second_sign, second, first_sign, first)
-    } else {
-        (first_sign, first, second_sign, second)
-    };
+    let (longest_sign, mut longest, shortest_sign, mut shortest) =
+        if first.len() < second.len() {
+            (second_sign, second, first_sign, first)
+        } else {
+            (first_sign, first, second_sign, second)
+        };
     if longest_sign.is_negative() {
         complement_in_place::<Digit, SHIFT>(&mut longest);
     };
@@ -503,7 +554,8 @@ pub(super) fn bitwise_xor_components<
             result[index] ^= digit_mask;
         }
     };
-    let sign_is_negative = longest_sign.is_negative() ^ shortest_sign.is_negative();
+    let sign_is_negative =
+        longest_sign.is_negative() ^ shortest_sign.is_negative();
     if sign_is_negative {
         result.push(to_digit_mask::<Digit>(SHIFT));
         complement_in_place::<Digit, SHIFT>(&mut result);
@@ -535,31 +587,39 @@ pub(super) fn checked_div_as_float<
     }
     let dividend_digits_count = dividend_digits.len();
     let divisor_digits_count = divisor_digits.len();
-    let dividend_is_small = dividend_digits_count <= (Output::MANTISSA_DIGITS / SHIFT)
+    let dividend_is_small = dividend_digits_count
+        <= (Output::MANTISSA_DIGITS / SHIFT)
         || (dividend_digits_count == (Output::MANTISSA_DIGITS / SHIFT) + 1
             && (dividend_digits[(Output::MANTISSA_DIGITS / SHIFT)]
                 >> (Output::MANTISSA_DIGITS % SHIFT))
                 .is_zero());
-    let divisor_is_small = divisor_digits_count <= (Output::MANTISSA_DIGITS / SHIFT)
+    let divisor_is_small = divisor_digits_count
+        <= (Output::MANTISSA_DIGITS / SHIFT)
         || (divisor_digits_count == (Output::MANTISSA_DIGITS / SHIFT) + 1
             && (divisor_digits[(Output::MANTISSA_DIGITS / SHIFT)]
                 >> (Output::MANTISSA_DIGITS % SHIFT))
                 .is_zero());
     if dividend_is_small && divisor_is_small {
-        let reduced_dividend = reduce_digits_to_float::<Digit, Output, SHIFT>(dividend_digits);
-        let reduced_divisor = reduce_digits_to_float::<Digit, Output, SHIFT>(divisor_digits);
+        let reduced_dividend =
+            reduce_digits_to_float::<Digit, Output, SHIFT>(dividend_digits);
+        let reduced_divisor =
+            reduce_digits_to_float::<Digit, Output, SHIFT>(divisor_digits);
         return Ok(reduced_dividend / reduced_divisor);
     }
     let digits_count_difference =
         (dividend_digits_count as isize) - (divisor_digits_count as isize);
     if digits_count_difference > (((usize::MAX / SHIFT) - 1) as isize) {
         return Err(CheckedDivAsFloatError::TooLarge);
-    } else if digits_count_difference < 1isize - ((usize::MAX / SHIFT) as isize) {
+    } else if digits_count_difference
+        < 1isize - ((usize::MAX / SHIFT) as isize)
+    {
         return Ok(Output::zero());
     }
     let bit_lengths_difference = digits_count_difference * (SHIFT as isize)
-        + (((dividend_digits[dividend_digits.len() - 1].bit_length()) as isize)
-            - (divisor_digits[divisor_digits.len() - 1].bit_length() as isize));
+        + (((dividend_digits[dividend_digits.len() - 1].bit_length())
+            as isize)
+            - (divisor_digits[divisor_digits.len() - 1].bit_length()
+                as isize));
     if bit_lengths_difference > (Output::MAX_EXP as isize) {
         return Err(CheckedDivAsFloatError::TooLarge);
     } else if bit_lengths_difference
@@ -573,7 +633,8 @@ pub(super) fn checked_div_as_float<
     let mut inexact = false;
     let mut quotient_digits = if shift <= 0 {
         let shift_digits = ((-shift) as usize) / SHIFT;
-        if dividend_digits_count >= ((isize::MAX - 1) as usize) - shift_digits {
+        if dividend_digits_count >= ((isize::MAX - 1) as usize) - shift_digits
+        {
             return Err(CheckedDivAsFloatError::TooLarge);
         }
         let quotient_digits_count = dividend_digits_count + shift_digits + 1;
@@ -608,14 +669,20 @@ pub(super) fn checked_div_as_float<
     trim_leading_zeros(&mut quotient_digits);
     if divisor_digits_count == 1 {
         let (next_quotient_digits, remainder) =
-            div_rem_digits_by_digit::<Digit, SHIFT>(&quotient_digits, divisor_digits[0]);
+            div_rem_digits_by_digit::<Digit, SHIFT>(
+                &quotient_digits,
+                divisor_digits[0],
+            );
         quotient_digits = next_quotient_digits;
         if !remainder.is_zero() {
             inexact = true;
         }
     } else {
         let (next_quotient_digits, remainder) =
-            div_rem_two_or_more_digits::<Digit, SHIFT>(&quotient_digits, divisor_digits);
+            div_rem_two_or_more_digits::<Digit, SHIFT>(
+                &quotient_digits,
+                divisor_digits,
+            );
         quotient_digits = next_quotient_digits;
         if !to_digits_sign(&remainder).is_zero() {
             inexact = true;
@@ -624,20 +691,26 @@ pub(super) fn checked_div_as_float<
     let quotient_bit_length = ((quotient_digits.len() - 1) * SHIFT
         + quotient_digits[quotient_digits.len() - 1].bit_length())
         as isize;
-    let extra_bits = quotient_bit_length.max((Output::MIN_EXP as isize) - shift)
+    let extra_bits = quotient_bit_length
+        .max((Output::MIN_EXP as isize) - shift)
         - (Output::MANTISSA_DIGITS as isize);
     let mask = Digit::one() << ((extra_bits as usize) - 1);
-    let mut quotient_low_digit = quotient_digits[0] | Digit::from(inexact as u8);
+    let mut quotient_low_digit =
+        quotient_digits[0] | Digit::from(inexact as u8);
     if !(quotient_low_digit & mask).is_zero()
-        && !(quotient_low_digit & (Digit::from(3u8) * mask - Digit::from(1u8))).is_zero()
+        && !(quotient_low_digit & (Digit::from(3u8) * mask - Digit::from(1u8)))
+            .is_zero()
     {
         quotient_low_digit += mask;
     }
-    quotient_digits[0] = quotient_low_digit & !(Digit::from(2u8) * mask - Digit::from(1u8));
-    let reduced_quotient = reduce_digits_to_float::<Digit, Output, SHIFT>(&quotient_digits);
+    quotient_digits[0] =
+        quotient_low_digit & !(Digit::from(2u8) * mask - Digit::from(1u8));
+    let reduced_quotient =
+        reduce_digits_to_float::<Digit, Output, SHIFT>(&quotient_digits);
     if shift + quotient_bit_length >= (Output::MAX_EXP as isize)
         && (shift + quotient_bit_length > (Output::MAX_EXP as isize)
-            || reduced_quotient == Output::one().ldexp(quotient_bit_length as i32))
+            || reduced_quotient
+                == Output::one().ldexp(quotient_bit_length as i32))
     {
         Err(CheckedDivAsFloatError::TooLarge)
     } else {
@@ -653,13 +726,16 @@ pub(super) fn checked_div<Digit: DivisibleDigit, const SHIFT: usize>(
 ) -> Option<(Sign, Vec<Digit>)> {
     if divisor_sign.is_zero() {
         None
-    } else if dividend_sign.is_zero() || digits_lesser_than(dividend, divisor) {
+    } else if dividend_sign.is_zero() || digits_lesser_than(dividend, divisor)
+    {
         Some((Sign::zero(), vec![Digit::zero()]))
     } else if divisor.len() == 1 {
-        let (digits, _) = div_rem_digits_by_digit::<Digit, SHIFT>(dividend, divisor[0]);
+        let (digits, _) =
+            div_rem_digits_by_digit::<Digit, SHIFT>(dividend, divisor[0]);
         Some((dividend_sign * divisor_sign, digits))
     } else {
-        let (digits, _) = div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
+        let (digits, _) =
+            div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
         Some((
             dividend_sign * divisor_sign * to_digits_sign(&digits),
             digits,
@@ -667,7 +743,10 @@ pub(super) fn checked_div<Digit: DivisibleDigit, const SHIFT: usize>(
     }
 }
 
-pub(super) fn checked_div_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
+pub(super) fn checked_div_euclid<
+    Digit: EuclidDivisibleDigit,
+    const SHIFT: usize,
+>(
     dividend_sign: Sign,
     dividend: &[Digit],
     divisor_sign: Sign,
@@ -697,7 +776,8 @@ pub(super) fn checked_div_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize
                 !remainder_digit.is_zero(),
             )
         } else {
-            let (digits, remainder) = div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
+            let (digits, remainder) =
+                div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
             (
                 dividend_sign * divisor_sign * to_digits_sign(&digits),
                 digits,
@@ -754,14 +834,22 @@ pub(super) fn checked_div_rem<Digit: DivisibleDigit, const SHIFT: usize>(
     }
 }
 
-pub(super) fn checked_div_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
+pub(super) fn checked_div_rem_euclid<
+    Digit: EuclidDivisibleDigit,
+    const SHIFT: usize,
+>(
     dividend_sign: Sign,
     dividend: &[Digit],
     divisor_sign: Sign,
     divisor: &[Digit],
 ) -> Option<(Sign, Vec<Digit>, Sign, Vec<Digit>)> {
     let (mut quotient_sign, mut quotient, mut remainder_sign, mut remainder) =
-        checked_div_rem::<Digit, SHIFT>(dividend_sign, dividend, divisor_sign, divisor)?;
+        checked_div_rem::<Digit, SHIFT>(
+            dividend_sign,
+            dividend,
+            divisor_sign,
+            divisor,
+        )?;
     if (divisor_sign.is_negative() && remainder_sign.is_positive())
         || (divisor_sign.is_positive() && remainder_sign.is_negative())
     {
@@ -771,8 +859,12 @@ pub(super) fn checked_div_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: u
             Sign::one(),
             &[Digit::one()],
         );
-        (remainder_sign, remainder) =
-            sum_components::<Digit, SHIFT>(remainder_sign, &remainder, divisor_sign, divisor);
+        (remainder_sign, remainder) = sum_components::<Digit, SHIFT>(
+            remainder_sign,
+            &remainder,
+            divisor_sign,
+            divisor,
+        );
     }
     Some((quotient_sign, quotient, remainder_sign, remainder))
 }
@@ -785,18 +877,24 @@ pub(super) fn checked_rem<Digit: DivisibleDigit, const SHIFT: usize>(
 ) -> Option<(Sign, Vec<Digit>)> {
     if divisor_sign.is_zero() {
         None
-    } else if dividend_sign.is_zero() || digits_lesser_than(dividend, divisor) {
+    } else if dividend_sign.is_zero() || digits_lesser_than(dividend, divisor)
+    {
         Some((dividend_sign, dividend.to_vec()))
     } else if divisor.len() == 1 {
-        let (_, digit) = div_rem_digits_by_digit::<Digit, SHIFT>(dividend, divisor[0]);
+        let (_, digit) =
+            div_rem_digits_by_digit::<Digit, SHIFT>(dividend, divisor[0]);
         Some((dividend_sign * ((!digit.is_zero()) as Sign), vec![digit]))
     } else {
-        let (_, digits) = div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
+        let (_, digits) =
+            div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
         Some((dividend_sign * to_digits_sign(&digits), digits))
     }
 }
 
-pub(super) fn checked_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize>(
+pub(super) fn checked_rem_euclid<
+    Digit: EuclidDivisibleDigit,
+    const SHIFT: usize,
+>(
     dividend_sign: Sign,
     dividend: &[Digit],
     divisor_sign: Sign,
@@ -811,29 +909,39 @@ pub(super) fn checked_rem_euclid<Digit: EuclidDivisibleDigit, const SHIFT: usize
             if (dividend_sign.is_negative() && divisor_sign.is_positive())
                 || (dividend_sign.is_positive() && divisor_sign.is_negative())
             {
-                subtract_digits::<Digit, SHIFT>(dividend, divisor, dividend_sign)
+                subtract_digits::<Digit, SHIFT>(
+                    dividend,
+                    divisor,
+                    dividend_sign,
+                )
             } else {
                 (dividend_sign, dividend.to_vec())
             },
         )
     } else {
         let (mut sign, mut digits) = if divisor.len() == 1 {
-            let (_, digit) = div_rem_digits_by_digit::<Digit, SHIFT>(dividend, divisor[0]);
+            let (_, digit) =
+                div_rem_digits_by_digit::<Digit, SHIFT>(dividend, divisor[0]);
             (dividend_sign * ((!digit.is_zero()) as Sign), vec![digit])
         } else {
-            let (_, digits) = div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
+            let (_, digits) =
+                div_rem_two_or_more_digits::<Digit, SHIFT>(dividend, divisor);
             (dividend_sign * to_digits_sign(&digits), digits)
         };
         if (divisor_sign.is_negative() && sign.is_positive())
             || (divisor_sign.is_positive() && sign.is_negative())
         {
-            (sign, digits) = subtract_digits::<Digit, SHIFT>(&digits, divisor, sign);
+            (sign, digits) =
+                subtract_digits::<Digit, SHIFT>(&digits, divisor, sign);
         }
         Some((sign, digits))
     }
 }
 
-pub(super) fn complement_in_place<Digit: ComplementableDigit, const SHIFT: usize>(
+pub(super) fn complement_in_place<
+    Digit: ComplementableDigit,
+    const SHIFT: usize,
+>(
     digits: &mut [Digit],
 ) {
     let mut accumulator = Digit::one();
@@ -857,7 +965,8 @@ where
     Value: FloatToInt<Digit> + From<Digit>,
 {
     let (fraction, exponent) = value.frexp();
-    let mut result = vec![Digit::zero(); ((exponent as usize) - 1) / SHIFT + 1];
+    let mut result =
+        vec![Digit::zero(); ((exponent as usize) - 1) / SHIFT + 1];
     let mut fraction = fraction.ldexp((exponent - 1) % (SHIFT as i32) + 1);
     for index in (0..result.len()).rev() {
         let digit = unsafe { Value::to_int_unchecked(fraction) };
@@ -869,12 +978,19 @@ where
 }
 
 #[inline]
-pub(super) fn digits_lesser_than<Digit: PartialOrd>(left: &[Digit], right: &[Digit]) -> bool {
+pub(super) fn digits_lesser_than<Digit: PartialOrd>(
+    left: &[Digit],
+    right: &[Digit],
+) -> bool {
     left.len() < right.len()
-        || left.len() == right.len() && left.iter().rev().lt(right.iter().rev())
+        || left.len() == right.len()
+            && left.iter().rev().lt(right.iter().rev())
 }
 
-pub(super) fn div_rem_digits_by_digit<Digit: DivisibleDigit, const SHIFT: usize>(
+pub(super) fn div_rem_digits_by_digit<
+    Digit: DivisibleDigit,
+    const SHIFT: usize,
+>(
     dividend: &[Digit],
     divisor: Digit,
 ) -> (Vec<Digit>, Digit) {
@@ -884,10 +1000,14 @@ pub(super) fn div_rem_digits_by_digit<Digit: DivisibleDigit, const SHIFT: usize>
     let divisor = DoublePrecisionOf::<Digit>::from(divisor);
     for offset in 1..=digits_count {
         remainder = (remainder << SHIFT)
-            | DoublePrecisionOf::<Digit>::from(dividend[digits_count - offset]);
-        let quotient_digit = unsafe { Digit::try_from(remainder / divisor).unwrap_unchecked() };
+            | DoublePrecisionOf::<Digit>::from(
+                dividend[digits_count - offset],
+            );
+        let quotient_digit =
+            unsafe { Digit::try_from(remainder / divisor).unwrap_unchecked() };
         quotient[digits_count - offset] = quotient_digit;
-        remainder -= DoublePrecisionOf::<Digit>::from(quotient_digit) * divisor;
+        remainder -=
+            DoublePrecisionOf::<Digit>::from(quotient_digit) * divisor;
     }
     trim_leading_zeros(&mut quotient);
     (quotient, unsafe {
@@ -895,7 +1015,10 @@ pub(super) fn div_rem_digits_by_digit<Digit: DivisibleDigit, const SHIFT: usize>
     })
 }
 
-pub(super) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usize>(
+pub(super) fn div_rem_two_or_more_digits<
+    Digit: DivisibleDigit,
+    const SHIFT: usize,
+>(
     dividend: &[Digit],
     divisor: &[Digit],
 ) -> (Vec<Digit>, Vec<Digit>) {
@@ -904,39 +1027,51 @@ pub(super) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usi
     let mut dividend_normalized = vec![Digit::zero(); dividend_digits_count];
     let mut divisor_normalized = vec![Digit::zero(); divisor_digits_count];
     let shift = SHIFT - divisor[divisor.len() - 1].bit_length();
-    shift_digits_left_in_place::<Digit, SHIFT>(divisor, shift, divisor_normalized.as_mut_slice());
+    shift_digits_left_in_place::<Digit, SHIFT>(
+        divisor,
+        shift,
+        divisor_normalized.as_mut_slice(),
+    );
     let accumulator = shift_digits_left_in_place::<Digit, SHIFT>(
         dividend,
         shift,
         dividend_normalized.as_mut_slice(),
     );
-    let last_divisor_digit_normalized = divisor_normalized[divisor_normalized.len() - 1];
+    let last_divisor_digit_normalized =
+        divisor_normalized[divisor_normalized.len() - 1];
     if !accumulator.is_zero()
-        || dividend_normalized[dividend_normalized.len() - 1] >= last_divisor_digit_normalized
+        || dividend_normalized[dividend_normalized.len() - 1]
+            >= last_divisor_digit_normalized
     {
         dividend_normalized.push(accumulator);
     }
     let quotient_size = dividend_normalized.len() - divisor_normalized.len();
     let mut quotient = vec![Digit::zero(); quotient_size];
-    let penult_divisor_digit_normalized = divisor_normalized[divisor_digits_count - 2];
+    let penult_divisor_digit_normalized =
+        divisor_normalized[divisor_digits_count - 2];
     let mut quotient_position = quotient_size;
     let base = Digit::one() << SHIFT;
     let digit_mask = to_digit_mask::<Digit>(SHIFT);
     for offset in (0..quotient_size).rev() {
-        let step =
-            (DoublePrecisionOf::<Digit>::from(dividend_normalized[offset + divisor_digits_count])
-                << SHIFT)
-                | DoublePrecisionOf::<Digit>::from(
-                    dividend_normalized[offset + divisor_digits_count - 1],
-                );
+        let step = (DoublePrecisionOf::<Digit>::from(
+            dividend_normalized[offset + divisor_digits_count],
+        ) << SHIFT)
+            | DoublePrecisionOf::<Digit>::from(
+                dividend_normalized[offset + divisor_digits_count - 1],
+            );
         let mut quotient_digit = unsafe {
-            Digit::try_from(step / DoublePrecisionOf::<Digit>::from(last_divisor_digit_normalized))
-                .unwrap_unchecked()
+            Digit::try_from(
+                step / DoublePrecisionOf::<Digit>::from(
+                    last_divisor_digit_normalized,
+                ),
+            )
+            .unwrap_unchecked()
         };
         let mut step_remainder = unsafe {
             Digit::try_from(
-                step - DoublePrecisionOf::<Digit>::from(last_divisor_digit_normalized)
-                    * DoublePrecisionOf::<Digit>::from(quotient_digit),
+                step - DoublePrecisionOf::<Digit>::from(
+                    last_divisor_digit_normalized,
+                ) * DoublePrecisionOf::<Digit>::from(quotient_digit),
             )
             .unwrap_unchecked()
         };
@@ -955,28 +1090,41 @@ pub(super) fn div_rem_two_or_more_digits<Digit: DivisibleDigit, const SHIFT: usi
         }
         let mut accumulator = OppositionOf::<Digit>::zero();
         for index in 0..divisor_digits_count {
-            let step =
-                OppositionOf::<DoublePrecisionOf<Digit>>::from(dividend_normalized[offset + index])
-                    + OppositionOf::<DoublePrecisionOf<Digit>>::from(accumulator)
-                    - OppositionOf::<DoublePrecisionOf<Digit>>::from(quotient_digit)
-                        * OppositionOf::<DoublePrecisionOf<Digit>>::from(divisor_normalized[index]);
+            let step = OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                dividend_normalized[offset + index],
+            ) + OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                accumulator,
+            ) - OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                quotient_digit,
+            ) * OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                divisor_normalized[index],
+            );
             dividend_normalized[offset + index] = unsafe {
-                Digit::try_from(step & OppositionOf::<DoublePrecisionOf<Digit>>::from(digit_mask))
+                Digit::try_from(
+                    step & OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                        digit_mask,
+                    ),
+                )
+                .unwrap_unchecked()
+            };
+            accumulator = unsafe {
+                OppositionOf::<Digit>::try_from(step >> SHIFT)
                     .unwrap_unchecked()
             };
-            accumulator =
-                unsafe { OppositionOf::<Digit>::try_from(step >> SHIFT).unwrap_unchecked() };
         }
         if unsafe {
-            OppositionOf::<Digit>::try_from(dividend_normalized[offset + divisor_digits_count])
-                .unwrap_unchecked()
+            OppositionOf::<Digit>::try_from(
+                dividend_normalized[offset + divisor_digits_count],
+            )
+            .unwrap_unchecked()
         } + accumulator
             < OppositionOf::<Digit>::zero()
         {
             let mut accumulator = Digit::zero();
             for index in 0..divisor_digits_count {
-                accumulator =
-                    accumulator + dividend_normalized[offset + index] + divisor_normalized[index];
+                accumulator = accumulator
+                    + dividend_normalized[offset + index]
+                    + divisor_normalized[index];
                 dividend_normalized[offset + index] = accumulator & digit_mask;
                 accumulator >>= SHIFT;
             }
@@ -1007,17 +1155,24 @@ pub(super) fn fraction_exponent_digits<
     digits: &[Digit],
 ) -> Option<(Fraction, i32)> {
     let mut result_digits =
-        vec![Digit::zero(); 2usize + (Fraction::MANTISSA_DIGITS + 1usize) / SHIFT];
+        vec![
+            Digit::zero();
+            2usize + (Fraction::MANTISSA_DIGITS + 1usize) / SHIFT
+        ];
     let size = digits.len();
     let mut bits_count = digits[digits.len() - 1].bit_length();
     if size > (usize::MAX - 1) / SHIFT
-        && (size > (usize::MAX - 1) / SHIFT + 1 || bits_count > (usize::MAX - 1) % SHIFT + 1)
+        && (size > (usize::MAX - 1) / SHIFT + 1
+            || bits_count > (usize::MAX - 1) % SHIFT + 1)
     {
         return None;
     }
     bits_count += (size - 1) * SHIFT;
-    let mut result_digits_count = if bits_count <= Fraction::MANTISSA_DIGITS + 2 {
-        let shift_digits = (Fraction::MANTISSA_DIGITS + 2 - bits_count) / SHIFT;
+    let mut result_digits_count = if bits_count
+        <= Fraction::MANTISSA_DIGITS + 2
+    {
+        let shift_digits =
+            (Fraction::MANTISSA_DIGITS + 2 - bits_count) / SHIFT;
         let shift_bits = (Fraction::MANTISSA_DIGITS + 2 - bits_count) % SHIFT;
         let mut result_size = shift_digits;
         let remainder = shift_digits_left_in_place::<Digit, SHIFT>(
@@ -1030,7 +1185,8 @@ pub(super) fn fraction_exponent_digits<
         result_size += 1;
         result_size
     } else {
-        let mut shift_digits = (bits_count - Fraction::MANTISSA_DIGITS - 2) / SHIFT;
+        let mut shift_digits =
+            (bits_count - Fraction::MANTISSA_DIGITS - 2) / SHIFT;
         let shift_bits = (bits_count - Fraction::MANTISSA_DIGITS - 2) % SHIFT;
         let remainder = shift_digits_right_in_place::<Digit, SHIFT>(
             &digits[shift_digits..],
@@ -1054,10 +1210,13 @@ pub(super) fn fraction_exponent_digits<
     const HALF_EVEN_CORRECTION: [i8; 8] = [0, -1, -2, 1, 0, -1, 2, 1];
     result_digits[0] = unsafe {
         Digit::try_from(
-            OppositionOf::<Digit>::try_from(result_digits[0]).unwrap_unchecked()
+            OppositionOf::<Digit>::try_from(result_digits[0])
+                .unwrap_unchecked()
                 + OppositionOf::<Digit>::from(
-                    HALF_EVEN_CORRECTION
-                        [usize::try_from(result_digits[0] & Digit::from(7u8)).unwrap_unchecked()],
+                    HALF_EVEN_CORRECTION[usize::try_from(
+                        result_digits[0] & Digit::from(7u8),
+                    )
+                    .unwrap_unchecked()],
                 ),
         )
         .unwrap_unchecked()
@@ -1069,7 +1228,8 @@ pub(super) fn fraction_exponent_digits<
         fraction = fraction * Fraction::from((1usize << SHIFT) as f32)
             + Fraction::from(result_digits[result_digits_count]);
     }
-    fraction /= Fraction::from((1u64 << (Fraction::MANTISSA_DIGITS + 2)) as f32);
+    fraction /=
+        Fraction::from((1u64 << (Fraction::MANTISSA_DIGITS + 2)) as f32);
     if fraction.is_one() {
         if bits_count == usize::MAX {
             return None;
@@ -1089,11 +1249,19 @@ pub(super) fn invert_components<Digit: InvertibleDigit, const SHIFT: usize>(
     sign: Sign,
     digits: &[Digit],
 ) -> (Sign, Vec<Digit>) {
-    let (sign, digits) = sum_components::<Digit, SHIFT>(sign, digits, Sign::one(), &[Digit::one()]);
+    let (sign, digits) = sum_components::<Digit, SHIFT>(
+        sign,
+        digits,
+        Sign::one(),
+        &[Digit::one()],
+    );
     (-sign, digits)
 }
 
-pub(super) fn multiply_digits<Digit: MultiplicativeDigit, const SHIFT: usize>(
+pub(super) fn multiply_digits<
+    Digit: MultiplicativeDigit,
+    const SHIFT: usize,
+>(
     first: &[Digit],
     second: &[Digit],
 ) -> Vec<Digit> {
@@ -1121,31 +1289,46 @@ pub(super) fn multiply_digits<Digit: MultiplicativeDigit, const SHIFT: usize>(
     } else {
         let shift = longest.len() >> 1;
         let (shortest_high, shortest_low) = split_digits(*shortest, shift);
-        let (longest_high, longest_low) = if shortest.as_ptr() == longest.as_ptr() {
-            (shortest_high.clone(), shortest_low.clone())
-        } else {
-            split_digits(*longest, shift)
-        };
+        let (longest_high, longest_low) =
+            if shortest.as_ptr() == longest.as_ptr() {
+                (shortest_high.clone(), shortest_low.clone())
+            } else {
+                split_digits(*longest, shift)
+            };
         let mut result = vec![Digit::zero(); shortest.len() + longest.len()];
-        let highs_product = multiply_digits::<Digit, SHIFT>(&shortest_high, &longest_high);
+        let highs_product =
+            multiply_digits::<Digit, SHIFT>(&shortest_high, &longest_high);
         for (index, &digit) in highs_product.iter().enumerate() {
             result[index + 2 * shift] = digit;
         }
-        let lows_product = multiply_digits::<Digit, SHIFT>(&shortest_low, &longest_low);
+        let lows_product =
+            multiply_digits::<Digit, SHIFT>(&shortest_low, &longest_low);
         for (index, &digit) in lows_product.iter().enumerate() {
             result[index] = digit;
         }
-        subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &lows_product);
-        subtract_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &highs_product);
-        let shortest_components_sum = sum_digits::<Digit, SHIFT>(&shortest_high, &shortest_low);
+        subtract_digits_in_place::<Digit, SHIFT>(
+            &mut result[shift..],
+            &lows_product,
+        );
+        subtract_digits_in_place::<Digit, SHIFT>(
+            &mut result[shift..],
+            &highs_product,
+        );
+        let shortest_components_sum =
+            sum_digits::<Digit, SHIFT>(&shortest_high, &shortest_low);
         let longest_components_sum = if shortest.as_ptr() == longest.as_ptr() {
             shortest_components_sum.clone()
         } else {
             sum_digits::<Digit, SHIFT>(&longest_high, &longest_low)
         };
-        let components_sums_product =
-            multiply_digits::<Digit, SHIFT>(&shortest_components_sum, &longest_components_sum);
-        sum_digits_in_place::<Digit, SHIFT>(&mut result[shift..], &components_sums_product);
+        let components_sums_product = multiply_digits::<Digit, SHIFT>(
+            &shortest_components_sum,
+            &longest_components_sum,
+        );
+        sum_digits_in_place::<Digit, SHIFT>(
+            &mut result[shift..],
+            &components_sums_product,
+        );
         trim_leading_zeros(&mut result);
         result
     }
@@ -1163,9 +1346,14 @@ fn multiply_digits_lopsided<Digit: MultiplicativeDigit, const SHIFT: usize>(
         let step_digits_count = longest_size.min(shortest_size);
         let product = multiply_digits::<Digit, SHIFT>(
             shortest,
-            &longest[processed_digits_count..processed_digits_count + step_digits_count].to_vec(),
+            &longest[processed_digits_count
+                ..processed_digits_count + step_digits_count]
+                .to_vec(),
         );
-        sum_digits_in_place::<Digit, SHIFT>(&mut result[processed_digits_count..], &product);
+        sum_digits_in_place::<Digit, SHIFT>(
+            &mut result[processed_digits_count..],
+            &product,
+        );
         longest_size -= step_digits_count;
         processed_digits_count += step_digits_count;
     }
@@ -1184,30 +1372,42 @@ fn multiply_digits_plain<Digit: MultiplicativeDigit, const SHIFT: usize>(
             let mut digit = DoublePrecisionOf::<Digit>::from(shortest[index]);
             let mut result_position = index << 1;
             let mut accumulator =
-                DoublePrecisionOf::<Digit>::from(result[result_position]) + digit * digit;
-            result[result_position] =
-                unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+                DoublePrecisionOf::<Digit>::from(result[result_position])
+                    + digit * digit;
+            result[result_position] = unsafe {
+                Digit::try_from(accumulator & digit_mask).unwrap_unchecked()
+            };
             result_position += 1;
             accumulator >>= SHIFT;
             digit <<= 1;
             for next_index in index + 1..shortest.len() {
-                accumulator += DoublePrecisionOf::<Digit>::from(result[result_position])
-                    + DoublePrecisionOf::<Digit>::from(shortest[next_index]) * digit;
-                result[result_position] =
-                    unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+                accumulator +=
+                    DoublePrecisionOf::<Digit>::from(result[result_position])
+                        + DoublePrecisionOf::<Digit>::from(
+                            shortest[next_index],
+                        ) * digit;
+                result[result_position] = unsafe {
+                    Digit::try_from(accumulator & digit_mask)
+                        .unwrap_unchecked()
+                };
                 result_position += 1;
                 accumulator >>= SHIFT;
             }
             if !accumulator.is_zero() {
-                accumulator += DoublePrecisionOf::<Digit>::from(result[result_position]);
-                result[result_position] =
-                    unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+                accumulator +=
+                    DoublePrecisionOf::<Digit>::from(result[result_position]);
+                result[result_position] = unsafe {
+                    Digit::try_from(accumulator & digit_mask)
+                        .unwrap_unchecked()
+                };
                 result_position += 1;
                 accumulator >>= SHIFT;
             }
             if !accumulator.is_zero() {
-                result[result_position] +=
-                    unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+                result[result_position] += unsafe {
+                    Digit::try_from(accumulator & digit_mask)
+                        .unwrap_unchecked()
+                };
             }
         }
     } else {
@@ -1217,16 +1417,22 @@ fn multiply_digits_plain<Digit: MultiplicativeDigit, const SHIFT: usize>(
             let mut result_position = index;
             for &second_digit in longest {
                 accumulator = accumulator
-                    + DoublePrecisionOf::<Digit>::from(result[result_position])
+                    + DoublePrecisionOf::<Digit>::from(
+                        result[result_position],
+                    )
                     + DoublePrecisionOf::<Digit>::from(second_digit) * digit;
-                result[result_position] =
-                    unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+                result[result_position] = unsafe {
+                    Digit::try_from(accumulator & digit_mask)
+                        .unwrap_unchecked()
+                };
                 result_position += 1;
                 accumulator >>= SHIFT;
             }
             if !accumulator.is_zero() {
-                result[result_position] +=
-                    unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() };
+                result[result_position] += unsafe {
+                    Digit::try_from(accumulator & digit_mask)
+                        .unwrap_unchecked()
+                };
             }
         }
     }
@@ -1253,12 +1459,14 @@ fn non_binary_digits_to_greater_binary_base<
     source: &[SourceDigit],
     source_base: usize,
 ) -> Vec<TargetDigit> {
-    let target_digit_mask = to_digit_mask::<DoublePrecisionOf<TargetDigit>>(TARGET_SHIFT);
+    let target_digit_mask =
+        to_digit_mask::<DoublePrecisionOf<TargetDigit>>(TARGET_SHIFT);
     static mut BASES_LOGS: [f64; 37] = [0.0; 37];
     static mut INFIMUM_BASES_EXPONENTS: [usize; 37] = [0; 37];
     static mut INFIMUM_BASES_POWERS: [usize; 37] = [0; 37];
     if unsafe { BASES_LOGS[source_base] } == 0.0 {
-        let bases_log = (source_base as f64).ln() / ((1usize << TARGET_SHIFT) as f64).ln();
+        let bases_log =
+            (source_base as f64).ln() / ((1usize << TARGET_SHIFT) as f64).ln();
         unsafe { BASES_LOGS[source_base] = bases_log };
         let mut infimum_base_power = source_base;
         let mut infimum_base_exponent: usize = 1;
@@ -1271,11 +1479,16 @@ fn non_binary_digits_to_greater_binary_base<
             infimum_base_exponent += 1;
         }
         unsafe { INFIMUM_BASES_POWERS[source_base] = infimum_base_power };
-        unsafe { INFIMUM_BASES_EXPONENTS[source_base] = infimum_base_exponent };
+        unsafe {
+            INFIMUM_BASES_EXPONENTS[source_base] = infimum_base_exponent
+        };
     }
-    let digits_count_upper_bound = (source.len() as f64) * unsafe { BASES_LOGS[source_base] } + 1.0;
-    let mut result = Vec::<TargetDigit>::with_capacity(digits_count_upper_bound as usize);
-    let infimum_base_exponent = unsafe { INFIMUM_BASES_EXPONENTS[source_base] };
+    let digits_count_upper_bound =
+        (source.len() as f64) * unsafe { BASES_LOGS[source_base] } + 1.0;
+    let mut result =
+        Vec::<TargetDigit>::with_capacity(digits_count_upper_bound as usize);
+    let infimum_base_exponent =
+        unsafe { INFIMUM_BASES_EXPONENTS[source_base] };
     let infimum_base_power = unsafe { INFIMUM_BASES_POWERS[source_base] };
     let mut reversed_source = source.iter().rev();
     while let Some(&digit) = reversed_source.next() {
@@ -1286,8 +1499,10 @@ fn non_binary_digits_to_greater_binary_base<
                 base_exponent += 1;
                 unsafe {
                     accumulator = accumulator
-                        * DoublePrecisionOf::<TargetDigit>::try_from(source_base)
-                            .unwrap_unchecked()
+                        * DoublePrecisionOf::<TargetDigit>::try_from(
+                            source_base,
+                        )
+                        .unwrap_unchecked()
                         + DoublePrecisionOf::<TargetDigit>::from(digit);
                 }
             } else {
@@ -1300,17 +1515,22 @@ fn non_binary_digits_to_greater_binary_base<
             source_base.pow(base_exponent as u32)
         };
         for result_position in result.iter_mut() {
-            accumulator += DoublePrecisionOf::<TargetDigit>::from(*result_position)
-                * unsafe {
-                    DoublePrecisionOf::<TargetDigit>::try_from(base_power).unwrap_unchecked()
-                };
+            accumulator +=
+                DoublePrecisionOf::<TargetDigit>::from(*result_position)
+                    * unsafe {
+                        DoublePrecisionOf::<TargetDigit>::try_from(base_power)
+                            .unwrap_unchecked()
+                    };
             *result_position = unsafe {
-                TargetDigit::try_from(accumulator & target_digit_mask).unwrap_unchecked()
+                TargetDigit::try_from(accumulator & target_digit_mask)
+                    .unwrap_unchecked()
             };
             accumulator >>= TARGET_SHIFT;
         }
         if !accumulator.is_zero() {
-            result.push(unsafe { TargetDigit::try_from(accumulator).unwrap_unchecked() });
+            result.push(unsafe {
+                TargetDigit::try_from(accumulator).unwrap_unchecked()
+            });
         }
     }
     if result.is_empty() {
@@ -1327,28 +1547,38 @@ fn non_binary_digits_to_lesser_binary_base<
     source: &[SourceDigit],
     source_base: usize,
 ) -> Vec<TargetDigit> {
-    let target_digit_mask = to_digit_mask::<DoublePrecisionOf<TargetDigit>>(TARGET_SHIFT);
+    let target_digit_mask =
+        to_digit_mask::<DoublePrecisionOf<TargetDigit>>(TARGET_SHIFT);
     static mut BASES_LOGS: [f64; 37] = [0.0; 37];
     if unsafe { BASES_LOGS[source_base] } == 0.0 {
-        let bases_log = (source_base as f64).ln() / ((1usize << TARGET_SHIFT) as f64).ln();
+        let bases_log =
+            (source_base as f64).ln() / ((1usize << TARGET_SHIFT) as f64).ln();
         unsafe { BASES_LOGS[source_base] = bases_log };
     }
-    let digits_count_upper_bound = (source.len() as f64) * unsafe { BASES_LOGS[source_base] } + 1.0;
-    let mut result = Vec::<TargetDigit>::with_capacity(digits_count_upper_bound as usize);
-    let source_base =
-        unsafe { DoublePrecisionOf::<TargetDigit>::try_from(source_base).unwrap_unchecked() };
+    let digits_count_upper_bound =
+        (source.len() as f64) * unsafe { BASES_LOGS[source_base] } + 1.0;
+    let mut result =
+        Vec::<TargetDigit>::with_capacity(digits_count_upper_bound as usize);
+    let source_base = unsafe {
+        DoublePrecisionOf::<TargetDigit>::try_from(source_base)
+            .unwrap_unchecked()
+    };
     for &digit in source.iter().rev() {
         let mut accumulator = DoublePrecisionOf::<TargetDigit>::from(digit);
         for result_position in result.iter_mut() {
-            accumulator += DoublePrecisionOf::<TargetDigit>::from(*result_position) * source_base;
+            accumulator +=
+                DoublePrecisionOf::<TargetDigit>::from(*result_position)
+                    * source_base;
             *result_position = unsafe {
-                TargetDigit::try_from(accumulator & target_digit_mask).unwrap_unchecked()
+                TargetDigit::try_from(accumulator & target_digit_mask)
+                    .unwrap_unchecked()
             };
             accumulator >>= TARGET_SHIFT;
         }
         while !accumulator.is_zero() {
             result.push(unsafe {
-                TargetDigit::try_from(accumulator & target_digit_mask).unwrap_unchecked()
+                TargetDigit::try_from(accumulator & target_digit_mask)
+                    .unwrap_unchecked()
             });
             accumulator >>= TARGET_SHIFT;
         }
@@ -1359,7 +1589,11 @@ fn non_binary_digits_to_lesser_binary_base<
     result
 }
 
-pub(super) fn reduce_digits<Digit: ReducibleTo<Output>, Output, const SHIFT: usize>(
+pub(super) fn reduce_digits<
+    Digit: ReducibleTo<Output>,
+    Output,
+    const SHIFT: usize,
+>(
     digits: &[Digit],
 ) -> Output {
     let mut result = Output::zero();
@@ -1369,7 +1603,11 @@ pub(super) fn reduce_digits<Digit: ReducibleTo<Output>, Output, const SHIFT: usi
     result
 }
 
-pub(super) fn maybe_reduce_digits<Digit: MaybeReducibleTo<Output>, Output, const SHIFT: usize>(
+pub(super) fn maybe_reduce_digits<
+    Digit: MaybeReducibleTo<Output>,
+    Output,
+    const SHIFT: usize,
+>(
     digits: &[Digit],
 ) -> Option<Output> {
     let mut result = Output::zero();
@@ -1379,26 +1617,36 @@ pub(super) fn maybe_reduce_digits<Digit: MaybeReducibleTo<Output>, Output, const
     Some(result)
 }
 
-pub(super) fn reduce_digits_to_float<Digit, Output, const SHIFT: usize>(digits: &[Digit]) -> Output
+pub(super) fn reduce_digits_to_float<Digit, Output, const SHIFT: usize>(
+    digits: &[Digit],
+) -> Output
 where
     Digit: Copy,
     Output: Float + From<Digit>,
 {
     let mut result = Output::zero();
     for &digit in digits.iter().rev() {
-        result = result * Output::from((1u64 << SHIFT) as f32) + Output::from(digit);
+        result = result * Output::from((1u64 << SHIFT) as f32)
+            + Output::from(digit);
     }
     result
 }
 
-pub(super) fn primitive_shift_digits_left<Digit: ShiftableLeftDigit, const SHIFT: usize>(
+pub(super) fn primitive_shift_digits_left<
+    Digit: ShiftableLeftDigit,
+    const SHIFT: usize,
+>(
     digits: &[Digit],
     shift_quotient: usize,
     shift_remainder: Digit,
 ) -> Option<Vec<Digit>> {
     let mut result = Vec::<Digit>::new();
     result
-        .try_reserve_exact(shift_quotient + ((!shift_remainder.is_zero()) as usize) + digits.len())
+        .try_reserve_exact(
+            shift_quotient
+                + ((!shift_remainder.is_zero()) as usize)
+                + digits.len(),
+        )
         .ok()?;
     for _ in 0..shift_quotient {
         result.push(Digit::zero());
@@ -1406,18 +1654,25 @@ pub(super) fn primitive_shift_digits_left<Digit: ShiftableLeftDigit, const SHIFT
     let mut accumulator = DoublePrecisionOf::<Digit>::zero();
     let digit_mask = to_digit_mask::<DoublePrecisionOf<Digit>>(SHIFT);
     for &digit in digits {
-        accumulator |= DoublePrecisionOf::<Digit>::from(digit) << shift_remainder;
-        result.push(unsafe { Digit::try_from(accumulator & digit_mask).unwrap_unchecked() });
+        accumulator |=
+            DoublePrecisionOf::<Digit>::from(digit) << shift_remainder;
+        result.push(unsafe {
+            Digit::try_from(accumulator & digit_mask).unwrap_unchecked()
+        });
         accumulator >>= SHIFT;
     }
     if !shift_remainder.is_zero() {
-        result.push(unsafe { Digit::try_from(accumulator).unwrap_unchecked() });
+        result
+            .push(unsafe { Digit::try_from(accumulator).unwrap_unchecked() });
     }
     trim_leading_zeros(&mut result);
     Some(result)
 }
 
-pub(super) fn shift_digits_left<Digit: ShiftableLeftDigit, const SHIFT: usize>(
+pub(super) fn shift_digits_left<
+    Digit: ShiftableLeftDigit,
+    const SHIFT: usize,
+>(
     base: &[Digit],
     shift: &[Digit],
 ) -> Result<Vec<Digit>, ShlError> {
@@ -1425,17 +1680,25 @@ pub(super) fn shift_digits_left<Digit: ShiftableLeftDigit, const SHIFT: usize>(
         div_rem_digits_by_digit::<Digit, SHIFT>(&shift, unsafe {
             Digit::try_from(SHIFT).unwrap_unchecked()
         });
-    let shift_quotient = maybe_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
-        .ok_or(ShlError::TooLarge)?;
+    let shift_quotient =
+        maybe_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
+            .ok_or(ShlError::TooLarge)?;
     if shift_quotient >= usize::MAX / size_of::<Digit>() {
         Err(ShlError::TooLarge)
     } else {
-        primitive_shift_digits_left::<Digit, SHIFT>(&base, shift_quotient, shift_remainder)
-            .ok_or(ShlError::OutOfMemory)
+        primitive_shift_digits_left::<Digit, SHIFT>(
+            &base,
+            shift_quotient,
+            shift_remainder,
+        )
+        .ok_or(ShlError::OutOfMemory)
     }
 }
 
-fn shift_digits_left_in_place<Digit: ShiftableInPlaceDigit, const SHIFT: usize>(
+fn shift_digits_left_in_place<
+    Digit: ShiftableInPlaceDigit,
+    const SHIFT: usize,
+>(
     input: &[Digit],
     shift: usize,
     output: &mut [Digit],
@@ -1445,13 +1708,18 @@ fn shift_digits_left_in_place<Digit: ShiftableInPlaceDigit, const SHIFT: usize>(
     for index in 0..input.len() {
         let step = (DoublePrecisionOf::<Digit>::from(input[index]) << shift)
             | DoublePrecisionOf::<Digit>::from(accumulator);
-        output[index] = unsafe { Digit::try_from(step & mask).unwrap_unchecked() };
-        accumulator = unsafe { Digit::try_from(step >> SHIFT).unwrap_unchecked() };
+        output[index] =
+            unsafe { Digit::try_from(step & mask).unwrap_unchecked() };
+        accumulator =
+            unsafe { Digit::try_from(step >> SHIFT).unwrap_unchecked() };
     }
     accumulator
 }
 
-fn shift_digits_right_in_place<Digit: ShiftableInPlaceDigit, const SHIFT: usize>(
+fn shift_digits_right_in_place<
+    Digit: ShiftableInPlaceDigit,
+    const SHIFT: usize,
+>(
     input: &[Digit],
     shift: usize,
     output: &mut [Digit],
@@ -1461,13 +1729,18 @@ fn shift_digits_right_in_place<Digit: ShiftableInPlaceDigit, const SHIFT: usize>
     for index in (0..input.len()).rev() {
         let step = (DoublePrecisionOf::<Digit>::from(accumulator) << SHIFT)
             | DoublePrecisionOf::<Digit>::from(input[index]);
-        accumulator = unsafe { Digit::try_from(step & mask).unwrap_unchecked() };
-        output[index] = unsafe { Digit::try_from(step >> shift).unwrap_unchecked() };
+        accumulator =
+            unsafe { Digit::try_from(step & mask).unwrap_unchecked() };
+        output[index] =
+            unsafe { Digit::try_from(step >> shift).unwrap_unchecked() };
     }
     accumulator
 }
 
-pub(super) fn primitive_shift_digits_right<Digit: ShiftableRightDigit, const SHIFT: usize>(
+pub(super) fn primitive_shift_digits_right<
+    Digit: ShiftableRightDigit,
+    const SHIFT: usize,
+>(
     digits: &[Digit],
     shift_quotient: usize,
     shift_remainder: Digit,
@@ -1476,7 +1749,8 @@ pub(super) fn primitive_shift_digits_right<Digit: ShiftableRightDigit, const SHI
         return vec![Digit::zero()];
     }
     let result_digits_count = digits.len() - shift_quotient;
-    let high_shift = SHIFT - unsafe { usize::try_from(shift_remainder).unwrap_unchecked() };
+    let high_shift =
+        SHIFT - unsafe { usize::try_from(shift_remainder).unwrap_unchecked() };
     let low_mask = to_digit_mask::<Digit>(high_shift);
     let high_mask = to_digit_mask::<Digit>(SHIFT) ^ low_mask;
     let mut result = vec![Digit::zero(); result_digits_count];
@@ -1492,7 +1766,10 @@ pub(super) fn primitive_shift_digits_right<Digit: ShiftableRightDigit, const SHI
     result
 }
 
-pub(super) fn shift_digits_right<Digit: ShiftableRightDigit, const SHIFT: usize>(
+pub(super) fn shift_digits_right<
+    Digit: ShiftableRightDigit,
+    const SHIFT: usize,
+>(
     base_sign: Sign,
     base: &[Digit],
     shift: &[Digit],
@@ -1501,8 +1778,9 @@ pub(super) fn shift_digits_right<Digit: ShiftableRightDigit, const SHIFT: usize>
         div_rem_digits_by_digit::<Digit, SHIFT>(&shift, unsafe {
             Digit::try_from(SHIFT).unwrap_unchecked()
         });
-    let shift_quotient = maybe_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
-        .unwrap_or(usize::MAX / size_of::<Digit>());
+    let shift_quotient =
+        maybe_reduce_digits::<Digit, usize, SHIFT>(&shift_quotient_digits)
+            .unwrap_or(usize::MAX / size_of::<Digit>());
     if shift_quotient >= usize::MAX / size_of::<Digit>() {
         if base_sign.is_negative() {
             (-Sign::one(), vec![Digit::one(); 1])
@@ -1510,21 +1788,31 @@ pub(super) fn shift_digits_right<Digit: ShiftableRightDigit, const SHIFT: usize>
             (Sign::zero(), vec![Digit::zero(); 1])
         }
     } else if base_sign.is_negative() {
-        let (inverted_sign, inverted_digits) = invert_components::<Digit, SHIFT>(base_sign, &base);
+        let (inverted_sign, inverted_digits) =
+            invert_components::<Digit, SHIFT>(base_sign, &base);
         let digits = primitive_shift_digits_right::<Digit, SHIFT>(
             &inverted_digits,
             shift_quotient,
             shift_remainder,
         );
-        invert_components::<Digit, SHIFT>(inverted_sign * to_digits_sign(&digits), &digits)
+        invert_components::<Digit, SHIFT>(
+            inverted_sign * to_digits_sign(&digits),
+            &digits,
+        )
     } else {
-        let digits =
-            primitive_shift_digits_right::<Digit, SHIFT>(&base, shift_quotient, shift_remainder);
+        let digits = primitive_shift_digits_right::<Digit, SHIFT>(
+            &base,
+            shift_quotient,
+            shift_remainder,
+        );
         (base_sign * to_digits_sign(&digits), digits)
     }
 }
 
-fn split_digits<Digit>(digits: &[Digit], size: usize) -> (Vec<Digit>, Vec<Digit>)
+fn split_digits<Digit>(
+    digits: &[Digit],
+    size: usize,
+) -> (Vec<Digit>, Vec<Digit>)
 where
     Digit: Clone + Zeroable,
 {
@@ -1738,51 +2026,65 @@ pub(super) fn to_gcd<Digit: GcdDigit, const SHIFT: usize>(
         }
         let highest_digit_bit_length = largest[largest.len() - 1].bit_length();
         let mut largest_leading_bits =
-            (OppositionOf::<DoublePrecisionOf<Digit>>::from(largest[largest_digits_count - 1])
-                << (2 * SHIFT - highest_digit_bit_length))
+            (OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                largest[largest_digits_count - 1],
+            ) << (2 * SHIFT - highest_digit_bit_length))
                 | (OppositionOf::<DoublePrecisionOf<Digit>>::from(
                     largest[largest_digits_count - 2],
                 ) << (SHIFT - highest_digit_bit_length))
                 | OppositionOf::<DoublePrecisionOf<Digit>>::from(
-                    largest[largest_digits_count - 3] >> highest_digit_bit_length,
+                    largest[largest_digits_count - 3]
+                        >> highest_digit_bit_length,
                 );
-        let mut smallest_leading_bits = if smallest_digits_count >= largest_digits_count - 2 {
-            OppositionOf::<DoublePrecisionOf<Digit>>::from(
-                smallest[largest_digits_count - 3] >> highest_digit_bit_length,
-            )
-        } else {
-            OppositionOf::<DoublePrecisionOf<Digit>>::zero()
-        } | if smallest_digits_count >= largest_digits_count - 1 {
-            OppositionOf::<DoublePrecisionOf<Digit>>::from(smallest[largest_digits_count - 2])
-                << (SHIFT - highest_digit_bit_length)
-        } else {
-            OppositionOf::<DoublePrecisionOf<Digit>>::zero()
-        } | if smallest_digits_count >= largest_digits_count {
-            OppositionOf::<DoublePrecisionOf<Digit>>::from(smallest[largest_digits_count - 1])
-                << (2 * SHIFT - highest_digit_bit_length)
-        } else {
-            OppositionOf::<DoublePrecisionOf<Digit>>::zero()
-        };
-        let mut first_coefficient = OppositionOf::<DoublePrecisionOf<Digit>>::one();
-        let mut second_coefficient = OppositionOf::<DoublePrecisionOf<Digit>>::zero();
-        let mut third_coefficient = OppositionOf::<DoublePrecisionOf<Digit>>::zero();
-        let mut fourth_coefficient = OppositionOf::<DoublePrecisionOf<Digit>>::one();
+        let mut smallest_leading_bits =
+            if smallest_digits_count >= largest_digits_count - 2 {
+                OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                    smallest[largest_digits_count - 3]
+                        >> highest_digit_bit_length,
+                )
+            } else {
+                OppositionOf::<DoublePrecisionOf<Digit>>::zero()
+            } | if smallest_digits_count >= largest_digits_count - 1 {
+                OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                    smallest[largest_digits_count - 2],
+                ) << (SHIFT - highest_digit_bit_length)
+            } else {
+                OppositionOf::<DoublePrecisionOf<Digit>>::zero()
+            } | if smallest_digits_count >= largest_digits_count {
+                OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                    smallest[largest_digits_count - 1],
+                ) << (2 * SHIFT - highest_digit_bit_length)
+            } else {
+                OppositionOf::<DoublePrecisionOf<Digit>>::zero()
+            };
+        let mut first_coefficient =
+            OppositionOf::<DoublePrecisionOf<Digit>>::one();
+        let mut second_coefficient =
+            OppositionOf::<DoublePrecisionOf<Digit>>::zero();
+        let mut third_coefficient =
+            OppositionOf::<DoublePrecisionOf<Digit>>::zero();
+        let mut fourth_coefficient =
+            OppositionOf::<DoublePrecisionOf<Digit>>::one();
         let mut iterations_count = 0usize;
         loop {
             if third_coefficient == smallest_leading_bits {
                 break;
             }
             let scale = (largest_leading_bits
-                + (first_coefficient - OppositionOf::<DoublePrecisionOf<Digit>>::one()))
+                + (first_coefficient
+                    - OppositionOf::<DoublePrecisionOf<Digit>>::one()))
                 / (smallest_leading_bits - third_coefficient);
-            let next_third_coefficient = second_coefficient + scale * fourth_coefficient;
-            let next_smallest_leading_bits = largest_leading_bits - scale * smallest_leading_bits;
+            let next_third_coefficient =
+                second_coefficient + scale * fourth_coefficient;
+            let next_smallest_leading_bits =
+                largest_leading_bits - scale * smallest_leading_bits;
             if next_third_coefficient > next_smallest_leading_bits {
                 break;
             }
             largest_leading_bits = smallest_leading_bits;
             smallest_leading_bits = next_smallest_leading_bits;
-            let next_fourth_coefficient = first_coefficient + scale * third_coefficient;
+            let next_fourth_coefficient =
+                first_coefficient + scale * third_coefficient;
             first_coefficient = fourth_coefficient;
             second_coefficient = third_coefficient;
             third_coefficient = next_third_coefficient;
@@ -1791,54 +2093,81 @@ pub(super) fn to_gcd<Digit: GcdDigit, const SHIFT: usize>(
         }
         if iterations_count == 0 {
             (largest, smallest) = if smallest_digits_count == 1 {
-                let (_, remainder) = div_rem_digits_by_digit::<Digit, SHIFT>(&largest, smallest[0]);
+                let (_, remainder) = div_rem_digits_by_digit::<Digit, SHIFT>(
+                    &largest,
+                    smallest[0],
+                );
                 (smallest, vec![remainder])
             } else {
-                let (_, remainder) =
-                    div_rem_two_or_more_digits::<Digit, SHIFT>(&largest, &smallest);
+                let (_, remainder) = div_rem_two_or_more_digits::<Digit, SHIFT>(
+                    &largest, &smallest,
+                );
                 (smallest, remainder)
             };
             continue;
         }
         if iterations_count % 2 != 0 {
-            (first_coefficient, second_coefficient) = (-second_coefficient, -first_coefficient);
-            (third_coefficient, fourth_coefficient) = (-fourth_coefficient, -third_coefficient);
+            (first_coefficient, second_coefficient) =
+                (-second_coefficient, -first_coefficient);
+            (third_coefficient, fourth_coefficient) =
+                (-fourth_coefficient, -third_coefficient);
         }
-        let digit_mask = to_digit_mask::<OppositionOf<DoublePrecisionOf<Digit>>>(SHIFT);
-        let mut next_largest_accumulator = OppositionOf::<DoublePrecisionOf<Digit>>::zero();
-        let mut next_smallest_accumulator = OppositionOf::<DoublePrecisionOf<Digit>>::zero();
-        let mut next_largest_digits = Vec::<Digit>::with_capacity(largest_digits_count);
-        let mut next_smallest_digits = Vec::<Digit>::with_capacity(largest_digits_count);
+        let digit_mask =
+            to_digit_mask::<OppositionOf<DoublePrecisionOf<Digit>>>(SHIFT);
+        let mut next_largest_accumulator =
+            OppositionOf::<DoublePrecisionOf<Digit>>::zero();
+        let mut next_smallest_accumulator =
+            OppositionOf::<DoublePrecisionOf<Digit>>::zero();
+        let mut next_largest_digits =
+            Vec::<Digit>::with_capacity(largest_digits_count);
+        let mut next_smallest_digits =
+            Vec::<Digit>::with_capacity(largest_digits_count);
         for index in 0..smallest_digits_count {
             next_largest_accumulator = next_largest_accumulator
                 + (first_coefficient
-                    * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest[index]))
+                    * OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                        largest[index],
+                    ))
                 - (second_coefficient
-                    * OppositionOf::<DoublePrecisionOf<Digit>>::from(smallest[index]));
+                    * OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                        smallest[index],
+                    ));
             next_smallest_accumulator = next_smallest_accumulator
                 + (fourth_coefficient
-                    * OppositionOf::<DoublePrecisionOf<Digit>>::from(smallest[index]))
+                    * OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                        smallest[index],
+                    ))
                 - (third_coefficient
-                    * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest[index]));
+                    * OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                        largest[index],
+                    ));
             next_largest_digits.push(unsafe {
-                Digit::try_from(next_largest_accumulator & digit_mask).unwrap_unchecked()
+                Digit::try_from(next_largest_accumulator & digit_mask)
+                    .unwrap_unchecked()
             });
             next_smallest_digits.push(unsafe {
-                Digit::try_from(next_smallest_accumulator & digit_mask).unwrap_unchecked()
+                Digit::try_from(next_smallest_accumulator & digit_mask)
+                    .unwrap_unchecked()
             });
             next_largest_accumulator >>= SHIFT;
             next_smallest_accumulator >>= SHIFT;
         }
         for index in smallest_digits_count..largest_digits_count {
-            next_largest_accumulator +=
-                first_coefficient * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest[index]);
-            next_smallest_accumulator -=
-                third_coefficient * OppositionOf::<DoublePrecisionOf<Digit>>::from(largest[index]);
+            next_largest_accumulator += first_coefficient
+                * OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                    largest[index],
+                );
+            next_smallest_accumulator -= third_coefficient
+                * OppositionOf::<DoublePrecisionOf<Digit>>::from(
+                    largest[index],
+                );
             next_largest_digits.push(unsafe {
-                Digit::try_from(next_largest_accumulator & digit_mask).unwrap_unchecked()
+                Digit::try_from(next_largest_accumulator & digit_mask)
+                    .unwrap_unchecked()
             });
             next_smallest_digits.push(unsafe {
-                Digit::try_from(next_smallest_accumulator & digit_mask).unwrap_unchecked()
+                Digit::try_from(next_smallest_accumulator & digit_mask)
+                    .unwrap_unchecked()
             });
             next_largest_accumulator >>= SHIFT;
             next_smallest_accumulator >>= SHIFT;
@@ -1849,17 +2178,17 @@ pub(super) fn to_gcd<Digit: GcdDigit, const SHIFT: usize>(
         smallest = next_smallest_digits;
     }
     let reduced_result =
-        reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&largest).gcd(reduce_digits::<
-            Digit,
-            DoublePrecisionOf<Digit>,
-            SHIFT,
-        >(&smallest));
+        reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&largest).gcd(
+            reduce_digits::<Digit, DoublePrecisionOf<Digit>, SHIFT>(&smallest),
+        );
     if reduced_result.is_zero() {
         (Sign::zero(), vec![Digit::zero(); 1])
     } else {
         (
             Sign::one(),
-            non_zero_value_to_digits::<DoublePrecisionOf<Digit>, Digit, SHIFT>(reduced_result),
+            non_zero_value_to_digits::<DoublePrecisionOf<Digit>, Digit, SHIFT>(
+                reduced_result,
+            ),
         )
     }
 }
@@ -1890,11 +2219,17 @@ pub(super) fn non_zero_value_to_digits<
             && crate::contracts::is_unsigned::<Digit>())
     {
         let mut value = if crate::contracts::is_signed::<Source>() {
-            let value = unsafe { OppositionOf::<Source>::try_from(value).unwrap_unchecked() };
+            let value = unsafe {
+                OppositionOf::<Source>::try_from(value).unwrap_unchecked()
+            };
             unsafe {
                 Digit::try_from(
-                    Source::try_from(if value.is_negative() { -value } else { value })
-                        .unwrap_unchecked(),
+                    Source::try_from(if value.is_negative() {
+                        -value
+                    } else {
+                        value
+                    })
+                    .unwrap_unchecked(),
                 )
                 .unwrap_unchecked()
             }
@@ -1910,7 +2245,9 @@ pub(super) fn non_zero_value_to_digits<
         digits
     } else {
         let mut value = if crate::contracts::is_signed::<Source>() {
-            let value = unsafe { OppositionOf::<Source>::try_from(value).unwrap_unchecked() };
+            let value = unsafe {
+                OppositionOf::<Source>::try_from(value).unwrap_unchecked()
+            };
             if value.is_negative() {
                 unsafe { Source::try_from(-value).unwrap_unchecked() }
             } else {
@@ -1922,7 +2259,9 @@ pub(super) fn non_zero_value_to_digits<
         let mut digits = Vec::<Digit>::new();
         let digit_mask = to_digit_mask::<Source>(SHIFT);
         while !value.is_zero() {
-            digits.push(unsafe { Digit::try_from(value & digit_mask).unwrap_unchecked() });
+            digits.push(unsafe {
+                Digit::try_from(value & digit_mask).unwrap_unchecked()
+            });
             value >>= SHIFT;
         }
         digits
@@ -1949,7 +2288,10 @@ where
     OppositionOf<Source>: TryFrom<Source>,
 {
     if crate::contracts::is_signed::<Source>()
-        && unsafe { OppositionOf::<Source>::try_from(value).unwrap_unchecked() }.is_negative()
+        && unsafe {
+            OppositionOf::<Source>::try_from(value).unwrap_unchecked()
+        }
+        .is_negative()
     {
         -Sign::one()
     } else {

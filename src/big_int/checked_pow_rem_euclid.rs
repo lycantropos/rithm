@@ -1,10 +1,12 @@
 use crate::traits::{
-    Abs, CheckedPowRemEuclid, CheckedRemEuclid, CheckedRemEuclidInv, Signed, Unitary, Zeroable,
+    Abs, CheckedPowRemEuclid, CheckedRemEuclid, CheckedRemEuclidInv, Signed,
+    Unitary, Zeroable,
 };
 
 use super::constants::{WINDOW_BASE, WINDOW_CUTOFF, WINDOW_SHIFT};
 use super::digits::{
-    binary_digits_to_lesser_binary_base, ExponentiativeDigit, ModularInvertibleDigit,
+    binary_digits_to_lesser_binary_base, ExponentiativeDigit,
+    ModularInvertibleDigit,
 };
 use super::types::{BigInt, CheckedPowRemEuclidError, WindowDigit};
 
@@ -16,7 +18,11 @@ impl<
 {
     type Output = Result<Self, CheckedPowRemEuclidError>;
 
-    fn checked_pow_rem_euclid(self, exponent: Self, divisor: Self) -> Self::Output {
+    fn checked_pow_rem_euclid(
+        self,
+        exponent: Self,
+        divisor: Self,
+    ) -> Self::Output {
         if divisor.is_zero() {
             Err(CheckedPowRemEuclidError::ZeroDivisor)
         } else {
@@ -42,7 +48,11 @@ impl<
 {
     type Output = Result<Self, CheckedPowRemEuclidError>;
 
-    fn checked_pow_rem_euclid(self, exponent: Self, divisor: &Self) -> Self::Output {
+    fn checked_pow_rem_euclid(
+        self,
+        exponent: Self,
+        divisor: &Self,
+    ) -> Self::Output {
         if divisor.is_zero() {
             Err(CheckedPowRemEuclidError::ZeroDivisor)
         } else {
@@ -68,7 +78,11 @@ impl<
 {
     type Output = Result<Self, CheckedPowRemEuclidError>;
 
-    fn checked_pow_rem_euclid(self, exponent: &Self, divisor: Self) -> Self::Output {
+    fn checked_pow_rem_euclid(
+        self,
+        exponent: &Self,
+        divisor: Self,
+    ) -> Self::Output {
         if divisor.is_zero() {
             Err(CheckedPowRemEuclidError::ZeroDivisor)
         } else {
@@ -94,7 +108,11 @@ impl<
 {
     type Output = Result<Self, CheckedPowRemEuclidError>;
 
-    fn checked_pow_rem_euclid(self, exponent: &Self, divisor: &Self) -> Self::Output {
+    fn checked_pow_rem_euclid(
+        self,
+        exponent: &Self,
+        divisor: &Self,
+    ) -> Self::Output {
         if divisor.is_zero() {
             Err(CheckedPowRemEuclidError::ZeroDivisor)
         } else {
@@ -116,10 +134,14 @@ impl<
         Digit: ExponentiativeDigit + ModularInvertibleDigit,
         const SEPARATOR: char,
         const SHIFT: usize,
-    > CheckedPowRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>, BigInt<Digit, SEPARATOR, SHIFT>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+    >
+    CheckedPowRemEuclid<
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        BigInt<Digit, SEPARATOR, SHIFT>,
+    > for &BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, CheckedPowRemEuclidError>;
+    type Output =
+        Result<BigInt<Digit, SEPARATOR, SHIFT>, CheckedPowRemEuclidError>;
 
     fn checked_pow_rem_euclid(
         self,
@@ -151,7 +173,8 @@ impl<
     > CheckedPowRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>, Self>
     for &BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, CheckedPowRemEuclidError>;
+    type Output =
+        Result<BigInt<Digit, SEPARATOR, SHIFT>, CheckedPowRemEuclidError>;
 
     fn checked_pow_rem_euclid(
         self,
@@ -183,7 +206,8 @@ impl<
     > CheckedPowRemEuclid<Self, BigInt<Digit, SEPARATOR, SHIFT>>
     for &BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, CheckedPowRemEuclidError>;
+    type Output =
+        Result<BigInt<Digit, SEPARATOR, SHIFT>, CheckedPowRemEuclidError>;
 
     fn checked_pow_rem_euclid(
         self,
@@ -214,9 +238,14 @@ impl<
         const SHIFT: usize,
     > CheckedPowRemEuclid<Self, Self> for &BigInt<Digit, SEPARATOR, SHIFT>
 {
-    type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, CheckedPowRemEuclidError>;
+    type Output =
+        Result<BigInt<Digit, SEPARATOR, SHIFT>, CheckedPowRemEuclidError>;
 
-    fn checked_pow_rem_euclid(self, exponent: Self, divisor: Self) -> Self::Output {
+    fn checked_pow_rem_euclid(
+        self,
+        exponent: Self,
+        divisor: Self,
+    ) -> Self::Output {
         if divisor.is_zero() {
             Err(CheckedPowRemEuclidError::ZeroDivisor)
         } else {
@@ -275,7 +304,9 @@ impl<
                         result
                     }
                 } else if exponent_digit.is_one() {
-                    unsafe { base.checked_rem_euclid(divisor).unwrap_unchecked() }
+                    unsafe {
+                        base.checked_rem_euclid(divisor).unwrap_unchecked()
+                    }
                 } else {
                     Self::one()
                 }
@@ -290,7 +321,8 @@ impl<
                     exponent_digit_mask <<= 1;
                 }
                 exponent_digit_mask >>= 1;
-                let mut exponent_digits_iterator = exponent.digits.iter().rev().skip(1).peekable();
+                let mut exponent_digits_iterator =
+                    exponent.digits.iter().rev().skip(1).peekable();
                 loop {
                     while !exponent_digit_mask.is_zero() {
                         result = unsafe {
@@ -310,7 +342,9 @@ impl<
                     if exponent_digits_iterator.peek().is_none() {
                         break;
                     }
-                    exponent_digit = unsafe { *exponent_digits_iterator.next().unwrap_unchecked() };
+                    exponent_digit = unsafe {
+                        *exponent_digits_iterator.next().unwrap_unchecked()
+                    };
                     exponent_digit_mask = Digit::one() << (SHIFT - 1);
                 }
                 result
@@ -324,12 +358,12 @@ impl<
                             .unwrap_unchecked()
                     };
                 }
-                let exponent_window_digits = binary_digits_to_lesser_binary_base::<
-                    Digit,
-                    WindowDigit,
-                >(
-                    &exponent.digits, SHIFT, WINDOW_SHIFT
-                );
+                let exponent_window_digits =
+                    binary_digits_to_lesser_binary_base::<Digit, WindowDigit>(
+                        &exponent.digits,
+                        SHIFT,
+                        WINDOW_SHIFT,
+                    );
                 let mut result = Self::one();
                 for &digit in exponent_window_digits.iter().rev() {
                     for _ in 0..WINDOW_SHIFT {

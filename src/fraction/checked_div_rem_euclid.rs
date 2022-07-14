@@ -1,6 +1,9 @@
-use crate::big_int::{BigInt, EuclidDivisibleDigit, GcdDigit, MultiplicativeDigit};
+use crate::big_int::{
+    BigInt, EuclidDivisibleDigit, GcdDigit, MultiplicativeDigit,
+};
 use crate::traits::{
-    CheckedDivRemEuclid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Zeroable,
+    CheckedDivRemEuclid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
+    Zeroable,
 };
 
 use super::types::{normalize_components_moduli, Fraction};
@@ -17,12 +20,16 @@ impl<
     type Output = Option<(Component, Self)>;
 
     fn checked_div_rem_euclid(self, divisor: Self) -> Self::Output {
-        let (quotient, remainder_numerator) = (self.numerator * divisor.denominator.clone())
-            .checked_div_rem_euclid(divisor.numerator * self.denominator.clone())?;
-        let (remainder_numerator, remainder_denominator) = normalize_components_moduli(
-            remainder_numerator,
-            self.denominator * divisor.denominator,
-        );
+        let (quotient, remainder_numerator) = (self.numerator
+            * divisor.denominator.clone())
+        .checked_div_rem_euclid(
+            divisor.numerator * self.denominator.clone(),
+        )?;
+        let (remainder_numerator, remainder_denominator) =
+            normalize_components_moduli(
+                remainder_numerator,
+                self.denominator * divisor.denominator,
+            );
         Some((
             quotient,
             Self {
@@ -45,8 +52,8 @@ impl<
     type Output = Option<(Component, Self)>;
 
     fn checked_div_rem_euclid(self, divisor: Component) -> Self::Output {
-        let (quotient, remainder_numerator) =
-            (self.numerator).checked_div_rem_euclid(divisor * self.denominator.clone())?;
+        let (quotient, remainder_numerator) = (self.numerator)
+            .checked_div_rem_euclid(divisor * self.denominator.clone())?;
         let (remainder_numerator, remainder_denominator) =
             normalize_components_moduli(remainder_numerator, self.denominator);
         Some((
@@ -68,10 +75,14 @@ impl<
     type Output = Option<(Self, Fraction<Self>)>;
 
     fn checked_div_rem_euclid(self, divisor: Fraction<Self>) -> Self::Output {
-        let (quotient, remainder_numerator) =
-            (self * divisor.denominator.clone()).checked_div_rem_euclid(divisor.numerator)?;
+        let (quotient, remainder_numerator) = (self
+            * divisor.denominator.clone())
+        .checked_div_rem_euclid(divisor.numerator)?;
         let (remainder_numerator, remainder_denominator) =
-            normalize_components_moduli(remainder_numerator, divisor.denominator);
+            normalize_components_moduli(
+                remainder_numerator,
+                divisor.denominator,
+            );
         Some((
             quotient,
             Fraction::<Self> {

@@ -5,11 +5,14 @@ use super::types::Fraction;
 
 impl<Component: Clone + PartialEq> PartialEq for Fraction<Component> {
     fn eq(&self, other: &Self) -> bool {
-        self.numerator.eq(&other.numerator) && self.denominator.eq(&other.denominator)
+        self.numerator.eq(&other.numerator)
+            && self.denominator.eq(&other.denominator)
     }
 }
 
-impl<Component: Clone + PartialEq + Unitary> PartialEq<Component> for Fraction<Component> {
+impl<Component: Clone + PartialEq + Unitary> PartialEq<Component>
+    for Fraction<Component>
+{
     fn eq(&self, other: &Component) -> bool {
         self.denominator.is_one() && self.numerator.eq(other)
     }

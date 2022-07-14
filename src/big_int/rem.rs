@@ -11,9 +11,13 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Rem
     type Output = Self;
 
     fn rem(self, divisor: Self) -> Self::Output {
-        let (sign, digits) =
-            checked_rem::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
-                .expect(UNDEFINED_DIVISION_ERROR_MESSAGE);
+        let (sign, digits) = checked_rem::<Digit, SHIFT>(
+            self.sign,
+            &self.digits,
+            divisor.sign,
+            &divisor.digits,
+        )
+        .expect(UNDEFINED_DIVISION_ERROR_MESSAGE);
         Self::Output { sign, digits }
     }
 }
@@ -24,22 +28,30 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Rem
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
     fn rem(self, divisor: Self) -> Self::Output {
-        let (sign, digits) =
-            checked_rem::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
-                .expect(UNDEFINED_DIVISION_ERROR_MESSAGE);
+        let (sign, digits) = checked_rem::<Digit, SHIFT>(
+            self.sign,
+            &self.digits,
+            divisor.sign,
+            &divisor.digits,
+        )
+        .expect(UNDEFINED_DIVISION_ERROR_MESSAGE);
         Self::Output { sign, digits }
     }
 }
 
-impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Rem<&Self>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
+    Rem<&Self> for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
     fn rem(self, divisor: &Self) -> Self::Output {
-        let (sign, digits) =
-            checked_rem::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
-                .expect(UNDEFINED_DIVISION_ERROR_MESSAGE);
+        let (sign, digits) = checked_rem::<Digit, SHIFT>(
+            self.sign,
+            &self.digits,
+            divisor.sign,
+            &divisor.digits,
+        )
+        .expect(UNDEFINED_DIVISION_ERROR_MESSAGE);
         Self::Output { sign, digits }
     }
 }
@@ -50,9 +62,13 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
     fn rem(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        let (sign, digits) =
-            checked_rem::<Digit, SHIFT>(self.sign, &self.digits, divisor.sign, &divisor.digits)
-                .expect(UNDEFINED_DIVISION_ERROR_MESSAGE);
+        let (sign, digits) = checked_rem::<Digit, SHIFT>(
+            self.sign,
+            &self.digits,
+            divisor.sign,
+            &divisor.digits,
+        )
+        .expect(UNDEFINED_DIVISION_ERROR_MESSAGE);
         Self::Output { sign, digits }
     }
 }

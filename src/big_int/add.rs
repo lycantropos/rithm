@@ -9,8 +9,12 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Add
     type Output = Self;
 
     fn add(self, other: Self) -> Self::Output {
-        let (sign, digits) =
-            sum_components::<Digit, SHIFT>(self.sign, &self.digits, other.sign, &other.digits);
+        let (sign, digits) = sum_components::<Digit, SHIFT>(
+            self.sign,
+            &self.digits,
+            other.sign,
+            &other.digits,
+        );
         Self::Output { sign, digits }
     }
 }
@@ -21,8 +25,12 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize>
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
     fn add(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        let (sign, digits) =
-            sum_components::<Digit, SHIFT>(self.sign, &self.digits, other.sign, &other.digits);
+        let (sign, digits) = sum_components::<Digit, SHIFT>(
+            self.sign,
+            &self.digits,
+            other.sign,
+            &other.digits,
+        );
         Self::Output { sign, digits }
     }
 }
@@ -33,20 +41,28 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Add
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
     fn add(self, other: Self) -> Self::Output {
-        let (sign, digits) =
-            sum_components::<Digit, SHIFT>(self.sign, &self.digits, other.sign, &other.digits);
+        let (sign, digits) = sum_components::<Digit, SHIFT>(
+            self.sign,
+            &self.digits,
+            other.sign,
+            &other.digits,
+        );
         Self::Output { sign, digits }
     }
 }
 
-impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Add<&Self>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize>
+    Add<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 
     fn add(self, other: &Self) -> Self::Output {
-        let (sign, digits) =
-            sum_components::<Digit, SHIFT>(self.sign, &self.digits, other.sign, &other.digits);
+        let (sign, digits) = sum_components::<Digit, SHIFT>(
+            self.sign,
+            &self.digits,
+            other.sign,
+            &other.digits,
+        );
         Self::Output { sign, digits }
     }
 }

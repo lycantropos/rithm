@@ -1,13 +1,19 @@
 use std::ops::SubAssign;
 
 use crate::traits::{
-    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed, SubtractiveMagma,
+    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed,
+    SubtractiveMagma,
 };
 
 use super::types::{normalize_components_moduli, Fraction};
 
 impl<
-        Component: Clone + DivisivePartialMagma + GcdMagma + Signed + MultiplicativeMonoid + SubtractiveMagma,
+        Component: Clone
+            + DivisivePartialMagma
+            + GcdMagma
+            + Signed
+            + MultiplicativeMonoid
+            + SubtractiveMagma,
     > SubAssign for Fraction<Component>
 {
     fn sub_assign(&mut self, subtrahend: Self) {
@@ -20,7 +26,12 @@ impl<
 }
 
 impl<
-        Component: Clone + DivisivePartialMagma + GcdMagma + Signed + MultiplicativeMonoid + SubtractiveMagma,
+        Component: Clone
+            + DivisivePartialMagma
+            + GcdMagma
+            + Signed
+            + MultiplicativeMonoid
+            + SubtractiveMagma,
     > SubAssign<Component> for Fraction<Component>
 {
     fn sub_assign(&mut self, subtrahend: Component) {

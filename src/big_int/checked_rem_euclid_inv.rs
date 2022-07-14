@@ -3,8 +3,11 @@ use crate::traits::{CheckedDivRemEuclid, CheckedRemEuclidInv, Signed};
 use super::digits::ModularInvertibleDigit;
 use super::types::BigInt;
 
-impl<Digit: ModularInvertibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclidInv
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ModularInvertibleDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedRemEuclidInv for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<Self>;
 
@@ -13,8 +16,11 @@ impl<Digit: ModularInvertibleDigit, const SEPARATOR: char, const SHIFT: usize> C
     }
 }
 
-impl<Digit: ModularInvertibleDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedRemEuclidInv<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ModularInvertibleDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedRemEuclidInv<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<Self>;
 
@@ -45,18 +51,28 @@ impl<Digit: ModularInvertibleDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: ModularInvertibleDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedRemEuclidInv<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ModularInvertibleDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedRemEuclidInv<BigInt<Digit, SEPARATOR, SHIFT>>
+    for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
 
-    fn checked_rem_euclid_inv(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn checked_rem_euclid_inv(
+        self,
+        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
         self.clone().checked_rem_euclid_inv(&divisor)
     }
 }
 
-impl<Digit: ModularInvertibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclidInv
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ModularInvertibleDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedRemEuclidInv for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
 

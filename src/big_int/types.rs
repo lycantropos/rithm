@@ -11,7 +11,9 @@ pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
     pub(super) digits: Vec<Digit>,
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> BigInt<Digit, SEPARATOR, SHIFT> {
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    BigInt<Digit, SEPARATOR, SHIFT>
+{
     pub(crate) fn digits(&self) -> &[Digit] {
         &self.digits
     }
@@ -29,7 +31,9 @@ impl CheckedDivAsFloatError {
             CheckedDivAsFloatError::TooLarge => {
                 "Division result too large to be expressed as floating point."
             }
-            CheckedDivAsFloatError::ZeroDivision => "Division by zero is undefined.",
+            CheckedDivAsFloatError::ZeroDivision => {
+                "Division by zero is undefined."
+            }
         }
     }
 }
@@ -55,7 +59,9 @@ pub enum CheckedPowRemEuclidError {
 impl CheckedPowRemEuclidError {
     fn description(&self) -> &str {
         match self {
-            CheckedPowRemEuclidError::ZeroDivisor => "Divisor should not be zero.",
+            CheckedPowRemEuclidError::ZeroDivisor => {
+                "Divisor should not be zero."
+            }
             CheckedPowRemEuclidError::NonInvertibleBase => {
                 "Base is not invertible for the given divisor."
             }
@@ -85,8 +91,12 @@ pub enum ShlError {
 impl ShlError {
     fn description(&self) -> String {
         match self {
-            ShlError::NegativeShift => String::from("Shift by negative step is undefined."),
-            ShlError::OutOfMemory => String::from("Not enough memory for shift result."),
+            ShlError::NegativeShift => {
+                String::from("Shift by negative step is undefined.")
+            }
+            ShlError::OutOfMemory => {
+                String::from("Not enough memory for shift result.")
+            }
             ShlError::TooLarge => String::from("Too large shift step."),
         }
     }
@@ -112,7 +122,9 @@ pub enum ShrError {
 impl ShrError {
     fn description(&self) -> String {
         match self {
-            ShrError::NegativeShift => String::from("Shift by negative step is undefined."),
+            ShrError::NegativeShift => {
+                String::from("Shift by negative step is undefined.")
+            }
         }
     }
 }
@@ -138,7 +150,9 @@ pub enum TryFromFloatError {
 impl TryFromFloatError {
     fn description(&self) -> &str {
         match self {
-            TryFromFloatError::Infinity => "Conversion of infinity is undefined.",
+            TryFromFloatError::Infinity => {
+                "Conversion of infinity is undefined."
+            }
             TryFromFloatError::NaN => "Conversion of NaN is undefined.",
         }
     }
@@ -178,7 +192,9 @@ impl TryFromStringError {
             TryFromStringError::ConsecutiveSeparators => {
                 String::from("Consecutive separators found.")
             }
-            TryFromStringError::EndsWithSeparator => String::from("Should not end with separator."),
+            TryFromStringError::EndsWithSeparator => {
+                String::from("Should not end with separator.")
+            }
             TryFromStringError::InvalidDigit(character, base) => {
                 format!("Invalid digit in base {}: {:?}.", base, character)
             }
@@ -209,7 +225,9 @@ pub enum TryIntoFloatError {
 impl TryIntoFloatError {
     fn description(&self) -> &str {
         match self {
-            TryIntoFloatError::TooLarge => "Too large to convert to floating point.",
+            TryIntoFloatError::TooLarge => {
+                "Too large to convert to floating point."
+            }
         }
     }
 }

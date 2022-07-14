@@ -1,10 +1,19 @@
 use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
-use crate::traits::{CheckedDiv, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed};
+use crate::traits::{
+    CheckedDiv, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed,
+};
 
-use super::types::{normalize_components_moduli, normalize_components_sign, Fraction};
+use super::types::{
+    normalize_components_moduli, normalize_components_sign, Fraction,
+};
 
-impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed + MultiplicativeMonoid> CheckedDiv
-    for Fraction<Component>
+impl<
+        Component: Clone
+            + DivisivePartialMagma
+            + GcdMagma
+            + Signed
+            + MultiplicativeMonoid,
+    > CheckedDiv for Fraction<Component>
 {
     type Output = Option<Self>;
 
@@ -27,8 +36,13 @@ impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed + Multiplicativ
     }
 }
 
-impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed + MultiplicativeMonoid>
-    CheckedDiv<Component> for Fraction<Component>
+impl<
+        Component: Clone
+            + DivisivePartialMagma
+            + GcdMagma
+            + Signed
+            + MultiplicativeMonoid,
+    > CheckedDiv<Component> for Fraction<Component>
 {
     type Output = Option<Self>;
 
@@ -38,8 +52,10 @@ impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed + Multiplicativ
         }
         let (dividend_numerator, divisor_numerator) =
             normalize_components_moduli(self.numerator, divisor);
-        let (numerator, denominator) =
-            normalize_components_sign(dividend_numerator, self.denominator * divisor_numerator);
+        let (numerator, denominator) = normalize_components_sign(
+            dividend_numerator,
+            self.denominator * divisor_numerator,
+        );
         Some(Self {
             numerator,
             denominator,
@@ -47,8 +63,11 @@ impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed + Multiplicativ
     }
 }
 
-impl<Digit: GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDiv<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: GcdDigit + MultiplicativeDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDiv<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<Fraction<Self>>;
 
@@ -56,9 +75,12 @@ impl<Digit: GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: 
         if divisor.is_zero() {
             return None;
         }
-        let (dividend, divisor_numerator) = normalize_components_moduli(self, divisor.numerator);
-        let (numerator, denominator) =
-            normalize_components_sign(dividend * divisor.denominator, divisor_numerator);
+        let (dividend, divisor_numerator) =
+            normalize_components_moduli(self, divisor.numerator);
+        let (numerator, denominator) = normalize_components_sign(
+            dividend * divisor.denominator,
+            divisor_numerator,
+        );
         Some(Fraction::<Self> {
             numerator,
             denominator,

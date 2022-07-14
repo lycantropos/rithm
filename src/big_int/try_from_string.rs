@@ -12,25 +12,36 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
     BigInt<Digit, SEPARATOR, SHIFT>
 {
     const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
-        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
-        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
-        37, 37, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 37, 37, 37, 37, 37, 37, 37, 10, 11, 12, 13, 14, 15,
-        16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 37, 37, 37,
-        37, 37, 37, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-        30, 31, 32, 33, 34, 35, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
-        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
-        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
-        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
-        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
-        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
-        37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 0, 1, 2, 3, 4,
+        5, 6, 7, 8, 9, 37, 37, 37, 37, 37, 37, 37, 10, 11, 12, 13, 14, 15, 16,
+        17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
+        34, 35, 37, 37, 37, 37, 37, 37, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+        19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+        37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
     ];
 
-    pub(super) fn try_from_string(string: &str, mut base: u8) -> Result<Self, TryFromStringError> {
+    pub(super) fn try_from_string(
+        string: &str,
+        mut base: u8,
+    ) -> Result<Self, TryFromStringError> {
         debug_assert!(is_valid_shift::<Digit, SHIFT>());
-        debug_assert!(Self::ASCII_CODES_DIGIT_VALUES[SEPARATOR as usize] >= MAX_REPRESENTABLE_BASE);
         debug_assert!(
-            base == 0 || (MIN_REPRESENTABLE_BASE..=MAX_REPRESENTABLE_BASE).contains(&base)
+            Self::ASCII_CODES_DIGIT_VALUES[SEPARATOR as usize]
+                >= MAX_REPRESENTABLE_BASE
+        );
+        debug_assert!(
+            base == 0
+                || (MIN_REPRESENTABLE_BASE..=MAX_REPRESENTABLE_BASE)
+                    .contains(&base)
         );
         let mut characters = string.trim().chars().peekable();
         let sign = Self::parse_sign(&mut characters);
@@ -39,7 +50,10 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
         };
         Self::skip_prefix(&mut characters, base);
         Self::parse_digits(characters, base).map(|digits| {
-            let digits = digits_to_binary_base::<u8, Digit, SHIFT>(&digits, base as usize);
+            let digits = digits_to_binary_base::<u8, Digit, SHIFT>(
+                &digits,
+                base as usize,
+            );
             Self {
                 sign: sign * to_digits_sign(&digits),
                 digits,
@@ -75,7 +89,9 @@ impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
             if character != SEPARATOR {
                 let digit = Self::ASCII_CODES_DIGIT_VALUES[character as usize];
                 if digit >= base {
-                    return Err(TryFromStringError::InvalidDigit(character, base));
+                    return Err(TryFromStringError::InvalidDigit(
+                        character, base,
+                    ));
                 }
                 result.push(digit);
             } else if prev == SEPARATOR {

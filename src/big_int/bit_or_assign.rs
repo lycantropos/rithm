@@ -3,8 +3,11 @@ use std::ops::BitOrAssign;
 use super::digits::{bitwise_or_components, BitwiseDisjunctiveDigit};
 use super::types::BigInt;
 
-impl<Digit: BitwiseDisjunctiveDigit, const SEPARATOR: char, const SHIFT: usize> BitOrAssign
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: BitwiseDisjunctiveDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > BitOrAssign for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn bitor_assign(&mut self, other: Self) {
         (self.sign, self.digits) = bitwise_or_components::<Digit, SHIFT>(
@@ -16,8 +19,11 @@ impl<Digit: BitwiseDisjunctiveDigit, const SEPARATOR: char, const SHIFT: usize> 
     }
 }
 
-impl<Digit: BitwiseDisjunctiveDigit, const SEPARATOR: char, const SHIFT: usize> BitOrAssign<&Self>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: BitwiseDisjunctiveDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > BitOrAssign<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn bitor_assign(&mut self, other: &Self) {
         (self.sign, self.digits) = bitwise_or_components::<Digit, SHIFT>(

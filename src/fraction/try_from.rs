@@ -4,7 +4,9 @@ use crate::big_int::{BigInt, DigitConvertibleFromF64, ShiftableLeftDigit};
 use crate::contracts::is_signed;
 use crate::traits::{CheckedShl, FrExp, Maybe, Unitary};
 
-use super::types::{normalize_components_moduli, Fraction, FromFloatConversionError};
+use super::types::{
+    normalize_components_moduli, Fraction, FromFloatConversionError,
+};
 
 macro_rules! big_int_fraction_try_from_float_impl {
     ($($f:ty)*) => ($(

@@ -19,8 +19,8 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Sub
     }
 }
 
-impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> Sub<&Self>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize>
+    Sub<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 

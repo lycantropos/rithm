@@ -9,7 +9,8 @@ impl<Digit: InvertibleDigit, const SEPARATOR: char, const SHIFT: usize> Not
     type Output = Self;
 
     fn not(self) -> Self::Output {
-        let (sign, digits) = invert_components::<Digit, SHIFT>(self.sign, &self.digits);
+        let (sign, digits) =
+            invert_components::<Digit, SHIFT>(self.sign, &self.digits);
         Self { sign, digits }
     }
 }
@@ -20,7 +21,8 @@ impl<Digit: InvertibleDigit, const SEPARATOR: char, const SHIFT: usize> Not
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
     fn not(self) -> Self::Output {
-        let (sign, digits) = invert_components::<Digit, SHIFT>(self.sign, &self.digits);
+        let (sign, digits) =
+            invert_components::<Digit, SHIFT>(self.sign, &self.digits);
         Self::Output { sign, digits }
     }
 }

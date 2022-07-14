@@ -1,19 +1,28 @@
 use std::ops::Add;
 
 use crate::big_int::{AdditiveDigit, BigInt, GcdDigit, MultiplicativeDigit};
-use crate::traits::{AdditiveMonoid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed};
+use crate::traits::{
+    AdditiveMonoid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
+    Signed,
+};
 
 use super::types::{normalize_components_moduli, Fraction};
 
 impl<
-        Component: AdditiveMonoid + Clone + DivisivePartialMagma + GcdMagma + Signed + MultiplicativeMonoid,
+        Component: AdditiveMonoid
+            + Clone
+            + DivisivePartialMagma
+            + GcdMagma
+            + Signed
+            + MultiplicativeMonoid,
     > Add for Fraction<Component>
 {
     type Output = Self;
 
     fn add(self, other: Self) -> Self::Output {
         let (numerator, denominator) = normalize_components_moduli(
-            self.numerator * other.denominator.clone() + other.numerator * self.denominator.clone(),
+            self.numerator * other.denominator.clone()
+                + other.numerator * self.denominator.clone(),
             self.denominator * other.denominator,
         );
         Self::Output {
@@ -24,7 +33,12 @@ impl<
 }
 
 impl<
-        Component: AdditiveMonoid + Clone + DivisivePartialMagma + GcdMagma + Signed + MultiplicativeMonoid,
+        Component: AdditiveMonoid
+            + Clone
+            + DivisivePartialMagma
+            + GcdMagma
+            + Signed
+            + MultiplicativeMonoid,
     > Add<Component> for Fraction<Component>
 {
     type Output = Self;

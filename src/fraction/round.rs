@@ -1,8 +1,8 @@
 use std::cmp::Ordering;
 
 use crate::traits::{
-    AdditiveMonoid, CheckedDivRemEuclid, MultiplicativeMonoid, Parity, Round, Signed,
-    SubtractiveMagma, TieBreaking,
+    AdditiveMonoid, CheckedDivRemEuclid, MultiplicativeMonoid, Parity, Round,
+    Signed, SubtractiveMagma, TieBreaking,
 };
 
 use super::types::Fraction;

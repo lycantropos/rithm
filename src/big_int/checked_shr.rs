@@ -3,12 +3,16 @@ use std::mem::size_of;
 use crate::traits::{CheckedShr, DivRem, Signed};
 
 use super::digits::{
-    primitive_shift_digits_right, shift_digits_right, to_digits_sign, ShiftableRightDigit,
+    primitive_shift_digits_right, shift_digits_right, to_digits_sign,
+    ShiftableRightDigit,
 };
 use super::types::{BigInt, ShrError};
 
-impl<Digit: ShiftableRightDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ShiftableRightDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedShr for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<Self, ShrError>;
 
@@ -18,15 +22,21 @@ impl<Digit: ShiftableRightDigit, const SEPARATOR: char, const SHIFT: usize> Chec
         } else if self.is_zero() {
             Ok(self)
         } else {
-            let (sign, digits) =
-                shift_digits_right::<Digit, SHIFT>(self.sign, &self.digits, &shift.digits);
+            let (sign, digits) = shift_digits_right::<Digit, SHIFT>(
+                self.sign,
+                &self.digits,
+                &shift.digits,
+            );
             Ok(Self { sign, digits })
         }
     }
 }
 
-impl<Digit: ShiftableRightDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr<&Self>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ShiftableRightDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedShr<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<Self, ShrError>;
 
@@ -36,33 +46,49 @@ impl<Digit: ShiftableRightDigit, const SEPARATOR: char, const SHIFT: usize> Chec
         } else if self.is_zero() {
             Ok(self)
         } else {
-            let (sign, digits) =
-                shift_digits_right::<Digit, SHIFT>(self.sign, &self.digits, &shift.digits);
+            let (sign, digits) = shift_digits_right::<Digit, SHIFT>(
+                self.sign,
+                &self.digits,
+                &shift.digits,
+            );
             Ok(Self { sign, digits })
         }
     }
 }
 
-impl<Digit: ShiftableRightDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedShr<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ShiftableRightDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedShr<BigInt<Digit, SEPARATOR, SHIFT>>
+    for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShrError>;
 
-    fn checked_shr(self, shift: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn checked_shr(
+        self,
+        shift: BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
         if shift.is_negative() {
             Err(ShrError::NegativeShift)
         } else if self.is_zero() {
             Ok(self.clone())
         } else {
-            let (sign, digits) =
-                shift_digits_right::<Digit, SHIFT>(self.sign, &self.digits, &shift.digits);
+            let (sign, digits) = shift_digits_right::<Digit, SHIFT>(
+                self.sign,
+                &self.digits,
+                &shift.digits,
+            );
             Ok(BigInt::<Digit, SEPARATOR, SHIFT> { sign, digits })
         }
     }
 }
 
-impl<Digit: ShiftableRightDigit, const SEPARATOR: char, const SHIFT: usize> CheckedShr
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ShiftableRightDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedShr for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShrError>;
 
@@ -72,8 +98,11 @@ impl<Digit: ShiftableRightDigit, const SEPARATOR: char, const SHIFT: usize> Chec
         } else if self.is_zero() {
             Ok(self.clone())
         } else {
-            let (sign, digits) =
-                shift_digits_right::<Digit, SHIFT>(self.sign, &self.digits, &shift.digits);
+            let (sign, digits) = shift_digits_right::<Digit, SHIFT>(
+                self.sign,
+                &self.digits,
+                &shift.digits,
+            );
             Ok(BigInt::<Digit, SEPARATOR, SHIFT> { sign, digits })
         }
     }

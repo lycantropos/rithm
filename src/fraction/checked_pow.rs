@@ -3,7 +3,11 @@ use crate::traits::{CheckedPow, Signed, Unitary, Zeroable};
 use super::types::{normalize_components_sign, Fraction};
 
 impl<
-        Component: Clone + Signed + CheckedPow<Component, Output = Option<Component>> + Unitary + Zeroable,
+        Component: Clone
+            + Signed
+            + CheckedPow<Component, Output = Option<Component>>
+            + Unitary
+            + Zeroable,
     > CheckedPow<Component> for Fraction<Component>
 {
     type Output = Option<Self>;
@@ -30,7 +34,9 @@ impl<
                         .checked_pow(exponent.clone())
                         .unwrap_unchecked()
                 },
-                denominator: unsafe { self.denominator.checked_pow(exponent).unwrap_unchecked() },
+                denominator: unsafe {
+                    self.denominator.checked_pow(exponent).unwrap_unchecked()
+                },
             })
         }
     }

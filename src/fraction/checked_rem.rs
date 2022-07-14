@@ -1,5 +1,7 @@
 use crate::big_int::{BigInt, DivisibleDigit, GcdDigit, MultiplicativeDigit};
-use crate::traits::{CheckedRem, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Zeroable};
+use crate::traits::{
+    CheckedRem, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Zeroable,
+};
 
 use super::types::{normalize_components_moduli, Fraction};
 
@@ -64,7 +66,8 @@ impl<
             None
         } else {
             let (numerator, denominator) = normalize_components_moduli(
-                (self * divisor.denominator.clone()).checked_rem(divisor.numerator)?,
+                (self * divisor.denominator.clone())
+                    .checked_rem(divisor.numerator)?,
                 divisor.denominator,
             );
             Some(Fraction::<Self> {

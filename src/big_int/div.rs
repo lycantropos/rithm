@@ -23,8 +23,8 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div
     }
 }
 
-impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Div<&Self>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
+    Div<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 

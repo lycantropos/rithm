@@ -3,7 +3,8 @@ use crate::traits::{Endianness, FromBytes, Oppose, Unitary, Zeroable};
 use super::constants::MIDDLE_BYTE;
 use super::contracts::is_valid_shift;
 use super::digits::{
-    binary_digits_to_binary_base, negate_digits, to_digits_sign, BinaryDigitConvertibleToBinary,
+    binary_digits_to_binary_base, negate_digits, to_digits_sign,
+    BinaryDigitConvertibleToBinary,
 };
 use super::types::{BigInt, Sign};
 
@@ -30,7 +31,8 @@ where
             sign,
             digits: binary_digits_to_binary_base::<u8, Digit>(
                 &bytes[..bytes.len()
-                    - ((bytes.len() > 1 && bytes[bytes.len() - 1].is_zero()) as usize)],
+                    - ((bytes.len() > 1 && bytes[bytes.len() - 1].is_zero())
+                        as usize)],
                 u8::BITS as usize,
                 SHIFT,
             ),

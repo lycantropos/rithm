@@ -1,6 +1,9 @@
-use crate::big_int::{BigInt, EuclidDivisibleDigit, GcdDigit, MultiplicativeDigit};
+use crate::big_int::{
+    BigInt, EuclidDivisibleDigit, GcdDigit, MultiplicativeDigit,
+};
 use crate::traits::{
-    CheckedRemEuclid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Zeroable,
+    CheckedRemEuclid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
+    Zeroable,
 };
 
 use super::types::{normalize_components_moduli, Fraction};
@@ -19,7 +22,9 @@ impl<
     fn checked_rem_euclid(self, divisor: Self) -> Self::Output {
         let (numerator, denominator) = normalize_components_moduli(
             (self.numerator * divisor.denominator.clone())
-                .checked_rem_euclid(divisor.numerator * self.denominator.clone())?,
+                .checked_rem_euclid(
+                    divisor.numerator * self.denominator.clone(),
+                )?,
             self.denominator * divisor.denominator,
         );
         Some(Self {
@@ -66,7 +71,8 @@ impl<
             None
         } else {
             let (numerator, denominator) = normalize_components_moduli(
-                (self * divisor.denominator.clone()).checked_rem_euclid(divisor.numerator)?,
+                (self * divisor.denominator.clone())
+                    .checked_rem_euclid(divisor.numerator)?,
                 divisor.denominator,
             );
             Some(Fraction::<Self> {

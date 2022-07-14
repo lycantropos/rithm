@@ -16,8 +16,8 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign
     }
 }
 
-impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign<&Self>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize>
+    SubAssign<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn sub_assign(&mut self, subtrahend: &Self) {
         (self.sign, self.digits) = subtract_components::<Digit, SHIFT>(

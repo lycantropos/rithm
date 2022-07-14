@@ -3,8 +3,11 @@ use crate::traits::CheckedDivRemEuclid;
 use super::digits::{checked_div_rem_euclid, EuclidDivisibleDigit};
 use super::types::BigInt;
 
-impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRemEuclid
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: EuclidDivisibleDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivRemEuclid for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<(Self, Self)>;
 
@@ -16,7 +19,12 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
             &divisor.digits,
         )
         .map(
-            |(quotient_sign, quotient_digits, remainder_sign, remainder_digits)| {
+            |(
+                quotient_sign,
+                quotient_digits,
+                remainder_sign,
+                remainder_digits,
+            )| {
                 (
                     Self {
                         sign: quotient_sign,
@@ -32,8 +40,11 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
     }
 }
 
-impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRemEuclid<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: EuclidDivisibleDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivRemEuclid<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<(Self, Self)>;
 
@@ -45,7 +56,12 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
             &divisor.digits,
         )
         .map(
-            |(quotient_sign, quotient_digits, remainder_sign, remainder_digits)| {
+            |(
+                quotient_sign,
+                quotient_digits,
+                remainder_sign,
+                remainder_digits,
+            )| {
                 (
                     Self {
                         sign: quotient_sign,
@@ -61,15 +77,22 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: EuclidDivisibleDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>>
+    for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<(
         BigInt<Digit, SEPARATOR, SHIFT>,
         BigInt<Digit, SEPARATOR, SHIFT>,
     )>;
 
-    fn checked_div_rem_euclid(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn checked_div_rem_euclid(
+        self,
+        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
         checked_div_rem_euclid::<Digit, SHIFT>(
             self.sign,
             &self.digits,
@@ -77,7 +100,12 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
             &divisor.digits,
         )
         .map(
-            |(quotient_sign, quotient_digits, remainder_sign, remainder_digits)| {
+            |(
+                quotient_sign,
+                quotient_digits,
+                remainder_sign,
+                remainder_digits,
+            )| {
                 (
                     BigInt::<Digit, SEPARATOR, SHIFT> {
                         sign: quotient_sign,
@@ -93,8 +121,11 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRemEuclid
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: EuclidDivisibleDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivRemEuclid for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<(
         BigInt<Digit, SEPARATOR, SHIFT>,
@@ -109,7 +140,12 @@ impl<Digit: EuclidDivisibleDigit, const SEPARATOR: char, const SHIFT: usize> Che
             &divisor.digits,
         )
         .map(
-            |(quotient_sign, quotient_digits, remainder_sign, remainder_digits)| {
+            |(
+                quotient_sign,
+                quotient_digits,
+                remainder_sign,
+                remainder_digits,
+            )| {
                 (
                     BigInt::<Digit, SEPARATOR, SHIFT> {
                         sign: quotient_sign,

@@ -3,12 +3,16 @@ use std::convert::TryFrom;
 use crate::traits::Unitary;
 
 use super::digits::{
-    digits_from_finite_positive_improper_float, DigitConvertibleFromF64, FromStrDigit,
+    digits_from_finite_positive_improper_float, DigitConvertibleFromF64,
+    FromStrDigit,
 };
 use super::types::{BigInt, Sign, TryFromFloatError, TryFromStringError};
 
-impl<Digit: DigitConvertibleFromF64, const SEPARATOR: char, const SHIFT: usize> TryFrom<f64>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: DigitConvertibleFromF64,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > TryFrom<f64> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Error = TryFromFloatError;
 
@@ -28,14 +32,21 @@ impl<Digit: DigitConvertibleFromF64, const SEPARATOR: char, const SHIFT: usize> 
             }
             Ok(Self {
                 sign,
-                digits: digits_from_finite_positive_improper_float::<Digit, f64, SHIFT>(value),
+                digits: digits_from_finite_positive_improper_float::<
+                    Digit,
+                    f64,
+                    SHIFT,
+                >(value),
             })
         }
     }
 }
 
-impl<Digit: DigitConvertibleFromF64, const SEPARATOR: char, const SHIFT: usize> TryFrom<f32>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: DigitConvertibleFromF64,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > TryFrom<f32> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Error = TryFromFloatError;
 
@@ -44,8 +55,8 @@ impl<Digit: DigitConvertibleFromF64, const SEPARATOR: char, const SHIFT: usize> 
     }
 }
 
-impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize> TryFrom<&str>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: FromStrDigit, const SEPARATOR: char, const SHIFT: usize>
+    TryFrom<&str> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Error = TryFromStringError;
 

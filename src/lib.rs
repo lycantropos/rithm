@@ -8,18 +8,22 @@ use std::convert::{TryFrom, TryInto};
 
 use pyo3::basic::CompareOp;
 use pyo3::exceptions::*;
-use pyo3::prelude::{pyclass, pymethods, pymodule, PyModule, PyResult, Python};
+use pyo3::prelude::{
+    pyclass, pymethods, pymodule, PyModule, PyResult, Python,
+};
 use pyo3::type_object::PyTypeObject;
 use pyo3::types::{PyBytes, PyFloat, PyLong, PyString, PyType};
-use pyo3::{intern, AsPyPointer, IntoPy, Py, PyAny, PyErr, PyObject, PyRef, ToPyObject};
+use pyo3::{
+    intern, AsPyPointer, IntoPy, Py, PyAny, PyErr, PyObject, PyRef, ToPyObject,
+};
 use pyo3_ffi as ffi;
 
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 use crate::traits::{
-    Abs, BitLength, Ceil, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid, CheckedPow,
-    CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr, Endianness, Floor, FromBytes,
-    FromStrRadix, Gcd, IsPowerOfTwo, Parity, Round, Signed, TieBreaking, ToBytes, Trunc, Unitary,
-    Zeroable,
+    Abs, BitLength, Ceil, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid,
+    CheckedPow, CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr,
+    Endianness, Floor, FromBytes, FromStrRadix, Gcd, IsPowerOfTwo, Parity,
+    Round, Signed, TieBreaking, ToBytes, Trunc, Unitary, Zeroable,
 };
 
 pub mod big_int;
@@ -84,7 +88,8 @@ impl PyEndianness {
 #[pymethods]
 impl PyTieBreaking {
     #[classattr]
-    const AWAY_FROM_ZERO: PyTieBreaking = PyTieBreaking(TieBreaking::AwayFromZero);
+    const AWAY_FROM_ZERO: PyTieBreaking =
+        PyTieBreaking(TieBreaking::AwayFromZero);
     #[classattr]
     const TO_EVEN: PyTieBreaking = PyTieBreaking(TieBreaking::ToEven);
     #[classattr]
@@ -113,7 +118,9 @@ impl PyInt {
             None => Ok(PyInt(BigInt::zero())),
             Some(value) => {
                 let py = value.py();
-                if _base.is_some() || value.is_instance(PyString::type_object(py))? {
+                if _base.is_some()
+                    || value.is_instance(PyString::type_object(py))?
+                {
                     let base = match _base {
                         Some(base) => {
                             base.extract::<u32>().or(Err(PyValueError::new_err(format!(
@@ -125,22 +132,28 @@ impl PyInt {
                         }
                         None => 10,
                     };
-                    match BigInt::from_str_radix(value.extract::<&str>()?, base) {
+                    match BigInt::from_str_radix(
+                        value.extract::<&str>()?,
+                        base,
+                    ) {
                         Ok(value) => Ok(PyInt(value)),
-                        Err(reason) => Err(PyValueError::new_err(reason.to_string())),
+                        Err(reason) => {
+                            Err(PyValueError::new_err(reason.to_string()))
+                        }
                     }
                 } else if value.is_instance(PyFloat::type_object(py))? {
                     Ok(PyInt(
-                        BigInt::try_from(value.extract::<&PyFloat>()?.value()).map_err(
-                            |reason| match reason {
+                        BigInt::try_from(value.extract::<&PyFloat>()?.value())
+                            .map_err(|reason| match reason {
                                 big_int::TryFromFloatError::Infinity => {
-                                    PyOverflowError::new_err(reason.to_string())
+                                    PyOverflowError::new_err(
+                                        reason.to_string(),
+                                    )
                                 }
                                 big_int::TryFromFloatError::NaN => {
                                     PyValueError::new_err(reason.to_string())
                                 }
-                            },
-                        )?,
+                            })?,
                     ))
                 } else {
                     Ok(PyInt(try_py_integral_to_big_int(value)?))
@@ -154,7 +167,11 @@ impl PyInt {
     }
 
     #[classmethod]
-    fn from_bytes(_cls: &PyType, mut bytes: Vec<u8>, endianness: PyEndianness) -> PyInt {
+    fn from_bytes(
+        _cls: &PyType,
+        mut bytes: Vec<u8>,
+        endianness: PyEndianness,
+    ) -> PyInt {
         PyInt(BigInt::from_bytes(bytes.as_mut_slice(), endianness.0))
     }
 
@@ -214,8 +231,11 @@ impl PyInt {
     fn __divmod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
         match try_py_any_to_maybe_big_int(divisor)? {
-            Some(divisor) => try_divmod(&self.0, divisor)
-                .map(|(quotient, remainder)| (PyInt(quotient), PyInt(remainder)).into_py(py)),
+            Some(divisor) => {
+                try_divmod(&self.0, divisor).map(|(quotient, remainder)| {
+                    (PyInt(quotient), PyInt(remainder)).into_py(py)
+                })
+            }
             None => Ok(py.NotImplemented()),
         }
     }
@@ -234,15 +254,15 @@ impl PyInt {
     fn __floordiv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
         match try_py_any_to_maybe_big_int(divisor)? {
-            Some(divisor) => {
-                try_floordiv(&self.0, &divisor).map(|result| PyInt(result).into_py(py))
-            }
+            Some(divisor) => try_floordiv(&self.0, &divisor)
+                .map(|result| PyInt(result).into_py(py)),
             None => Ok(py.NotImplemented()),
         }
     }
 
     fn __getstate__(&self, py: Python) -> PyObject {
-        PyBytes::new(py, &self.0.to_bytes(PICKLE_SERIALIZATION_ENDIANNESS)).to_object(py)
+        PyBytes::new(py, &self.0.to_bytes(PICKLE_SERIALIZATION_ENDIANNESS))
+            .to_object(py)
     }
 
     fn __hash__(&self) -> ffi::Py_hash_t {
@@ -264,7 +284,8 @@ impl PyInt {
     fn __lshift__(&self, shift: &PyAny) -> PyResult<PyObject> {
         let py = shift.py();
         match try_py_any_to_maybe_big_int(shift)? {
-            Some(shift) => try_lshift(&self.0, shift).map(|result| PyInt(result).into_py(py)),
+            Some(shift) => try_lshift(&self.0, shift)
+                .map(|result| PyInt(result).into_py(py)),
             None => Ok(py.NotImplemented()),
         }
     }
@@ -272,7 +293,8 @@ impl PyInt {
     fn __mod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
         match try_py_any_to_maybe_big_int(divisor)? {
-            Some(divisor) => try_mod(&self.0, divisor).map(|result| PyInt(result).into_py(py)),
+            Some(divisor) => try_mod(&self.0, divisor)
+                .map(|result| PyInt(result).into_py(py)),
             None => Ok(py.NotImplemented()),
         }
     }
@@ -303,19 +325,28 @@ impl PyInt {
         slf
     }
 
-    fn __pow__(&self, exponent: &PyAny, divisor: Option<&PyAny>) -> PyResult<PyObject> {
+    fn __pow__(
+        &self,
+        exponent: &PyAny,
+        divisor: Option<&PyAny>,
+    ) -> PyResult<PyObject> {
         let py = exponent.py();
         match try_py_any_to_maybe_big_int(exponent)? {
             Some(exponent) => match divisor {
                 Some(divisor) => match try_py_any_to_maybe_big_int(divisor)? {
-                    Some(divisor) => try_pow_mod(&self.0, exponent, divisor, py),
+                    Some(divisor) => {
+                        try_pow_mod(&self.0, exponent, divisor, py)
+                    }
                     None => Ok(py.NotImplemented()),
                 },
                 None => {
                     if exponent.is_negative() {
                         try_pow_negative_exponent(self.0.clone(), exponent, py)
                     } else {
-                        Ok(PyInt(pow_non_negative_exponent(&self.0, &exponent)).into_py(py))
+                        Ok(PyInt(pow_non_negative_exponent(
+                            &self.0, &exponent,
+                        ))
+                        .into_py(py))
                     }
                 }
             },
@@ -344,8 +375,11 @@ impl PyInt {
     fn __rdivmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
         let py = dividend.py();
         if dividend.is_instance(PyLong::type_object(py))? {
-            try_divmod(&try_py_long_to_big_int(dividend)?, &self.0)
-                .map(|(quotient, remainder)| (PyInt(quotient), PyInt(remainder)).into_py(py))
+            try_divmod(&try_py_long_to_big_int(dividend)?, &self.0).map(
+                |(quotient, remainder)| {
+                    (PyInt(quotient), PyInt(remainder)).into_py(py)
+                },
+            )
         } else {
             Ok(py.NotImplemented())
         }
@@ -411,7 +445,11 @@ impl PyInt {
         }
     }
 
-    fn __round__(&self, digits: Option<&PyLong>, py: Python) -> PyResult<Self> {
+    fn __round__(
+        &self,
+        digits: Option<&PyLong>,
+        py: Python,
+    ) -> PyResult<Self> {
         Ok(match digits {
             Some(digits) => {
                 if digits.lt(0.into_py(py))? {
@@ -420,7 +458,10 @@ impl PyInt {
                             .checked_pow(-try_py_long_to_big_int(digits)?)
                             .unwrap_unchecked()
                     };
-                    PyInt(&self.0 - try_mod_to_near(&self.0, &ten_to_digits_power)?)
+                    PyInt(
+                        &self.0
+                            - try_mod_to_near(&self.0, &ten_to_digits_power)?,
+                    )
                 } else {
                     self.clone()
                 }
@@ -429,7 +470,11 @@ impl PyInt {
         })
     }
 
-    fn __rpow__(&self, base: &PyAny, divisor: Option<&PyAny>) -> PyResult<PyObject> {
+    fn __rpow__(
+        &self,
+        base: &PyAny,
+        divisor: Option<&PyAny>,
+    ) -> PyResult<PyObject> {
         let py = base.py();
         let base = if base.is_instance(PyLong::type_object(py))? {
             try_py_long_to_big_int(base)?
@@ -445,7 +490,8 @@ impl PyInt {
                 if self.0.is_negative() {
                     try_pow_negative_exponent(base, self.0.clone(), py)
                 } else {
-                    Ok(PyInt(pow_non_negative_exponent(&base, &self.0)).into_py(py))
+                    Ok(PyInt(pow_non_negative_exponent(&base, &self.0))
+                        .into_py(py))
                 }
             }
         }
@@ -464,7 +510,8 @@ impl PyInt {
     fn __rshift__(&self, shift: &PyAny) -> PyResult<PyObject> {
         let py = shift.py();
         match try_py_any_to_maybe_big_int(shift)? {
-            Some(shift) => try_rshift(&self.0, shift).map(|result| PyInt(result).into_py(py)),
+            Some(shift) => try_rshift(&self.0, shift)
+                .map(|result| PyInt(result).into_py(py)),
             None => Ok(py.NotImplemented()),
         }
     }
@@ -502,7 +549,10 @@ impl PyInt {
             .extract::<&PyBytes>(py)
             .and_then(|py_bytes| py_bytes.extract::<Vec<u8>>())
             .map(|bytes| {
-                self.0 = BigInt::from_bytes(&bytes, PICKLE_SERIALIZATION_ENDIANNESS);
+                self.0 = BigInt::from_bytes(
+                    &bytes,
+                    PICKLE_SERIALIZATION_ENDIANNESS,
+                );
             })
     }
 
@@ -521,9 +571,8 @@ impl PyInt {
     fn __truediv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
         match try_py_any_to_maybe_big_int(divisor)? {
-            Some(divisor) => {
-                try_truediv(self.0.clone(), divisor).map(|result| PyFraction(result).into_py(py))
-            }
+            Some(divisor) => try_truediv(self.0.clone(), divisor)
+                .map(|result| PyFraction(result).into_py(py)),
             None => Ok(py.NotImplemented()),
         }
     }
@@ -582,19 +631,33 @@ fn try_floordiv(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
 }
 
 #[inline]
-fn try_lshift<Base: CheckedShl<Shift, Output = Result<Value, big_int::ShlError>>, Shift, Value>(
+fn try_lshift<
+    Base: CheckedShl<Shift, Output = Result<Value, big_int::ShlError>>,
+    Shift,
+    Value,
+>(
     base: Base,
     shift: Shift,
 ) -> PyResult<Value> {
     base.checked_shl(shift).map_err(|reason| match reason {
-        big_int::ShlError::NegativeShift => PyValueError::new_err(reason.to_string()),
-        big_int::ShlError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
-        big_int::ShlError::TooLarge => PyOverflowError::new_err(reason.to_string()),
+        big_int::ShlError::NegativeShift => {
+            PyValueError::new_err(reason.to_string())
+        }
+        big_int::ShlError::OutOfMemory => {
+            PyMemoryError::new_err(reason.to_string())
+        }
+        big_int::ShlError::TooLarge => {
+            PyOverflowError::new_err(reason.to_string())
+        }
     })
 }
 
 #[inline]
-fn try_mod<Dividend: CheckedRemEuclid<Divisor, Output = Option<Value>>, Divisor, Value>(
+fn try_mod<
+    Dividend: CheckedRemEuclid<Divisor, Output = Option<Value>>,
+    Divisor,
+    Value,
+>(
     dividend: Dividend,
     divisor: Divisor,
 ) -> PyResult<Value> {
@@ -608,20 +671,26 @@ fn try_mod<Dividend: CheckedRemEuclid<Divisor, Output = Option<Value>>, Divisor,
 
 #[inline]
 fn try_mod_to_near(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
-    let (quotient, remainder) = match dividend.checked_div_rem_euclid(divisor) {
+    let (quotient, remainder) = match dividend.checked_div_rem_euclid(divisor)
+    {
         Some((quotient, remainder)) => Ok((quotient, remainder)),
         None => Err(PyZeroDivisionError::new_err(
             UNDEFINED_DIVISION_ERROR_MESSAGE,
         )),
     }?;
-    let double_remainder =
-        (&remainder)
-            .checked_shl(BigInt::one())
-            .map_err(|reason| match reason {
-                big_int::ShlError::NegativeShift => PyValueError::new_err(reason.to_string()),
-                big_int::ShlError::OutOfMemory => PyMemoryError::new_err(reason.to_string()),
-                big_int::ShlError::TooLarge => PyOverflowError::new_err(reason.to_string()),
-            })?;
+    let double_remainder = (&remainder).checked_shl(BigInt::one()).map_err(
+        |reason| match reason {
+            big_int::ShlError::NegativeShift => {
+                PyValueError::new_err(reason.to_string())
+            }
+            big_int::ShlError::OutOfMemory => {
+                PyMemoryError::new_err(reason.to_string())
+            }
+            big_int::ShlError::TooLarge => {
+                PyOverflowError::new_err(reason.to_string())
+            }
+        },
+    )?;
     let greater_than_half = if divisor.is_positive() {
         &double_remainder > divisor
     } else {
@@ -644,7 +713,11 @@ fn pow_non_negative_exponent(base: &BigInt, exponent: &BigInt) -> BigInt {
 }
 
 #[inline]
-fn try_pow_negative_exponent(base: BigInt, exponent: BigInt, py: Python) -> PyResult<PyObject> {
+fn try_pow_negative_exponent(
+    base: BigInt,
+    exponent: BigInt,
+    py: Python,
+) -> PyResult<PyObject> {
     debug_assert!(exponent.is_negative());
     match Fraction::from(base).checked_pow(exponent) {
         Some(power) => Ok(PyFraction(power).into_py(py)),
@@ -673,12 +746,18 @@ fn try_pow_mod<
 }
 
 #[inline]
-fn try_rshift<Base: CheckedShr<Shift, Output = Result<Value, big_int::ShrError>>, Shift, Value>(
+fn try_rshift<
+    Base: CheckedShr<Shift, Output = Result<Value, big_int::ShrError>>,
+    Shift,
+    Value,
+>(
     base: Base,
     shift: Shift,
 ) -> PyResult<Value> {
     base.checked_shr(shift).map_err(|reason| match reason {
-        big_int::ShrError::NegativeShift => PyValueError::new_err(reason.to_string()),
+        big_int::ShrError::NegativeShift => {
+            PyValueError::new_err(reason.to_string())
+        }
     })
 }
 
@@ -699,11 +778,16 @@ fn try_py_any_to_maybe_fraction(value: &PyAny) -> PyResult<Option<Fraction>> {
     let py = value.py();
     match value.getattr(intern!(py, "numerator")) {
         Ok(numerator) => match try_py_any_to_maybe_big_int(numerator)? {
-            Some(numerator) => match value.getattr(intern!(py, "denominator")) {
-                Ok(denominator) => match try_py_any_to_maybe_big_int(denominator)? {
-                    Some(denominator) => try_truediv(numerator, denominator).map(Some),
-                    None => Ok(None),
-                },
+            Some(numerator) => match value.getattr(intern!(py, "denominator"))
+            {
+                Ok(denominator) => {
+                    match try_py_any_to_maybe_big_int(denominator)? {
+                        Some(denominator) => {
+                            try_truediv(numerator, denominator).map(Some)
+                        }
+                        None => Ok(None),
+                    }
+                }
                 Err(_) => Ok(None),
             },
             None => Ok(None),
@@ -735,10 +819,12 @@ fn try_py_long_to_big_int(value: &PyAny) -> PyResult<BigInt> {
             Ordering::Less => Err(PyErr::fetch(py)),
             Ordering::Equal => Ok(BigInt::zero()),
             Ordering::Greater => {
-                let bytes_count = (bits_count as usize) / (u8::BITS as usize) + 1;
+                let bytes_count =
+                    (bits_count as usize) / (u8::BITS as usize) + 1;
                 let mut buffer = vec![0u8; bytes_count];
                 if ffi::_PyLong_AsByteArray(
-                    Py::<PyLong>::from_owned_ptr(py, value).as_ptr() as *mut ffi::PyLongObject,
+                    Py::<PyLong>::from_owned_ptr(py, value).as_ptr()
+                        as *mut ffi::PyLongObject,
                     buffer.as_mut_ptr(),
                     buffer.len(),
                     1,
@@ -770,7 +856,10 @@ fn try_truediv(dividend: BigInt, divisor: BigInt) -> PyResult<Fraction> {
 #[pymethods]
 impl PyFraction {
     #[new]
-    fn new(_numerator: Option<&PyAny>, _denominator: Option<&PyAny>) -> PyResult<Self> {
+    fn new(
+        _numerator: Option<&PyAny>,
+        _denominator: Option<&PyAny>,
+    ) -> PyResult<Self> {
         match _denominator {
             Some(denominator) => match _numerator {
                 Some(numerator) => {
@@ -842,7 +931,10 @@ impl PyFraction {
     fn __add__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
         if other.is_instance(PyFraction::type_object(py))? {
-            Ok(PyFraction(self.0.clone() + other.extract::<PyFraction>()?.0).into_py(py))
+            Ok(
+                PyFraction(self.0.clone() + other.extract::<PyFraction>()?.0)
+                    .into_py(py),
+            )
         } else {
             self.__radd__(other)
         }
@@ -860,15 +952,16 @@ impl PyFraction {
         let py = divisor.py();
         if divisor.is_instance(PyFraction::type_object(py))? {
             let divisor = divisor.extract::<PyFraction>()?.0;
-            try_divmod(self.0.clone(), divisor)
-                .map(|(quotient, remainder)| (PyInt(quotient), PyFraction(remainder)).into_py(py))
+            try_divmod(self.0.clone(), divisor).map(|(quotient, remainder)| {
+                (PyInt(quotient), PyFraction(remainder)).into_py(py)
+            })
         } else {
             match try_py_any_to_maybe_big_int(divisor)? {
-                Some(divisor) => {
-                    try_divmod(self.0.clone(), divisor).map(|(quotient, remainder)| {
+                Some(divisor) => try_divmod(self.0.clone(), divisor).map(
+                    |(quotient, remainder)| {
                         (PyInt(quotient), PyFraction(remainder)).into_py(py)
-                    })
-                }
+                    },
+                ),
                 None => Ok(py.NotImplemented()),
             }
         }
@@ -900,12 +993,14 @@ impl PyFraction {
             }
         } else {
             match try_py_any_to_maybe_big_int(divisor)? {
-                Some(divisor) => match self.0.clone().checked_div_euclid(divisor) {
-                    Some(quotient) => Ok(PyInt(quotient).into_py(py)),
-                    None => Err(PyZeroDivisionError::new_err(
-                        UNDEFINED_DIVISION_ERROR_MESSAGE,
-                    )),
-                },
+                Some(divisor) => {
+                    match self.0.clone().checked_div_euclid(divisor) {
+                        Some(quotient) => Ok(PyInt(quotient).into_py(py)),
+                        None => Err(PyZeroDivisionError::new_err(
+                            UNDEFINED_DIVISION_ERROR_MESSAGE,
+                        )),
+                    }
+                }
                 None => Ok(py.NotImplemented()),
             }
         }
@@ -923,7 +1018,10 @@ impl PyFraction {
         let inverted_denominator = unsafe {
             self.0
                 .denominator()
-                .checked_pow_rem_euclid(BigInt::from(HASH_MODULUS - 2), BigInt::from(HASH_MODULUS))
+                .checked_pow_rem_euclid(
+                    BigInt::from(HASH_MODULUS - 2),
+                    BigInt::from(HASH_MODULUS),
+                )
                 .unwrap_unchecked()
         };
         let result = if inverted_denominator.is_zero() {
@@ -964,12 +1062,16 @@ impl PyFraction {
             }
         } else {
             match try_py_any_to_maybe_big_int(divisor)? {
-                Some(divisor) => match self.0.clone().checked_rem_euclid(divisor) {
-                    Some(remainder) => Ok(PyFraction(remainder).into_py(py)),
-                    None => Err(PyZeroDivisionError::new_err(
-                        UNDEFINED_DIVISION_ERROR_MESSAGE,
-                    )),
-                },
+                Some(divisor) => {
+                    match self.0.clone().checked_rem_euclid(divisor) {
+                        Some(remainder) => {
+                            Ok(PyFraction(remainder).into_py(py))
+                        }
+                        None => Err(PyZeroDivisionError::new_err(
+                            UNDEFINED_DIVISION_ERROR_MESSAGE,
+                        )),
+                    }
+                }
                 None => Ok(py.NotImplemented()),
             }
         }
@@ -978,7 +1080,10 @@ impl PyFraction {
     fn __mul__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
         if other.is_instance(PyFraction::type_object(py))? {
-            Ok(PyFraction(self.0.clone() * other.extract::<PyFraction>()?.0).into_py(py))
+            Ok(
+                PyFraction(self.0.clone() * other.extract::<PyFraction>()?.0)
+                    .into_py(py),
+            )
         } else {
             self.__rmul__(other)
         }
@@ -1020,8 +1125,11 @@ impl PyFraction {
     fn __rdivmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
         let py = dividend.py();
         match try_py_any_to_maybe_big_int(dividend)? {
-            Some(dividend) => try_divmod(dividend, self.0.clone())
-                .map(|(quotient, remainder)| (PyInt(quotient), PyFraction(remainder)).into_py(py)),
+            Some(dividend) => try_divmod(dividend, self.0.clone()).map(
+                |(quotient, remainder)| {
+                    (PyInt(quotient), PyFraction(remainder)).into_py(py)
+                },
+            ),
             None => Ok(py.NotImplemented()),
         }
     }
@@ -1037,7 +1145,8 @@ impl PyFraction {
     fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<PyObject> {
         let py = other.py();
         if other.is_instance(PyFraction::type_object(py))? {
-            Ok(compare(&self.0, &other.extract::<PyFraction>()?.0, op).into_py(py))
+            Ok(compare(&self.0, &other.extract::<PyFraction>()?.0, op)
+                .into_py(py))
         } else {
             match try_py_any_to_maybe_big_int(other)? {
                 Some(other) => Ok(compare(&self.0, &other, op).into_py(py)),
@@ -1049,12 +1158,14 @@ impl PyFraction {
     fn __rfloordiv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
         let py = dividend.py();
         match try_py_any_to_maybe_big_int(dividend)? {
-            Some(dividend) => match dividend.checked_div_euclid(self.0.clone()) {
-                Some(quotient) => Ok(PyInt(quotient).into_py(py)),
-                None => Err(PyZeroDivisionError::new_err(
-                    UNDEFINED_DIVISION_ERROR_MESSAGE,
-                )),
-            },
+            Some(dividend) => {
+                match dividend.checked_div_euclid(self.0.clone()) {
+                    Some(quotient) => Ok(PyInt(quotient).into_py(py)),
+                    None => Err(PyZeroDivisionError::new_err(
+                        UNDEFINED_DIVISION_ERROR_MESSAGE,
+                    )),
+                }
+            }
             None => Ok(py.NotImplemented()),
         }
     }
@@ -1062,12 +1173,14 @@ impl PyFraction {
     fn __rmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
         let py = dividend.py();
         match try_py_any_to_maybe_big_int(dividend)? {
-            Some(dividend) => match dividend.checked_rem_euclid(self.0.clone()) {
-                Some(remainder) => Ok(PyFraction(remainder).into_py(py)),
-                None => Err(PyZeroDivisionError::new_err(
-                    UNDEFINED_DIVISION_ERROR_MESSAGE,
-                )),
-            },
+            Some(dividend) => {
+                match dividend.checked_rem_euclid(self.0.clone()) {
+                    Some(remainder) => Ok(PyFraction(remainder).into_py(py)),
+                    None => Err(PyZeroDivisionError::new_err(
+                        UNDEFINED_DIVISION_ERROR_MESSAGE,
+                    )),
+                }
+            }
             None => Ok(py.NotImplemented()),
         }
     }
@@ -1080,7 +1193,11 @@ impl PyFraction {
         }
     }
 
-    fn __round__(&self, digits: Option<&PyLong>, py: Python) -> PyResult<PyObject> {
+    fn __round__(
+        &self,
+        digits: Option<&PyLong>,
+        py: Python,
+    ) -> PyResult<PyObject> {
         match digits {
             Some(digits) => {
                 let digits = try_py_long_to_big_int(digits)?;
@@ -1092,7 +1209,8 @@ impl PyFraction {
                 if digits.is_positive() {
                     Ok(PyFraction(unsafe {
                         Fraction::new(
-                            (self.0.clone() * shift.clone()).round(TieBreaking::ToEven),
+                            (self.0.clone() * shift.clone())
+                                .round(TieBreaking::ToEven),
                             shift,
                         )
                         .unwrap_unchecked()
@@ -1100,19 +1218,26 @@ impl PyFraction {
                     .into_py(py))
                 } else {
                     Ok(PyFraction(Fraction::from(
-                        (self.0.clone() / shift.clone()).round(TieBreaking::ToEven) * shift,
+                        (self.0.clone() / shift.clone())
+                            .round(TieBreaking::ToEven)
+                            * shift,
                     ))
                     .into_py(py))
                 }
             }
-            None => Ok(PyInt(self.0.clone().round(TieBreaking::ToEven)).into_py(py)),
+            None => {
+                Ok(PyInt(self.0.clone().round(TieBreaking::ToEven))
+                    .into_py(py))
+            }
         }
     }
 
     fn __rsub__(&self, subtrahend: &PyAny) -> PyResult<PyObject> {
         let py = subtrahend.py();
         match try_py_any_to_maybe_big_int(subtrahend)? {
-            Some(subtrahend) => Ok(PyFraction(subtrahend - self.0.clone()).into_py(py)),
+            Some(subtrahend) => {
+                Ok(PyFraction(subtrahend - self.0.clone()).into_py(py))
+            }
             None => Ok(py.NotImplemented()),
         }
     }
@@ -1130,7 +1255,11 @@ impl PyFraction {
         }
     }
 
-    fn __setstate__(&mut self, state: (PyObject, PyObject), py: Python) -> PyResult<()> {
+    fn __setstate__(
+        &mut self,
+        state: (PyObject, PyObject),
+        py: Python,
+    ) -> PyResult<()> {
         let (numerator_state, denominator_state) = state;
         let mut numerator = PyInt(BigInt::zero());
         numerator.__setstate__(numerator_state, py)?;
@@ -1154,10 +1283,17 @@ impl PyFraction {
     fn __sub__(&self, minuend: &PyAny) -> PyResult<PyObject> {
         let py = minuend.py();
         if minuend.is_instance(PyFraction::type_object(py))? {
-            Ok(PyFraction(self.0.clone() - minuend.extract::<PyFraction>()?.0).into_py(py))
+            Ok(
+                PyFraction(
+                    self.0.clone() - minuend.extract::<PyFraction>()?.0,
+                )
+                .into_py(py),
+            )
         } else {
             match try_py_any_to_maybe_big_int(minuend)? {
-                Some(minuend) => Ok(PyFraction(self.0.clone() - minuend).into_py(py)),
+                Some(minuend) => {
+                    Ok(PyFraction(self.0.clone() - minuend).into_py(py))
+                }
                 None => Ok(py.NotImplemented()),
             }
         }
@@ -1199,8 +1335,11 @@ fn hash(value: &BigInt) -> usize {
         return if value.is_negative() {
             usize::MAX
                 - unsafe {
-                    usize::try_from(value.digits()[0] + Digit::from(value.digits()[0].is_one()))
-                        .unwrap_unchecked()
+                    usize::try_from(
+                        value.digits()[0]
+                            + Digit::from(value.digits()[0].is_one()),
+                    )
+                    .unwrap_unchecked()
                 }
                 + 1
         } else {
@@ -1209,7 +1348,8 @@ fn hash(value: &BigInt) -> usize {
     };
     let mut result = 0;
     for &position in value.digits().iter().rev() {
-        result = ((result << BINARY_SHIFT) & HASH_MODULUS) | (result >> (HASH_BITS - BINARY_SHIFT));
+        result = ((result << BINARY_SHIFT) & HASH_MODULUS)
+            | (result >> (HASH_BITS - BINARY_SHIFT));
         result += unsafe { usize::try_from(position).unwrap_unchecked() };
         if result >= HASH_MODULUS {
             result -= HASH_MODULUS;

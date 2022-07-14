@@ -3,10 +3,12 @@ use std::convert::TryFrom;
 use crate::traits::{LdExp, Signed, Zeroable};
 
 use super::digits::{
-    fraction_exponent_digits, maybe_reduce_digits, BinaryDigitConvertibleToFloat, MaybeReducibleTo,
+    fraction_exponent_digits, maybe_reduce_digits,
+    BinaryDigitConvertibleToFloat, MaybeReducibleTo,
 };
 use super::types::{
-    BigInt, TryIntoFloatError, TryIntoSignedIntegerError, TryIntoUnsignedIntegerError,
+    BigInt, TryIntoFloatError, TryIntoSignedIntegerError,
+    TryIntoUnsignedIntegerError,
 };
 
 macro_rules! float_try_from_big_int {

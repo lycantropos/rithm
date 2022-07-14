@@ -1,4 +1,6 @@
-use super::digits::{non_zero_value_to_digits, value_to_sign, ConstructibleFrom};
+use super::digits::{
+    non_zero_value_to_digits, value_to_sign, ConstructibleFrom,
+};
 use super::types::BigInt;
 
 macro_rules! primitive_partial_eq_to_big_int_impl {

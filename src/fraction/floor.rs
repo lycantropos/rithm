@@ -3,7 +3,10 @@ use crate::traits::{CheckedDivEuclid, Floor, MultiplicativeMonoid, Zeroable};
 use super::types::Fraction;
 
 impl<
-        Component: Clone + CheckedDivEuclid<Output = Option<Component>> + MultiplicativeMonoid + Zeroable,
+        Component: Clone
+            + CheckedDivEuclid<Output = Option<Component>>
+            + MultiplicativeMonoid
+            + Zeroable,
     > Floor for Fraction<Component>
 {
     type Output = Component;

@@ -3,7 +3,10 @@ use std::convert::{From, TryFrom};
 use crate::traits::{Endianness, Oppose, Signed, ToBytes, Zeroable};
 
 use super::constants::MIDDLE_BYTE;
-use super::digits::{binary_digits_to_binary_base, negate_digits, BinaryDigitConvertibleToBinary};
+use super::digits::{
+    binary_digits_to_binary_base, negate_digits,
+    BinaryDigitConvertibleToBinary,
+};
 use super::types::BigInt;
 
 impl<
@@ -17,11 +20,14 @@ where
     type Output = Vec<u8>;
 
     fn to_bytes(self, endianness: Endianness) -> Self::Output {
-        let mut result =
-            binary_digits_to_binary_base::<Digit, Digit>(&self.digits, SHIFT, u8::BITS as usize)
-                .iter()
-                .map(|&byte| unsafe { u8::try_from(byte).unwrap_unchecked() })
-                .collect::<Vec<u8>>();
+        let mut result = binary_digits_to_binary_base::<Digit, Digit>(
+            &self.digits,
+            SHIFT,
+            u8::BITS as usize,
+        )
+        .iter()
+        .map(|&byte| unsafe { u8::try_from(byte).unwrap_unchecked() })
+        .collect::<Vec<u8>>();
         let most_significant_byte = result[result.len() - 1];
         if most_significant_byte >= MIDDLE_BYTE
             && !(most_significant_byte == MIDDLE_BYTE

@@ -1,12 +1,19 @@
 use std::ops::Mul;
 
 use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
-use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed};
+use crate::traits::{
+    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed,
+};
 
 use super::types::{normalize_components_moduli, Fraction};
 
-impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed + MultiplicativeMonoid> Mul
-    for Fraction<Component>
+impl<
+        Component: Clone
+            + DivisivePartialMagma
+            + GcdMagma
+            + Signed
+            + MultiplicativeMonoid,
+    > Mul for Fraction<Component>
 {
     type Output = Self;
 
@@ -22,13 +29,19 @@ impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed + Multiplicativ
     }
 }
 
-impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed + MultiplicativeMonoid>
-    Mul<Component> for Fraction<Component>
+impl<
+        Component: Clone
+            + DivisivePartialMagma
+            + GcdMagma
+            + Signed
+            + MultiplicativeMonoid,
+    > Mul<Component> for Fraction<Component>
 {
     type Output = Self;
 
     fn mul(self, other: Component) -> Self::Output {
-        let (other, denominator) = normalize_components_moduli(other, self.denominator);
+        let (other, denominator) =
+            normalize_components_moduli(other, self.denominator);
         Self::Output {
             numerator: self.numerator * other,
             denominator,
@@ -36,8 +49,11 @@ impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed + Multiplicativ
     }
 }
 
-impl<Digit: GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
-    Mul<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: GcdDigit + MultiplicativeDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > Mul<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Fraction<Self>;
 

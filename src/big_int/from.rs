@@ -1,10 +1,12 @@
 use crate::traits::{Unitary, Zeroable};
 
-use super::digits::{non_zero_value_to_digits, non_zero_value_to_sign, ConstructibleFrom};
+use super::digits::{
+    non_zero_value_to_digits, non_zero_value_to_sign, ConstructibleFrom,
+};
 use super::types::BigInt;
 
-impl<Digit: Unitary + Zeroable, const SEPARATOR: char, const SHIFT: usize> From<bool>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: Unitary + Zeroable, const SEPARATOR: char, const SHIFT: usize>
+    From<bool> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn from(value: bool) -> Self {
         if value {

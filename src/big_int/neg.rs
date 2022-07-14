@@ -2,7 +2,9 @@ use std::ops::Neg;
 
 use super::types::BigInt;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Neg for BigInt<Digit, SEPARATOR, SHIFT> {
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Neg
+    for BigInt<Digit, SEPARATOR, SHIFT>
+{
     type Output = Self;
 
     fn neg(self) -> Self::Output {

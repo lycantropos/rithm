@@ -1,11 +1,16 @@
 use crate::traits::{CheckedPow, Signed};
 
 use super::constants::{WINDOW_BASE, WINDOW_CUTOFF, WINDOW_SHIFT};
-use super::digits::{binary_digits_to_lesser_binary_base, ExponentiativeDigit};
+use super::digits::{
+    binary_digits_to_lesser_binary_base, ExponentiativeDigit,
+};
 use super::types::{BigInt, WindowDigit};
 
-impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize> CheckedPow<Self>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ExponentiativeDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedPow<Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<Self>;
 
@@ -18,8 +23,11 @@ impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize> Chec
     }
 }
 
-impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize> CheckedPow<&Self>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ExponentiativeDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedPow<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<Self>;
 
@@ -32,12 +40,19 @@ impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize> Chec
     }
 }
 
-impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedPow<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ExponentiativeDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedPow<BigInt<Digit, SEPARATOR, SHIFT>>
+    for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
 
-    fn checked_pow(self, exponent: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn checked_pow(
+        self,
+        exponent: BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
         if exponent.is_negative() {
             None
         } else {
@@ -46,8 +61,11 @@ impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize> CheckedPow<Self>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ExponentiativeDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedPow<Self> for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
 
@@ -60,8 +78,11 @@ impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize> Chec
     }
 }
 
-impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize>
-    BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ExponentiativeDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn unchecked_pow(&self, exponent: &Self) -> Self {
         debug_assert!(!exponent.is_negative());
@@ -88,7 +109,8 @@ impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize>
                 exponent_digit_mask <<= 1;
             }
             exponent_digit_mask >>= 1;
-            let mut exponent_digits_iterator = exponent.digits.iter().rev().skip(1);
+            let mut exponent_digits_iterator =
+                exponent.digits.iter().rev().skip(1);
             loop {
                 while !exponent_digit_mask.is_zero() {
                     result = &result * &result;
@@ -114,11 +136,12 @@ impl<Digit: ExponentiativeDigit, const SEPARATOR: char, const SHIFT: usize>
             for index in 1..WINDOW_BASE {
                 cache[index] = &cache[index - 1] * self;
             }
-            let exponent_window_digits = binary_digits_to_lesser_binary_base::<Digit, WindowDigit>(
-                &exponent.digits,
-                SHIFT,
-                WINDOW_SHIFT,
-            );
+            let exponent_window_digits =
+                binary_digits_to_lesser_binary_base::<Digit, WindowDigit>(
+                    &exponent.digits,
+                    SHIFT,
+                    WINDOW_SHIFT,
+                );
             let mut result = Self::one();
             for &digit in exponent_window_digits.iter().rev() {
                 for _ in 0..WINDOW_SHIFT {

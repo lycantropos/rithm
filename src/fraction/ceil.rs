@@ -1,5 +1,6 @@
 use crate::traits::{
-    Ceil, CheckedDivEuclid, MultiplicativeMonoid, NegatableUnaryAlgebra, Zeroable,
+    Ceil, CheckedDivEuclid, MultiplicativeMonoid, NegatableUnaryAlgebra,
+    Zeroable,
 };
 
 use super::types::Fraction;

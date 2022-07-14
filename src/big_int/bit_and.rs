@@ -3,8 +3,11 @@ use std::ops::BitAnd;
 use super::digits::{bitwise_and_components, BitwiseConjunctiveDigit};
 use super::types::BigInt;
 
-impl<Digit: BitwiseConjunctiveDigit, const SEPARATOR: char, const SHIFT: usize> BitAnd
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: BitwiseConjunctiveDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > BitAnd for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 
@@ -19,8 +22,12 @@ impl<Digit: BitwiseConjunctiveDigit, const SEPARATOR: char, const SHIFT: usize> 
     }
 }
 
-impl<Digit: BitwiseConjunctiveDigit, const SEPARATOR: char, const SHIFT: usize>
-    BitAnd<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: BitwiseConjunctiveDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > BitAnd<BigInt<Digit, SEPARATOR, SHIFT>>
+    for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
@@ -35,8 +42,11 @@ impl<Digit: BitwiseConjunctiveDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: BitwiseConjunctiveDigit, const SEPARATOR: char, const SHIFT: usize> BitAnd
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: BitwiseConjunctiveDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > BitAnd for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
@@ -51,8 +61,11 @@ impl<Digit: BitwiseConjunctiveDigit, const SEPARATOR: char, const SHIFT: usize> 
     }
 }
 
-impl<Digit: BitwiseConjunctiveDigit, const SEPARATOR: char, const SHIFT: usize> BitAnd<&Self>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: BitwiseConjunctiveDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > BitAnd<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 

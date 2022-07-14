@@ -1,7 +1,8 @@
 use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 use crate::traits::{
-    CheckedDivEuclid, DivEuclid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed,
+    CheckedDivEuclid, DivEuclid, DivisivePartialMagma, GcdMagma,
+    MultiplicativeMonoid, Signed,
 };
 
 use super::types::Fraction;
@@ -40,8 +41,11 @@ impl<
     }
 }
 
-impl<Digit: GcdDigit + MultiplicativeDigit, const SEPARATOR: char, const SHIFT: usize>
-    DivEuclid<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: GcdDigit + MultiplicativeDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > DivEuclid<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 

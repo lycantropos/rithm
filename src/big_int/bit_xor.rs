@@ -1,10 +1,15 @@
 use std::ops::BitXor;
 
-use super::digits::{bitwise_xor_components, BitwiseExclusiveDisjunctiveDigit};
+use super::digits::{
+    bitwise_xor_components, BitwiseExclusiveDisjunctiveDigit,
+};
 use super::types::BigInt;
 
-impl<Digit: BitwiseExclusiveDisjunctiveDigit, const SEPARATOR: char, const SHIFT: usize> BitXor
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: BitwiseExclusiveDisjunctiveDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > BitXor for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 
@@ -19,8 +24,11 @@ impl<Digit: BitwiseExclusiveDisjunctiveDigit, const SEPARATOR: char, const SHIFT
     }
 }
 
-impl<Digit: BitwiseExclusiveDisjunctiveDigit, const SEPARATOR: char, const SHIFT: usize>
-    BitXor<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: BitwiseExclusiveDisjunctiveDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > BitXor<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Self;
 
@@ -35,8 +43,12 @@ impl<Digit: BitwiseExclusiveDisjunctiveDigit, const SEPARATOR: char, const SHIFT
     }
 }
 
-impl<Digit: BitwiseExclusiveDisjunctiveDigit, const SEPARATOR: char, const SHIFT: usize>
-    BitXor<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: BitwiseExclusiveDisjunctiveDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > BitXor<BigInt<Digit, SEPARATOR, SHIFT>>
+    for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
@@ -51,8 +63,11 @@ impl<Digit: BitwiseExclusiveDisjunctiveDigit, const SEPARATOR: char, const SHIFT
     }
 }
 
-impl<Digit: BitwiseExclusiveDisjunctiveDigit, const SEPARATOR: char, const SHIFT: usize> BitXor
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: BitwiseExclusiveDisjunctiveDigit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > BitXor for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 

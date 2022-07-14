@@ -24,10 +24,6 @@ jobs:
           },
           {
             os: 'ubuntu-latest',
-            rust_target: 'i686-unknown-linux-gnu',
-          },
-          {
-            os: 'ubuntu-latest',
             python_architecture: 'x64',
             rust_target: 'x86_64-unknown-linux-gnu'
           },
@@ -71,10 +67,6 @@ jobs:
       - name: 'Run Rust linter'
         run: cargo fmt --check
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
-      - name: 'Setup cross-compiling dependencies'
-        run: sudo apt-get install gcc-multilib
-        if: ${{ runner.os == 'Linux' &&
-                startsWith(matrix.platform.rust_target, 'i686') }}
       - name: 'Run Rust doctests'
         run: cargo test --doc --target=${{ matrix.platform.rust_target }}
         env:

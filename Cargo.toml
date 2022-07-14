@@ -18,5 +18,9 @@ features = ["extension-module"]
 version = "^0.16.5"
 features = ["extension-module"]
 
+[dependencies.traiter]
+version = "^0.1.0"
+features = ["numbers", "std"]
+
 [build-dependencies]
 pyo3-build-config = "^0.16.5"

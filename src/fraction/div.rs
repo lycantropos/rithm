@@ -1,9 +1,12 @@
 use std::ops::Div;
 
+use traiter::numbers::{CheckedDiv, Signed};
+
 use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 use crate::traits::{
-    CheckedDiv, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed,
+    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
+    NegatableUnaryAlgebra,
 };
 
 use super::types::Fraction;
@@ -13,7 +16,8 @@ impl<
             + DivisivePartialMagma
             + GcdMagma
             + Signed
-            + MultiplicativeMonoid,
+            + MultiplicativeMonoid
+            + NegatableUnaryAlgebra,
     > Div for Fraction<Component>
 {
     type Output = Self;
@@ -29,7 +33,8 @@ impl<
             + DivisivePartialMagma
             + GcdMagma
             + Signed
-            + MultiplicativeMonoid,
+            + MultiplicativeMonoid
+            + NegatableUnaryAlgebra,
     > Div<Component> for Fraction<Component>
 {
     type Output = Self;

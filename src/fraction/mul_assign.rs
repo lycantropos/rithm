@@ -1,8 +1,8 @@
 use std::ops::MulAssign;
 
-use crate::traits::{
-    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed,
-};
+use traiter::numbers::Signed;
+
+use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid};
 
 use super::types::{normalize_components_moduli, Fraction};
 

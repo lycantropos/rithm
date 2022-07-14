@@ -1,4 +1,4 @@
-use crate::traits::{CheckedPow, Pow};
+use traiter::numbers::{CheckedPow, Pow};
 
 use super::digits::ExponentiativeDigit;
 use super::types::BigInt;

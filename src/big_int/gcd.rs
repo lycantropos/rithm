@@ -1,4 +1,4 @@
-use crate::traits::Gcd;
+use traiter::numbers::Gcd;
 
 use super::digits::{to_gcd, GcdDigit};
 use super::types::BigInt;

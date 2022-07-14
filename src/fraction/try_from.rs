@@ -1,8 +1,10 @@
 use std::convert::{FloatToInt, TryFrom};
 
+use traiter::numbers::{CheckedShl, FractExp, Unitary};
+
 use crate::big_int::{BigInt, DigitConvertibleFromF64, ShiftableLeftDigit};
 use crate::contracts::is_signed;
-use crate::traits::{CheckedShl, FrExp, Maybe, Unitary};
+use crate::traits::Maybe;
 
 use super::types::{
     normalize_components_moduli, Fraction, FromFloatConversionError,
@@ -26,7 +28,7 @@ macro_rules! big_int_fraction_try_from_float_impl {
                 } else if value.is_nan() {
                     Err(FromFloatConversionError::NaN)
                 } else {
-                    let (mut fraction, mut exponent) = value.frexp();
+                    let (mut fraction, mut exponent) = value.fract_exp();
                     for _ in 0..300 {
                         if fraction == fraction.floor() {
                             break;
@@ -67,7 +69,7 @@ macro_rules! primitive_fraction_try_from_float_impl {
                 } else if value.round() < (<$t>::MIN as $f) || value.round() > (<$t>::MAX as $f) {
                     Err(FromFloatConversionError::OutOfBounds)
                 } else {
-                    let (mut fraction, mut exponent) = value.frexp();
+                    let (mut fraction, mut exponent) = value.fract_exp();
                     const MAX_EXPONENT_MODULUS: u32 = <$t>::BITS - 1 - (is_signed::<$t>() as u32);
                     if (exponent.abs() as u32) > MAX_EXPONENT_MODULUS {
                         if exponent.is_negative() {

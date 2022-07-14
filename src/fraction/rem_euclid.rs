@@ -1,9 +1,8 @@
+use traiter::numbers::{CheckedRemEuclid, RemEuclid, Signed};
+
 use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use crate::traits::{
-    CheckedRemEuclid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
-    RemEuclid, Signed,
-};
+use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid};
 
 use super::types::Fraction;
 

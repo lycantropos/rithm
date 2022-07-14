@@ -1,4 +1,4 @@
-use crate::traits::CheckedDiv;
+use traiter::numbers::CheckedDiv;
 
 use super::digits::{checked_div, DivisibleDigit};
 use super::types::BigInt;

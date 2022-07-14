@@ -1,9 +1,10 @@
 use std::ops::Add;
 
+use traiter::numbers::Signed;
+
 use crate::big_int::{AdditiveDigit, BigInt, GcdDigit, MultiplicativeDigit};
 use crate::traits::{
     AdditiveMonoid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
-    Signed,
 };
 
 use super::types::{normalize_components_moduli, Fraction};

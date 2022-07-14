@@ -1,4 +1,4 @@
-use crate::traits::{CheckedPow, Signed};
+use traiter::numbers::{CheckedPow, Signed};
 
 use super::constants::{WINDOW_BASE, WINDOW_CUTOFF, WINDOW_SHIFT};
 use super::digits::{

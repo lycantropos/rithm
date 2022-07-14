@@ -1,4 +1,4 @@
-use crate::traits::Abs;
+use traiter::numbers::Abs;
 
 use super::types::BigInt;
 

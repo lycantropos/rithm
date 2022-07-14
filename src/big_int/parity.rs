@@ -1,4 +1,4 @@
-use crate::traits::Parity;
+use traiter::numbers::Parity;
 
 use super::digits::ParitiableDigit;
 use super::types::BigInt;

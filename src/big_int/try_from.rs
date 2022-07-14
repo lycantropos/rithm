@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-use crate::traits::Unitary;
+use traiter::numbers::Unitary;
 
 use super::digits::{
     digits_from_finite_positive_improper_float, DigitConvertibleFromF64,

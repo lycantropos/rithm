@@ -1,4 +1,4 @@
-use crate::traits::{IsPowerOfTwo, Zeroable};
+use traiter::numbers::{IsPowerOfTwo, Zeroable};
 
 use super::types::BigInt;
 

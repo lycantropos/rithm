@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Formatter};
 
-use crate::traits::Unitary;
+use traiter::numbers::Unitary;
 
 use super::types::Fraction;
 

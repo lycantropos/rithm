@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-use crate::traits::{LdExp, Signed, Zeroable};
+use traiter::numbers::{LoadExp, Signed, Zeroable};
 
 use super::digits::{
     fraction_exponent_digits, maybe_reduce_digits,
@@ -24,7 +24,7 @@ macro_rules! float_try_from_big_int {
             fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
                 match fraction_exponent_digits::<Digit, $t, SHIFT>(&value.digits) {
                     Some((fraction_modulus, exponent)) => {
-                        Ok(((value.sign as $t) * fraction_modulus).ldexp(exponent))
+                        Ok(((value.sign as $t) * fraction_modulus).load_exp(exponent))
                     }
                     None => Err(TryIntoFloatError::TooLarge),
                 }
@@ -42,7 +42,7 @@ macro_rules! float_try_from_big_int {
             fn try_from(value: &BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
                 match fraction_exponent_digits::<Digit, $t, SHIFT>(&value.digits) {
                     Some((fraction_modulus, exponent)) => {
-                        Ok(((value.sign as $t) * fraction_modulus).ldexp(exponent))
+                        Ok(((value.sign as $t) * fraction_modulus).load_exp(exponent))
                     }
                     None => Err(TryIntoFloatError::TooLarge),
                 }

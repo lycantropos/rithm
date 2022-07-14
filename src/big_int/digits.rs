@@ -3,15 +3,18 @@ use std::convert::{FloatToInt, TryFrom};
 use std::fmt::{Debug, Display};
 use std::mem::size_of;
 
+use traiter::numbers::{
+    BitLength, CheckedShl, Gcd, Signed, Unitary, Zeroable,
+};
+
 use crate::traits::{
     AssigningAdditiveGroup, AssigningAdditiveMonoid,
     AssigningBitwiseConjunctiveMagma, AssigningBitwiseDisjunctiveMonoid,
     AssigningBitwiseExclusiveDisjunctiveMonoid, AssigningDivisivePartialMagma,
     AssigningMultiplicativeMonoid, AssigningShiftableLeftBy,
-    AssigningShiftableRightBy, AssigningSubtractiveMagma, BitLength,
-    BitwiseNegatableUnaryAlgebra, CheckedShl, DoublePrecision,
-    DoublePrecisionOf, Float, Gcd, ModularPartialMagma,
-    ModularSubtractiveMagma, Oppose, OppositionOf, Signed, Unitary, Zeroable,
+    AssigningShiftableRightBy, AssigningSubtractiveMagma,
+    BitwiseNegatableUnaryAlgebra, DoublePrecision, DoublePrecisionOf, Float,
+    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf,
 };
 
 use super::types::{CheckedDivAsFloatError, ShlError, Sign, WindowDigit};
@@ -710,11 +713,11 @@ pub(super) fn checked_div_as_float<
     if shift + quotient_bit_length >= (Output::MAX_EXP as isize)
         && (shift + quotient_bit_length > (Output::MAX_EXP as isize)
             || reduced_quotient
-                == Output::one().ldexp(quotient_bit_length as i32))
+                == Output::one().load_exp(quotient_bit_length as i32))
     {
         Err(CheckedDivAsFloatError::TooLarge)
     } else {
-        Ok(reduced_quotient.ldexp(shift as i32))
+        Ok(reduced_quotient.load_exp(shift as i32))
     }
 }
 
@@ -964,15 +967,15 @@ pub(super) fn digits_from_finite_positive_improper_float<
 where
     Value: FloatToInt<Digit> + From<Digit>,
 {
-    let (fraction, exponent) = value.frexp();
+    let (fraction, exponent) = value.fract_exp();
     let mut result =
         vec![Digit::zero(); ((exponent as usize) - 1) / SHIFT + 1];
-    let mut fraction = fraction.ldexp((exponent - 1) % (SHIFT as i32) + 1);
+    let mut fraction = fraction.load_exp((exponent - 1) % (SHIFT as i32) + 1);
     for index in (0..result.len()).rev() {
         let digit = unsafe { Value::to_int_unchecked(fraction) };
         result[index] = digit;
         fraction -= Value::from(digit);
-        fraction = fraction.ldexp(SHIFT as i32);
+        fraction = fraction.load_exp(SHIFT as i32);
     }
     result
 }

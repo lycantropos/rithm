@@ -1,10 +1,10 @@
 use std::ops::Rem;
 
+use traiter::numbers::{CheckedRem, Signed};
+
 use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use crate::traits::{
-    CheckedRem, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed,
-};
+use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid};
 
 use super::types::Fraction;
 

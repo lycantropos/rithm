@@ -1,5 +1,6 @@
+use traiter::numbers::{CheckedDivRemEuclid, DivRemEuclid};
+
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use crate::traits::{CheckedDivRemEuclid, DivRemEuclid};
 
 use super::digits::EuclidDivisibleDigit;
 use super::types::BigInt;

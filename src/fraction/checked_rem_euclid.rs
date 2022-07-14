@@ -1,10 +1,9 @@
+use traiter::numbers::{CheckedRemEuclid, Zeroable};
+
 use crate::big_int::{
     BigInt, EuclidDivisibleDigit, GcdDigit, MultiplicativeDigit,
 };
-use crate::traits::{
-    CheckedRemEuclid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
-    Zeroable,
-};
+use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid};
 
 use super::types::{normalize_components_moduli, Fraction};
 

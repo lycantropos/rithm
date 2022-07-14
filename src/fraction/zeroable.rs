@@ -1,4 +1,4 @@
-use crate::traits::{Unitary, Zeroable};
+use traiter::numbers::{Unitary, Zeroable};
 
 use super::types::Fraction;
 

@@ -1,4 +1,4 @@
-use crate::traits::FromStrRadix;
+use traiter::numbers::FromStrRadix;
 
 use super::constants::{MAX_REPRESENTABLE_BASE, MIN_REPRESENTABLE_BASE};
 use super::digits::FromStrDigit;

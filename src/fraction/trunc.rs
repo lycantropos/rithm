@@ -1,6 +1,6 @@
-use crate::traits::{
-    Ceil, CheckedDivEuclid, Floor, MultiplicativeMonoid, Signed, Trunc,
-};
+use traiter::numbers::{Ceil, CheckedDivEuclid, Floor, Signed, Trunc};
+
+use crate::traits::{MultiplicativeMonoid, NegatableUnaryAlgebra};
 
 use super::types::Fraction;
 
@@ -8,6 +8,7 @@ impl<
         Component: Clone
             + CheckedDivEuclid<Output = Option<Component>>
             + MultiplicativeMonoid
+            + NegatableUnaryAlgebra
             + Signed,
     > Trunc for Fraction<Component>
 {

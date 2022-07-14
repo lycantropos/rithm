@@ -1,4 +1,6 @@
-use crate::traits::{CheckedDivEuclid, Floor, MultiplicativeMonoid, Zeroable};
+use traiter::numbers::{CheckedDivEuclid, Floor, Zeroable};
+
+use crate::traits::MultiplicativeMonoid;
 
 use super::types::Fraction;
 

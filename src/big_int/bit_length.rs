@@ -1,4 +1,4 @@
-use crate::traits::BitLength;
+use traiter::numbers::BitLength;
 
 use super::digits::{ConstructibleFrom, MultiplicativeDigit};
 use super::types::BigInt;

@@ -1,4 +1,4 @@
-use crate::traits::{Signed, Zeroable};
+use traiter::numbers::{Sign, Signed, Zeroable};
 
 use super::types::BigInt;
 
@@ -11,5 +11,9 @@ impl<Digit: Zeroable, const SEPARATOR: char, const SHIFT: usize> Signed
 
     fn is_positive(&self) -> bool {
         self.sign.is_positive()
+    }
+
+    fn sign(&self) -> Sign {
+        self.sign.sign()
     }
 }

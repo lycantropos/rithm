@@ -1,6 +1,8 @@
 use std::fmt;
 
-use crate::traits::{DivisivePartialMagma, GcdMagma, Signed};
+use traiter::numbers::Signed;
+
+use crate::traits::{DivisivePartialMagma, GcdMagma, NegatableUnaryAlgebra};
 
 #[derive(Clone)]
 pub struct Fraction<Component: Clone> {
@@ -8,8 +10,13 @@ pub struct Fraction<Component: Clone> {
     pub(super) denominator: Component,
 }
 
-impl<Component: Clone + DivisivePartialMagma + GcdMagma + Signed>
-    Fraction<Component>
+impl<
+        Component: Clone
+            + DivisivePartialMagma
+            + GcdMagma
+            + NegatableUnaryAlgebra
+            + Signed,
+    > Fraction<Component>
 {
     pub fn new(
         mut numerator: Component,
@@ -52,7 +59,9 @@ pub(super) fn normalize_components_moduli<
 }
 
 #[inline]
-pub(super) fn normalize_components_sign<Component: Signed>(
+pub(super) fn normalize_components_sign<
+    Component: NegatableUnaryAlgebra + Signed,
+>(
     numerator: Component,
     denominator: Component,
 ) -> (Component, Component) {

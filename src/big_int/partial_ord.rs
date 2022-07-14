@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use crate::traits::{Signed, Zeroable};
+use traiter::numbers::{Signed, Zeroable};
 
 use super::digits::{
     digits_lesser_than, non_zero_value_to_digits, value_to_sign,

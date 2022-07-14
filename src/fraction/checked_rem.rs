@@ -1,7 +1,7 @@
+use traiter::numbers::{CheckedRem, Zeroable};
+
 use crate::big_int::{BigInt, DivisibleDigit, GcdDigit, MultiplicativeDigit};
-use crate::traits::{
-    CheckedRem, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Zeroable,
-};
+use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid};
 
 use super::types::{normalize_components_moduli, Fraction};
 

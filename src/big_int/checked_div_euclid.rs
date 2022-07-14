@@ -1,4 +1,4 @@
-use crate::traits::CheckedDivEuclid;
+use traiter::numbers::CheckedDivEuclid;
 
 use super::digits::{checked_div_euclid, EuclidDivisibleDigit};
 use super::types::BigInt;

@@ -1,7 +1,10 @@
 use std::ops::DivAssign;
 
+use traiter::numbers::Signed;
+
 use crate::traits::{
-    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed,
+    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
+    NegatableUnaryAlgebra,
 };
 
 use super::types::{
@@ -13,6 +16,7 @@ impl<
             + DivisivePartialMagma
             + GcdMagma
             + MultiplicativeMonoid
+            + NegatableUnaryAlgebra
             + Signed,
     > DivAssign for Fraction<Component>
 {
@@ -37,6 +41,7 @@ impl<
             + DivisivePartialMagma
             + GcdMagma
             + MultiplicativeMonoid
+            + NegatableUnaryAlgebra
             + Signed,
     > DivAssign<Component> for Fraction<Component>
 {

@@ -1,5 +1,6 @@
+use traiter::numbers::Unitary;
+
 use crate::big_int::BigInt;
-use crate::traits::Unitary;
 
 use super::types::Fraction;
 

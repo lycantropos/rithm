@@ -1,5 +1,7 @@
+use traiter::numbers::{CheckedPow, Pow, Signed, Unitary, Zeroable};
+
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use crate::traits::{CheckedPow, Pow, Signed, Unitary, Zeroable};
+use crate::traits::NegatableUnaryAlgebra;
 
 use super::types::Fraction;
 
@@ -7,6 +9,7 @@ impl<
         Component: Clone
             + Signed
             + CheckedPow<Component, Output = Option<Component>>
+            + NegatableUnaryAlgebra
             + Unitary
             + Zeroable,
     > Pow<Component> for Fraction<Component>
@@ -34,4 +37,4 @@ macro_rules! primitive_fraction_pow_impl {
         )*)
 }
 
-primitive_fraction_pow_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+primitive_fraction_pow_impl!(i8 i16 i32 i64 i128 isize);

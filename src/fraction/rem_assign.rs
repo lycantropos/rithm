@@ -1,9 +1,9 @@
 use std::ops::RemAssign;
 
+use traiter::numbers::{CheckedRem, Signed};
+
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use crate::traits::{
-    CheckedRem, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed,
-};
+use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid};
 
 use super::types::{normalize_components_moduli, Fraction};
 

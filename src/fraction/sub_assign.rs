@@ -1,8 +1,9 @@
 use std::ops::SubAssign;
 
+use traiter::numbers::Signed;
+
 use crate::traits::{
-    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed,
-    SubtractiveMagma,
+    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, SubtractiveMagma,
 };
 
 use super::types::{normalize_components_moduli, Fraction};

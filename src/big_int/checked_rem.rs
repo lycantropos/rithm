@@ -1,4 +1,4 @@
-use crate::traits::CheckedRem;
+use traiter::numbers::CheckedRem;
 
 use super::digits::{checked_rem, DivisibleDigit};
 use super::types::BigInt;

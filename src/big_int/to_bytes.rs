@@ -1,6 +1,8 @@
 use std::convert::{From, TryFrom};
 
-use crate::traits::{Endianness, Oppose, Signed, ToBytes, Zeroable};
+use traiter::numbers::{Endianness, Signed, ToBytes, Zeroable};
+
+use crate::traits::Oppose;
 
 use super::constants::MIDDLE_BYTE;
 use super::digits::{
@@ -13,13 +15,13 @@ impl<
         Digit: BinaryDigitConvertibleToBinary<Digit> + From<u8> + Oppose + Zeroable,
         const SEPARATOR: char,
         const SHIFT: usize,
-    > ToBytes for &BigInt<Digit, SEPARATOR, SHIFT>
+    > ToBytes for BigInt<Digit, SEPARATOR, SHIFT>
 where
     u8: TryFrom<Digit>,
 {
     type Output = Vec<u8>;
 
-    fn to_bytes(self, endianness: Endianness) -> Self::Output {
+    fn to_bytes(&self, endianness: Endianness) -> Self::Output {
         let mut result = binary_digits_to_binary_base::<Digit, Digit>(
             &self.digits,
             SHIFT,

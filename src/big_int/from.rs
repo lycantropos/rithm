@@ -1,4 +1,4 @@
-use crate::traits::{Unitary, Zeroable};
+use traiter::numbers::{Unitary, Zeroable};
 
 use super::digits::{
     non_zero_value_to_digits, non_zero_value_to_sign, ConstructibleFrom,

@@ -1,6 +1,9 @@
+use traiter::numbers::{CheckedDiv, Signed};
+
 use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
 use crate::traits::{
-    CheckedDiv, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed,
+    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
+    NegatableUnaryAlgebra,
 };
 
 use super::types::{
@@ -12,7 +15,8 @@ impl<
             + DivisivePartialMagma
             + GcdMagma
             + Signed
-            + MultiplicativeMonoid,
+            + MultiplicativeMonoid
+            + NegatableUnaryAlgebra,
     > CheckedDiv for Fraction<Component>
 {
     type Output = Option<Self>;
@@ -41,7 +45,8 @@ impl<
             + DivisivePartialMagma
             + GcdMagma
             + Signed
-            + MultiplicativeMonoid,
+            + MultiplicativeMonoid
+            + NegatableUnaryAlgebra,
     > CheckedDiv<Component> for Fraction<Component>
 {
     type Output = Option<Self>;

@@ -1,5 +1,7 @@
+use traiter::numbers::{CheckedDivEuclid, Zeroable};
+
 use crate::big_int::{BigInt, EuclidDivisibleDigit, MultiplicativeDigit};
-use crate::traits::{CheckedDivEuclid, MultiplicativeMonoid, Zeroable};
+use crate::traits::MultiplicativeMonoid;
 
 use super::types::Fraction;
 

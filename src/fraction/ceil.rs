@@ -1,7 +1,6 @@
-use crate::traits::{
-    Ceil, CheckedDivEuclid, MultiplicativeMonoid, NegatableUnaryAlgebra,
-    Zeroable,
-};
+use traiter::numbers::{Ceil, CheckedDivEuclid, Zeroable};
+
+use crate::traits::{MultiplicativeMonoid, NegatableUnaryAlgebra};
 
 use super::types::Fraction;
 

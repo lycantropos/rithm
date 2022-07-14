@@ -1,4 +1,4 @@
-use crate::traits::Zeroable;
+use traiter::numbers::Zeroable;
 
 use super::types::{BigInt, Sign};
 

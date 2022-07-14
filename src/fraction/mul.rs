@@ -1,9 +1,9 @@
 use std::ops::Mul;
 
+use traiter::numbers::Signed;
+
 use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
-use crate::traits::{
-    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed,
-};
+use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid};
 
 use super::types::{normalize_components_moduli, Fraction};
 

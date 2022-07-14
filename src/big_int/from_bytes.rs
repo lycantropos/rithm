@@ -1,4 +1,6 @@
-use crate::traits::{Endianness, FromBytes, Oppose, Unitary, Zeroable};
+use traiter::numbers::{Endianness, FromBytes, Unitary, Zeroable};
+
+use crate::traits::Oppose;
 
 use super::constants::MIDDLE_BYTE;
 use super::contracts::is_valid_shift;

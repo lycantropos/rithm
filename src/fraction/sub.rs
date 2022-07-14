@@ -1,9 +1,10 @@
 use std::ops::Sub;
 
+use traiter::numbers::Signed;
+
 use crate::big_int::{AdditiveDigit, BigInt, GcdDigit, MultiplicativeDigit};
 use crate::traits::{
-    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, Signed,
-    SubtractiveMagma,
+    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, SubtractiveMagma,
 };
 
 use super::types::{normalize_components_moduli, Fraction};

@@ -1,4 +1,6 @@
-use crate::traits::{Abs, ModularUnaryAlgebra};
+use traiter::numbers::Abs;
+
+use crate::traits::ModularUnaryAlgebra;
 
 use super::types::Fraction;
 

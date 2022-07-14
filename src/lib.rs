@@ -17,14 +17,14 @@ use pyo3::{
     intern, AsPyPointer, IntoPy, Py, PyAny, PyErr, PyObject, PyRef, ToPyObject,
 };
 use pyo3_ffi as ffi;
-
-use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use crate::traits::{
+use traiter::numbers::{
     Abs, BitLength, Ceil, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid,
     CheckedPow, CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr,
     Endianness, Floor, FromBytes, FromStrRadix, Gcd, IsPowerOfTwo, Parity,
     Round, Signed, TieBreaking, ToBytes, Trunc, Unitary, Zeroable,
 };
+
+use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
 pub mod big_int;
 mod constants;

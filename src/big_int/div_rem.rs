@@ -1,5 +1,6 @@
+use traiter::numbers::{CheckedDivRem, DivRem};
+
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use crate::traits::{CheckedDivRem, DivRem};
 
 use super::digits::DivisibleDigit;
 use super::types::BigInt;

@@ -1,9 +1,10 @@
 use std::cmp::Ordering;
 
-use crate::traits::{
-    AdditiveMonoid, CheckedDivRemEuclid, MultiplicativeMonoid, Parity, Round,
-    Signed, SubtractiveMagma, TieBreaking,
+use traiter::numbers::{
+    CheckedDivRemEuclid, Parity, Round, Signed, TieBreaking,
 };
+
+use crate::traits::{AdditiveMonoid, MultiplicativeMonoid, SubtractiveMagma};
 
 use super::types::Fraction;
 

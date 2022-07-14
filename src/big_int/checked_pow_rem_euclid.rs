@@ -1,4 +1,4 @@
-use crate::traits::{
+use traiter::numbers::{
     Abs, CheckedPowRemEuclid, CheckedRemEuclid, CheckedRemEuclidInv, Signed,
     Unitary, Zeroable,
 };

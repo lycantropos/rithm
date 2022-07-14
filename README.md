@@ -191,12 +191,11 @@ we can:
 ```rust
 /// With setup
 use std::convert::TryFrom;
-
-use rithm::big_int;
-use rithm::traits::{
-    Abs, CheckedDivAsF32, CheckedDivAsF64, DivEuclid, FromStrRadix, Pow, 
-    RemEuclid, Zeroable,
+use traiter::numbers::{
+    Abs, DivEuclid, FromStrRadix, Pow, RemEuclid, Zeroable
 };
+use rithm::big_int;
+use rithm::traits::{CheckedDivAsF32, CheckedDivAsF64};
 
 #[cfg(target_arch = "x86")]
 type Digit = u16;
@@ -248,8 +247,8 @@ assert_eq!(BigInt::from(25) - BigInt::from(16), 9);
 ```rust
 /// With setup
 use std::convert::TryFrom;
+use traiter::numbers::{Abs, DivEuclid, Pow, RemEuclid, Unitary, Zeroable};
 use rithm::fraction;
-use rithm::traits::{Abs, DivEuclid, Pow, RemEuclid, Unitary, Zeroable};
 
 type Fraction = fraction::Fraction<i8>;
 /// we can:

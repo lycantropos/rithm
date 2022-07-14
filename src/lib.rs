@@ -30,7 +30,7 @@ pub mod big_int;
 mod constants;
 mod contracts;
 pub mod fraction;
-pub mod traits;
+mod traits;
 
 #[cfg(target_arch = "x86")]
 type Digit = u16;

@@ -240,7 +240,6 @@ pub trait ShiftableLeftDigit =
 
 pub trait ShiftableRightDigit = AssigningBitwiseDisjunctiveMonoid
     + AssigningBitwiseExclusiveDisjunctiveMonoid
-    + AssigningShiftableRightBy
     + DivisibleDigit
     + Debug
     + InvertibleDigit
@@ -1753,8 +1752,9 @@ pub(super) fn primitive_shift_digits_right<
         return vec![Digit::zero()];
     }
     let result_digits_count = digits.len() - shift_quotient;
-    let high_shift =
-        SHIFT - unsafe { usize::try_from(shift_remainder).unwrap_unchecked() };
+    let shift_remainder =
+        unsafe { usize::try_from(shift_remainder).unwrap_unchecked() };
+    let high_shift = SHIFT - shift_remainder;
     let low_mask = to_digit_mask::<Digit>(high_shift);
     let high_mask = to_digit_mask::<Digit>(SHIFT) ^ low_mask;
     let mut result = vec![Digit::zero(); result_digits_count];

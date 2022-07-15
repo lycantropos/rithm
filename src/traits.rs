@@ -383,6 +383,30 @@ impl Oppose for usize {
     type Result = isize;
 }
 
+pub trait UncheckedToInt<Int> {
+    unsafe fn unchecked_to_int(self) -> Int;
+}
+
+macro_rules! impl_float_unchecked_to_int {
+    ($float:ty => $($integer:ty)+) => {
+        $(
+            impl UncheckedToInt<$integer> for $float {
+                #[inline(always)]
+                unsafe fn unchecked_to_int(self) -> $integer {
+                    self.to_int_unchecked::<$integer>()
+                }
+            }
+        )+
+    }
+}
+
+impl_float_unchecked_to_int!(
+    f32 => u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize
+);
+impl_float_unchecked_to_int!(
+    f64 => u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize
+);
+
 pub trait WrappingSub<Subtrahend = Self> {
     type Output;
 

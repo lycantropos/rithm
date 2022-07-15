@@ -180,10 +180,6 @@ impl HasSignBit for i8 {
     const RESULT: bool = true;
 }
 
-impl HasSignBit for isize {
-    const RESULT: bool = true;
-}
-
 impl HasSignBit for i16 {
     const RESULT: bool = true;
 }
@@ -197,6 +193,10 @@ impl HasSignBit for i64 {
 }
 
 impl HasSignBit for i128 {
+    const RESULT: bool = true;
+}
+
+impl HasSignBit for isize {
     const RESULT: bool = true;
 }
 
@@ -339,10 +339,6 @@ impl Oppose for i8 {
     type Result = i8;
 }
 
-impl Oppose for isize {
-    type Result = isize;
-}
-
 impl Oppose for i16 {
     type Result = i16;
 }
@@ -357,6 +353,10 @@ impl Oppose for i64 {
 
 impl Oppose for i128 {
     type Result = i128;
+}
+
+impl Oppose for isize {
+    type Result = isize;
 }
 
 impl Oppose for u8 {

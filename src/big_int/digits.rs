@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::convert::TryFrom;
+use std::convert::{FloatToInt, TryFrom};
 use std::fmt::{Debug, Display};
 use std::mem::size_of;
 
@@ -15,7 +15,7 @@ use crate::traits::{
     AssigningShiftableRightBy, AssigningSubtractiveMagma,
     BitwiseNegatableUnaryAlgebra, DoublePrecision, DoublePrecisionOf, Float,
     HasSignBit, ModularPartialMagma, ModularSubtractiveMagma, Oppose,
-    OppositionOf, UncheckedToInt,
+    OppositionOf,
 };
 
 use super::types::{CheckedDivAsFloatError, ShlError, Sign, WindowDigit};
@@ -116,7 +116,7 @@ where
     OppositionOf<Source>: TryFrom<Source>;
 
 pub trait DigitConvertibleFromF64 =
-    Copy + Zeroable where f64: From<Self> + UncheckedToInt<Self>;
+    Copy + Zeroable where f64: FloatToInt<Self> + From<Self>;
 
 pub trait DisplayableDigit = AssigningDivisivePartialMagma
     + BinaryDigitConvertibleTo<Self>
@@ -962,17 +962,20 @@ pub(super) fn complement_in_place<
 
 pub(super) fn digits_from_finite_positive_improper_float<
     Digit: Copy + Zeroable,
-    Value: Float + From<Digit> + UncheckedToInt<Digit>,
+    Value: Float,
     const SHIFT: usize,
 >(
     value: Value,
-) -> Vec<Digit> {
+) -> Vec<Digit>
+where
+    Value: FloatToInt<Digit> + From<Digit>,
+{
     let (fraction, exponent) = value.fract_exp();
     let mut result =
         vec![Digit::zero(); ((exponent as usize) - 1) / SHIFT + 1];
     let mut fraction = fraction.load_exp((exponent - 1) % (SHIFT as i32) + 1);
     for index in (0..result.len()).rev() {
-        let digit = unsafe { Value::unchecked_to_int(fraction) };
+        let digit = unsafe { Value::to_int_unchecked(fraction) };
         result[index] = digit;
         fraction -= Value::from(digit);
         fraction = fraction.load_exp(SHIFT as i32);

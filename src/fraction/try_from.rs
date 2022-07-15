@@ -1,10 +1,10 @@
-use std::convert::TryFrom;
+use std::convert::{FloatToInt, TryFrom};
 
 use traiter::numbers::{CheckedShl, FractExp, Unitary};
 
 use crate::big_int::{BigInt, DigitConvertibleFromF64, ShiftableLeftDigit};
 use crate::contracts::is_signed;
-use crate::traits::{Maybe, UncheckedToInt};
+use crate::traits::Maybe;
 
 use super::types::{
     normalize_components_moduli, Fraction, FromFloatConversionError,
@@ -18,7 +18,7 @@ macro_rules! big_int_fraction_try_from_float_impl {
                 const SHIFT: usize,
             > TryFrom<$f> for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
         where
-            $f: UncheckedToInt<BigInt<Digit, SEPARATOR, SHIFT>>,
+            $f: FloatToInt<BigInt<Digit, SEPARATOR, SHIFT>>,
         {
             type Error = FromFloatConversionError;
 
@@ -36,8 +36,8 @@ macro_rules! big_int_fraction_try_from_float_impl {
                         fraction *= 2.0 as $f;
                         exponent -= 1;
                     }
-                    let mut numerator: BigInt<Digit, SEPARATOR, SHIFT> =
-                        unsafe { fraction.unchecked_to_int() };
+                    let mut numerator =
+                        unsafe { fraction.to_int_unchecked::<BigInt<Digit, SEPARATOR, SHIFT>>() };
                     let mut denominator = BigInt::<Digit, SEPARATOR, SHIFT>::one();
                     if exponent.is_negative() {
                         denominator = denominator.checked_shl((-exponent) as u32).result();

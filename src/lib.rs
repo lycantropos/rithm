@@ -1,4 +1,3 @@
-#![feature(convert_float_to_int)]
 #![feature(trait_alias)]
 
 use std::cmp::Ordering;

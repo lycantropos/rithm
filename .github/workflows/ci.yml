@@ -64,9 +64,6 @@ jobs:
           target: ${{ matrix.platform.rust_target }}
           toolchain: nightly
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
-      - name: 'Install Rust coverage dependencies'
-        run: cargo clean && cargo install grcov
-        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Run Rust linter'
         run: cargo fmt --check
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
@@ -108,6 +105,9 @@ jobs:
         run: coverage run --append -m pytest
       - name: 'Collect Python coverage'
         run: coverage xml -o coverage_python.xml
+      - name: 'Install Rust coverage dependencies'
+        run: cargo install grcov
+        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Collect Rust coverage'
         run: >
           grcov target -s . -t cobertura --llvm --branch --ignore-not-existing

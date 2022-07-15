@@ -1,6 +1,4 @@
-#![feature(const_float_bits_conv)]
 #![feature(convert_float_to_int)]
-#![feature(specialization)]
 #![feature(trait_alias)]
 
 use std::cmp::Ordering;

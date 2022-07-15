@@ -14,7 +14,8 @@ use crate::traits::{
     AssigningMultiplicativeMonoid, AssigningShiftableLeftBy,
     AssigningShiftableRightBy, AssigningSubtractiveMagma,
     BitwiseNegatableUnaryAlgebra, DoublePrecision, DoublePrecisionOf, Float,
-    ModularPartialMagma, ModularSubtractiveMagma, Oppose, OppositionOf,
+    HasSignBit, ModularPartialMagma, ModularSubtractiveMagma, Oppose,
+    OppositionOf,
 };
 
 use super::types::{CheckedDivAsFloatError, ShlError, Sign, WindowDigit};
@@ -101,6 +102,7 @@ pub trait ConstructibleFrom<Source> = AssigningBitwiseConjunctiveMagma
     + AssigningShiftableRightBy<usize>
     + MaskableDigit
     + Copy
+    + HasSignBit
     + Oppose
     + TryFrom<Source>
 where
@@ -108,6 +110,7 @@ where
         + AssigningShiftableRightBy<usize>
         + MaskableDigit
         + Copy
+        + HasSignBit
         + Oppose
         + TryFrom<OppositionOf<Source>>,
     OppositionOf<Source>: TryFrom<Source>;
@@ -159,14 +162,15 @@ pub trait EuclidDivisibleDigit = AdditiveDigit + DivisibleDigit;
 pub trait ExponentiativeDigit =
     MultiplicativeDigit + From<u8> + BinaryDigitDowncastableTo<WindowDigit>;
 
-pub trait FromStrDigit = Oppose
+pub trait FromStrDigit = HasSignBit
 where
     u8: BinaryDigitConvertibleToBinary<Self>
         + NonBinaryDigitConvertibleToBinary<Self>;
 
-pub trait GcdDigit = DivisibleDigit + ModularSubtractiveMagma
+pub trait GcdDigit = DivisibleDigit + HasSignBit + ModularSubtractiveMagma
 where
     DoublePrecisionOf<Self>: Gcd<Output = DoublePrecisionOf<Self>>
+        + HasSignBit
         + ModularPartialMagma
         + TryFrom<OppositionOf<DoublePrecisionOf<Self>>>,
     OppositionOf<DoublePrecisionOf<Self>>: AssigningBitwiseDisjunctiveMonoid
@@ -2274,7 +2278,7 @@ pub(super) fn non_zero_value_to_digits<
 #[inline]
 pub(super) fn value_to_sign<Source>(value: Source) -> Sign
 where
-    Source: Oppose + Zeroable,
+    Source: HasSignBit + Oppose + Zeroable,
     OppositionOf<Source>: TryFrom<Source>,
 {
     if value.is_zero() {
@@ -2287,7 +2291,7 @@ where
 #[inline]
 pub(super) fn non_zero_value_to_sign<Source>(value: Source) -> Sign
 where
-    Source: Oppose,
+    Source: HasSignBit + Oppose,
     OppositionOf<Source>: TryFrom<Source>,
 {
     if crate::contracts::is_signed::<Source>()

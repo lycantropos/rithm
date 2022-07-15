@@ -172,6 +172,58 @@ impl DoublePrecision for u64 {
     type Result = u128;
 }
 
+pub trait HasSignBit {
+    const RESULT: bool;
+}
+
+impl HasSignBit for i8 {
+    const RESULT: bool = true;
+}
+
+impl HasSignBit for isize {
+    const RESULT: bool = true;
+}
+
+impl HasSignBit for i16 {
+    const RESULT: bool = true;
+}
+
+impl HasSignBit for i32 {
+    const RESULT: bool = true;
+}
+
+impl HasSignBit for i64 {
+    const RESULT: bool = true;
+}
+
+impl HasSignBit for i128 {
+    const RESULT: bool = true;
+}
+
+impl HasSignBit for u8 {
+    const RESULT: bool = false;
+}
+
+impl HasSignBit for u16 {
+    const RESULT: bool = false;
+}
+
+impl HasSignBit for u32 {
+    const RESULT: bool = false;
+}
+
+impl HasSignBit for u64 {
+    const RESULT: bool = false;
+}
+
+impl HasSignBit for u128 {
+    const RESULT: bool = false;
+}
+
+impl HasSignBit for usize {
+    const RESULT: bool = false;
+}
+
 pub trait MantissaDigits {
     const MANTISSA_DIGITS: usize;
 }

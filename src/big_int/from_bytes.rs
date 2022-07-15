@@ -1,6 +1,6 @@
 use traiter::numbers::{Endianness, FromBytes, Unitary, Zeroable};
 
-use crate::traits::Oppose;
+use crate::traits::HasSignBit;
 
 use super::constants::MIDDLE_BYTE;
 use super::contracts::is_valid_shift;
@@ -10,7 +10,7 @@ use super::digits::{
 };
 use super::types::{BigInt, Sign};
 
-impl<Digit: Oppose, const SEPARATOR: char, const SHIFT: usize> FromBytes
+impl<Digit: HasSignBit, const SEPARATOR: char, const SHIFT: usize> FromBytes
     for BigInt<Digit, SEPARATOR, SHIFT>
 where
     u8: BinaryDigitConvertibleToBinary<Digit>,

@@ -65,7 +65,7 @@ jobs:
           toolchain: nightly
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install Rust coverage dependencies'
-        run: cargo install grcov
+        run: cargo clean && cargo install grcov
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Run Rust linter'
         run: cargo fmt --check

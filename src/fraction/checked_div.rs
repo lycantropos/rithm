@@ -1,10 +1,8 @@
-use traiter::numbers::{CheckedDiv, Signed};
+use std::ops::{Div, Mul, Neg};
 
-use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
-use crate::traits::{
-    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
-    NegatableUnaryAlgebra,
-};
+use traiter::numbers::{CheckedDiv, Gcd, Signed, Unitary, Zeroable};
+
+use crate::big_int::BigInt;
 
 use super::types::{
     normalize_components_moduli, normalize_components_sign, Fraction,
@@ -12,11 +10,12 @@ use super::types::{
 
 impl<
         Component: Clone
-            + DivisivePartialMagma
-            + GcdMagma
+            + Div<Output = Component>
+            + Gcd<Output = Component>
             + Signed
-            + MultiplicativeMonoid
-            + NegatableUnaryAlgebra,
+            + Mul<Output = Component>
+            + Neg<Output = Component>
+            + Unitary,
     > CheckedDiv for Fraction<Component>
 {
     type Output = Option<Self>;
@@ -42,11 +41,12 @@ impl<
 
 impl<
         Component: Clone
-            + DivisivePartialMagma
-            + GcdMagma
+            + Div<Output = Component>
+            + Gcd<Output = Component>
             + Signed
-            + MultiplicativeMonoid
-            + NegatableUnaryAlgebra,
+            + Mul<Output = Component>
+            + Neg<Output = Component>
+            + Unitary,
     > CheckedDiv<Component> for Fraction<Component>
 {
     type Output = Option<Self>;
@@ -68,11 +68,16 @@ impl<
     }
 }
 
-impl<
-        Digit: GcdDigit + MultiplicativeDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDiv<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDiv<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: Clone
+        + Div<Output = Self>
+        + Gcd<Output = Self>
+        + Mul<Output = Self>
+        + Neg<Output = Self>
+        + Signed
+        + Unitary,
 {
     type Output = Option<Fraction<Self>>;
 
@@ -93,26 +98,28 @@ impl<
     }
 }
 
-macro_rules! primitive_checked_div_fraction_impl {
-    ($($t:ty)*) => ($(
-    impl CheckedDiv<Fraction<Self>> for $t
-    {
-        type Output = Option<Fraction<Self>>;
+macro_rules! signed_integer_checked_div_fraction_impl {
+    ($($integer:ty)*) => ($(
+        impl CheckedDiv<Fraction<Self>> for $integer {
+            type Output = Option<Fraction<Self>>;
 
-        fn checked_div(self, divisor: Fraction<Self>) -> Self::Output {
-            if divisor.is_zero() {
-                return None;
+            fn checked_div(self, divisor: Fraction<Self>) -> Self::Output {
+                if divisor.is_zero() {
+                    return None;
+                }
+                let (dividend, divisor_numerator) =
+                    normalize_components_moduli(self, divisor.numerator);
+                let (numerator, denominator) = normalize_components_sign(
+                    dividend * divisor.denominator,
+                    divisor_numerator,
+                );
+                Some(Fraction::<Self> {
+                    numerator,
+                    denominator,
+                })
             }
-            let (dividend, divisor_numerator) = normalize_components_moduli(self, divisor.numerator);
-            let (numerator, denominator) =
-                normalize_components_sign(dividend * divisor.denominator, divisor_numerator);
-            Some(Fraction::<Self> {
-                numerator,
-                denominator,
-            })
         }
-    }
     )*)
 }
 
-primitive_checked_div_fraction_impl!(i8 i16 i32 i64 i128 isize);
+signed_integer_checked_div_fraction_impl!(i8 i16 i32 i64 i128 isize);

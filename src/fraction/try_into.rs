@@ -1,31 +1,23 @@
 use std::convert::TryFrom;
 
-use crate::traits::{CheckedDivAsF32, CheckedDivAsF64, Maybe};
+use crate::traits::TryDivAsFloat;
 
 use super::types::Fraction;
 
-impl<Component: Clone + CheckedDivAsF32> TryFrom<Fraction<Component>> for f32 {
-    type Error = <<Component as CheckedDivAsF32>::Output as Maybe>::Error;
+macro_rules! try_float_from_fraction {
+    ($($float:ty)*) => ($(
+        impl<Component: TryDivAsFloat<Component, $float>>
+            TryFrom<Fraction<Component>> for $float
+        {
+            type Error = <Component as TryDivAsFloat<Component, $float>>::Error;
 
-    fn try_from(value: Fraction<Component>) -> Result<f32, Self::Error> {
-        let maybe = value.numerator.checked_div_as_f32(value.denominator);
-        if maybe.is_result() {
-            Ok(maybe.result())
-        } else {
-            Err(maybe.error())
+            fn try_from(
+                value: Fraction<Component>,
+            ) -> Result<$float, Self::Error> {
+                value.numerator.try_div_as_float(value.denominator)
+            }
         }
-    }
+    )*)
 }
 
-impl<Component: Clone + CheckedDivAsF64> TryFrom<Fraction<Component>> for f64 {
-    type Error = <<Component as CheckedDivAsF64>::Output as Maybe>::Error;
-
-    fn try_from(value: Fraction<Component>) -> Result<f64, Self::Error> {
-        let maybe = value.numerator.checked_div_as_f64(value.denominator);
-        if maybe.is_result() {
-            Ok(maybe.result())
-        } else {
-            Err(maybe.error())
-        }
-    }
-}
+try_float_from_fraction!(f32 f64);

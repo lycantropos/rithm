@@ -1,21 +1,18 @@
-use std::ops::Sub;
+use std::ops::{Div, Mul, Sub};
 
-use traiter::numbers::Signed;
+use traiter::numbers::{Gcd, Signed};
 
-use crate::big_int::{AdditiveDigit, BigInt, GcdDigit, MultiplicativeDigit};
-use crate::traits::{
-    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid, SubtractiveMagma,
-};
+use crate::big_int::BigInt;
 
 use super::types::{normalize_components_moduli, Fraction};
 
 impl<
         Component: Clone
-            + DivisivePartialMagma
-            + GcdMagma
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
             + Signed
-            + MultiplicativeMonoid
-            + SubtractiveMagma,
+            + Sub<Output = Component>,
     > Sub for Fraction<Component>
 {
     type Output = Self;
@@ -35,12 +32,12 @@ impl<
 
 impl<
         Component: Clone
-            + DivisivePartialMagma
+            + Div<Output = Component>
             + Eq
-            + GcdMagma
+            + Gcd<Output = Component>
             + Signed
-            + MultiplicativeMonoid
-            + SubtractiveMagma,
+            + Mul<Output = Component>
+            + Sub<Output = Component>,
     > Sub<Component> for Fraction<Component>
 {
     type Output = Self;
@@ -57,11 +54,14 @@ impl<
     }
 }
 
-impl<
-        Digit: AdditiveDigit + GcdDigit + MultiplicativeDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > Sub<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Sub<Fraction<Self>>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: Clone
+        + Div<Output = Self>
+        + Gcd<Output = Self>
+        + Mul<Output = Self>
+        + Sub<Output = Self>,
 {
     type Output = Fraction<Self>;
 
@@ -77,9 +77,9 @@ impl<
     }
 }
 
-macro_rules! primitive_sub_fraction_impl {
-    ($($t:ty)*) => ($(
-    impl Sub<Fraction<Self>> for $t {
+macro_rules! signed_integer_sub_fraction_impl {
+    ($($integer:ty)*) => ($(
+    impl Sub<Fraction<Self>> for $integer {
         type Output = Fraction<Self>;
 
         fn sub(self, subtrahend: Fraction<Self>) -> Self::Output {
@@ -96,4 +96,4 @@ macro_rules! primitive_sub_fraction_impl {
     )*)
 }
 
-primitive_sub_fraction_impl!(i8 i16 i32 i64 i128 isize);
+signed_integer_sub_fraction_impl!(i8 i16 i32 i64 i128 isize);

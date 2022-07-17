@@ -1,13 +1,15 @@
-use traiter::numbers::{CheckedDivRemEuclid, CheckedRemEuclidInv, Signed};
+use std::ops::{Add, Mul, Sub};
 
-use super::digits::ModularInvertibleDigit;
+use traiter::numbers::{
+    CheckedDivRemEuclid, CheckedRemEuclidInv, Signed, Unitary, Zeroable,
+};
+
 use super::types::BigInt;
 
-impl<
-        Digit: ModularInvertibleDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedRemEuclidInv for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclidInv
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    for<'a> Self: CheckedRemEuclidInv<&'a Self, Output = Option<Self>>,
 {
     type Output = Option<Self>;
 
@@ -16,11 +18,16 @@ impl<
     }
 }
 
-impl<
-        Digit: ModularInvertibleDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedRemEuclidInv<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedRemEuclidInv<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    for<'a> Self: Clone
+        + Mul<&'a Self, Output = Self>
+        + Signed
+        + Sub<Output = Self>
+        + Unitary,
+    for<'a> &'a Self: Add<Self, Output = Self>
+        + CheckedDivRemEuclid<Output = Option<(Self, Self)>>,
 {
     type Output = Option<Self>;
 
@@ -51,12 +58,14 @@ impl<
     }
 }
 
-impl<
-        Digit: ModularInvertibleDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedRemEuclidInv<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedRemEuclidInv<BigInt<Digit, SEPARATOR, SHIFT>>
     for &BigInt<Digit, SEPARATOR, SHIFT>
+where
+    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedRemEuclidInv<
+            &'a BigInt<Digit, SEPARATOR, SHIFT>,
+            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+        > + Clone,
 {
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
 
@@ -68,11 +77,13 @@ impl<
     }
 }
 
-impl<
-        Digit: ModularInvertibleDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedRemEuclidInv for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclidInv
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+where
+    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedRemEuclidInv<
+            &'a BigInt<Digit, SEPARATOR, SHIFT>,
+            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+        > + Clone,
 {
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
 

@@ -2,11 +2,11 @@ use traiter::numbers::{CheckedDivRemEuclid, DivRemEuclid};
 
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
-use super::digits::EuclidDivisibleDigit;
+use super::digits::CheckedDivRemEuclidComponents;
 use super::types::BigInt;
 
 impl<
-        Digit: EuclidDivisibleDigit,
+        Digit: CheckedDivRemEuclidComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > DivRemEuclid for BigInt<Digit, SEPARATOR, SHIFT>
@@ -20,7 +20,7 @@ impl<
 }
 
 impl<
-        Digit: EuclidDivisibleDigit,
+        Digit: CheckedDivRemEuclidComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > DivRemEuclid<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -34,7 +34,7 @@ impl<
 }
 
 impl<
-        Digit: EuclidDivisibleDigit,
+        Digit: CheckedDivRemEuclidComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > DivRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>>
@@ -55,7 +55,7 @@ impl<
 }
 
 impl<
-        Digit: EuclidDivisibleDigit,
+        Digit: CheckedDivRemEuclidComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > DivRemEuclid for &BigInt<Digit, SEPARATOR, SHIFT>

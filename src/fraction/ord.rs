@@ -1,19 +1,12 @@
 use std::cmp::Ordering;
-
-use crate::traits::MultiplicativeMonoid;
+use std::ops::Mul;
 
 use super::types::Fraction;
 
-impl<Component: Clone + Eq + MultiplicativeMonoid + PartialOrd> Ord
+impl<Component: Clone + Eq + Mul<Output = Component> + Ord> Ord
     for Fraction<Component>
 {
     fn cmp(&self, other: &Self) -> Ordering {
-        if self.lt(other) {
-            Ordering::Less
-        } else if self.gt(other) {
-            Ordering::Greater
-        } else {
-            Ordering::Equal
-        }
+        unsafe { self.partial_cmp(other).unwrap_unchecked() }
     }
 }

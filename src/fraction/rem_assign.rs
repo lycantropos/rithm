@@ -1,18 +1,17 @@
-use std::ops::RemAssign;
+use std::ops::{Div, Mul, RemAssign};
 
-use traiter::numbers::{CheckedRem, Signed};
+use traiter::numbers::{CheckedRem, Gcd, Signed};
 
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid};
 
 use super::types::{normalize_components_moduli, Fraction};
 
 impl<
         Component: Clone
             + CheckedRem<Output = Option<Component>>
-            + DivisivePartialMagma
-            + GcdMagma
-            + MultiplicativeMonoid
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
             + Signed,
     > RemAssign for Fraction<Component>
 {
@@ -29,9 +28,9 @@ impl<
 impl<
         Component: Clone
             + CheckedRem<Output = Option<Component>>
-            + DivisivePartialMagma
-            + GcdMagma
-            + MultiplicativeMonoid
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
             + Signed,
     > RemAssign<Component> for Fraction<Component>
 {

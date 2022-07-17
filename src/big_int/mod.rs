@@ -2,10 +2,6 @@ pub(crate) use self::constants::{
     MAX_REPRESENTABLE_BASE, MIN_REPRESENTABLE_BASE,
 };
 pub use self::contracts::is_valid_shift;
-pub(crate) use self::digits::{
-    AdditiveDigit, DigitConvertibleFromF64, DivisibleDigit,
-    EuclidDivisibleDigit, GcdDigit, MultiplicativeDigit, ShiftableLeftDigit,
-};
 pub use self::types::BigInt;
 pub(crate) use self::types::{ShlError, ShrError, TryFromFloatError};
 
@@ -20,8 +16,6 @@ mod bit_or_assign;
 mod bit_xor;
 mod bit_xor_assign;
 mod checked_div;
-mod checked_div_as_f32;
-mod checked_div_as_f64;
 mod checked_div_euclid;
 mod checked_div_rem;
 mod checked_div_rem_euclid;
@@ -63,6 +57,7 @@ mod signed;
 mod sub;
 mod sub_assign;
 mod to_bytes;
+mod try_div_as_float;
 mod try_from;
 mod try_from_string;
 mod try_into;

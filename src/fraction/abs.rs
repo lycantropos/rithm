@@ -1,10 +1,8 @@
 use traiter::numbers::Abs;
 
-use crate::traits::ModularUnaryAlgebra;
-
 use super::types::Fraction;
 
-impl<Component: Clone + ModularUnaryAlgebra> Abs for Fraction<Component> {
+impl<Component: Abs<Output = Component>> Abs for Fraction<Component> {
     type Output = Self;
 
     fn abs(self) -> <Self as Abs>::Output {

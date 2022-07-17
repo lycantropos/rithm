@@ -1,16 +1,17 @@
-use traiter::numbers::{CheckedRem, Zeroable};
+use std::ops::{Div, Mul};
 
-use crate::big_int::{BigInt, DivisibleDigit, GcdDigit, MultiplicativeDigit};
-use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid};
+use traiter::numbers::{CheckedRem, Gcd, Unitary, Zeroable};
+
+use crate::big_int::BigInt;
 
 use super::types::{normalize_components_moduli, Fraction};
 
 impl<
         Component: Clone
             + CheckedRem<Output = Option<Component>>
-            + DivisivePartialMagma
-            + GcdMagma
-            + MultiplicativeMonoid
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
             + Zeroable,
     > CheckedRem for Fraction<Component>
 {
@@ -32,9 +33,9 @@ impl<
 impl<
         Component: Clone
             + CheckedRem<Output = Option<Component>>
-            + DivisivePartialMagma
-            + GcdMagma
-            + MultiplicativeMonoid
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
             + Zeroable,
     > CheckedRem<Component> for Fraction<Component>
 {
@@ -53,11 +54,16 @@ impl<
     }
 }
 
-impl<
-        Digit: DivisibleDigit + GcdDigit + MultiplicativeDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedRem<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedRem<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: Clone
+        + CheckedRem<Output = Option<Self>>
+        + Div<Output = Self>
+        + Gcd<Output = Self>
+        + Mul<Output = Self>
+        + Unitary
+        + Zeroable,
 {
     type Output = Option<Fraction<Self>>;
 
@@ -78,10 +84,9 @@ impl<
     }
 }
 
-macro_rules! primitive_checked_rem_fraction_impl {
-    ($($t:ty)*) => ($(
-        impl CheckedRem<Fraction<Self>> for $t
-        {
+macro_rules! integer_checked_rem_fraction_impl {
+    ($($integer:ty)*) => ($(
+        impl CheckedRem<Fraction<Self>> for $integer {
             type Output = Option<Fraction<Self>>;
 
             fn checked_rem(self, divisor: Fraction<Self>) -> Self::Output {
@@ -89,7 +94,8 @@ macro_rules! primitive_checked_rem_fraction_impl {
                     None
                 } else {
                     let (numerator, denominator) = normalize_components_moduli(
-                        (self * divisor.denominator).checked_rem(divisor.numerator)?,
+                        (self * divisor.denominator)
+                            .checked_rem(divisor.numerator)?,
                         divisor.denominator,
                     );
                     Some(Fraction::<Self> {
@@ -99,7 +105,9 @@ macro_rules! primitive_checked_rem_fraction_impl {
                 }
             }
         }
-        )*)
+    )*)
 }
 
-primitive_checked_rem_fraction_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+integer_checked_rem_fraction_impl!(
+    i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
+);

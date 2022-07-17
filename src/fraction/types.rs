@@ -1,20 +1,32 @@
 use std::fmt;
+use std::ops::{Div, Neg};
 
-use traiter::numbers::Signed;
+use traiter::numbers::{Gcd, Signed};
 
-use crate::traits::{DivisivePartialMagma, GcdMagma, NegatableUnaryAlgebra};
-
-#[derive(Clone)]
-pub struct Fraction<Component: Clone> {
+pub struct Fraction<Component> {
     pub(super) numerator: Component,
     pub(super) denominator: Component,
 }
 
+impl<Component: Clone> Clone for Fraction<Component> {
+    fn clone(&self) -> Self {
+        Self {
+            numerator: self.numerator.clone(),
+            denominator: self.denominator.clone(),
+        }
+    }
+
+    fn clone_from(&mut self, source: &Self) {
+        (self.numerator, self.denominator) =
+            (source.numerator.clone(), source.denominator.clone());
+    }
+}
+
 impl<
         Component: Clone
-            + DivisivePartialMagma
-            + GcdMagma
-            + NegatableUnaryAlgebra
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Neg<Output = Component>
             + Signed,
     > Fraction<Component>
 {
@@ -37,7 +49,7 @@ impl<
     }
 }
 
-impl<Component: Clone> Fraction<Component> {
+impl<Component> Fraction<Component> {
     pub fn denominator(&self) -> &Component {
         &self.denominator
     }
@@ -49,7 +61,7 @@ impl<Component: Clone> Fraction<Component> {
 
 #[inline]
 pub(super) fn normalize_components_moduli<
-    Component: Clone + DivisivePartialMagma + GcdMagma,
+    Component: Clone + Div<Output = Component> + Gcd<Output = Component>,
 >(
     numerator: Component,
     denominator: Component,
@@ -60,7 +72,7 @@ pub(super) fn normalize_components_moduli<
 
 #[inline]
 pub(super) fn normalize_components_sign<
-    Component: NegatableUnaryAlgebra + Signed,
+    Component: Neg<Output = Component> + Signed,
 >(
     numerator: Component,
     denominator: Component,

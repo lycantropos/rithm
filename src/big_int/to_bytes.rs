@@ -5,14 +5,15 @@ use traiter::numbers::{Endianness, Signed, ToBytes, Zeroable};
 use crate::traits::Oppose;
 
 use super::constants::MIDDLE_BYTE;
-use super::digits::{
-    binary_digits_to_binary_base, negate_digits,
-    BinaryDigitConvertibleToBinary,
-};
+use super::digits::{negate_digits, BinaryBaseFromBinaryDigits};
 use super::types::BigInt;
 
 impl<
-        Digit: BinaryDigitConvertibleToBinary<Digit> + From<u8> + Oppose + Zeroable,
+        Digit: BinaryBaseFromBinaryDigits<Digit>
+            + Copy
+            + From<u8>
+            + Oppose
+            + Zeroable,
         const SEPARATOR: char,
         const SHIFT: usize,
     > ToBytes for BigInt<Digit, SEPARATOR, SHIFT>
@@ -22,7 +23,7 @@ where
     type Output = Vec<u8>;
 
     fn to_bytes(&self, endianness: Endianness) -> Self::Output {
-        let mut result = binary_digits_to_binary_base::<Digit, Digit>(
+        let mut result = Digit::binary_base_from_binary_digits(
             &self.digits,
             SHIFT,
             u8::BITS as usize,

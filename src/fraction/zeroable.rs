@@ -2,7 +2,7 @@ use traiter::numbers::{Unitary, Zeroable};
 
 use super::types::Fraction;
 
-impl<Component: Clone + Unitary + Zeroable> Zeroable for Fraction<Component> {
+impl<Component: Unitary + Zeroable> Zeroable for Fraction<Component> {
     fn zero() -> Self {
         Self {
             numerator: Component::zero(),

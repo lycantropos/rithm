@@ -1,15 +1,9 @@
-use traiter::numbers::{CheckedDivEuclid, Floor, Zeroable};
-
-use crate::traits::MultiplicativeMonoid;
+use traiter::numbers::{CheckedDivEuclid, Floor};
 
 use super::types::Fraction;
 
-impl<
-        Component: Clone
-            + CheckedDivEuclid<Output = Option<Component>>
-            + MultiplicativeMonoid
-            + Zeroable,
-    > Floor for Fraction<Component>
+impl<Component: CheckedDivEuclid<Output = Option<Component>>> Floor
+    for Fraction<Component>
 {
     type Output = Component;
 

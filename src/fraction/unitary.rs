@@ -2,7 +2,7 @@ use traiter::numbers::Unitary;
 
 use super::types::Fraction;
 
-impl<Component: Clone + Unitary> Unitary for Fraction<Component> {
+impl<Component: Unitary> Unitary for Fraction<Component> {
     fn one() -> Self {
         Self {
             numerator: Component::one(),

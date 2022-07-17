@@ -1,21 +1,18 @@
-use std::ops::Add;
+use std::ops::{Add, Div, Mul};
 
-use traiter::numbers::Signed;
+use traiter::numbers::{Gcd, Signed};
 
-use crate::big_int::{AdditiveDigit, BigInt, GcdDigit, MultiplicativeDigit};
-use crate::traits::{
-    AdditiveMonoid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
-};
+use crate::big_int::BigInt;
 
 use super::types::{normalize_components_moduli, Fraction};
 
 impl<
-        Component: AdditiveMonoid
+        Component: Add<Output = Component>
             + Clone
-            + DivisivePartialMagma
-            + GcdMagma
-            + Signed
-            + MultiplicativeMonoid,
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
+            + Signed,
     > Add for Fraction<Component>
 {
     type Output = Self;
@@ -34,12 +31,12 @@ impl<
 }
 
 impl<
-        Component: AdditiveMonoid
+        Component: Add<Output = Component>
             + Clone
-            + DivisivePartialMagma
-            + GcdMagma
+            + Div<Output = Component>
+            + Gcd<Output = Component>
             + Signed
-            + MultiplicativeMonoid,
+            + Mul<Output = Component>,
     > Add<Component> for Fraction<Component>
 {
     type Output = Self;
@@ -56,11 +53,10 @@ impl<
     }
 }
 
-impl<
-        Digit: AdditiveDigit + GcdDigit + MultiplicativeDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > Add<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Add<Fraction<Self>>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Fraction<Self>: Add<Self, Output = Fraction<Self>>,
 {
     type Output = Fraction<Self>;
 
@@ -69,9 +65,9 @@ impl<
     }
 }
 
-macro_rules! primitive_add_fraction_impl {
-    ($($t:ty)*) => ($(
-    impl Add<Fraction<Self>> for $t {
+macro_rules! signed_integer_add_fraction_impl {
+    ($($integer:ty)*) => ($(
+    impl Add<Fraction<Self>> for $integer {
         type Output = Fraction<Self>;
 
         fn add(self, other: Fraction<Self>) -> Self::Output {
@@ -81,4 +77,4 @@ macro_rules! primitive_add_fraction_impl {
     )*)
 }
 
-primitive_add_fraction_impl!(i8 i16 i32 i64 i128 isize);
+signed_integer_add_fraction_impl!(i8 i16 i32 i64 i128 isize);

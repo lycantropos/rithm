@@ -1,7 +1,8 @@
+use std::ops::Neg;
+
 use traiter::numbers::{CheckedPow, Pow, Signed, Unitary, Zeroable};
 
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use crate::traits::NegatableUnaryAlgebra;
 
 use super::types::Fraction;
 
@@ -9,7 +10,7 @@ impl<
         Component: Clone
             + Signed
             + CheckedPow<Component, Output = Option<Component>>
-            + NegatableUnaryAlgebra
+            + Neg<Output = Component>
             + Unitary
             + Zeroable,
     > Pow<Component> for Fraction<Component>
@@ -22,9 +23,9 @@ impl<
     }
 }
 
-macro_rules! primitive_fraction_pow_impl {
-    ($($t:ty)*) => ($(
-        impl Pow<u32> for Fraction<$t> {
+macro_rules! signed_integer_fraction_pow_impl {
+    ($($integer:ty)*) => ($(
+        impl Pow<u32> for Fraction<$integer> {
             type Output = Self;
 
             fn pow(self, exponent: u32) -> Self::Output {
@@ -37,4 +38,4 @@ macro_rules! primitive_fraction_pow_impl {
         )*)
 }
 
-primitive_fraction_pow_impl!(i8 i16 i32 i64 i128 isize);
+signed_integer_fraction_pow_impl!(i8 i16 i32 i64 i128 isize);

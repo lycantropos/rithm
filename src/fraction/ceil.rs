@@ -1,14 +1,12 @@
-use traiter::numbers::{Ceil, CheckedDivEuclid, Zeroable};
+use std::ops::Neg;
 
-use crate::traits::{MultiplicativeMonoid, NegatableUnaryAlgebra};
+use traiter::numbers::{Ceil, CheckedDivEuclid, Zeroable};
 
 use super::types::Fraction;
 
 impl<
-        Component: Clone
-            + CheckedDivEuclid<Output = Option<Component>>
-            + MultiplicativeMonoid
-            + NegatableUnaryAlgebra
+        Component: CheckedDivEuclid<Output = Option<Component>>
+            + Neg<Output = Component>
             + Zeroable,
     > Ceil for Fraction<Component>
 {

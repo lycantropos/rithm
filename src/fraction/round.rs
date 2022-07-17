@@ -1,23 +1,23 @@
 use std::cmp::Ordering;
+use std::ops::{Add, Mul, Sub};
 
 use traiter::numbers::{
-    CheckedDivRemEuclid, Parity, Round, Signed, TieBreaking,
+    CheckedDivRemEuclid, Parity, Round, Signed, TieBreaking, Unitary,
 };
-
-use crate::traits::{AdditiveMonoid, MultiplicativeMonoid, SubtractiveMagma};
 
 use super::types::Fraction;
 
 impl<
-        Component: AdditiveMonoid
+        Component: Add<Output = Component>
             + Clone
             + CheckedDivRemEuclid<Output = Option<(Component, Component)>>
             + From<u8>
-            + MultiplicativeMonoid
+            + Mul<Output = Component>
             + Signed
             + Ord
             + Parity
-            + SubtractiveMagma,
+            + Sub<Output = Component>
+            + Unitary,
     > Round for Fraction<Component>
 {
     type Output = Component;

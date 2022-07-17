@@ -1,15 +1,18 @@
+use std::ops::{Add, Mul};
+
 use traiter::numbers::BitLength;
 
-use super::digits::{ConstructibleFrom, MultiplicativeDigit};
 use super::types::BigInt;
 
 impl<
-        Digit: BitLength<Output = usize>
-            + ConstructibleFrom<usize>
-            + MultiplicativeDigit,
+        Digit: BitLength<Output = usize> + Copy,
         const SEPARATOR: char,
         const SHIFT: usize,
     > BitLength for &BigInt<Digit, SEPARATOR, SHIFT>
+where
+    BigInt<Digit, SEPARATOR, SHIFT>: Add<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+        + From<usize>
+        + Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
 {
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 

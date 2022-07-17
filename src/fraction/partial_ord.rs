@@ -1,110 +1,47 @@
 use std::cmp::Ordering;
+use std::ops::Mul;
 
-use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
-use crate::traits::MultiplicativeMonoid;
+use traiter::numbers::Unitary;
+
+use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Component: Clone + MultiplicativeMonoid + PartialOrd> PartialOrd
+impl<Component: Clone + Mul<Output = Component> + PartialOrd> PartialOrd
     for Fraction<Component>
 {
-    fn ge(&self, other: &Self) -> bool {
-        self.numerator.clone() * other.denominator.clone()
-            >= other.numerator.clone() * self.denominator.clone()
-    }
-
-    fn gt(&self, other: &Self) -> bool {
-        self.numerator.clone() * other.denominator.clone()
-            > other.numerator.clone() * self.denominator.clone()
-    }
-
-    fn le(&self, other: &Self) -> bool {
-        self.numerator.clone() * other.denominator.clone()
-            <= other.numerator.clone() * self.denominator.clone()
-    }
-
-    fn lt(&self, other: &Self) -> bool {
-        self.numerator.clone() * other.denominator.clone()
-            < other.numerator.clone() * self.denominator.clone()
-    }
-
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(if self.lt(other) {
-            Ordering::Less
-        } else if self.gt(other) {
-            Ordering::Greater
-        } else {
-            Ordering::Equal
-        })
+        (self.numerator.clone() * other.denominator.clone())
+            .partial_cmp(&(other.numerator.clone() * self.denominator.clone()))
     }
 }
 
-impl<Component: Clone + MultiplicativeMonoid + PartialOrd>
+impl<Component: Clone + Mul<Output = Component> + PartialOrd + Unitary>
     PartialOrd<Component> for Fraction<Component>
 {
-    fn ge(&self, other: &Component) -> bool {
-        self.numerator >= other.clone() * self.denominator.clone()
-    }
-
-    fn gt(&self, other: &Component) -> bool {
-        self.numerator > other.clone() * self.denominator.clone()
-    }
-
-    fn le(&self, other: &Component) -> bool {
-        self.numerator <= other.clone() * self.denominator.clone()
-    }
-
-    fn lt(&self, other: &Component) -> bool {
-        self.numerator < other.clone() * self.denominator.clone()
-    }
-
     fn partial_cmp(&self, other: &Component) -> Option<Ordering> {
-        Some(if self.lt(other) {
-            Ordering::Less
-        } else if self.gt(other) {
-            Ordering::Greater
-        } else {
-            Ordering::Equal
-        })
+        self.numerator
+            .partial_cmp(&(other.clone() * self.denominator.clone()))
     }
 }
 
-impl<
-        Digit: Clone + GcdDigit + MultiplicativeDigit + PartialOrd,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > PartialOrd<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Component: Clone, Digit, const SEPARATOR: char, const SHIFT: usize>
+    PartialOrd<Fraction<Component>> for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: Clone
+        + Mul<Component, Output = Self>
+        + PartialEq<Fraction<Component>>
+        + PartialOrd<Component>,
 {
-    fn ge(&self, other: &Fraction<Self>) -> bool {
-        self.clone() * other.denominator.clone() >= other.numerator
-    }
-
-    fn gt(&self, other: &Fraction<Self>) -> bool {
-        self.clone() * other.denominator.clone() > other.numerator
-    }
-
-    fn le(&self, other: &Fraction<Self>) -> bool {
-        self.clone() * other.denominator.clone() <= other.numerator
-    }
-
-    fn lt(&self, other: &Fraction<Self>) -> bool {
-        self.clone() * other.denominator.clone() < other.numerator
-    }
-
-    fn partial_cmp(&self, other: &Fraction<Self>) -> Option<Ordering> {
-        Some(if self.lt(other) {
-            Ordering::Less
-        } else if self.gt(other) {
-            Ordering::Greater
-        } else {
-            Ordering::Equal
-        })
+    fn partial_cmp(&self, other: &Fraction<Component>) -> Option<Ordering> {
+        (self.clone() * other.denominator.clone())
+            .partial_cmp(&other.numerator)
     }
 }
 
-macro_rules! primitive_partial_ord_fraction_impl {
-    ($($t:ty)*) => ($(
-    impl PartialOrd<Fraction<Self>> for $t
+macro_rules! signed_integer_partial_ord_fraction_impl {
+    ($($integer:ty)*) => ($(
+    impl PartialOrd<Fraction<Self>> for $integer
     {
         fn ge(&self, other: &Fraction<Self>) -> bool {
             self * other.denominator >= other.numerator
@@ -135,4 +72,4 @@ macro_rules! primitive_partial_ord_fraction_impl {
     )*)
 }
 
-primitive_partial_ord_fraction_impl!(i8 i16 i32 i64 i128 isize);
+signed_integer_partial_ord_fraction_impl!(i8 i16 i32 i64 i128 isize);

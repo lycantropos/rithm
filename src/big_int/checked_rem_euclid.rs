@@ -1,10 +1,10 @@
 use traiter::numbers::CheckedRemEuclid;
 
-use super::digits::{checked_rem_euclid, EuclidDivisibleDigit};
+use super::digits::CheckedRemEuclidComponents;
 use super::types::BigInt;
 
 impl<
-        Digit: EuclidDivisibleDigit,
+        Digit: CheckedRemEuclidComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedRemEuclid for BigInt<Digit, SEPARATOR, SHIFT>
@@ -12,7 +12,7 @@ impl<
     type Output = Option<Self>;
 
     fn checked_rem_euclid(self, divisor: Self) -> Self::Output {
-        checked_rem_euclid::<Digit, SHIFT>(
+        Digit::checked_rem_euclid_components::<SHIFT>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -23,7 +23,7 @@ impl<
 }
 
 impl<
-        Digit: EuclidDivisibleDigit,
+        Digit: CheckedRemEuclidComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedRemEuclid<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -31,7 +31,7 @@ impl<
     type Output = Option<Self>;
 
     fn checked_rem_euclid(self, divisor: &Self) -> Self::Output {
-        checked_rem_euclid::<Digit, SHIFT>(
+        Digit::checked_rem_euclid_components::<SHIFT>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -42,7 +42,7 @@ impl<
 }
 
 impl<
-        Digit: EuclidDivisibleDigit,
+        Digit: CheckedRemEuclidComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>>
@@ -54,7 +54,7 @@ impl<
         self,
         divisor: BigInt<Digit, SEPARATOR, SHIFT>,
     ) -> Self::Output {
-        checked_rem_euclid::<Digit, SHIFT>(
+        Digit::checked_rem_euclid_components::<SHIFT>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -68,7 +68,7 @@ impl<
 }
 
 impl<
-        Digit: EuclidDivisibleDigit,
+        Digit: CheckedRemEuclidComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedRemEuclid for &BigInt<Digit, SEPARATOR, SHIFT>
@@ -76,7 +76,7 @@ impl<
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
 
     fn checked_rem_euclid(self, divisor: Self) -> Self::Output {
-        checked_rem_euclid::<Digit, SHIFT>(
+        Digit::checked_rem_euclid_components::<SHIFT>(
             self.sign,
             &self.digits,
             divisor.sign,

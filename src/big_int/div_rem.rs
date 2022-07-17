@@ -2,11 +2,12 @@ use traiter::numbers::{CheckedDivRem, DivRem};
 
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
-use super::digits::DivisibleDigit;
 use super::types::BigInt;
 
-impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivRem
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivRem
     for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: CheckedDivRem<Output = Option<(Self, Self)>>,
 {
     type Output = (Self, Self);
 
@@ -16,8 +17,10 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivRem
     }
 }
 
-impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
-    DivRem<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivRem<&Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    for<'a> Self: CheckedDivRem<&'a Self, Output = Option<(Self, Self)>>,
 {
     type Output = (Self, Self);
 
@@ -27,9 +30,17 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
     DivRem<BigInt<Digit, SEPARATOR, SHIFT>>
     for &BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: CheckedDivRem<
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        Output = Option<(
+            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, SHIFT>,
+        )>,
+    >,
 {
     type Output = (
         BigInt<Digit, SEPARATOR, SHIFT>,
@@ -45,8 +56,15 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize> DivRem
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivRem
     for &BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: CheckedDivRem<
+        Output = Option<(
+            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, SHIFT>,
+        )>,
+    >,
 {
     type Output = (
         BigInt<Digit, SEPARATOR, SHIFT>,

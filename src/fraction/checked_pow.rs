@@ -1,6 +1,6 @@
-use traiter::numbers::{CheckedPow, Signed, Unitary, Zeroable};
+use std::ops::Neg;
 
-use crate::traits::NegatableUnaryAlgebra;
+use traiter::numbers::{CheckedPow, Signed, Unitary, Zeroable};
 
 use super::types::{normalize_components_sign, Fraction};
 
@@ -8,7 +8,7 @@ impl<
         Component: Clone
             + Signed
             + CheckedPow<Component, Output = Option<Component>>
-            + NegatableUnaryAlgebra
+            + Neg<Output = Component>
             + Unitary,
     > CheckedPow<Component> for Fraction<Component>
 {
@@ -44,9 +44,9 @@ impl<
     }
 }
 
-macro_rules! primitive_fraction_checked_pow_impl {
-    ($($t:ty)*) => ($(
-        impl CheckedPow<u32> for Fraction<$t> {
+macro_rules! signed_integer_fraction_checked_pow_impl {
+    ($($integer:ty)*) => ($(
+        impl CheckedPow<u32> for Fraction<$integer> {
             type Output = Option<Self>;
 
             fn checked_pow(self, exponent: u32) -> Self::Output {
@@ -59,4 +59,4 @@ macro_rules! primitive_fraction_checked_pow_impl {
         )*)
 }
 
-primitive_fraction_checked_pow_impl!(i8 i16 i32 i64 i128 isize);
+signed_integer_fraction_checked_pow_impl!(i8 i16 i32 i64 i128 isize);

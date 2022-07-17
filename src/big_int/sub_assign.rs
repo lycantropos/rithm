@@ -1,13 +1,13 @@
 use std::ops::SubAssign;
 
-use super::digits::{subtract_components, AdditiveDigit};
+use super::digits::SubtractComponents;
 use super::types::BigInt;
 
-impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: SubtractComponents, const SEPARATOR: char, const SHIFT: usize>
+    SubAssign for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn sub_assign(&mut self, subtrahend: Self) {
-        (self.sign, self.digits) = subtract_components::<Digit, SHIFT>(
+        (self.sign, self.digits) = Digit::subtract_components::<SHIFT>(
             self.sign,
             &self.digits,
             subtrahend.sign,
@@ -16,11 +16,11 @@ impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize> SubAssign
     }
 }
 
-impl<Digit: AdditiveDigit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit: SubtractComponents, const SEPARATOR: char, const SHIFT: usize>
     SubAssign<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn sub_assign(&mut self, subtrahend: &Self) {
-        (self.sign, self.digits) = subtract_components::<Digit, SHIFT>(
+        (self.sign, self.digits) = Digit::subtract_components::<SHIFT>(
             self.sign,
             &self.digits,
             subtrahend.sign,

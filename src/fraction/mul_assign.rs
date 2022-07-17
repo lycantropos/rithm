@@ -1,17 +1,15 @@
-use std::ops::MulAssign;
+use std::ops::{Div, Mul, MulAssign};
 
-use traiter::numbers::Signed;
-
-use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid};
+use traiter::numbers::{Gcd, Signed};
 
 use super::types::{normalize_components_moduli, Fraction};
 
 impl<
         Component: Clone
-            + DivisivePartialMagma
-            + GcdMagma
-            + Signed
-            + MultiplicativeMonoid,
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
+            + Signed,
     > MulAssign for Fraction<Component>
 {
     fn mul_assign(&mut self, other: Self) {
@@ -30,10 +28,10 @@ impl<
 
 impl<
         Component: Clone
-            + DivisivePartialMagma
-            + GcdMagma
+            + Div<Output = Component>
+            + Gcd<Output = Component>
             + Signed
-            + MultiplicativeMonoid,
+            + Mul<Output = Component>,
     > MulAssign<Component> for Fraction<Component>
 {
     fn mul_assign(&mut self, other: Component) {

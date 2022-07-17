@@ -1,19 +1,15 @@
-use std::ops::AddAssign;
+use std::ops::{Add, AddAssign, Div, Mul};
 
-use traiter::numbers::Signed;
-
-use crate::traits::{
-    AdditiveMonoid, DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
-};
+use traiter::numbers::{Gcd, Signed};
 
 use super::types::{normalize_components_moduli, Fraction};
 
 impl<
-        Component: AdditiveMonoid
+        Component: Add<Output = Component>
             + Clone
-            + DivisivePartialMagma
-            + GcdMagma
-            + MultiplicativeMonoid
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
             + Signed,
     > AddAssign for Fraction<Component>
 {
@@ -27,11 +23,11 @@ impl<
 }
 
 impl<
-        Component: AdditiveMonoid
+        Component: Add<Output = Component>
             + Clone
-            + DivisivePartialMagma
-            + GcdMagma
-            + MultiplicativeMonoid
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
             + Signed,
     > AddAssign<Component> for Fraction<Component>
 {

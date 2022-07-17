@@ -1,23 +1,20 @@
-use std::ops::Div;
+use std::ops::{Div, Mul, Neg};
 
-use traiter::numbers::{CheckedDiv, Signed};
+use traiter::numbers::{CheckedDiv, Gcd, Signed, Unitary};
 
-use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
+use crate::big_int::BigInt;
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use crate::traits::{
-    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
-    NegatableUnaryAlgebra,
-};
 
 use super::types::Fraction;
 
 impl<
         Component: Clone
-            + DivisivePartialMagma
-            + GcdMagma
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
+            + Neg<Output = Component>
             + Signed
-            + MultiplicativeMonoid
-            + NegatableUnaryAlgebra,
+            + Unitary,
     > Div for Fraction<Component>
 {
     type Output = Self;
@@ -30,11 +27,12 @@ impl<
 
 impl<
         Component: Clone
-            + DivisivePartialMagma
-            + GcdMagma
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
+            + Neg<Output = Component>
             + Signed
-            + MultiplicativeMonoid
-            + NegatableUnaryAlgebra,
+            + Unitary,
     > Div<Component> for Fraction<Component>
 {
     type Output = Self;
@@ -45,11 +43,10 @@ impl<
     }
 }
 
-impl<
-        Digit: GcdDigit + MultiplicativeDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > Div<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Div<Fraction<Self>>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: CheckedDiv<Fraction<Self>, Output = Option<Fraction<Self>>>,
 {
     type Output = Fraction<Self>;
 
@@ -59,17 +56,17 @@ impl<
     }
 }
 
-macro_rules! primitive_div_fraction_impl {
-    ($($t:ty)*) => ($(
-        impl Div<Fraction<Self>> for $t {
+macro_rules! integer_div_fraction_impl {
+    ($($integer:ty)*) => ($(
+        impl Div<Fraction<Self>> for $integer {
             type Output = Fraction<Self>;
 
             fn div(self, divisor: Fraction<Self>) -> Self::Output {
-                <$t as CheckedDiv<Fraction<Self>>>::checked_div(self, divisor)
+                <$integer as CheckedDiv<Fraction<Self>>>::checked_div(self, divisor)
                     .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
             }
         }
     )*)
 }
 
-primitive_div_fraction_impl!(i8 i16 i32 i64 i128 isize);
+integer_div_fraction_impl!(i8 i16 i32 i64 i128 isize);

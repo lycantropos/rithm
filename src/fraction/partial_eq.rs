@@ -4,14 +4,14 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Component: Clone + PartialEq> PartialEq for Fraction<Component> {
+impl<Component: PartialEq> PartialEq for Fraction<Component> {
     fn eq(&self, other: &Self) -> bool {
         self.numerator.eq(&other.numerator)
             && self.denominator.eq(&other.denominator)
     }
 }
 
-impl<Component: Clone + PartialEq + Unitary> PartialEq<Component>
+impl<Component: PartialEq + Unitary> PartialEq<Component>
     for Fraction<Component>
 {
     fn eq(&self, other: &Component) -> bool {
@@ -20,7 +20,7 @@ impl<Component: Clone + PartialEq + Unitary> PartialEq<Component>
 }
 
 impl<
-        Component: Clone + PartialEq<Self> + Unitary,
+        Component: PartialEq<Self> + Unitary,
         Digit,
         const SEPARATOR: char,
         const SHIFT: usize,
@@ -31,14 +31,16 @@ impl<
     }
 }
 
-macro_rules! primitive_partial_eq_fraction_impl {
-    ($($t:ty)*) => ($(
-    impl<Component: Clone + PartialEq<$t> + Unitary> PartialEq<Fraction<Component>> for $t {
-        fn eq(&self, other: &Fraction<Component>) -> bool {
-            other.denominator.is_one() && other.numerator.eq(self)
+macro_rules! signed_integer_partial_eq_fraction_impl {
+    ($($integer:ty)*) => ($(
+        impl<Component: PartialEq<$integer> + Unitary>
+            PartialEq<Fraction<Component>> for $integer
+        {
+            fn eq(&self, other: &Fraction<Component>) -> bool {
+                other.denominator.is_one() && other.numerator.eq(self)
+            }
         }
-    }
     )*)
 }
 
-primitive_partial_eq_fraction_impl!(i8 i16 i32 i64 i128 isize);
+signed_integer_partial_eq_fraction_impl!(i8 i16 i32 i64 i128 isize);

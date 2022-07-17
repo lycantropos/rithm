@@ -1,15 +1,18 @@
 use traiter::numbers::CheckedDivRem;
 
-use super::digits::{checked_div_rem, DivisibleDigit};
+use super::digits::CheckedDivRemComponents;
 use super::types::BigInt;
 
-impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRem for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: CheckedDivRemComponents,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivRem for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<(Self, Self)>;
 
     fn checked_div_rem(self, divisor: Self) -> Self::Output {
-        checked_div_rem::<Digit, SHIFT>(
+        Digit::checked_div_rem_components::<SHIFT>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -37,13 +40,16 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRem<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: CheckedDivRemComponents,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivRem<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<(Self, Self)>;
 
     fn checked_div_rem(self, divisor: &Self) -> Self::Output {
-        checked_div_rem::<Digit, SHIFT>(
+        Digit::checked_div_rem_components::<SHIFT>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -71,8 +77,11 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRem<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<
+        Digit: CheckedDivRemComponents,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivRem<BigInt<Digit, SEPARATOR, SHIFT>>
     for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<(
@@ -84,7 +93,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
         self,
         divisor: BigInt<Digit, SEPARATOR, SHIFT>,
     ) -> Self::Output {
-        checked_div_rem::<Digit, SHIFT>(
+        Digit::checked_div_rem_components::<SHIFT>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -112,8 +121,11 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRem for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: CheckedDivRemComponents,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > CheckedDivRem for &BigInt<Digit, SEPARATOR, SHIFT>
 {
     type Output = Option<(
         BigInt<Digit, SEPARATOR, SHIFT>,
@@ -121,7 +133,7 @@ impl<Digit: DivisibleDigit, const SEPARATOR: char, const SHIFT: usize>
     )>;
 
     fn checked_div_rem(self, divisor: Self) -> Self::Output {
-        checked_div_rem::<Digit, SHIFT>(
+        Digit::checked_div_rem_components::<SHIFT>(
             self.sign,
             &self.digits,
             divisor.sign,

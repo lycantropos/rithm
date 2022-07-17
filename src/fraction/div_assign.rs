@@ -1,11 +1,6 @@
-use std::ops::DivAssign;
+use std::ops::{Div, DivAssign, Mul, Neg};
 
-use traiter::numbers::Signed;
-
-use crate::traits::{
-    DivisivePartialMagma, GcdMagma, MultiplicativeMonoid,
-    NegatableUnaryAlgebra,
-};
+use traiter::numbers::{Gcd, Signed};
 
 use super::types::{
     normalize_components_moduli, normalize_components_sign, Fraction,
@@ -13,10 +8,10 @@ use super::types::{
 
 impl<
         Component: Clone
-            + DivisivePartialMagma
-            + GcdMagma
-            + MultiplicativeMonoid
-            + NegatableUnaryAlgebra
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
+            + Neg<Output = Component>
             + Signed,
     > DivAssign for Fraction<Component>
 {
@@ -38,10 +33,10 @@ impl<
 
 impl<
         Component: Clone
-            + DivisivePartialMagma
-            + GcdMagma
-            + MultiplicativeMonoid
-            + NegatableUnaryAlgebra
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
+            + Neg<Output = Component>
             + Signed,
     > DivAssign<Component> for Fraction<Component>
 {

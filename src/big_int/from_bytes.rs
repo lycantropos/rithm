@@ -5,15 +5,15 @@ use crate::traits::HasSignBit;
 use super::constants::MIDDLE_BYTE;
 use super::contracts::is_valid_shift;
 use super::digits::{
-    binary_digits_to_binary_base, negate_digits, to_digits_sign,
-    BinaryDigitConvertibleToBinary,
+    negate_digits, to_digits_sign, BinaryBaseFromBinaryDigits,
 };
 use super::types::{BigInt, Sign};
 
-impl<Digit: HasSignBit, const SEPARATOR: char, const SHIFT: usize> FromBytes
-    for BigInt<Digit, SEPARATOR, SHIFT>
-where
-    u8: BinaryDigitConvertibleToBinary<Digit>,
+impl<
+        Digit: BinaryBaseFromBinaryDigits<u8> + HasSignBit,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > FromBytes for BigInt<Digit, SEPARATOR, SHIFT>
 {
     fn from_bytes(bytes: &[u8], endianness: Endianness) -> Self {
         let mut bytes = bytes.to_vec();
@@ -31,7 +31,7 @@ where
         };
         Self {
             sign,
-            digits: binary_digits_to_binary_base::<u8, Digit>(
+            digits: Digit::binary_base_from_binary_digits(
                 &bytes[..bytes.len()
                     - ((bytes.len() > 1 && bytes[bytes.len() - 1].is_zero())
                         as usize)],

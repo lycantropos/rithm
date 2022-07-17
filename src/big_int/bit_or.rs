@@ -1,10 +1,10 @@
 use std::ops::BitOr;
 
-use super::digits::{bitwise_or_components, BitwiseDisjunctiveDigit};
+use super::digits::BitwiseOrComponents;
 use super::types::BigInt;
 
 impl<
-        Digit: BitwiseDisjunctiveDigit,
+        Digit: BitwiseOrComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > BitOr for BigInt<Digit, SEPARATOR, SHIFT>
@@ -12,7 +12,7 @@ impl<
     type Output = Self;
 
     fn bitor(self, other: Self) -> Self::Output {
-        let (sign, digits) = bitwise_or_components::<Digit, SHIFT>(
+        let (sign, digits) = Digit::bitwise_or_components::<SHIFT>(
             self.sign,
             self.digits,
             other.sign,
@@ -23,7 +23,7 @@ impl<
 }
 
 impl<
-        Digit: BitwiseDisjunctiveDigit,
+        Digit: BitwiseOrComponents + Clone,
         const SEPARATOR: char,
         const SHIFT: usize,
     > BitOr<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -31,7 +31,7 @@ impl<
     type Output = Self;
 
     fn bitor(self, other: &Self) -> Self::Output {
-        let (sign, digits) = bitwise_or_components::<Digit, SHIFT>(
+        let (sign, digits) = Digit::bitwise_or_components::<SHIFT>(
             self.sign,
             self.digits,
             other.sign,
@@ -42,7 +42,7 @@ impl<
 }
 
 impl<
-        Digit: BitwiseDisjunctiveDigit,
+        Digit: BitwiseOrComponents + Clone,
         const SEPARATOR: char,
         const SHIFT: usize,
     > BitOr<BigInt<Digit, SEPARATOR, SHIFT>>
@@ -51,7 +51,7 @@ impl<
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
     fn bitor(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        let (sign, digits) = bitwise_or_components::<Digit, SHIFT>(
+        let (sign, digits) = Digit::bitwise_or_components::<SHIFT>(
             self.sign,
             self.digits.clone(),
             other.sign,
@@ -62,7 +62,7 @@ impl<
 }
 
 impl<
-        Digit: BitwiseDisjunctiveDigit,
+        Digit: BitwiseOrComponents + Clone,
         const SEPARATOR: char,
         const SHIFT: usize,
     > BitOr for &BigInt<Digit, SEPARATOR, SHIFT>
@@ -70,7 +70,7 @@ impl<
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
     fn bitor(self, other: Self) -> Self::Output {
-        let (sign, digits) = bitwise_or_components::<Digit, SHIFT>(
+        let (sign, digits) = Digit::bitwise_or_components::<SHIFT>(
             self.sign,
             self.digits.clone(),
             other.sign,

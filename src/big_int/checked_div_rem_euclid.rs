@@ -1,10 +1,10 @@
 use traiter::numbers::CheckedDivRemEuclid;
 
-use super::digits::{checked_div_rem_euclid, EuclidDivisibleDigit};
+use super::digits::CheckedDivRemEuclidComponents;
 use super::types::BigInt;
 
 impl<
-        Digit: EuclidDivisibleDigit,
+        Digit: CheckedDivRemEuclidComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedDivRemEuclid for BigInt<Digit, SEPARATOR, SHIFT>
@@ -12,7 +12,7 @@ impl<
     type Output = Option<(Self, Self)>;
 
     fn checked_div_rem_euclid(self, divisor: Self) -> Self::Output {
-        checked_div_rem_euclid::<Digit, SHIFT>(
+        Digit::checked_div_rem_euclid_components::<SHIFT>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -41,7 +41,7 @@ impl<
 }
 
 impl<
-        Digit: EuclidDivisibleDigit,
+        Digit: CheckedDivRemEuclidComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedDivRemEuclid<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -49,7 +49,7 @@ impl<
     type Output = Option<(Self, Self)>;
 
     fn checked_div_rem_euclid(self, divisor: &Self) -> Self::Output {
-        checked_div_rem_euclid::<Digit, SHIFT>(
+        Digit::checked_div_rem_euclid_components::<SHIFT>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -78,7 +78,7 @@ impl<
 }
 
 impl<
-        Digit: EuclidDivisibleDigit,
+        Digit: CheckedDivRemEuclidComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedDivRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>>
@@ -93,7 +93,7 @@ impl<
         self,
         divisor: BigInt<Digit, SEPARATOR, SHIFT>,
     ) -> Self::Output {
-        checked_div_rem_euclid::<Digit, SHIFT>(
+        Digit::checked_div_rem_euclid_components::<SHIFT>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -122,7 +122,7 @@ impl<
 }
 
 impl<
-        Digit: EuclidDivisibleDigit,
+        Digit: CheckedDivRemEuclidComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > CheckedDivRemEuclid for &BigInt<Digit, SEPARATOR, SHIFT>
@@ -133,7 +133,7 @@ impl<
     )>;
 
     fn checked_div_rem_euclid(self, divisor: Self) -> Self::Output {
-        checked_div_rem_euclid::<Digit, SHIFT>(
+        Digit::checked_div_rem_euclid_components::<SHIFT>(
             self.sign,
             &self.digits,
             divisor.sign,

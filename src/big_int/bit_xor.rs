@@ -1,12 +1,10 @@
 use std::ops::BitXor;
 
-use super::digits::{
-    bitwise_xor_components, BitwiseExclusiveDisjunctiveDigit,
-};
+use super::digits::BitwiseXorComponents;
 use super::types::BigInt;
 
 impl<
-        Digit: BitwiseExclusiveDisjunctiveDigit,
+        Digit: BitwiseXorComponents,
         const SEPARATOR: char,
         const SHIFT: usize,
     > BitXor for BigInt<Digit, SEPARATOR, SHIFT>
@@ -14,7 +12,7 @@ impl<
     type Output = Self;
 
     fn bitxor(self, other: Self) -> Self::Output {
-        let (sign, digits) = bitwise_xor_components::<Digit, SHIFT>(
+        let (sign, digits) = Digit::bitwise_xor_components::<SHIFT>(
             self.sign,
             self.digits,
             other.sign,
@@ -25,7 +23,7 @@ impl<
 }
 
 impl<
-        Digit: BitwiseExclusiveDisjunctiveDigit,
+        Digit: BitwiseXorComponents + Clone,
         const SEPARATOR: char,
         const SHIFT: usize,
     > BitXor<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -33,7 +31,7 @@ impl<
     type Output = Self;
 
     fn bitxor(self, other: &Self) -> Self::Output {
-        let (sign, digits) = bitwise_xor_components::<Digit, SHIFT>(
+        let (sign, digits) = Digit::bitwise_xor_components::<SHIFT>(
             self.sign,
             self.digits,
             other.sign,
@@ -44,7 +42,7 @@ impl<
 }
 
 impl<
-        Digit: BitwiseExclusiveDisjunctiveDigit,
+        Digit: BitwiseXorComponents + Clone,
         const SEPARATOR: char,
         const SHIFT: usize,
     > BitXor<BigInt<Digit, SEPARATOR, SHIFT>>
@@ -53,7 +51,7 @@ impl<
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
     fn bitxor(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        let (sign, digits) = bitwise_xor_components::<Digit, SHIFT>(
+        let (sign, digits) = Digit::bitwise_xor_components::<SHIFT>(
             self.sign,
             self.digits.clone(),
             other.sign,
@@ -64,7 +62,7 @@ impl<
 }
 
 impl<
-        Digit: BitwiseExclusiveDisjunctiveDigit,
+        Digit: BitwiseXorComponents + Clone,
         const SEPARATOR: char,
         const SHIFT: usize,
     > BitXor for &BigInt<Digit, SEPARATOR, SHIFT>
@@ -72,7 +70,7 @@ impl<
     type Output = BigInt<Digit, SEPARATOR, SHIFT>;
 
     fn bitxor(self, other: Self) -> Self::Output {
-        let (sign, digits) = bitwise_xor_components::<Digit, SHIFT>(
+        let (sign, digits) = Digit::bitwise_xor_components::<SHIFT>(
             self.sign,
             self.digits.clone(),
             other.sign,

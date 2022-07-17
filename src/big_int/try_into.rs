@@ -2,10 +2,7 @@ use std::convert::TryFrom;
 
 use traiter::numbers::{LoadExp, Signed, Zeroable};
 
-use super::digits::{
-    fraction_exponent_digits, maybe_reduce_digits,
-    BinaryDigitConvertibleToFloat, MaybeReducibleTo,
-};
+use super::digits::{FractExpDigits, MaybeReduceDigits};
 use super::types::{
     BigInt, TryIntoFloatError, TryIntoSignedIntegerError,
     TryIntoUnsignedIntegerError,
@@ -14,7 +11,7 @@ use super::types::{
 macro_rules! float_try_from_big_int {
     ($($t:ty)*) => ($(
         impl<
-                Digit: BinaryDigitConvertibleToFloat<$t>,
+                Digit: FractExpDigits<$t>,
                 const SEPARATOR: char,
                 const SHIFT: usize,
             > TryFrom<BigInt<Digit, SEPARATOR, SHIFT>> for $t
@@ -22,7 +19,7 @@ macro_rules! float_try_from_big_int {
             type Error = TryIntoFloatError;
 
             fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
-                match fraction_exponent_digits::<Digit, $t, SHIFT>(&value.digits) {
+                match Digit::fract_exp_digits::<SHIFT>(&value.digits) {
                     Some((fraction_modulus, exponent)) => {
                         Ok(((value.sign as $t) * fraction_modulus).load_exp(exponent))
                     }
@@ -32,7 +29,7 @@ macro_rules! float_try_from_big_int {
         }
 
         impl<
-                Digit: BinaryDigitConvertibleToFloat<$t>,
+                Digit: FractExpDigits<$t>,
                 const SEPARATOR: char,
                 const SHIFT: usize,
             > TryFrom<&BigInt<Digit, SEPARATOR, SHIFT>> for $t
@@ -40,7 +37,7 @@ macro_rules! float_try_from_big_int {
             type Error = TryIntoFloatError;
 
             fn try_from(value: &BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
-                match fraction_exponent_digits::<Digit, $t, SHIFT>(&value.digits) {
+                match Digit::fract_exp_digits::<SHIFT>(&value.digits) {
                     Some((fraction_modulus, exponent)) => {
                         Ok(((value.sign as $t) * fraction_modulus).load_exp(exponent))
                     }
@@ -55,13 +52,13 @@ float_try_from_big_int!(f32 f64);
 
 macro_rules! signed_primitive_try_from_big_int {
     ($($t:ty)*) => ($(
-        impl<Digit: MaybeReducibleTo<$t> + Zeroable, const SEPARATOR: char, const SHIFT: usize>
+        impl<Digit: MaybeReduceDigits<$t> + Zeroable, const SEPARATOR: char, const SHIFT: usize>
             TryFrom<BigInt<Digit, SEPARATOR, SHIFT>> for $t
         {
             type Error = TryIntoSignedIntegerError;
 
             fn try_from(value: BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
-                let result = maybe_reduce_digits::<Digit, $t, SHIFT>(&value.digits)
+                let result = Digit::maybe_reduce_digits::<SHIFT>(&value.digits)
                     .ok_or(TryIntoSignedIntegerError::TooLarge);
                 if value.is_negative() {
                     result.map(|value| -value)
@@ -71,13 +68,13 @@ macro_rules! signed_primitive_try_from_big_int {
             }
         }
 
-        impl<Digit: MaybeReducibleTo<$t> + Zeroable, const SEPARATOR: char, const SHIFT: usize>
+        impl<Digit: MaybeReduceDigits<$t> + Zeroable, const SEPARATOR: char, const SHIFT: usize>
             TryFrom<&BigInt<Digit, SEPARATOR, SHIFT>> for $t
         {
             type Error = TryIntoSignedIntegerError;
 
             fn try_from(value: &BigInt<Digit, SEPARATOR, SHIFT>) -> Result<Self, Self::Error> {
-                let result = maybe_reduce_digits::<Digit, $t, SHIFT>(&value.digits)
+                let result = Digit::maybe_reduce_digits::<SHIFT>(&value.digits)
                     .ok_or(TryIntoSignedIntegerError::TooLarge);
                 if value.is_negative() {
                     result.map(|value| -value)
@@ -93,7 +90,7 @@ signed_primitive_try_from_big_int!(i8 i16 i32 i64 i128 isize);
 
 macro_rules! unsigned_primitive_try_from_big_int {
     ($($t:ty)*) => ($(
-        impl<Digit: MaybeReducibleTo<$t> + Zeroable, const SEPARATOR: char, const SHIFT: usize>
+        impl<Digit: MaybeReduceDigits<$t> + Zeroable, const SEPARATOR: char, const SHIFT: usize>
             TryFrom<BigInt<Digit, SEPARATOR, SHIFT>> for $t
         {
             type Error = TryIntoUnsignedIntegerError;
@@ -102,13 +99,13 @@ macro_rules! unsigned_primitive_try_from_big_int {
                 if value.is_negative() {
                     Err(TryIntoUnsignedIntegerError::Negative)
                 } else {
-                    maybe_reduce_digits::<Digit, $t, SHIFT>(&value.digits)
+                    Digit::maybe_reduce_digits::<SHIFT>(&value.digits)
                         .ok_or(TryIntoUnsignedIntegerError::TooLarge)
                 }
             }
         }
 
-        impl<Digit: MaybeReducibleTo<$t> + Zeroable, const SEPARATOR: char, const SHIFT: usize>
+        impl<Digit: MaybeReduceDigits<$t> + Zeroable, const SEPARATOR: char, const SHIFT: usize>
             TryFrom<&BigInt<Digit, SEPARATOR, SHIFT>> for $t
         {
             type Error = TryIntoUnsignedIntegerError;
@@ -117,7 +114,7 @@ macro_rules! unsigned_primitive_try_from_big_int {
                 if value.is_negative() {
                     Err(TryIntoUnsignedIntegerError::Negative)
                 } else {
-                    maybe_reduce_digits::<Digit, $t, SHIFT>(&value.digits)
+                    Digit::maybe_reduce_digits::<SHIFT>(&value.digits)
                         .ok_or(TryIntoUnsignedIntegerError::TooLarge)
                 }
             }

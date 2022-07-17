@@ -1,15 +1,18 @@
-use traiter::numbers::{Ceil, CheckedDivEuclid, Floor, Signed, Trunc};
+use std::ops::{Mul, Neg};
 
-use crate::traits::{MultiplicativeMonoid, NegatableUnaryAlgebra};
+use traiter::numbers::{
+    Ceil, CheckedDivEuclid, Floor, Signed, Trunc, Unitary,
+};
 
 use super::types::Fraction;
 
 impl<
         Component: Clone
             + CheckedDivEuclid<Output = Option<Component>>
-            + MultiplicativeMonoid
-            + NegatableUnaryAlgebra
-            + Signed,
+            + Mul<Output = Component>
+            + Neg<Output = Component>
+            + Signed
+            + Unitary,
     > Trunc for Fraction<Component>
 {
     type Output = Component;

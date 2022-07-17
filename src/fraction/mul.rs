@@ -1,18 +1,17 @@
-use std::ops::Mul;
+use std::ops::{Div, Mul};
 
-use traiter::numbers::Signed;
+use traiter::numbers::{Gcd, Signed};
 
-use crate::big_int::{BigInt, GcdDigit, MultiplicativeDigit};
-use crate::traits::{DivisivePartialMagma, GcdMagma, MultiplicativeMonoid};
+use crate::big_int::BigInt;
 
 use super::types::{normalize_components_moduli, Fraction};
 
 impl<
         Component: Clone
-            + DivisivePartialMagma
-            + GcdMagma
-            + Signed
-            + MultiplicativeMonoid,
+            + Div<Output = Component>
+            + Gcd<Output = Component>
+            + Mul<Output = Component>
+            + Signed,
     > Mul for Fraction<Component>
 {
     type Output = Self;
@@ -31,10 +30,10 @@ impl<
 
 impl<
         Component: Clone
-            + DivisivePartialMagma
-            + GcdMagma
+            + Div<Output = Component>
+            + Gcd<Output = Component>
             + Signed
-            + MultiplicativeMonoid,
+            + Mul<Output = Component>,
     > Mul<Component> for Fraction<Component>
 {
     type Output = Self;
@@ -49,11 +48,10 @@ impl<
     }
 }
 
-impl<
-        Digit: GcdDigit + MultiplicativeDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > Mul<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Mul<Fraction<Self>>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Fraction<Self>: Mul<Self, Output = Fraction<Self>>,
 {
     type Output = Fraction<Self>;
 
@@ -62,9 +60,9 @@ impl<
     }
 }
 
-macro_rules! primitive_mul_fraction_impl {
-    ($($t:ty)*) => ($(
-    impl Mul<Fraction<Self>> for $t {
+macro_rules! signed_integer_mul_fraction_impl {
+    ($($integer:ty)*) => ($(
+    impl Mul<Fraction<Self>> for $integer {
         type Output = Fraction<Self>;
 
         fn mul(self, other: Fraction<Self>) -> Self::Output {
@@ -74,4 +72,4 @@ macro_rules! primitive_mul_fraction_impl {
     )*)
 }
 
-primitive_mul_fraction_impl!(i8 i16 i32 i64 i128 isize);
+signed_integer_mul_fraction_impl!(i8 i16 i32 i64 i128 isize);

@@ -1,29 +1,47 @@
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
+use std::ops::{Div, DivAssign};
 
-use traiter::numbers::Signed;
+use traiter::numbers::{RemEuclid, Signed, Zeroable};
 
 use super::constants::MAX_REPRESENTABLE_BASE;
-use super::digits::{binary_digits_to_base, DisplayableDigit};
+use super::digits::BaseFromBinaryDigits;
 use super::types::BigInt;
 
-impl<Digit: DisplayableDigit, const SEPARATOR: char, const SHIFT: usize>
-    Display for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Display
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: ToBaseString,
 {
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
         formatter.write_str(&self.to_base_string(10))
     }
 }
 
-impl<Digit: DisplayableDigit, const SEPARATOR: char, const SHIFT: usize>
-    BigInt<Digit, SEPARATOR, SHIFT>
-{
+trait ToBaseString {
     const DIGIT_VALUES_ASCII_CODES: [char; MAX_REPRESENTABLE_BASE as usize] = [
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
         'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
         's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
     ];
 
+    fn to_base_string(&self, base: usize) -> String;
+}
+
+impl<
+        Digit: Copy
+            + Div<Output = Digit>
+            + DivAssign
+            + BaseFromBinaryDigits<Digit>
+            + RemEuclid<Output = Digit>
+            + TryFrom<usize>
+            + Zeroable,
+        const SEPARATOR: char,
+        const SHIFT: usize,
+    > ToBaseString for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    usize: TryFrom<Digit>,
+{
     fn to_base_string(&self, base: usize) -> String {
         let shift = if (1usize << SHIFT) >= (MAX_REPRESENTABLE_BASE as usize)
             || base < (1usize << SHIFT)
@@ -32,7 +50,7 @@ impl<Digit: DisplayableDigit, const SEPARATOR: char, const SHIFT: usize>
         } else {
             1usize
         };
-        let digits = binary_digits_to_base::<Digit, Digit>(
+        let digits = Digit::base_from_binary_digits(
             &self.digits,
             SHIFT,
             power(base, shift),

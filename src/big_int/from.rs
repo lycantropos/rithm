@@ -1,8 +1,6 @@
 use traiter::numbers::{Unitary, Zeroable};
 
-use super::digits::{
-    non_zero_value_to_digits, non_zero_value_to_sign, ConstructibleFrom,
-};
+use super::digits::{non_zero_value_to_sign, DigitsFromNonZeroValue};
 use super::types::BigInt;
 
 impl<Digit: Unitary + Zeroable, const SEPARATOR: char, const SHIFT: usize>
@@ -19,7 +17,7 @@ impl<Digit: Unitary + Zeroable, const SEPARATOR: char, const SHIFT: usize>
 
 macro_rules! primitive_partial_eq_to_big_int_impl {
     ($($t:ty)*) => ($(
-        impl<Digit: ConstructibleFrom<$t>, const SEPARATOR: char, const SHIFT: usize> From<$t>
+        impl<Digit: DigitsFromNonZeroValue<$t> + Zeroable, const SEPARATOR: char, const SHIFT: usize> From<$t>
             for BigInt<Digit, SEPARATOR, SHIFT>
         {
             fn from(value: $t) -> Self {
@@ -28,7 +26,7 @@ macro_rules! primitive_partial_eq_to_big_int_impl {
                 } else {
                     Self {
                         sign: non_zero_value_to_sign(value),
-                        digits: non_zero_value_to_digits::<$t, Digit, SHIFT>(value),
+                        digits: Digit::digits_from_non_zero_value::<SHIFT>(value),
                     }
                 }
             }

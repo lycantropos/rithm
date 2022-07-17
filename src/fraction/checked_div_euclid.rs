@@ -1,14 +1,14 @@
+use std::ops::Mul;
+
 use traiter::numbers::{CheckedDivEuclid, Zeroable};
 
-use crate::big_int::{BigInt, EuclidDivisibleDigit, MultiplicativeDigit};
-use crate::traits::MultiplicativeMonoid;
+use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
 impl<
-        Component: Clone
-            + CheckedDivEuclid<Output = Option<Component>>
-            + MultiplicativeMonoid
+        Component: CheckedDivEuclid<Output = Option<Component>>
+            + Mul<Output = Component>
             + Zeroable,
     > CheckedDivEuclid for Fraction<Component>
 {
@@ -21,9 +21,7 @@ impl<
 }
 
 impl<
-        Component: Clone
-            + CheckedDivEuclid<Output = Option<Component>>
-            + MultiplicativeMonoid,
+        Component: CheckedDivEuclid<Output = Option<Component>> + Mul<Output = Component>,
     > CheckedDivEuclid<Component> for Fraction<Component>
 {
     type Output = Option<Component>;
@@ -34,11 +32,10 @@ impl<
     }
 }
 
-impl<
-        Digit: EuclidDivisibleDigit + MultiplicativeDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivEuclid<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDivEuclid<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: CheckedDivEuclid<Output = Option<Self>> + Mul<Output = Self>,
 {
     type Output = Option<Self>;
 
@@ -47,9 +44,9 @@ impl<
     }
 }
 
-macro_rules! primitive_checked_div_euclid_fraction_impl {
-    ($($t:ty)*) => ($(
-    impl CheckedDivEuclid<Fraction<Self>> for $t
+macro_rules! integer_checked_div_euclid_fraction_impl {
+    ($($integer:ty)*) => ($(
+    impl CheckedDivEuclid<Fraction<Self>> for $integer
     {
         type Output = Option<Self>;
 
@@ -60,4 +57,6 @@ macro_rules! primitive_checked_div_euclid_fraction_impl {
     )*)
 }
 
-primitive_checked_div_euclid_fraction_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+integer_checked_div_euclid_fraction_impl!(
+    i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
+);

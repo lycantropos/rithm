@@ -1,16 +1,15 @@
-use traiter::numbers::{CheckedPow, Signed};
+use std::ops::{BitAnd, Mul, MulAssign, Shl, ShlAssign, ShrAssign};
+
+use traiter::numbers::{CheckedPow, Signed, Unitary, Zeroable};
 
 use super::constants::{WINDOW_BASE, WINDOW_CUTOFF, WINDOW_SHIFT};
-use super::digits::{
-    binary_digits_to_lesser_binary_base, ExponentiativeDigit,
-};
+use super::digits::LesserBinaryBaseFromBinaryDigits;
 use super::types::{BigInt, WindowDigit};
 
-impl<
-        Digit: ExponentiativeDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedPow<Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedPow<Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: UncheckedPow + Signed,
 {
     type Output = Option<Self>;
 
@@ -23,11 +22,10 @@ impl<
     }
 }
 
-impl<
-        Digit: ExponentiativeDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedPow<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedPow<&Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: UncheckedPow + Signed,
 {
     type Output = Option<Self>;
 
@@ -40,12 +38,11 @@ impl<
     }
 }
 
-impl<
-        Digit: ExponentiativeDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedPow<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedPow<BigInt<Digit, SEPARATOR, SHIFT>>
     for &BigInt<Digit, SEPARATOR, SHIFT>
+where
+    BigInt<Digit, SEPARATOR, SHIFT>: UncheckedPow + Signed,
 {
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
 
@@ -61,11 +58,10 @@ impl<
     }
 }
 
-impl<
-        Digit: ExponentiativeDigit,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedPow<Self> for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedPow<Self>
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+where
+    BigInt<Digit, SEPARATOR, SHIFT>: UncheckedPow + Signed,
 {
     type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
 
@@ -78,11 +74,27 @@ impl<
     }
 }
 
+trait UncheckedPow: Sized {
+    fn unchecked_pow(&self, exponent: &Self) -> Self;
+}
+
 impl<
-        Digit: ExponentiativeDigit,
+        Digit: BitAnd<Output = Digit>
+            + Copy
+            + From<u8>
+            + PartialOrd
+            + Shl<usize, Output = Digit>
+            + ShlAssign<usize>
+            + ShrAssign<usize>
+            + Unitary
+            + Zeroable,
         const SEPARATOR: char,
         const SHIFT: usize,
-    > BigInt<Digit, SEPARATOR, SHIFT>
+    > UncheckedPow for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    for<'a> Self: Mul<Output = Self> + MulAssign<&'a Self>,
+    for<'a> &'a Self: Mul<Output = Self>,
+    WindowDigit: LesserBinaryBaseFromBinaryDigits<Digit>,
 {
     fn unchecked_pow(&self, exponent: &Self) -> Self {
         debug_assert!(!exponent.is_negative());
@@ -120,8 +132,8 @@ impl<
                     exponent_digit_mask >>= 1;
                 }
                 match exponent_digits_iterator.next() {
-                    Some(next_exponent_digit) => {
-                        exponent_digit = *next_exponent_digit;
+                    Some(&next_exponent_digit) => {
+                        exponent_digit = next_exponent_digit;
                         exponent_digit_mask = Digit::one() << (SHIFT - 1);
                     }
                     None => {
@@ -136,8 +148,8 @@ impl<
             for index in 1..WINDOW_BASE {
                 cache[index] = &cache[index - 1] * self;
             }
-            let exponent_window_digits =
-                binary_digits_to_lesser_binary_base::<Digit, WindowDigit>(
+            let exponent_window_digits: Vec<WindowDigit> =
+                WindowDigit::lesser_binary_base_from_binary_digits(
                     &exponent.digits,
                     SHIFT,
                     WINDOW_SHIFT,

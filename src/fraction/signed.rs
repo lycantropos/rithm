@@ -2,7 +2,7 @@ use traiter::numbers::{Sign, Signed, Unitary};
 
 use super::types::Fraction;
 
-impl<Component: Clone + Signed + Unitary> Signed for Fraction<Component> {
+impl<Component: Signed + Unitary> Signed for Fraction<Component> {
     fn is_negative(&self) -> bool {
         self.numerator.is_negative()
     }

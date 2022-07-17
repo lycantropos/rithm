@@ -3,8 +3,7 @@ use std::cmp::Ordering;
 use traiter::numbers::{Signed, Zeroable};
 
 use super::digits::{
-    digits_lesser_than, non_zero_value_to_digits, value_to_sign,
-    ConstructibleFrom,
+    digits_lesser_than, value_to_sign, DigitsFromNonZeroValue,
 };
 use super::types::{BigInt, Sign};
 
@@ -72,7 +71,7 @@ impl<
 macro_rules! big_int_partial_ord_to_signed_primitive_impl {
     ($($t:ty)*) => ($(
         impl<
-                Digit: ConstructibleFrom<$t> + PartialOrd + Zeroable,
+                Digit: DigitsFromNonZeroValue<$t> + PartialOrd + Zeroable,
                 const SEPARATOR: char,
                 const SHIFT: usize,
             > PartialOrd<$t> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -85,11 +84,11 @@ macro_rules! big_int_partial_ord_to_signed_primitive_impl {
                                 if self.is_positive() {
                                     digits_lesser_than(
                                         &self.digits,
-                                        &non_zero_value_to_digits::<$t, Digit, SHIFT>(*other),
+                                        &Digit::digits_from_non_zero_value::<SHIFT>(*other),
                                     )
                                 } else {
                                     digits_lesser_than(
-                                        &non_zero_value_to_digits::<$t, Digit, SHIFT>(*other),
+                                        &Digit::digits_from_non_zero_value::<SHIFT>(*other),
                                         &self.digits,
                                     )
                                 }
@@ -102,13 +101,13 @@ macro_rules! big_int_partial_ord_to_signed_primitive_impl {
                         && self.sign == ((*other).signum() as Sign)
                         && if self.is_positive() {
                             digits_lesser_than(
-                                &non_zero_value_to_digits::<$t, Digit, SHIFT>(*other),
+                                &Digit::digits_from_non_zero_value::<SHIFT>(*other),
                                 &self.digits,
                             )
                         } else {
                             digits_lesser_than(
                                 &self.digits,
-                                &non_zero_value_to_digits::<$t, Digit, SHIFT>(*other),
+                                &Digit::digits_from_non_zero_value::<SHIFT>(*other),
                             )
                         }
             }
@@ -120,13 +119,13 @@ macro_rules! big_int_partial_ord_to_signed_primitive_impl {
                             || !{
                                 if self.is_positive() {
                                     digits_lesser_than(
-                                        &non_zero_value_to_digits::<$t, Digit, SHIFT>(*other),
+                                        &Digit::digits_from_non_zero_value::<SHIFT>(*other),
                                         &self.digits,
                                     )
                                 } else {
                                     digits_lesser_than(
                                         &self.digits,
-                                        &non_zero_value_to_digits::<$t, Digit, SHIFT>(*other),
+                                        &Digit::digits_from_non_zero_value::<SHIFT>(*other),
                                     )
                                 }
                             })
@@ -139,11 +138,11 @@ macro_rules! big_int_partial_ord_to_signed_primitive_impl {
                         && if self.is_positive() {
                             digits_lesser_than(
                                 &self.digits,
-                                &non_zero_value_to_digits::<$t, Digit, SHIFT>(*other),
+                                &Digit::digits_from_non_zero_value::<SHIFT>(*other),
                             )
                         } else {
                             digits_lesser_than(
-                                &non_zero_value_to_digits::<$t, Digit, SHIFT>(*other),
+                                &Digit::digits_from_non_zero_value::<SHIFT>(*other),
                                 &self.digits,
                             )
                         }
@@ -167,7 +166,7 @@ big_int_partial_ord_to_signed_primitive_impl!(i8 i16 i32 i64 i128 isize);
 macro_rules! big_int_partial_ord_to_unsigned_primitive_impl {
     ($($t:ty)*) => ($(
         impl<
-                Digit: ConstructibleFrom<$t> + PartialOrd + Zeroable,
+                Digit: DigitsFromNonZeroValue<$t> + PartialOrd + Zeroable,
                 const SEPARATOR: char,
                 const SHIFT: usize,
             > PartialOrd<$t> for BigInt<Digit, SEPARATOR, SHIFT>
@@ -178,7 +177,7 @@ macro_rules! big_int_partial_ord_to_unsigned_primitive_impl {
                         && (other.is_zero()
                             || !digits_lesser_than(
                                 &self.digits,
-                                &non_zero_value_to_digits::<$t, Digit, SHIFT>(*other),
+                                &Digit::digits_from_non_zero_value::<SHIFT>(*other),
                             ))
             }
 
@@ -186,7 +185,7 @@ macro_rules! big_int_partial_ord_to_unsigned_primitive_impl {
                 self.is_positive()
                     && (other.is_zero()
                         || digits_lesser_than(
-                            &non_zero_value_to_digits::<$t, Digit, SHIFT>(*other),
+                            &Digit::digits_from_non_zero_value::<SHIFT>(*other),
                             &self.digits,
                         ))
             }
@@ -195,7 +194,7 @@ macro_rules! big_int_partial_ord_to_unsigned_primitive_impl {
                 !self.is_positive()
                     || !other.is_zero()
                         && digits_lesser_than(
-                            &non_zero_value_to_digits::<$t, Digit, SHIFT>(*other),
+                            &Digit::digits_from_non_zero_value::<SHIFT>(*other),
                             &self.digits,
                         )
             }
@@ -206,7 +205,7 @@ macro_rules! big_int_partial_ord_to_unsigned_primitive_impl {
                         && (self.is_zero()
                             || digits_lesser_than(
                                 &self.digits,
-                                &non_zero_value_to_digits::<$t, Digit, SHIFT>(*other),
+                                &Digit::digits_from_non_zero_value::<SHIFT>(*other),
                             ))
             }
 
@@ -228,7 +227,7 @@ big_int_partial_ord_to_unsigned_primitive_impl!(u8 u16 u32 u64 u128 usize);
 macro_rules! signed_primitive_partial_ord_to_big_int_impl {
     ($($t:ty)*) => ($(
         impl<
-                Digit: ConstructibleFrom<$t> + PartialOrd + Zeroable,
+                Digit: DigitsFromNonZeroValue<$t> + PartialOrd + Zeroable,
                 const SEPARATOR: char,
                 const SHIFT: usize,
             > PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $t
@@ -240,11 +239,11 @@ macro_rules! signed_primitive_partial_ord_to_big_int_impl {
                             if self.is_positive() {
                                 digits_lesser_than(
                                     &other.digits,
-                                    &non_zero_value_to_digits::<$t, Digit, SHIFT>(*self),
+                                    &Digit::digits_from_non_zero_value::<SHIFT>(*self),
                                 )
                             } else {
                                 digits_lesser_than(
-                                    &non_zero_value_to_digits::<$t, Digit, SHIFT>(*self),
+                                    &Digit::digits_from_non_zero_value::<SHIFT>(*self),
                                     &other.digits,
                                 )
                             }
@@ -256,13 +255,13 @@ macro_rules! signed_primitive_partial_ord_to_big_int_impl {
                     || value_to_sign(*self) == other.sign
                         && if self.is_positive() {
                             digits_lesser_than(
-                                &non_zero_value_to_digits::<$t, Digit, SHIFT>(*self),
+                                &Digit::digits_from_non_zero_value::<SHIFT>(*self),
                                 &other.digits,
                             )
                         } else {
                             digits_lesser_than(
                                 &other.digits,
-                                &non_zero_value_to_digits::<$t, Digit, SHIFT>(*self),
+                                &Digit::digits_from_non_zero_value::<SHIFT>(*self),
                             )
                         }
             }
@@ -273,13 +272,13 @@ macro_rules! signed_primitive_partial_ord_to_big_int_impl {
                         && !{
                             if self.is_positive() {
                                 digits_lesser_than(
-                                    &non_zero_value_to_digits::<$t, Digit, SHIFT>(*self),
+                                    &Digit::digits_from_non_zero_value::<SHIFT>(*self),
                                     &other.digits,
                                 )
                             } else {
                                 digits_lesser_than(
                                     &other.digits,
-                                    &non_zero_value_to_digits::<$t, Digit, SHIFT>(*self),
+                                    &Digit::digits_from_non_zero_value::<SHIFT>(*self),
                                 )
                             }
                         }
@@ -291,11 +290,11 @@ macro_rules! signed_primitive_partial_ord_to_big_int_impl {
                         && if self.is_positive() {
                             digits_lesser_than(
                                 &other.digits,
-                                &non_zero_value_to_digits::<$t, Digit, SHIFT>(*self),
+                                &Digit::digits_from_non_zero_value::<SHIFT>(*self),
                             )
                         } else {
                             digits_lesser_than(
-                                &non_zero_value_to_digits::<$t, Digit, SHIFT>(*self),
+                                &Digit::digits_from_non_zero_value::<SHIFT>(*self),
                                 &other.digits,
                             )
                         }
@@ -319,7 +318,7 @@ signed_primitive_partial_ord_to_big_int_impl!(i8 i16 i32 i64 i128 isize);
 macro_rules! unsigned_primitive_partial_ord_to_big_int_impl {
     ($($t:ty)*) => ($(
         impl<
-                Digit: ConstructibleFrom<$t> + PartialOrd + Zeroable,
+                Digit: DigitsFromNonZeroValue<$t> + PartialOrd + Zeroable,
                 const SEPARATOR: char,
                 const SHIFT: usize,
             > PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $t
@@ -328,7 +327,7 @@ macro_rules! unsigned_primitive_partial_ord_to_big_int_impl {
                 !other.is_positive()
                     || !self.is_zero()
                         && digits_lesser_than(
-                            &non_zero_value_to_digits::<$t, Digit, SHIFT>(*self),
+                            &Digit::digits_from_non_zero_value::<SHIFT>(*self),
                             &other.digits,
                         )
             }
@@ -339,7 +338,7 @@ macro_rules! unsigned_primitive_partial_ord_to_big_int_impl {
                         && (other.is_zero()
                             || digits_lesser_than(
                                 &other.digits,
-                                &non_zero_value_to_digits::<$t, Digit, SHIFT>(*self),
+                                &Digit::digits_from_non_zero_value::<SHIFT>(*self),
                             ))
             }
 
@@ -349,7 +348,7 @@ macro_rules! unsigned_primitive_partial_ord_to_big_int_impl {
                         && (self.is_zero()
                             || !digits_lesser_than(
                                 &other.digits,
-                                &non_zero_value_to_digits::<$t, Digit, SHIFT>(*self),
+                                &Digit::digits_from_non_zero_value::<SHIFT>(*self),
                             ))
             }
 
@@ -357,7 +356,7 @@ macro_rules! unsigned_primitive_partial_ord_to_big_int_impl {
                 other.is_positive()
                     && (self.is_zero()
                         || digits_lesser_than(
-                            &non_zero_value_to_digits::<$t, Digit, SHIFT>(*self),
+                            &Digit::digits_from_non_zero_value::<SHIFT>(*self),
                             &other.digits,
                         ))
             }

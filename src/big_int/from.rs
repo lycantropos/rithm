@@ -15,7 +15,7 @@ impl<Digit: Unitary + Zeroable, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-macro_rules! primitive_partial_eq_to_big_int_impl {
+macro_rules! from_integer_impl {
     ($($t:ty)*) => ($(
         impl<Digit: DigitsFromNonZeroValue<$t> + Zeroable, const SEPARATOR: char, const SHIFT: usize> From<$t>
             for BigInt<Digit, SEPARATOR, SHIFT>
@@ -34,4 +34,4 @@ macro_rules! primitive_partial_eq_to_big_int_impl {
     )*)
 }
 
-primitive_partial_eq_to_big_int_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+from_integer_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);

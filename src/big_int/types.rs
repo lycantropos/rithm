@@ -5,7 +5,7 @@ use super::constants::{MAX_REPRESENTABLE_BASE, MIN_REPRESENTABLE_BASE};
 pub(super) type Sign = i8;
 pub(super) type WindowDigit = u8;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
     pub(super) sign: Sign,
     pub(super) digits: Vec<Digit>,

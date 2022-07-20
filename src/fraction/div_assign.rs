@@ -1,30 +1,24 @@
-use std::ops::{Div, DivAssign, Mul, Neg};
+use std::ops::{DivAssign, Mul};
 
-use traiter::numbers::{Gcd, Signed};
-
-use super::types::{
-    normalize_components_moduli, normalize_components_sign, Fraction,
-};
+use super::types::{Fraction, NormalizeModuli, NormalizeSign};
 
 impl<
         Component: Clone
-            + Div<Output = Component>
-            + Gcd<Output = Component>
             + Mul<Output = Component>
-            + Neg<Output = Component>
-            + Signed,
+            + NormalizeModuli<Output = (Component, Component)>
+            + NormalizeSign<Output = (Component, Component)>,
     > DivAssign for Fraction<Component>
 {
     fn div_assign(&mut self, divisor: Self) {
-        let (numerator, divisor_numerator) = normalize_components_moduli(
+        let (numerator, divisor_numerator) = Component::normalize_moduli(
             self.numerator.clone(),
             divisor.numerator,
         );
-        let (denominator, divisor_denominator) = normalize_components_moduli(
+        let (denominator, divisor_denominator) = Component::normalize_moduli(
             self.denominator.clone(),
             divisor.denominator,
         );
-        (self.numerator, self.denominator) = normalize_components_sign(
+        (self.numerator, self.denominator) = Component::normalize_sign(
             numerator * divisor_denominator,
             denominator * divisor_numerator,
         );
@@ -33,17 +27,15 @@ impl<
 
 impl<
         Component: Clone
-            + Div<Output = Component>
-            + Gcd<Output = Component>
             + Mul<Output = Component>
-            + Neg<Output = Component>
-            + Signed,
+            + NormalizeModuli<Output = (Component, Component)>
+            + NormalizeSign<Output = (Component, Component)>,
     > DivAssign<Component> for Fraction<Component>
 {
     fn div_assign(&mut self, divisor: Component) {
         let (numerator, divisor) =
-            normalize_components_moduli(self.numerator.clone(), divisor);
-        (self.numerator, self.denominator) = normalize_components_sign(
+            Component::normalize_moduli(self.numerator.clone(), divisor);
+        (self.numerator, self.denominator) = Component::normalize_sign(
             numerator,
             self.denominator.clone() * divisor,
         );

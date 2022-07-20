@@ -5,7 +5,7 @@ use super::types::Fraction;
 impl<Component: Abs<Output = Component>> Abs for Fraction<Component> {
     type Output = Self;
 
-    fn abs(self) -> <Self as Abs>::Output {
+    fn abs(self) -> Self::Output {
         Self::Output {
             numerator: self.numerator.abs(),
             denominator: self.denominator,

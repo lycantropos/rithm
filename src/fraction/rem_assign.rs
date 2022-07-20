@@ -1,22 +1,20 @@
-use std::ops::{Div, Mul, RemAssign};
+use std::ops::{Mul, RemAssign};
 
-use traiter::numbers::{CheckedRem, Gcd, Signed};
+use traiter::numbers::CheckedRem;
 
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
-use super::types::{normalize_components_moduli, Fraction};
+use super::types::{Fraction, NormalizeModuli};
 
 impl<
         Component: Clone
             + CheckedRem<Output = Option<Component>>
-            + Div<Output = Component>
-            + Gcd<Output = Component>
             + Mul<Output = Component>
-            + Signed,
+            + NormalizeModuli<Output = (Component, Component)>,
     > RemAssign for Fraction<Component>
 {
     fn rem_assign(&mut self, divisor: Self) {
-        (self.numerator, self.denominator) = normalize_components_moduli(
+        (self.numerator, self.denominator) = Component::normalize_moduli(
             (self.numerator.clone() * divisor.denominator.clone())
                 .checked_rem(divisor.numerator * self.denominator.clone())
                 .expect(UNDEFINED_DIVISION_ERROR_MESSAGE),
@@ -28,14 +26,12 @@ impl<
 impl<
         Component: Clone
             + CheckedRem<Output = Option<Component>>
-            + Div<Output = Component>
-            + Gcd<Output = Component>
             + Mul<Output = Component>
-            + Signed,
+            + NormalizeModuli<Output = (Component, Component)>,
     > RemAssign<Component> for Fraction<Component>
 {
     fn rem_assign(&mut self, divisor: Component) {
-        (self.numerator, self.denominator) = normalize_components_moduli(
+        (self.numerator, self.denominator) = Component::normalize_moduli(
             self.numerator
                 .clone()
                 .checked_rem(divisor * self.denominator.clone())

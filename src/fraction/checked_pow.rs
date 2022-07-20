@@ -1,16 +1,18 @@
 use std::ops::Neg;
 
-use traiter::numbers::{CheckedPow, Signed, Unitary, Zeroable};
+use traiter::numbers::{CheckedPow, Signed, Zeroable};
 
-use super::types::{normalize_components_sign, Fraction};
+use super::types::{Fraction, NormalizeSign};
 
 impl<
         Component: Clone
-            + Signed
             + CheckedPow<Component, Output = Option<Component>>
+            + Signed
             + Neg<Output = Component>
-            + Unitary,
+            + NormalizeSign<Output = (Component, Component)>,
     > CheckedPow<Component> for Fraction<Component>
+where
+    Self: Zeroable,
 {
     type Output = Option<Self>;
 
@@ -20,7 +22,7 @@ impl<
                 None
             } else {
                 let exponent = -exponent;
-                let (numerator, denominator) = normalize_components_sign(
+                let (numerator, denominator) = Component::normalize_sign(
                     self.denominator.checked_pow(exponent.clone())?,
                     self.numerator.checked_pow(exponent)?,
                 );

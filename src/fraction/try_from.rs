@@ -6,9 +6,7 @@ use crate::big_int::{BigInt, ShlError};
 use crate::contracts::is_signed;
 use crate::traits::UncheckedToInt;
 
-use super::types::{
-    normalize_components_moduli, Fraction, FromFloatConversionError,
-};
+use super::types::{Fraction, FromFloatConversionError, NormalizeModuli};
 
 macro_rules! big_int_fraction_try_from_float_impl {
     ($($float:ty)*) => ($(
@@ -115,7 +113,7 @@ macro_rules! try_integer_fraction_from_float_impl {
                     }
                     if exponent.is_negative() {
                         let (numerator, denominator) =
-                            normalize_components_moduli(
+                            <$integer>::normalize_moduli(
                                 fraction.round() as $integer,
                                 <$integer>::one() << ((-exponent) as u32),
                             );

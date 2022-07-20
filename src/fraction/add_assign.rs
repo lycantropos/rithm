@@ -1,20 +1,16 @@
-use std::ops::{Add, AddAssign, Div, Mul};
+use std::ops::{Add, AddAssign, Mul};
 
-use traiter::numbers::{Gcd, Signed};
-
-use super::types::{normalize_components_moduli, Fraction};
+use super::types::{Fraction, NormalizeModuli};
 
 impl<
         Component: Add<Output = Component>
             + Clone
-            + Div<Output = Component>
-            + Gcd<Output = Component>
             + Mul<Output = Component>
-            + Signed,
+            + NormalizeModuli<Output = (Component, Component)>,
     > AddAssign for Fraction<Component>
 {
     fn add_assign(&mut self, other: Self) {
-        (self.numerator, self.denominator) = normalize_components_moduli(
+        (self.numerator, self.denominator) = Component::normalize_moduli(
             self.numerator.clone() * other.denominator.clone()
                 + other.numerator * self.denominator.clone(),
             self.denominator.clone() * other.denominator,
@@ -25,14 +21,12 @@ impl<
 impl<
         Component: Add<Output = Component>
             + Clone
-            + Div<Output = Component>
-            + Gcd<Output = Component>
             + Mul<Output = Component>
-            + Signed,
+            + NormalizeModuli<Output = (Component, Component)>,
     > AddAssign<Component> for Fraction<Component>
 {
     fn add_assign(&mut self, other: Component) {
-        (self.numerator, self.denominator) = normalize_components_moduli(
+        (self.numerator, self.denominator) = Component::normalize_moduli(
             self.numerator.clone() + other * self.denominator.clone(),
             self.denominator.clone(),
         );

@@ -1,20 +1,13 @@
-use std::ops::{Div, Mul};
-
-use traiter::numbers::{CheckedDivEuclid, DivEuclid, Gcd, Signed};
+use traiter::numbers::{CheckedDivEuclid, DivEuclid};
 
 use crate::big_int::BigInt;
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
 use super::types::Fraction;
 
-impl<
-        Component: Clone
-            + CheckedDivEuclid<Output = Option<Component>>
-            + Div<Output = Component>
-            + Gcd<Output = Component>
-            + Mul<Output = Component>
-            + Signed,
-    > DivEuclid for Fraction<Component>
+impl<Component> DivEuclid for Fraction<Component>
+where
+    Self: CheckedDivEuclid<Output = Option<Component>>,
 {
     type Output = Component;
 
@@ -24,14 +17,9 @@ impl<
     }
 }
 
-impl<
-        Component: Clone
-            + CheckedDivEuclid<Output = Option<Component>>
-            + Div<Output = Component>
-            + Gcd<Output = Component>
-            + Mul<Output = Component>
-            + Signed,
-    > DivEuclid<Component> for Fraction<Component>
+impl<Component> DivEuclid<Component> for Fraction<Component>
+where
+    Self: CheckedDivEuclid<Component, Output = Option<Component>>,
 {
     type Output = Component;
 

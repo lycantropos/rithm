@@ -1,7 +1,9 @@
 use std::fmt;
-use std::ops::{Div, Neg};
+use std::ops::Neg;
 
-use traiter::numbers::{Gcd, Signed};
+use traiter::numbers::{CheckedDiv, Gcd, Signed, Zeroable};
+
+use crate::big_int::BigInt;
 
 pub struct Fraction<Component> {
     pub(super) numerator: Component,
@@ -23,11 +25,9 @@ impl<Component: Clone> Clone for Fraction<Component> {
 }
 
 impl<
-        Component: Clone
-            + Div<Output = Component>
-            + Gcd<Output = Component>
-            + Neg<Output = Component>
-            + Signed,
+        Component: NormalizeModuli<Output = (Component, Component)>
+            + NormalizeSign<Output = (Component, Component)>
+            + Zeroable,
     > Fraction<Component>
 {
     pub fn new(
@@ -38,9 +38,9 @@ impl<
             None
         } else {
             (numerator, denominator) =
-                normalize_components_sign(numerator, denominator);
+                Component::normalize_sign(numerator, denominator);
             (numerator, denominator) =
-                normalize_components_moduli(numerator, denominator);
+                Component::normalize_moduli(numerator, denominator);
             Some(Self {
                 numerator,
                 denominator,
@@ -59,30 +59,178 @@ impl<Component> Fraction<Component> {
     }
 }
 
-#[inline]
-pub(super) fn normalize_components_moduli<
-    Component: Clone + Div<Output = Component> + Gcd<Output = Component>,
->(
-    numerator: Component,
-    denominator: Component,
-) -> (Component, Component) {
-    let gcd = numerator.clone().gcd(denominator.clone());
-    (numerator / gcd.clone(), denominator / gcd)
+pub trait NormalizeModuli<Other = Self> {
+    type Output;
+
+    fn normalize_moduli(self, other: Other) -> Self::Output;
 }
 
-#[inline]
-pub(super) fn normalize_components_sign<
-    Component: Neg<Output = Component> + Signed,
->(
-    numerator: Component,
-    denominator: Component,
-) -> (Component, Component) {
-    if denominator.is_negative() {
-        (-numerator, -denominator)
-    } else {
-        (numerator, denominator)
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> NormalizeModuli
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    for<'a> Self: CheckedDiv<Output = Option<Self>>
+        + CheckedDiv<&'a Self, Output = Option<Self>>,
+    for<'a> &'a Self: Gcd<Output = Self>,
+{
+    type Output = (Self, Self);
+
+    #[inline]
+    fn normalize_moduli(self, other: Self) -> Self::Output {
+        let gcd = self.gcd(&other);
+        (
+            unsafe { self.checked_div(&gcd).unwrap_unchecked() },
+            unsafe { other.checked_div(gcd).unwrap_unchecked() },
+        )
     }
 }
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> NormalizeModuli<&Self>
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    for<'a> Self: CheckedDiv<&'a Self, Output = Option<Self>>,
+    for<'a> &'a Self:
+        CheckedDiv<Self, Output = Option<Self>> + Gcd<Output = Self>,
+{
+    type Output = (Self, Self);
+
+    #[inline]
+    fn normalize_moduli(self, other: &Self) -> Self::Output {
+        let gcd = self.gcd(other);
+        (
+            unsafe { self.checked_div(&gcd).unwrap_unchecked() },
+            unsafe { other.checked_div(gcd).unwrap_unchecked() },
+        )
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    NormalizeModuli<BigInt<Digit, SEPARATOR, SHIFT>>
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+where
+    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: CheckedDiv<Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>>
+        + Gcd<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+    BigInt<Digit, SEPARATOR, SHIFT>:
+        CheckedDiv<Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>>,
+{
+    type Output = (
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        BigInt<Digit, SEPARATOR, SHIFT>,
+    );
+
+    #[inline]
+    fn normalize_moduli(
+        self,
+        other: BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
+        let gcd = self.gcd(&other);
+        (
+            unsafe { self.checked_div(&gcd).unwrap_unchecked() },
+            unsafe { other.checked_div(gcd).unwrap_unchecked() },
+        )
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> NormalizeModuli
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+where
+    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: CheckedDiv<Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>>
+        + CheckedDiv<
+            BigInt<Digit, SEPARATOR, SHIFT>,
+            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+        > + Gcd<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+{
+    type Output = (
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        BigInt<Digit, SEPARATOR, SHIFT>,
+    );
+
+    #[inline]
+    fn normalize_moduli(self, other: Self) -> Self::Output {
+        let gcd = self.gcd(other);
+        (
+            unsafe { self.checked_div(&gcd).unwrap_unchecked() },
+            unsafe { other.checked_div(gcd).unwrap_unchecked() },
+        )
+    }
+}
+
+macro_rules! integer_normalize_moduli_impl {
+    ($($integer:ty)*) => ($(
+        impl NormalizeModuli for $integer {
+            type Output = (Self, Self);
+
+            #[inline]
+            fn normalize_moduli(self, other: Self) -> Self::Output {
+                let gcd = self.gcd(other);
+                (
+                    unsafe { self.checked_div(gcd).unwrap_unchecked() },
+                    unsafe { other.checked_div(gcd).unwrap_unchecked() },
+                )
+            }
+        }
+    )*)
+}
+
+integer_normalize_moduli_impl!(
+    i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
+);
+
+pub trait NormalizeSign<Other = Self> {
+    type Output;
+
+    fn normalize_sign(self, other: Other) -> Self::Output;
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> NormalizeSign
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: Neg<Output = Self> + Signed,
+{
+    type Output = (Self, Self);
+
+    #[inline]
+    fn normalize_sign(self, other: Self) -> Self::Output {
+        if other.is_negative() {
+            (-self, -other)
+        } else {
+            (self, other)
+        }
+    }
+}
+
+macro_rules! signed_integer_normalize_sign_impl {
+    ($($integer:ty)*) => ($(
+        impl NormalizeSign for $integer {
+            type Output = (Self, Self);
+
+            #[inline]
+            fn normalize_sign(self, other: Self) -> Self::Output {
+                if other.is_negative() {
+                    (-self, -other)
+                } else {
+                    (self, other)
+                }
+            }
+        }
+    )*)
+}
+
+signed_integer_normalize_sign_impl!(i8 i16 i32 i64 i128 isize);
+
+macro_rules! unsigned_integer_normalize_sign_impl {
+    ($($integer:ty)*) => ($(
+        impl NormalizeSign for $integer {
+            type Output = (Self, Self);
+
+            #[inline(always)]
+            fn normalize_sign(self, other: Self) -> Self::Output {
+                (self, other)
+            }
+        }
+    )*)
+}
+
+unsigned_integer_normalize_sign_impl!(u8 u16 u32 u64 u128 usize);
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum FromFloatConversionError {

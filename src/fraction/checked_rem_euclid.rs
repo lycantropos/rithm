@@ -1,24 +1,22 @@
-use std::ops::{Div, Mul};
+use std::ops::Mul;
 
-use traiter::numbers::{CheckedRemEuclid, Gcd, Unitary, Zeroable};
+use traiter::numbers::{CheckedRemEuclid, Zeroable};
 
 use crate::big_int::BigInt;
 
-use super::types::{normalize_components_moduli, Fraction};
+use super::types::{Fraction, NormalizeModuli};
 
 impl<
         Component: Clone
             + CheckedRemEuclid<Output = Option<Component>>
-            + Div<Output = Component>
-            + Gcd<Output = Component>
             + Mul<Output = Component>
-            + Zeroable,
+            + NormalizeModuli<Output = (Component, Component)>,
     > CheckedRemEuclid for Fraction<Component>
 {
     type Output = Option<Self>;
 
     fn checked_rem_euclid(self, divisor: Self) -> Self::Output {
-        let (numerator, denominator) = normalize_components_moduli(
+        let (numerator, denominator) = Component::normalize_moduli(
             (self.numerator * divisor.denominator.clone())
                 .checked_rem_euclid(
                     divisor.numerator * self.denominator.clone(),
@@ -35,16 +33,14 @@ impl<
 impl<
         Component: Clone
             + CheckedRemEuclid<Output = Option<Component>>
-            + Div<Output = Component>
-            + Gcd<Output = Component>
             + Mul<Output = Component>
-            + Zeroable,
+            + NormalizeModuli<Output = (Component, Component)>,
     > CheckedRemEuclid<Component> for Fraction<Component>
 {
     type Output = Option<Self>;
 
     fn checked_rem_euclid(self, divisor: Component) -> Self::Output {
-        let (numerator, denominator) = normalize_components_moduli(
+        let (numerator, denominator) = Component::normalize_moduli(
             self.numerator
                 .checked_rem_euclid(divisor * self.denominator.clone())?,
             self.denominator,
@@ -61,11 +57,9 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize>
 where
     Self: CheckedRemEuclid<Output = Option<Self>>
         + Clone
-        + Div<Output = Self>
-        + Gcd<Output = Self>
         + Mul<Output = Self>
-        + Unitary
-        + Zeroable,
+        + NormalizeModuli<Output = (Self, Self)>,
+    Fraction<Self>: Zeroable,
 {
     type Output = Option<Fraction<Self>>;
 
@@ -73,7 +67,7 @@ where
         if divisor.is_zero() {
             None
         } else {
-            let (numerator, denominator) = normalize_components_moduli(
+            let (numerator, denominator) = Self::normalize_moduli(
                 (self * divisor.denominator.clone())
                     .checked_rem_euclid(divisor.numerator)?,
                 divisor.denominator,
@@ -98,7 +92,7 @@ macro_rules! integer_checked_rem_euclid_fraction_impl {
                 if divisor.is_zero() {
                     None
                 } else {
-                    let (numerator, denominator) = normalize_components_moduli(
+                    let (numerator, denominator) = <$integer>::normalize_moduli(
                         (self * divisor.denominator)
                             .checked_rem_euclid(divisor.numerator)?,
                         divisor.denominator,

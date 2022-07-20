@@ -1,19 +1,12 @@
-use std::ops::Neg;
-
-use traiter::numbers::{CheckedPow, Pow, Signed, Unitary, Zeroable};
+use traiter::numbers::{CheckedPow, Pow};
 
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
 use super::types::Fraction;
 
-impl<
-        Component: Clone
-            + Signed
-            + CheckedPow<Component, Output = Option<Component>>
-            + Neg<Output = Component>
-            + Unitary
-            + Zeroable,
-    > Pow<Component> for Fraction<Component>
+impl<Component> Pow<Component> for Fraction<Component>
+where
+    Self: CheckedPow<Component, Output = Option<Self>>,
 {
     type Output = Self;
 

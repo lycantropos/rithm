@@ -1,24 +1,20 @@
-use std::ops::{Add, Div, Mul};
-
-use traiter::numbers::{Gcd, Signed};
+use std::ops::{Add, Mul};
 
 use crate::big_int::BigInt;
 
-use super::types::{normalize_components_moduli, Fraction};
+use super::types::{Fraction, NormalizeModuli};
 
 impl<
         Component: Add<Output = Component>
             + Clone
-            + Div<Output = Component>
-            + Gcd<Output = Component>
             + Mul<Output = Component>
-            + Signed,
+            + NormalizeModuli<Output = (Component, Component)>,
     > Add for Fraction<Component>
 {
     type Output = Self;
 
     fn add(self, other: Self) -> Self::Output {
-        let (numerator, denominator) = normalize_components_moduli(
+        let (numerator, denominator) = Component::normalize_moduli(
             self.numerator * other.denominator.clone()
                 + other.numerator * self.denominator.clone(),
             self.denominator * other.denominator,
@@ -33,16 +29,14 @@ impl<
 impl<
         Component: Add<Output = Component>
             + Clone
-            + Div<Output = Component>
-            + Gcd<Output = Component>
-            + Signed
-            + Mul<Output = Component>,
+            + Mul<Output = Component>
+            + NormalizeModuli<Output = (Component, Component)>,
     > Add<Component> for Fraction<Component>
 {
     type Output = Self;
 
     fn add(self, other: Component) -> Self::Output {
-        let (numerator, denominator) = normalize_components_moduli(
+        let (numerator, denominator) = Component::normalize_moduli(
             self.numerator + other * self.denominator.clone(),
             self.denominator,
         );
@@ -65,7 +59,7 @@ where
     }
 }
 
-macro_rules! signed_integer_add_fraction_impl {
+macro_rules! integer_add_fraction_impl {
     ($($integer:ty)*) => ($(
         impl Add<Fraction<Self>> for $integer {
             type Output = Fraction<Self>;
@@ -77,4 +71,6 @@ macro_rules! signed_integer_add_fraction_impl {
     )*)
 }
 
-signed_integer_add_fraction_impl!(i8 i16 i32 i64 i128 isize);
+integer_add_fraction_impl!(
+    i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
+);

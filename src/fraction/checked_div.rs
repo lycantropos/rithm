@@ -1,22 +1,18 @@
-use std::ops::{Div, Mul, Neg};
+use std::ops::Mul;
 
-use traiter::numbers::{CheckedDiv, Gcd, Signed, Unitary, Zeroable};
+use traiter::numbers::{CheckedDiv, Zeroable};
 
 use crate::big_int::BigInt;
 
-use super::types::{
-    normalize_components_moduli, normalize_components_sign, Fraction,
-};
+use super::types::{Fraction, NormalizeModuli, NormalizeSign};
 
 impl<
-        Component: Clone
-            + Div<Output = Component>
-            + Gcd<Output = Component>
-            + Signed
-            + Mul<Output = Component>
-            + Neg<Output = Component>
-            + Unitary,
+        Component: Mul<Output = Component>
+            + NormalizeModuli<Output = (Component, Component)>
+            + NormalizeSign<Output = (Component, Component)>,
     > CheckedDiv for Fraction<Component>
+where
+    Self: Zeroable,
 {
     type Output = Option<Self>;
 
@@ -25,10 +21,10 @@ impl<
             return None;
         }
         let (dividend_numerator, divisor_numerator) =
-            normalize_components_moduli(self.numerator, divisor.numerator);
+            Component::normalize_moduli(self.numerator, divisor.numerator);
         let (dividend_denominator, divisor_denominator) =
-            normalize_components_moduli(self.denominator, divisor.denominator);
-        let (numerator, denominator) = normalize_components_sign(
+            Component::normalize_moduli(self.denominator, divisor.denominator);
+        let (numerator, denominator) = Component::normalize_sign(
             dividend_numerator * divisor_denominator,
             dividend_denominator * divisor_numerator,
         );
@@ -40,14 +36,13 @@ impl<
 }
 
 impl<
-        Component: Clone
-            + Div<Output = Component>
-            + Gcd<Output = Component>
-            + Signed
-            + Mul<Output = Component>
-            + Neg<Output = Component>
-            + Unitary,
+        Component: Mul<Output = Component>
+            + NormalizeModuli<Output = (Component, Component)>
+            + NormalizeSign<Output = (Component, Component)>
+            + Zeroable,
     > CheckedDiv<Component> for Fraction<Component>
+where
+    Self: Zeroable,
 {
     type Output = Option<Self>;
 
@@ -56,8 +51,8 @@ impl<
             return None;
         }
         let (dividend_numerator, divisor_numerator) =
-            normalize_components_moduli(self.numerator, divisor);
-        let (numerator, denominator) = normalize_components_sign(
+            Component::normalize_moduli(self.numerator, divisor);
+        let (numerator, denominator) = Component::normalize_sign(
             dividend_numerator,
             self.denominator * divisor_numerator,
         );
@@ -72,12 +67,10 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize>
     CheckedDiv<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 where
     Self: Clone
-        + Div<Output = Self>
-        + Gcd<Output = Self>
         + Mul<Output = Self>
-        + Neg<Output = Self>
-        + Signed
-        + Unitary,
+        + NormalizeModuli<Output = (Self, Self)>
+        + NormalizeSign<Output = (Self, Self)>,
+    Fraction<Self>: Zeroable,
 {
     type Output = Option<Fraction<Self>>;
 
@@ -86,8 +79,8 @@ where
             return None;
         }
         let (dividend, divisor_numerator) =
-            normalize_components_moduli(self, divisor.numerator);
-        let (numerator, denominator) = normalize_components_sign(
+            Self::normalize_moduli(self, divisor.numerator);
+        let (numerator, denominator) = Self::normalize_sign(
             dividend * divisor.denominator,
             divisor_numerator,
         );
@@ -108,8 +101,8 @@ macro_rules! signed_integer_checked_div_fraction_impl {
                     return None;
                 }
                 let (dividend, divisor_numerator) =
-                    normalize_components_moduli(self, divisor.numerator);
-                let (numerator, denominator) = normalize_components_sign(
+                    <$integer>::normalize_moduli(self, divisor.numerator);
+                let (numerator, denominator) = <$integer>::normalize_sign(
                     dividend * divisor.denominator,
                     divisor_numerator,
                 );

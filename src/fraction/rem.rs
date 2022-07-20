@@ -1,20 +1,15 @@
-use std::ops::{Div, Mul, Rem};
+use std::ops::Rem;
 
-use traiter::numbers::{CheckedRem, Gcd, Signed};
+use traiter::numbers::CheckedRem;
 
 use crate::big_int::BigInt;
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
 use super::types::Fraction;
 
-impl<
-        Component: Clone
-            + CheckedRem<Output = Option<Component>>
-            + Div<Output = Component>
-            + Gcd<Output = Component>
-            + Mul<Output = Component>
-            + Signed,
-    > Rem for Fraction<Component>
+impl<Component> Rem for Fraction<Component>
+where
+    Self: CheckedRem<Output = Option<Self>>,
 {
     type Output = Self;
 
@@ -24,14 +19,9 @@ impl<
     }
 }
 
-impl<
-        Component: Clone
-            + CheckedRem<Output = Option<Component>>
-            + Div<Output = Component>
-            + Gcd<Output = Component>
-            + Signed
-            + Mul<Output = Component>,
-    > Rem<Component> for Fraction<Component>
+impl<Component> Rem<Component> for Fraction<Component>
+where
+    Self: CheckedRem<Component, Output = Option<Self>>,
 {
     type Output = Self;
 

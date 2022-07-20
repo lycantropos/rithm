@@ -1,23 +1,19 @@
-use std::ops::{Div, Mul, MulAssign};
+use std::ops::{Mul, MulAssign};
 
-use traiter::numbers::{Gcd, Signed};
-
-use super::types::{normalize_components_moduli, Fraction};
+use super::types::{Fraction, NormalizeModuli};
 
 impl<
         Component: Clone
-            + Div<Output = Component>
-            + Gcd<Output = Component>
             + Mul<Output = Component>
-            + Signed,
+            + NormalizeModuli<Output = (Component, Component)>,
     > MulAssign for Fraction<Component>
 {
     fn mul_assign(&mut self, other: Self) {
-        let (numerator, other_denominator) = normalize_components_moduli(
+        let (numerator, other_denominator) = Component::normalize_moduli(
             self.numerator.clone(),
             other.denominator,
         );
-        let (other_numerator, denominator) = normalize_components_moduli(
+        let (other_numerator, denominator) = Component::normalize_moduli(
             other.numerator,
             self.denominator.clone(),
         );
@@ -28,15 +24,13 @@ impl<
 
 impl<
         Component: Clone
-            + Div<Output = Component>
-            + Gcd<Output = Component>
-            + Signed
-            + Mul<Output = Component>,
+            + Mul<Output = Component>
+            + NormalizeModuli<Output = (Component, Component)>,
     > MulAssign<Component> for Fraction<Component>
 {
     fn mul_assign(&mut self, other: Component) {
         let (other, denominator) =
-            normalize_components_moduli(other, self.denominator.clone());
+            Component::normalize_moduli(other, self.denominator.clone());
         self.numerator = self.numerator.clone() * other;
         self.denominator = denominator;
     }

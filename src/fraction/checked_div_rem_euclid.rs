@@ -1,18 +1,16 @@
-use std::ops::{Div, Mul};
+use std::ops::Mul;
 
-use traiter::numbers::{CheckedDivRemEuclid, Gcd, Zeroable};
+use traiter::numbers::CheckedDivRemEuclid;
 
 use crate::big_int::BigInt;
 
-use super::types::{normalize_components_moduli, Fraction};
+use super::types::{Fraction, NormalizeModuli};
 
 impl<
         Component: Clone
             + CheckedDivRemEuclid<Output = Option<(Component, Component)>>
-            + Div<Output = Component>
-            + Gcd<Output = Component>
             + Mul<Output = Component>
-            + Zeroable,
+            + NormalizeModuli<Output = (Component, Component)>,
     > CheckedDivRemEuclid for Fraction<Component>
 {
     type Output = Option<(Component, Self)>;
@@ -24,7 +22,7 @@ impl<
             divisor.numerator * self.denominator.clone(),
         )?;
         let (remainder_numerator, remainder_denominator) =
-            normalize_components_moduli(
+            Component::normalize_moduli(
                 remainder_numerator,
                 self.denominator * divisor.denominator,
             );
@@ -41,10 +39,8 @@ impl<
 impl<
         Component: Clone
             + CheckedDivRemEuclid<Output = Option<(Component, Component)>>
-            + Div<Output = Component>
-            + Gcd<Output = Component>
             + Mul<Output = Component>
-            + Zeroable,
+            + NormalizeModuli<Output = (Component, Component)>,
     > CheckedDivRemEuclid<Component> for Fraction<Component>
 {
     type Output = Option<(Component, Self)>;
@@ -53,7 +49,7 @@ impl<
         let (quotient, remainder_numerator) = (self.numerator)
             .checked_div_rem_euclid(divisor * self.denominator.clone())?;
         let (remainder_numerator, remainder_denominator) =
-            normalize_components_moduli(remainder_numerator, self.denominator);
+            Component::normalize_moduli(remainder_numerator, self.denominator);
         Some((
             quotient,
             Self {
@@ -69,9 +65,8 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize>
 where
     Self: CheckedDivRemEuclid<Self, Output = Option<(Self, Self)>>
         + Clone
-        + Div<Output = Self>
-        + Gcd<Output = Self>
-        + Mul<Output = Self>,
+        + Mul<Output = Self>
+        + NormalizeModuli<Output = (Self, Self)>,
 {
     type Output = Option<(Self, Fraction<Self>)>;
 
@@ -80,10 +75,7 @@ where
             * divisor.denominator.clone())
         .checked_div_rem_euclid(divisor.numerator)?;
         let (remainder_numerator, remainder_denominator) =
-            normalize_components_moduli(
-                remainder_numerator,
-                divisor.denominator,
-            );
+            Self::normalize_moduli(remainder_numerator, divisor.denominator);
         Some((
             quotient,
             Fraction::<Self> {
@@ -107,7 +99,7 @@ macro_rules! integer_checked_div_rem_euclid_fraction_impl {
                     * divisor.denominator.clone())
                 .checked_div_rem_euclid(divisor.numerator)?;
                 let (remainder_numerator, remainder_denominator) =
-                    normalize_components_moduli(
+                    <$integer>::normalize_moduli(
                         remainder_numerator,
                         divisor.denominator,
                     );

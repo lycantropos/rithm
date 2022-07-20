@@ -79,20 +79,20 @@ where
 
 macro_rules! signed_integer_sub_fraction_impl {
     ($($integer:ty)*) => ($(
-    impl Sub<Fraction<Self>> for $integer {
-        type Output = Fraction<Self>;
+        impl Sub<Fraction<Self>> for $integer {
+            type Output = Fraction<Self>;
 
-        fn sub(self, subtrahend: Fraction<Self>) -> Self::Output {
-            let (numerator, denominator) = normalize_components_moduli(
-                self * subtrahend.denominator - subtrahend.numerator,
-                subtrahend.denominator,
-            );
-            Self::Output {
-                numerator,
-                denominator,
+            fn sub(self, subtrahend: Fraction<Self>) -> Self::Output {
+                let (numerator, denominator) = normalize_components_moduli(
+                    self * subtrahend.denominator - subtrahend.numerator,
+                    subtrahend.denominator,
+                );
+                Self::Output {
+                    numerator,
+                    denominator,
+                }
             }
         }
-    }
     )*)
 }
 

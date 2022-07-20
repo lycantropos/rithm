@@ -46,14 +46,17 @@ where
 
 macro_rules! integer_checked_div_euclid_fraction_impl {
     ($($integer:ty)*) => ($(
-    impl CheckedDivEuclid<Fraction<Self>> for $integer
-    {
-        type Output = Option<Self>;
+        impl CheckedDivEuclid<Fraction<Self>> for $integer {
+            type Output = Option<Self>;
 
-        fn checked_div_euclid(self, divisor: Fraction<Self>) -> Self::Output {
-            (self * divisor.denominator).checked_div_euclid(divisor.numerator)
+            fn checked_div_euclid(
+                self,
+                divisor: Fraction<Self>,
+            ) -> Self::Output {
+                (self * divisor.denominator)
+                    .checked_div_euclid(divisor.numerator)
+            }
         }
-    }
     )*)
 }
 

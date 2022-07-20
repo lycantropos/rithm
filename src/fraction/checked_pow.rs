@@ -56,7 +56,7 @@ macro_rules! signed_integer_fraction_checked_pow_impl {
                 })
             }
         }
-        )*)
+    )*)
 }
 
 signed_integer_fraction_checked_pow_impl!(i8 i16 i32 i64 i128 isize);

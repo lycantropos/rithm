@@ -67,13 +67,13 @@ where
 
 macro_rules! signed_integer_add_fraction_impl {
     ($($integer:ty)*) => ($(
-    impl Add<Fraction<Self>> for $integer {
-        type Output = Fraction<Self>;
+        impl Add<Fraction<Self>> for $integer {
+            type Output = Fraction<Self>;
 
-        fn add(self, other: Fraction<Self>) -> Self::Output {
-            other + self
+            fn add(self, other: Fraction<Self>) -> Self::Output {
+                other + self
+            }
         }
-    }
     )*)
 }
 

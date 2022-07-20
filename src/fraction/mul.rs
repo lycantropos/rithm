@@ -62,13 +62,13 @@ where
 
 macro_rules! signed_integer_mul_fraction_impl {
     ($($integer:ty)*) => ($(
-    impl Mul<Fraction<Self>> for $integer {
-        type Output = Fraction<Self>;
+        impl Mul<Fraction<Self>> for $integer {
+            type Output = Fraction<Self>;
 
-        fn mul(self, other: Fraction<Self>) -> Self::Output {
-            other * self
+            fn mul(self, other: Fraction<Self>) -> Self::Output {
+                other * self
+            }
         }
-    }
     )*)
 }
 

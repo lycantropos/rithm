@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryFrom;
 
 use pyo3::basic::CompareOp;
 use pyo3::exceptions::*;
@@ -961,7 +961,7 @@ impl PyFraction {
     }
 
     fn __float__(&self, py: Python) -> PyResult<PyObject> {
-        match <Fraction as TryInto<f64>>::try_into(self.0.clone()) {
+        match f64::try_from(self.0.clone()) {
             Ok(float) => Ok(float.into_py(py)),
             Err(reason) => Err(PyOverflowError::new_err(reason.to_string())),
         }

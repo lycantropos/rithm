@@ -938,7 +938,7 @@ impl PyFraction {
     }
 
     fn __ceil__(&self) -> PyInt {
-        PyInt(self.0.clone().ceil())
+        PyInt((&self.0).ceil())
     }
 
     fn __divmod__(&self, divisor: &PyAny) -> PyResult<PyObject> {

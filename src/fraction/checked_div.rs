@@ -6,113 +6,534 @@ use crate::big_int::BigInt;
 
 use super::types::{Fraction, NormalizeModuli, NormalizeSign};
 
-impl<
-        Component: Mul<Output = Component>
-            + NormalizeModuli<Output = (Component, Component)>
-            + NormalizeSign<Output = (Component, Component)>,
-    > CheckedDiv for Fraction<Component>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDiv
+    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
 where
+    BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+        + NormalizeModuli<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        > + NormalizeSign<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        >,
     Self: Zeroable,
 {
     type Output = Option<Self>;
 
     fn checked_div(self, divisor: Self) -> Self::Output {
         if divisor.is_zero() {
-            return None;
+            None
+        } else {
+            let (dividend_numerator, divisor_numerator) =
+                self.numerator.normalize_moduli(divisor.numerator);
+            let (dividend_denominator, divisor_denominator) =
+                self.denominator.normalize_moduli(divisor.denominator);
+            let (numerator, denominator) = (dividend_numerator
+                * divisor_denominator)
+                .normalize_sign(dividend_denominator * divisor_numerator);
+            Some(Self {
+                numerator,
+                denominator,
+            })
         }
-        let (dividend_numerator, divisor_numerator) =
-            Component::normalize_moduli(self.numerator, divisor.numerator);
-        let (dividend_denominator, divisor_denominator) =
-            Component::normalize_moduli(self.denominator, divisor.denominator);
-        let (numerator, denominator) = Component::normalize_sign(
-            dividend_numerator * divisor_denominator,
-            dividend_denominator * divisor_numerator,
-        );
-        Some(Self {
-            numerator,
-            denominator,
-        })
     }
 }
 
-impl<
-        Component: Mul<Output = Component>
-            + NormalizeModuli<Output = (Component, Component)>
-            + NormalizeSign<Output = (Component, Component)>
-            + Zeroable,
-    > CheckedDiv<Component> for Fraction<Component>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDiv<&Self>
+    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
 where
+    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+        + NormalizeModuli<
+            &'a BigInt<Digit, SEPARATOR, SHIFT>,
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        > + NormalizeSign<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        >,
     Self: Zeroable,
 {
     type Output = Option<Self>;
 
-    fn checked_div(self, divisor: Component) -> Self::Output {
+    fn checked_div(self, divisor: &Self) -> Self::Output {
         if divisor.is_zero() {
-            return None;
+            None
+        } else {
+            let (dividend_numerator, divisor_numerator) =
+                self.numerator.normalize_moduli(&divisor.numerator);
+            let (dividend_denominator, divisor_denominator) =
+                self.denominator.normalize_moduli(&divisor.denominator);
+            let (numerator, denominator) = (dividend_numerator
+                * divisor_denominator)
+                .normalize_sign(dividend_denominator * divisor_numerator);
+            Some(Self {
+                numerator,
+                denominator,
+            })
         }
-        let (dividend_numerator, divisor_numerator) =
-            Component::normalize_moduli(self.numerator, divisor);
-        let (numerator, denominator) = Component::normalize_sign(
-            dividend_numerator,
-            self.denominator * divisor_numerator,
-        );
-        Some(Self {
-            numerator,
-            denominator,
-        })
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDiv<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
+    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        Output = (
+            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, SHIFT>,
+        ),
+    >,
+    BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+        + NormalizeSign<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        >,
+    Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Zeroable,
+{
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+
+    fn checked_div(
+        self,
+        divisor: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+    ) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            let (dividend_numerator, divisor_numerator) =
+                self.numerator.normalize_moduli(divisor.numerator);
+            let (dividend_denominator, divisor_denominator) =
+                self.denominator.normalize_moduli(divisor.denominator);
+            let (numerator, denominator) = (dividend_numerator
+                * divisor_denominator)
+                .normalize_sign(dividend_denominator * divisor_numerator);
+            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+                numerator,
+                denominator,
+            })
+        }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDiv
+    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
+        Output = (
+            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, SHIFT>,
+        ),
+    >,
+    BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+        + NormalizeSign<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        >,
+    Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Zeroable,
+{
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+
+    fn checked_div(self, divisor: Self) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            let (dividend_numerator, divisor_numerator) =
+                self.numerator.normalize_moduli(&divisor.numerator);
+            let (dividend_denominator, divisor_denominator) =
+                self.denominator.normalize_moduli(&divisor.denominator);
+            let (numerator, denominator) = (dividend_numerator
+                * divisor_denominator)
+                .normalize_sign(dividend_denominator * divisor_numerator);
+            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+                numerator,
+                denominator,
+            })
+        }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDiv<BigInt<Digit, SEPARATOR, SHIFT>>
+    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+        + NormalizeModuli<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        > + NormalizeSign<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        > + Zeroable,
+{
+    type Output = Option<Self>;
+
+    fn checked_div(
+        self,
+        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            let (dividend_numerator, divisor_numerator) =
+                self.numerator.normalize_moduli(divisor);
+            let (numerator, denominator) = dividend_numerator
+                .normalize_sign(self.denominator * divisor_numerator);
+            Some(Self {
+                numerator,
+                denominator,
+            })
+        }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDiv<&BigInt<Digit, SEPARATOR, SHIFT>>
+    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+        + NormalizeModuli<
+            &'a BigInt<Digit, SEPARATOR, SHIFT>,
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        > + NormalizeSign<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        > + Zeroable,
+{
+    type Output = Option<Self>;
+
+    fn checked_div(
+        self,
+        divisor: &BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            let (dividend_numerator, divisor_numerator) =
+                self.numerator.normalize_moduli(divisor);
+            let (numerator, denominator) = dividend_numerator
+                .normalize_sign(self.denominator * divisor_numerator);
+            Some(Self {
+                numerator,
+                denominator,
+            })
+        }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDiv<BigInt<Digit, SEPARATOR, SHIFT>>
+    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: NormalizeSign<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        > + Zeroable,
+    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<
+            BigInt<Digit, SEPARATOR, SHIFT>,
+            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+        > + NormalizeModuli<
+            BigInt<Digit, SEPARATOR, SHIFT>,
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        >,
+{
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+
+    fn checked_div(
+        self,
+        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            let (dividend_numerator, divisor_numerator) =
+                self.numerator.normalize_moduli(divisor);
+            let (numerator, denominator) = dividend_numerator
+                .normalize_sign(&self.denominator * divisor_numerator);
+            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+                numerator,
+                denominator,
+            })
+        }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDiv<&BigInt<Digit, SEPARATOR, SHIFT>>
+    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    BigInt<Digit, SEPARATOR, SHIFT>: NormalizeSign<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        > + Zeroable,
+    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<
+            BigInt<Digit, SEPARATOR, SHIFT>,
+            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+        > + NormalizeModuli<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        >,
+{
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+
+    fn checked_div(
+        self,
+        divisor: &BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            let (dividend_numerator, divisor_numerator) =
+                self.numerator.normalize_moduli(divisor);
+            let (numerator, denominator) = dividend_numerator
+                .normalize_sign(&self.denominator * divisor_numerator);
+            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+                numerator,
+                denominator,
+            })
+        }
     }
 }
 
 impl<Digit, const SEPARATOR: char, const SHIFT: usize>
     CheckedDiv<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Self: Clone
-        + Mul<Output = Self>
+    Fraction<Self>: Zeroable,
+    Self: Mul<Output = Self>
         + NormalizeModuli<Output = (Self, Self)>
         + NormalizeSign<Output = (Self, Self)>,
-    Fraction<Self>: Zeroable,
 {
     type Output = Option<Fraction<Self>>;
 
     fn checked_div(self, divisor: Fraction<Self>) -> Self::Output {
         if divisor.is_zero() {
-            return None;
+            None
+        } else {
+            let (dividend, divisor_numerator) =
+                self.normalize_moduli(divisor.numerator);
+            let (numerator, denominator) = (dividend * divisor.denominator)
+                .normalize_sign(divisor_numerator);
+            Some(Fraction::<Self> {
+                numerator,
+                denominator,
+            })
         }
-        let (dividend, divisor_numerator) =
-            Self::normalize_moduli(self, divisor.numerator);
-        let (numerator, denominator) = Self::normalize_sign(
-            dividend * divisor.denominator,
-            divisor_numerator,
-        );
-        Some(Fraction::<Self> {
-            numerator,
-            denominator,
-        })
     }
 }
 
-macro_rules! signed_integer_checked_div_fraction_impl {
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDiv<&Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Fraction<Self>: Zeroable,
+    for<'a> Self: Mul<&'a Self, Output = Self>
+        + NormalizeModuli<&'a Self, Output = (Self, Self)>
+        + NormalizeSign<Output = (Self, Self)>,
+{
+    type Output = Option<Fraction<Self>>;
+
+    fn checked_div(self, divisor: &Fraction<Self>) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            let (dividend, divisor_numerator) =
+                self.normalize_moduli(&divisor.numerator);
+            let (numerator, denominator) = (dividend * &divisor.denominator)
+                .normalize_sign(divisor_numerator);
+            Some(Fraction::<Self> {
+                numerator,
+                denominator,
+            })
+        }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDiv<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+where
+    BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+        + NormalizeSign<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        >,
+    Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Zeroable,
+    Self: NormalizeModuli<
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        Output = (
+            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, SHIFT>,
+        ),
+    >,
+{
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+
+    fn checked_div(
+        self,
+        divisor: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+    ) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            let (dividend, divisor_numerator) =
+                self.normalize_moduli(divisor.numerator);
+            let (numerator, denominator) = (dividend * divisor.denominator)
+                .normalize_sign(divisor_numerator);
+            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+                numerator,
+                denominator,
+            })
+        }
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    CheckedDiv<&Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+where
+    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
+        Output = (
+            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, SHIFT>,
+        ),
+    >,
+    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: Mul<
+            &'a BigInt<Digit, SEPARATOR, SHIFT>,
+            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+        > + NormalizeSign<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
+        >,
+    Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Zeroable,
+{
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+
+    fn checked_div(
+        self,
+        divisor: &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+    ) -> Self::Output {
+        if divisor.is_zero() {
+            None
+        } else {
+            let (dividend, divisor_numerator) =
+                self.normalize_moduli(&divisor.numerator);
+            let (numerator, denominator) = (dividend * &divisor.denominator)
+                .normalize_sign(divisor_numerator);
+            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+                numerator,
+                denominator,
+            })
+        }
+    }
+}
+
+macro_rules! integer_fraction_checked_div_impl {
     ($($integer:ty)*) => ($(
+        impl CheckedDiv for Fraction<$integer>
+        where
+            Self: Zeroable,
+        {
+            type Output = Option<Self>;
+
+            fn checked_div(self, divisor: Self) -> Self::Output {
+                if divisor == 0 {
+                    None
+                } else {
+                    let (dividend_numerator, divisor_numerator) =
+                        self.numerator.normalize_moduli(divisor.numerator);
+                    let (dividend_denominator, divisor_denominator) =
+                        self.denominator.normalize_moduli(divisor.denominator);
+                    let (numerator, denominator) = (dividend_numerator
+                        * divisor_denominator)
+                        .normalize_sign(
+                            dividend_denominator * divisor_numerator,
+                        );
+                    Some(Self {
+                        numerator,
+                        denominator,
+                    })
+                }
+            }
+        }
+
+        impl CheckedDiv<$integer> for Fraction<$integer>
+        where
+            Self: Zeroable,
+        {
+            type Output = Option<Self>;
+
+            fn checked_div(self, divisor: $integer) -> Self::Output {
+                if divisor == 0 {
+                    None
+                } else {
+                    let (dividend_numerator, divisor_numerator) =
+                        self.numerator.normalize_moduli(divisor);
+                    let (numerator, denominator) = dividend_numerator
+                        .normalize_sign(self.denominator * divisor_numerator);
+                    Some(Self {
+                        numerator,
+                        denominator,
+                    })
+                }
+            }
+        }
+
         impl CheckedDiv<Fraction<Self>> for $integer {
             type Output = Option<Fraction<Self>>;
 
             fn checked_div(self, divisor: Fraction<Self>) -> Self::Output {
-                if divisor.is_zero() {
-                    return None;
+                if divisor == 0 {
+                    None
+                } else {
+                    let (dividend, divisor_numerator) =
+                        self.normalize_moduli(divisor.numerator);
+                    let (numerator, denominator) = (dividend
+                        * divisor.denominator)
+                        .normalize_sign(divisor_numerator);
+                    Some(Fraction::<Self> {
+                        numerator,
+                        denominator,
+                    })
                 }
-                let (dividend, divisor_numerator) =
-                    <$integer>::normalize_moduli(self, divisor.numerator);
-                let (numerator, denominator) = <$integer>::normalize_sign(
-                    dividend * divisor.denominator,
-                    divisor_numerator,
-                );
-                Some(Fraction::<Self> {
-                    numerator,
-                    denominator,
-                })
             }
         }
     )*)
 }
 
-signed_integer_checked_div_fraction_impl!(i8 i16 i32 i64 i128 isize);
+integer_fraction_checked_div_impl!(
+    i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
+);

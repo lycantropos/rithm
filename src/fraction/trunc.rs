@@ -22,6 +22,24 @@ where
     }
 }
 
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Trunc
+    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Signed,
+    Self: Ceil<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+        + Floor<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+{
+    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+
+    fn trunc(self) -> Self::Output {
+        if self.is_negative() {
+            self.ceil()
+        } else {
+            self.floor()
+        }
+    }
+}
+
 macro_rules! signed_integer_fraction_trunc_impl {
     ($($integer:ty)*) => ($(
         impl Trunc for Fraction<$integer> {

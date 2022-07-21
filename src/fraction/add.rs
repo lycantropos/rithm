@@ -324,7 +324,7 @@ where
     }
 }
 
-macro_rules! integer_add_fraction_impl {
+macro_rules! integer_fraction_add_impl {
     ($($integer:ty)*) => ($(
         impl Add for Fraction<$integer> {
             type Output = Self;
@@ -368,6 +368,6 @@ macro_rules! integer_add_fraction_impl {
     )*)
 }
 
-integer_add_fraction_impl!(
+integer_fraction_add_impl!(
     i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
 );

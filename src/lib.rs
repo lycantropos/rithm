@@ -968,7 +968,7 @@ impl PyFraction {
     }
 
     fn __floor__(&self) -> PyInt {
-        PyInt(self.0.clone().floor())
+        PyInt((&self.0).floor())
     }
 
     fn __floordiv__(&self, divisor: &PyAny) -> PyResult<PyObject> {

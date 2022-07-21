@@ -1319,7 +1319,7 @@ impl PyFraction {
     }
 
     fn __trunc__(&self) -> PyInt {
-        PyInt(self.0.clone().trunc())
+        PyInt((&self.0).trunc())
     }
 }
 

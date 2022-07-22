@@ -1295,11 +1295,7 @@ impl PyFraction {
     fn __truediv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
         if divisor.is_instance(PyFraction::type_object(py))? {
-            match self
-                .0
-                .clone()
-                .checked_div(divisor.extract::<PyFraction>()?.0)
-            {
+            match (&self.0).checked_div(divisor.extract::<PyFraction>()?.0) {
                 Some(quotient) => Ok(PyFraction(quotient).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
                     UNDEFINED_DIVISION_ERROR_MESSAGE,
@@ -1307,7 +1303,7 @@ impl PyFraction {
             }
         } else {
             match try_py_any_to_maybe_big_int(divisor)? {
-                Some(divisor) => match self.0.clone().checked_div(divisor) {
+                Some(divisor) => match (&self.0).checked_div(divisor) {
                     Some(quotient) => Ok(PyFraction(quotient).into_py(py)),
                     None => Err(PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,

@@ -974,9 +974,7 @@ impl PyFraction {
     fn __floordiv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
         if divisor.is_instance(PyFraction::type_object(py))? {
-            match self
-                .0
-                .clone()
+            match (&self.0)
                 .checked_div_euclid(divisor.extract::<PyFraction>()?.0)
             {
                 Some(quotient) => Ok(PyInt(quotient).into_py(py)),
@@ -986,14 +984,12 @@ impl PyFraction {
             }
         } else {
             match try_py_any_to_maybe_big_int(divisor)? {
-                Some(divisor) => {
-                    match self.0.clone().checked_div_euclid(divisor) {
-                        Some(quotient) => Ok(PyInt(quotient).into_py(py)),
-                        None => Err(PyZeroDivisionError::new_err(
-                            UNDEFINED_DIVISION_ERROR_MESSAGE,
-                        )),
-                    }
-                }
+                Some(divisor) => match (&self.0).checked_div_euclid(divisor) {
+                    Some(quotient) => Ok(PyInt(quotient).into_py(py)),
+                    None => Err(PyZeroDivisionError::new_err(
+                        UNDEFINED_DIVISION_ERROR_MESSAGE,
+                    )),
+                },
                 None => Ok(py.NotImplemented()),
             }
         }

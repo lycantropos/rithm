@@ -1238,7 +1238,7 @@ impl PyFraction {
     fn __rtruediv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
         let py = dividend.py();
         match try_py_any_to_maybe_big_int(dividend)? {
-            Some(dividend) => match dividend.checked_div(self.0.clone()) {
+            Some(dividend) => match dividend.checked_div(&self.0) {
                 Some(quotient) => Ok(PyFraction(quotient).into_py(py)),
                 None => Err(PyZeroDivisionError::new_err(
                     UNDEFINED_DIVISION_ERROR_MESSAGE,

@@ -2,8 +2,10 @@ use traiter::numbers::{Sign, Signed, Zeroable};
 
 use super::types::BigInt;
 
-impl<Digit: Zeroable, const SEPARATOR: char, const SHIFT: usize> Signed
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> Signed
     for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: Zeroable,
 {
     fn is_negative(&self) -> bool {
         self.sign.is_negative()

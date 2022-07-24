@@ -16,17 +16,22 @@ impl<Digit: Unitary + Zeroable, const SEPARATOR: char, const SHIFT: usize>
 }
 
 macro_rules! from_integer_impl {
-    ($($t:ty)*) => ($(
-        impl<Digit: DigitsFromNonZeroValue<$t> + Zeroable, const SEPARATOR: char, const SHIFT: usize> From<$t>
-            for BigInt<Digit, SEPARATOR, SHIFT>
+    ($($integer:ty)*) => ($(
+        impl<
+                Digit: DigitsFromNonZeroValue<$integer> + Zeroable,
+                const SEPARATOR: char,
+                const SHIFT: usize,
+            > From<$integer> for BigInt<Digit, SEPARATOR, SHIFT>
         {
-            fn from(value: $t) -> Self {
+            fn from(value: $integer) -> Self {
                 if value.is_zero() {
                     Self::zero()
                 } else {
                     Self {
                         sign: non_zero_value_to_sign(value),
-                        digits: Digit::digits_from_non_zero_value::<SHIFT>(value),
+                        digits: Digit::digits_from_non_zero_value::<SHIFT>(
+                            value,
+                        ),
                     }
                 }
             }

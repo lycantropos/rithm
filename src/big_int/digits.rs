@@ -1991,9 +1991,9 @@ where
         let mut result = Vec::<Self>::new();
         result
             .try_reserve_exact(
-                shift_quotient
-                    + ((!shift_remainder.is_zero()) as usize)
-                    + digits.len(),
+                digits.len()
+                    + shift_quotient
+                    + if shift_remainder.is_zero() { 0 } else { 1 },
             )
             .ok()?;
         for _ in 0..shift_quotient {

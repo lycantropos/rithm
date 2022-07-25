@@ -5,7 +5,8 @@ use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
 use super::types::Fraction;
 
-impl<Component> RemEuclid for Fraction<Component>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> RemEuclid
+    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
 where
     Self: CheckedRemEuclid<Output = Option<Self>>,
 {
@@ -17,13 +18,129 @@ where
     }
 }
 
-impl<Component> RemEuclid<Component> for Fraction<Component>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> RemEuclid<&Self>
+    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
 where
-    Self: CheckedRemEuclid<Component, Output = Option<Self>>,
+    for<'a> Self: CheckedRemEuclid<&'a Self, Output = Option<Self>>,
 {
     type Output = Self;
 
-    fn rem_euclid(self, divisor: Component) -> Self::Output {
+    fn rem_euclid(self, divisor: &Self) -> Self::Output {
+        self.checked_rem_euclid(divisor)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    RemEuclid<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
+    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    Self: CheckedRemEuclid<
+        Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+
+    fn rem_euclid(
+        self,
+        divisor: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+    ) -> Self::Output {
+        self.checked_rem_euclid(divisor)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize> RemEuclid
+    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    Self: CheckedRemEuclid<
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+
+    fn rem_euclid(self, divisor: Self) -> Self::Output {
+        self.checked_rem_euclid(divisor)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    RemEuclid<BigInt<Digit, SEPARATOR, SHIFT>>
+    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    Self: CheckedRemEuclid<
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        Output = Option<Self>,
+    >,
+{
+    type Output = Self;
+
+    fn rem_euclid(
+        self,
+        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
+        self.checked_rem_euclid(divisor)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    RemEuclid<&BigInt<Digit, SEPARATOR, SHIFT>>
+    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    for<'a> Self: CheckedRemEuclid<
+        &'a BigInt<Digit, SEPARATOR, SHIFT>,
+        Output = Option<Self>,
+    >,
+{
+    type Output = Self;
+
+    fn rem_euclid(
+        self,
+        divisor: &BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
+        self.checked_rem_euclid(divisor)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    RemEuclid<BigInt<Digit, SEPARATOR, SHIFT>>
+    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    Self: CheckedRemEuclid<
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+
+    fn rem_euclid(
+        self,
+        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
+        self.checked_rem_euclid(divisor)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    RemEuclid<&BigInt<Digit, SEPARATOR, SHIFT>>
+    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    for<'a> Self: CheckedRemEuclid<
+        &'a BigInt<Digit, SEPARATOR, SHIFT>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+
+    fn rem_euclid(
+        self,
+        divisor: &BigInt<Digit, SEPARATOR, SHIFT>,
+    ) -> Self::Output {
         self.checked_rem_euclid(divisor)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
     }
@@ -42,17 +159,93 @@ where
     }
 }
 
-macro_rules! signed_integer_rem_fraction_impl {
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    RemEuclid<&Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    for<'a> Self:
+        CheckedRemEuclid<&'a Fraction<Self>, Output = Option<Fraction<Self>>>,
+{
+    type Output = Fraction<Self>;
+
+    fn rem_euclid(self, divisor: &Fraction<Self>) -> Self::Output {
+        self.checked_rem_euclid(divisor)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    RemEuclid<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: CheckedRemEuclid<
+        Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+
+    fn rem_euclid(
+        self,
+        divisor: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+    ) -> Self::Output {
+        self.checked_rem_euclid(divisor)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    RemEuclid<&Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
+    for &BigInt<Digit, SEPARATOR, SHIFT>
+where
+    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: CheckedRemEuclid<
+        &'a Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+
+    fn rem_euclid(
+        self,
+        divisor: &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+    ) -> Self::Output {
+        self.checked_rem_euclid(divisor)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+macro_rules! integer_fraction_rem_euclid_impl {
     ($($integer:ty)*) => ($(
+        impl RemEuclid for Fraction<$integer> {
+            type Output = Self;
+
+            fn rem_euclid(self, divisor: Self) -> Self::Output {
+                self.checked_rem_euclid(divisor)
+                    .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+            }
+        }
+
+        impl RemEuclid<$integer> for Fraction<$integer> {
+            type Output = Self;
+
+            fn rem_euclid(self, divisor: $integer) -> Self::Output {
+                self.checked_rem_euclid(divisor)
+                    .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+            }
+        }
+
         impl RemEuclid<Fraction<Self>> for $integer {
             type Output = Fraction<Self>;
 
             fn rem_euclid(self, divisor: Fraction<Self>) -> Self::Output {
-                <$integer as CheckedRemEuclid<Fraction<Self>>>::checked_rem_euclid(self, divisor)
-                    .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+                <$integer as CheckedRemEuclid<Fraction<Self>>>::checked_rem_euclid(
+                    self, divisor,
+                )
+                .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
             }
         }
     )*)
 }
 
-signed_integer_rem_fraction_impl!(i8 i16 i32 i64 i128 isize);
+integer_fraction_rem_euclid_impl!(
+    i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
+);

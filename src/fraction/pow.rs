@@ -1,16 +1,68 @@
 use traiter::numbers::{CheckedPow, Pow};
 
+use crate::big_int::BigInt;
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
 use super::types::Fraction;
 
-impl<Component> Pow<Component> for Fraction<Component>
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    Pow<BigInt<Digit, SEPARATOR, SHIFT>>
+    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
 where
-    Self: CheckedPow<Component, Output = Option<Self>>,
+    Self: CheckedPow<BigInt<Digit, SEPARATOR, SHIFT>, Output = Option<Self>>,
 {
     type Output = Self;
 
-    fn pow(self, exponent: Component) -> Self::Output {
+    fn pow(self, exponent: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+        self.checked_pow(exponent)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    Pow<&BigInt<Digit, SEPARATOR, SHIFT>>
+    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    for<'a> Self:
+        CheckedPow<&'a BigInt<Digit, SEPARATOR, SHIFT>, Output = Option<Self>>,
+{
+    type Output = Self;
+
+    fn pow(self, exponent: &BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+        self.checked_pow(exponent)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    Pow<BigInt<Digit, SEPARATOR, SHIFT>>
+    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    Self: CheckedPow<
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+
+    fn pow(self, exponent: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+        self.checked_pow(exponent)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+    Pow<&BigInt<Digit, SEPARATOR, SHIFT>>
+    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+where
+    for<'a> Self: CheckedPow<
+        &'a BigInt<Digit, SEPARATOR, SHIFT>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+
+    fn pow(self, exponent: &BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
         self.checked_pow(exponent)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
     }
@@ -31,4 +83,6 @@ macro_rules! signed_integer_fraction_pow_impl {
     )*)
 }
 
-signed_integer_fraction_pow_impl!(i8 i16 i32 i64 i128 isize);
+signed_integer_fraction_pow_impl!(
+    i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
+);

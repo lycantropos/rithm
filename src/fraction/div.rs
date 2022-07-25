@@ -199,10 +199,7 @@ where
 
 macro_rules! integer_fraction_div_impl {
     ($($integer:ty)*) => ($(
-        impl Div for Fraction<$integer>
-        where
-            Self: CheckedDiv<Output = Option<Self>>,
-        {
+        impl Div for Fraction<$integer> {
             type Output = Self;
 
             fn div(self, divisor: Self) -> Self::Output {
@@ -211,10 +208,7 @@ macro_rules! integer_fraction_div_impl {
             }
         }
 
-        impl Div<$integer> for Fraction<$integer>
-        where
-            Self: CheckedDiv<$integer, Output = Option<Self>>,
-        {
+        impl Div<$integer> for Fraction<$integer> {
             type Output = Self;
 
             fn div(self, divisor: $integer) -> Self::Output {
@@ -227,8 +221,10 @@ macro_rules! integer_fraction_div_impl {
             type Output = Fraction<Self>;
 
             fn div(self, divisor: Fraction<Self>) -> Self::Output {
-                <$integer as CheckedDiv<Fraction<Self>>>::checked_div(self, divisor)
-                    .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+                <$integer as CheckedDiv<Fraction<Self>>>::checked_div(
+                    self, divisor,
+                )
+                .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
             }
         }
     )*)

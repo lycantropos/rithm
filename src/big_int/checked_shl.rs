@@ -157,6 +157,52 @@ macro_rules! checked_shl_signed_integer_impl {
                 }
             }
         }
+
+        impl<
+                Digit: Copy + PrimitiveShiftDigitsLeft + TryFrom<usize> + Zeroable,
+                const SEPARATOR: char,
+                const SHIFT: usize,
+            > CheckedShl<$integer> for &BigInt<Digit, SEPARATOR, SHIFT>
+        {
+            type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShlError>;
+
+            fn checked_shl(self, shift: $integer) -> Self::Output {
+                debug_assert!(
+                    usize::BITS < <$integer>::BITS
+                        || SHIFT < <$integer>::MAX as usize
+                );
+                if shift.is_negative() {
+                    Err(ShlError::NegativeShift)
+                } else if self.is_zero() {
+                    Ok(self.clone())
+                } else {
+                    let (shift_quotient, shift_remainder) =
+                        shift.div_rem(SHIFT as $integer);
+                    if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
+                        >= (usize::BITS as usize)
+                        && shift_quotient
+                            >= ((usize::MAX / size_of::<Digit>()) as $integer)
+                    {
+                        Err(ShlError::TooLarge)
+                    } else {
+                        let digits =
+                            Digit::primitive_shift_digits_left::<SHIFT>(
+                                &self.digits,
+                                shift_quotient as usize,
+                                unsafe {
+                                    Digit::try_from(shift_remainder as usize)
+                                        .unwrap_unchecked()
+                                },
+                            )
+                            .ok_or(ShlError::OutOfMemory)?;
+                        Ok(BigInt::<Digit, SEPARATOR, SHIFT> {
+                            sign: self.sign,
+                            digits,
+                        })
+                    }
+                }
+            }
+        }
     )*)
 }
 
@@ -200,6 +246,50 @@ macro_rules! checked_shl_unsigned_integer_impl {
                             )
                             .ok_or(ShlError::OutOfMemory)?;
                         Ok(Self {
+                            sign: self.sign,
+                            digits,
+                        })
+                    }
+                }
+            }
+        }
+
+        impl<
+                Digit: Copy + PrimitiveShiftDigitsLeft + TryFrom<usize> + Zeroable,
+                const SEPARATOR: char,
+                const SHIFT: usize,
+            > CheckedShl<$integer> for &BigInt<Digit, SEPARATOR, SHIFT>
+        {
+            type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShlError>;
+
+            fn checked_shl(self, shift: $integer) -> Self::Output {
+                debug_assert!(
+                    usize::BITS < <$integer>::BITS
+                        || SHIFT < <$integer>::MAX as usize
+                );
+                if self.is_zero() {
+                    Ok(self.clone())
+                } else {
+                    let (shift_quotient, shift_remainder) =
+                        shift.div_rem(SHIFT as $integer);
+                    if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
+                        >= (usize::BITS as usize)
+                        && shift_quotient
+                            >= ((usize::MAX / size_of::<Digit>()) as $integer)
+                    {
+                        Err(ShlError::TooLarge)
+                    } else {
+                        let digits =
+                            Digit::primitive_shift_digits_left::<SHIFT>(
+                                &self.digits,
+                                shift_quotient as usize,
+                                unsafe {
+                                    Digit::try_from(shift_remainder as usize)
+                                        .unwrap_unchecked()
+                                },
+                            )
+                            .ok_or(ShlError::OutOfMemory)?;
+                        Ok(BigInt::<Digit, SEPARATOR, SHIFT> {
                             sign: self.sign,
                             digits,
                         })

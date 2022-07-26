@@ -53,6 +53,7 @@ mod rem;
 mod rem_assign;
 mod rem_euclid;
 mod shl;
+mod shr;
 mod signed;
 mod sub;
 mod sub_assign;

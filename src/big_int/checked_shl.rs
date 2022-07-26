@@ -120,9 +120,10 @@ macro_rules! checked_shl_signed_integer_impl {
                             shift.div_rem(SHIFT as $integer);
                         if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
                             >= (usize::BITS as usize)
-                            && shift_quotient
-                                >= ((usize::MAX / size_of::<Digit>())
-                                    as $integer)
+                            && unsafe {
+                                usize::try_from(shift_quotient)
+                                    .unwrap_unchecked()
+                            } >= (usize::MAX / size_of::<Digit>())
                         {
                             Err(ShlError::TooLarge)
                         } else {
@@ -170,9 +171,10 @@ macro_rules! checked_shl_signed_integer_impl {
                             shift.div_rem(SHIFT as $integer);
                         if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
                             >= (usize::BITS as usize)
-                            && shift_quotient
-                                >= ((usize::MAX / size_of::<Digit>())
-                                    as $integer)
+                            && unsafe {
+                                usize::try_from(shift_quotient)
+                                    .unwrap_unchecked()
+                            } >= (usize::MAX / size_of::<Digit>())
                         {
                             Err(ShlError::TooLarge)
                         } else {
@@ -205,11 +207,12 @@ checked_shl_signed_integer_impl!(i8 i16 i32 i64 i128 isize);
 macro_rules! checked_shl_unsigned_integer_impl {
     ($($integer:ty)*) => ($(
         impl<
-            Digit: PrimitiveShiftDigitsLeft + TryFrom<usize>,
-            const SEPARATOR: char,
-            const SHIFT: usize,
-        > CheckedShl<$integer> for BigInt<Digit, SEPARATOR, SHIFT>
-            where BigInt<Digit, SEPARATOR, SHIFT>: Zeroable
+                Digit: PrimitiveShiftDigitsLeft + TryFrom<usize>,
+                const SEPARATOR: char,
+                const SHIFT: usize,
+            > CheckedShl<$integer> for BigInt<Digit, SEPARATOR, SHIFT>
+        where
+            BigInt<Digit, SEPARATOR, SHIFT>: Zeroable,
         {
             type Output = Result<Self, ShlError>;
 
@@ -225,8 +228,9 @@ macro_rules! checked_shl_unsigned_integer_impl {
                         shift.div_rem(SHIFT as $integer);
                     if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
                         >= (usize::BITS as usize)
-                        && shift_quotient
-                        >= ((usize::MAX / size_of::<Digit>()) as $integer)
+                        && unsafe {
+                            usize::try_from(shift_quotient).unwrap_unchecked()
+                        } >= (usize::MAX / size_of::<Digit>())
                     {
                         Err(ShlError::TooLarge)
                     } else {
@@ -239,7 +243,7 @@ macro_rules! checked_shl_unsigned_integer_impl {
                                         .unwrap_unchecked()
                                 },
                             )
-                                .ok_or(ShlError::OutOfMemory)?;
+                            .ok_or(ShlError::OutOfMemory)?;
                         Ok(Self {
                             sign: self.sign,
                             digits,
@@ -250,11 +254,12 @@ macro_rules! checked_shl_unsigned_integer_impl {
         }
 
         impl<
-            Digit: PrimitiveShiftDigitsLeft + TryFrom<usize>,
-            const SEPARATOR: char,
-            const SHIFT: usize,
-        > CheckedShl<$integer> for &BigInt<Digit, SEPARATOR, SHIFT>
-            where BigInt<Digit, SEPARATOR, SHIFT>: Clone + Zeroable
+                Digit: PrimitiveShiftDigitsLeft + TryFrom<usize>,
+                const SEPARATOR: char,
+                const SHIFT: usize,
+            > CheckedShl<$integer> for &BigInt<Digit, SEPARATOR, SHIFT>
+        where
+            BigInt<Digit, SEPARATOR, SHIFT>: Clone + Zeroable,
         {
             type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShlError>;
 
@@ -270,8 +275,9 @@ macro_rules! checked_shl_unsigned_integer_impl {
                         shift.div_rem(SHIFT as $integer);
                     if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
                         >= (usize::BITS as usize)
-                        && shift_quotient
-                        >= ((usize::MAX / size_of::<Digit>()) as $integer)
+                        && unsafe {
+                            usize::try_from(shift_quotient).unwrap_unchecked()
+                        } >= (usize::MAX / size_of::<Digit>())
                     {
                         Err(ShlError::TooLarge)
                     } else {
@@ -284,7 +290,7 @@ macro_rules! checked_shl_unsigned_integer_impl {
                                         .unwrap_unchecked()
                                 },
                             )
-                                .ok_or(ShlError::OutOfMemory)?;
+                            .ok_or(ShlError::OutOfMemory)?;
                         Ok(BigInt::<Digit, SEPARATOR, SHIFT> {
                             sign: self.sign,
                             digits,

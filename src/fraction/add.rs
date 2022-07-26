@@ -7,6 +7,10 @@ use super::types::{Fraction, NormalizeModuli};
 impl<Digit, const SEPARATOR: char, const SHIFT: usize> Add
     for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
 where
+    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        Output = BigInt<Digit, SEPARATOR, SHIFT>,
+    >,
     for<'a> BigInt<Digit, SEPARATOR, SHIFT>: Add<Output = BigInt<Digit, SEPARATOR, SHIFT>>
         + Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
         + Mul<
@@ -22,12 +26,9 @@ where
     type Output = Self;
 
     fn add(self, other: Self) -> Self::Output {
-        let (numerator, denominator) =
-            BigInt::<Digit, SEPARATOR, SHIFT>::normalize_moduli(
-                self.numerator * &other.denominator
-                    + other.numerator * &self.denominator,
-                self.denominator * other.denominator,
-            );
+        let (numerator, denominator) = (self.numerator * &other.denominator
+            + &self.denominator * other.numerator)
+            .normalize_moduli(self.denominator * other.denominator);
         Self::Output {
             numerator,
             denominator,
@@ -55,12 +56,9 @@ where
     type Output = Self;
 
     fn add(self, other: &Self) -> Self::Output {
-        let (numerator, denominator) =
-            BigInt::<Digit, SEPARATOR, SHIFT>::normalize_moduli(
-                self.numerator * &other.denominator
-                    + &other.numerator * &self.denominator,
-                self.denominator * &other.denominator,
-            );
+        let (numerator, denominator) = (self.numerator * &other.denominator
+            + &self.denominator * &other.numerator)
+            .normalize_moduli(self.denominator * &other.denominator);
         Self::Output {
             numerator,
             denominator,
@@ -72,20 +70,17 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize>
     Add<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
     for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: Add<Output = BigInt<Digit, SEPARATOR, SHIFT>>
-        + Mul<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
-        > + NormalizeModuli<
-            Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
-            ),
-        >,
     for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
         + Mul<
             BigInt<Digit, SEPARATOR, SHIFT>,
             Output = BigInt<Digit, SEPARATOR, SHIFT>,
+        >,
+    BigInt<Digit, SEPARATOR, SHIFT>: Add<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+        + NormalizeModuli<
+            Output = (
+                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, SHIFT>,
+            ),
         >,
 {
     type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
@@ -94,12 +89,9 @@ where
         self,
         other: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
     ) -> Self::Output {
-        let (numerator, denominator) =
-            BigInt::<Digit, SEPARATOR, SHIFT>::normalize_moduli(
-                &self.numerator * &other.denominator
-                    + other.numerator * &self.denominator,
-                &self.denominator * other.denominator,
-            );
+        let (numerator, denominator) = (&self.numerator * &other.denominator
+            + &self.denominator * other.numerator)
+            .normalize_moduli(&self.denominator * other.denominator);
         Self::Output {
             numerator,
             denominator,
@@ -123,12 +115,9 @@ where
     type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
 
     fn add(self, other: Self) -> Self::Output {
-        let (numerator, denominator) =
-            BigInt::<Digit, SEPARATOR, SHIFT>::normalize_moduli(
-                &self.numerator * &other.denominator
-                    + &other.numerator * &self.denominator,
-                &self.denominator * &other.denominator,
-            );
+        let (numerator, denominator) = (&self.numerator * &other.denominator
+            + &self.denominator * &other.numerator)
+            .normalize_moduli(&self.denominator * &other.denominator);
         Self::Output {
             numerator,
             denominator,
@@ -140,11 +129,12 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize>
     Add<BigInt<Digit, SEPARATOR, SHIFT>>
     for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: Add<Output = BigInt<Digit, SEPARATOR, SHIFT>>
-        + Mul<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
-        > + NormalizeModuli<
+    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<
+        BigInt<Digit, SEPARATOR, SHIFT>,
+        Output = BigInt<Digit, SEPARATOR, SHIFT>,
+    >,
+    BigInt<Digit, SEPARATOR, SHIFT>: Add<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+        + NormalizeModuli<
             Output = (
                 BigInt<Digit, SEPARATOR, SHIFT>,
                 BigInt<Digit, SEPARATOR, SHIFT>,
@@ -154,11 +144,9 @@ where
     type Output = Self;
 
     fn add(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        let (numerator, denominator) =
-            BigInt::<Digit, SEPARATOR, SHIFT>::normalize_moduli(
-                self.numerator + other * &self.denominator,
-                self.denominator,
-            );
+        let (numerator, denominator) = (self.numerator
+            + &self.denominator * other)
+            .normalize_moduli(self.denominator);
         Self::Output {
             numerator,
             denominator,
@@ -183,11 +171,9 @@ where
     type Output = Self;
 
     fn add(self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        let (numerator, denominator) =
-            BigInt::<Digit, SEPARATOR, SHIFT>::normalize_moduli(
-                self.numerator + other * &self.denominator,
-                self.denominator,
-            );
+        let (numerator, denominator) = (self.numerator
+            + &self.denominator * other)
+            .normalize_moduli(self.denominator);
         Self::Output {
             numerator,
             denominator,
@@ -199,29 +185,27 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize>
     Add<BigInt<Digit, SEPARATOR, SHIFT>>
     for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: Mul<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
-        > + NormalizeModuli<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
-            ),
-        >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Add<
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
+        &'a BigInt<Digit, SEPARATOR, SHIFT>,
+        Output = (
+            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, SHIFT>,
+        ),
     >,
+    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Add<
+            BigInt<Digit, SEPARATOR, SHIFT>,
+            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+        > + Mul<
+            BigInt<Digit, SEPARATOR, SHIFT>,
+            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+        >,
 {
     type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
 
     fn add(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        let (numerator, denominator) =
-            BigInt::<Digit, SEPARATOR, SHIFT>::normalize_moduli(
-                &self.numerator + other * &self.denominator,
-                &self.denominator,
-            );
+        let (numerator, denominator) = (&self.numerator
+            + &self.denominator * other)
+            .normalize_moduli(&self.denominator);
         Self::Output {
             numerator,
             denominator,
@@ -248,11 +232,9 @@ where
     type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
 
     fn add(self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        let (numerator, denominator) =
-            BigInt::<Digit, SEPARATOR, SHIFT>::normalize_moduli(
-                &self.numerator + other * &self.denominator,
-                &self.denominator,
-            );
+        let (numerator, denominator) = (&self.numerator
+            + &self.denominator * other)
+            .normalize_moduli(&self.denominator);
         Self::Output {
             numerator,
             denominator,
@@ -330,11 +312,10 @@ macro_rules! integer_fraction_add_impl {
             type Output = Self;
 
             fn add(self, other: Self) -> Self::Output {
-                let (numerator, denominator) = <$integer>::normalize_moduli(
-                    self.numerator * other.denominator
-                        + other.numerator * self.denominator,
-                    self.denominator * other.denominator,
-                );
+                let (numerator, denominator) = (self.numerator
+                    * other.denominator
+                    + self.denominator * other.numerator)
+                    .normalize_moduli(self.denominator * other.denominator);
                 Self::Output {
                     numerator,
                     denominator,
@@ -346,10 +327,9 @@ macro_rules! integer_fraction_add_impl {
             type Output = Self;
 
             fn add(self, other: $integer) -> Self::Output {
-                let (numerator, denominator) = <$integer>::normalize_moduli(
-                    self.numerator + other * self.denominator,
-                    self.denominator,
-                );
+                let (numerator, denominator) = (self.numerator
+                    + self.denominator * other)
+                    .normalize_moduli(self.denominator);
                 Self::Output {
                     numerator,
                     denominator,

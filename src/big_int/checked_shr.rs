@@ -129,9 +129,10 @@ macro_rules! checked_shr_signed_integer_impl {
                             shift.div_rem(SHIFT as $integer);
                         if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
                             >= (usize::BITS as usize)
-                            && shift_quotient
-                                >= ((usize::MAX / size_of::<Digit>())
-                                    as $integer)
+                            && unsafe {
+                                usize::try_from(shift_quotient)
+                                    .unwrap_unchecked()
+                            } >= (usize::MAX / size_of::<Digit>())
                         {
                             Ok(Self::zero())
                         } else if self.is_negative() {
@@ -196,9 +197,10 @@ macro_rules! checked_shr_signed_integer_impl {
                             shift.div_rem(SHIFT as $integer);
                         if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
                             >= (usize::BITS as usize)
-                            && shift_quotient
-                                >= ((usize::MAX / size_of::<Digit>())
-                                    as $integer)
+                            && unsafe {
+                                usize::try_from(shift_quotient)
+                                    .unwrap_unchecked()
+                            } >= (usize::MAX / size_of::<Digit>())
                         {
                             Ok(BigInt::<Digit, SEPARATOR, SHIFT>::zero())
                         } else if self.is_negative() {
@@ -265,8 +267,9 @@ macro_rules! checked_shr_unsigned_integer_impl {
                         shift.div_rem(SHIFT as $integer);
                     if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
                         >= (usize::BITS as usize)
-                        && shift_quotient
-                            >= ((usize::MAX / size_of::<Digit>()) as $integer)
+                        && unsafe {
+                            usize::try_from(shift_quotient).unwrap_unchecked()
+                        } >= (usize::MAX / size_of::<Digit>())
                     {
                         Ok(Self::zero())
                     } else {
@@ -310,8 +313,9 @@ macro_rules! checked_shr_unsigned_integer_impl {
                         shift.div_rem(SHIFT as $integer);
                     if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
                         >= (usize::BITS as usize)
-                        && shift_quotient
-                            >= ((usize::MAX / size_of::<Digit>()) as $integer)
+                        && unsafe {
+                            usize::try_from(shift_quotient).unwrap_unchecked()
+                        } >= (usize::MAX / size_of::<Digit>())
                     {
                         Ok(BigInt::<Digit, SEPARATOR, SHIFT>::zero())
                     } else {

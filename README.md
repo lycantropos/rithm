@@ -116,6 +116,10 @@ we can:
   rithm.Int(9)
   >>> Int(3) ** Int(2)
   rithm.Int(9)
+  >>> Int(5) << Int(1)
+  rithm.Int(10)
+  >>> Int(5) >> Int(1)
+  rithm.Int(2)
   >>> Int(25) - Int(16)
   rithm.Int(9)
   >>> Int(18) / Int(2)
@@ -230,11 +234,13 @@ assert_eq!(BigInt::from(2) ^ BigInt::from(11), 9);
 assert_eq!(BigInt::from(19) / BigInt::from(2), 9);
 assert_eq!(BigInt::from(19).div_euclid(BigInt::from(2)), 9);
 assert_eq!(BigInt::from(3) * BigInt::from(3), 9);
-assert_eq!(!BigInt::from(-10), 9);
 assert_eq!(-BigInt::from(-9), 9);
+assert_eq!(!BigInt::from(-10), 9);
 assert_eq!(BigInt::from(3).pow(BigInt::from(2)), 9);
 assert_eq!(BigInt::from(19) % BigInt::from(10), 9);
 assert_eq!(BigInt::from(19).rem_euclid(BigInt::from(10)), 9);
+assert_eq!(BigInt::from(5) << 1, 10);
+assert_eq!(BigInt::from(5) >> 1, 2);
 assert_eq!(BigInt::from(25) - BigInt::from(16), 9);
 ```
 

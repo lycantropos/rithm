@@ -22,7 +22,7 @@ where
     }
 }
 
-macro_rules! big_int_partial_ord_to_signed_primitive_impl {
+macro_rules! big_int_partial_ord_signed_integer_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: DigitsFromNonZeroValue<$integer> + Ord,
@@ -56,9 +56,9 @@ macro_rules! big_int_partial_ord_to_signed_primitive_impl {
     )*)
 }
 
-big_int_partial_ord_to_signed_primitive_impl!(i8 i16 i32 i64 i128 isize);
+big_int_partial_ord_signed_integer_impl!(i8 i16 i32 i64 i128 isize);
 
-macro_rules! big_int_partial_ord_to_unsigned_primitive_impl {
+macro_rules! big_int_partial_ord_unsigned_integer_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: DigitsFromNonZeroValue<$integer> + Ord,
@@ -96,9 +96,9 @@ macro_rules! big_int_partial_ord_to_unsigned_primitive_impl {
     )*)
 }
 
-big_int_partial_ord_to_unsigned_primitive_impl!(u8 u16 u32 u64 u128 usize);
+big_int_partial_ord_unsigned_integer_impl!(u8 u16 u32 u64 u128 usize);
 
-macro_rules! signed_primitive_partial_ord_to_big_int_impl {
+macro_rules! signed_integer_partial_ord_big_int_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: DigitsFromNonZeroValue<$integer> + Ord,
@@ -132,9 +132,9 @@ macro_rules! signed_primitive_partial_ord_to_big_int_impl {
     )*)
 }
 
-signed_primitive_partial_ord_to_big_int_impl!(i8 i16 i32 i64 i128 isize);
+signed_integer_partial_ord_big_int_impl!(i8 i16 i32 i64 i128 isize);
 
-macro_rules! unsigned_primitive_partial_ord_to_big_int_impl {
+macro_rules! unsigned_integer_partial_ord_big_int_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: DigitsFromNonZeroValue<$integer> + Ord,
@@ -176,4 +176,4 @@ macro_rules! unsigned_primitive_partial_ord_to_big_int_impl {
     )*)
 }
 
-unsigned_primitive_partial_ord_to_big_int_impl!(u8 u16 u32 u64 u128 usize);
+unsigned_integer_partial_ord_big_int_impl!(u8 u16 u32 u64 u128 usize);

@@ -1,160 +1,54 @@
 use std::cmp::Ordering;
 
-use traiter::numbers::{Signed, Zeroable};
+use traiter::numbers::{Sign, Signed, Zeroable};
 
-use super::digits::{
-    digits_lesser_than, value_to_sign, DigitsFromNonZeroValue,
-};
-use super::types::{BigInt, Sign};
+use super::digits::{compare_digits, DigitsFromNonZeroValue};
+use super::types::{BigInt, Sign as BigIntSign};
 
-impl<
-        Digit: Clone + PartialOrd + Zeroable,
-        const SEPARATOR: char,
-        const SHIFT: usize,
-    > PartialOrd for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: Ord, const SEPARATOR: char, const SHIFT: usize> PartialOrd
+    for BigInt<Digit, SEPARATOR, SHIFT>
+where
+    Self: PartialEq,
 {
-    fn ge(&self, other: &Self) -> bool {
-        self.sign > other.sign
-            || self.sign == other.sign
-                && !{
-                    if self.is_positive() {
-                        digits_lesser_than(&self.digits, &other.digits)
-                    } else {
-                        digits_lesser_than(&other.digits, &self.digits)
-                    }
-                }
-    }
-
-    fn gt(&self, other: &Self) -> bool {
-        self.sign > other.sign
-            || self.sign == other.sign
-                && if self.is_positive() {
-                    digits_lesser_than(&other.digits, &self.digits)
-                } else {
-                    digits_lesser_than(&self.digits, &other.digits)
-                }
-    }
-
-    fn le(&self, other: &Self) -> bool {
-        self.sign < other.sign
-            || self.sign == other.sign
-                && !{
-                    if self.is_positive() {
-                        digits_lesser_than(&other.digits, &self.digits)
-                    } else {
-                        digits_lesser_than(&self.digits, &other.digits)
-                    }
-                }
-    }
-
-    fn lt(&self, other: &Self) -> bool {
-        self.sign < other.sign
-            || self.sign == other.sign
-                && if self.is_positive() {
-                    digits_lesser_than(&self.digits, &other.digits)
-                } else {
-                    digits_lesser_than(&other.digits, &self.digits)
-                }
-    }
-
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(if self.lt(other) {
-            Ordering::Less
-        } else if self.gt(other) {
-            Ordering::Greater
-        } else {
-            Ordering::Equal
+        Some(match self.sign.cmp(&other.sign) {
+            Ordering::Equal => {
+                if self.sign.is_zero() {
+                    Ordering::Equal
+                } else {
+                    compare_digits(&self.digits, &other.digits)
+                }
+            }
+            value => value,
         })
     }
 }
 
 macro_rules! big_int_partial_ord_to_signed_primitive_impl {
-    ($($t:ty)*) => ($(
+    ($($integer:ty)*) => ($(
         impl<
-                Digit: DigitsFromNonZeroValue<$t> + PartialOrd + Zeroable,
+                Digit: DigitsFromNonZeroValue<$integer> + Ord,
                 const SEPARATOR: char,
                 const SHIFT: usize,
-            > PartialOrd<$t> for BigInt<Digit, SEPARATOR, SHIFT>
+            > PartialOrd<$integer> for BigInt<Digit, SEPARATOR, SHIFT>
+        where
+            Self: PartialEq<$integer>,
         {
-            fn ge(&self, other: &$t) -> bool {
-                self.sign > ((*other).signum() as Sign)
-                    || self.sign == ((*other).signum() as Sign)
-                        && (other.is_zero()
-                            || !{
-                                if self.is_positive() {
-                                    digits_lesser_than(
-                                        &self.digits,
-                                        &Digit::digits_from_non_zero_value::<SHIFT>(*other),
-                                    )
-                                } else {
-                                    digits_lesser_than(
-                                        &Digit::digits_from_non_zero_value::<SHIFT>(*other),
-                                        &self.digits,
-                                    )
-                                }
-                            })
-            }
-
-            fn gt(&self, other: &$t) -> bool {
-                self.sign > ((*other).signum() as Sign)
-                    || !other.is_zero()
-                        && self.sign == ((*other).signum() as Sign)
-                        && if self.is_positive() {
-                            digits_lesser_than(
-                                &Digit::digits_from_non_zero_value::<SHIFT>(*other),
-                                &self.digits,
-                            )
+            fn partial_cmp(&self, other: &$integer) -> Option<Ordering> {
+                Some(match self.sign.cmp(&(other.signum() as BigIntSign)) {
+                    Ordering::Equal => {
+                        if self.sign.is_zero() {
+                            Ordering::Equal
                         } else {
-                            digits_lesser_than(
+                            compare_digits(
                                 &self.digits,
-                                &Digit::digits_from_non_zero_value::<SHIFT>(*other),
+                                &Digit::digits_from_non_zero_value::<SHIFT>(
+                                    *other,
+                                ),
                             )
                         }
-            }
-
-            fn le(&self, other: &$t) -> bool {
-                self.sign < ((*other).signum() as Sign)
-                    || self.sign == ((*other).signum() as Sign)
-                        && (other.is_zero()
-                            || !{
-                                if self.is_positive() {
-                                    digits_lesser_than(
-                                        &Digit::digits_from_non_zero_value::<SHIFT>(*other),
-                                        &self.digits,
-                                    )
-                                } else {
-                                    digits_lesser_than(
-                                        &self.digits,
-                                        &Digit::digits_from_non_zero_value::<SHIFT>(*other),
-                                    )
-                                }
-                            })
-            }
-
-            fn lt(&self, other: &$t) -> bool {
-                self.sign < ((*other).signum() as Sign)
-                    || !other.is_zero()
-                        && self.sign == ((*other).signum() as Sign)
-                        && if self.is_positive() {
-                            digits_lesser_than(
-                                &self.digits,
-                                &Digit::digits_from_non_zero_value::<SHIFT>(*other),
-                            )
-                        } else {
-                            digits_lesser_than(
-                                &Digit::digits_from_non_zero_value::<SHIFT>(*other),
-                                &self.digits,
-                            )
-                        }
-            }
-
-            fn partial_cmp(&self, other: &$t) -> Option<Ordering> {
-                Some(if self.lt(other) {
-                    Ordering::Less
-                } else if self.gt(other) {
-                    Ordering::Greater
-                } else {
-                    Ordering::Equal
+                    }
+                    value => value,
                 })
             }
         }
@@ -164,58 +58,37 @@ macro_rules! big_int_partial_ord_to_signed_primitive_impl {
 big_int_partial_ord_to_signed_primitive_impl!(i8 i16 i32 i64 i128 isize);
 
 macro_rules! big_int_partial_ord_to_unsigned_primitive_impl {
-    ($($t:ty)*) => ($(
+    ($($integer:ty)*) => ($(
         impl<
-                Digit: DigitsFromNonZeroValue<$t> + PartialOrd + Zeroable,
+                Digit: DigitsFromNonZeroValue<$integer> + Ord,
                 const SEPARATOR: char,
                 const SHIFT: usize,
-            > PartialOrd<$t> for BigInt<Digit, SEPARATOR, SHIFT>
+            > PartialOrd<$integer> for BigInt<Digit, SEPARATOR, SHIFT>
+        where
+            Self: PartialEq<$integer> + Signed,
         {
-            fn ge(&self, other: &$t) -> bool {
-                self.is_zero() && other.is_zero()
-                    || self.is_positive()
-                        && (other.is_zero()
-                            || !digits_lesser_than(
+            fn partial_cmp(&self, other: &$integer) -> Option<Ordering> {
+                Some(match self.sign() {
+                    Sign::Negative => Ordering::Less,
+                    Sign::Positive => {
+                        if other.is_zero() {
+                            Ordering::Greater
+                        } else {
+                            compare_digits(
                                 &self.digits,
-                                &Digit::digits_from_non_zero_value::<SHIFT>(*other),
-                            ))
-            }
-
-            fn gt(&self, other: &$t) -> bool {
-                self.is_positive()
-                    && (other.is_zero()
-                        || digits_lesser_than(
-                            &Digit::digits_from_non_zero_value::<SHIFT>(*other),
-                            &self.digits,
-                        ))
-            }
-
-            fn le(&self, other: &$t) -> bool {
-                !self.is_positive()
-                    || !other.is_zero()
-                        && digits_lesser_than(
-                            &Digit::digits_from_non_zero_value::<SHIFT>(*other),
-                            &self.digits,
-                        )
-            }
-
-            fn lt(&self, other: &$t) -> bool {
-                self.is_negative()
-                    || !other.is_zero()
-                        && (self.is_zero()
-                            || digits_lesser_than(
-                                &self.digits,
-                                &Digit::digits_from_non_zero_value::<SHIFT>(*other),
-                            ))
-            }
-
-            fn partial_cmp(&self, other: &$t) -> Option<Ordering> {
-                Some(if self.lt(other) {
-                    Ordering::Less
-                } else if self.gt(other) {
-                    Ordering::Greater
-                } else {
-                    Ordering::Equal
+                                &Digit::digits_from_non_zero_value::<SHIFT>(
+                                    *other,
+                                ),
+                            )
+                        }
+                    }
+                    Sign::Zero => {
+                        if other.is_zero() {
+                            Ordering::Equal
+                        } else {
+                            Ordering::Less
+                        }
+                    }
                 })
             }
         }
@@ -225,88 +98,33 @@ macro_rules! big_int_partial_ord_to_unsigned_primitive_impl {
 big_int_partial_ord_to_unsigned_primitive_impl!(u8 u16 u32 u64 u128 usize);
 
 macro_rules! signed_primitive_partial_ord_to_big_int_impl {
-    ($($t:ty)*) => ($(
+    ($($integer:ty)*) => ($(
         impl<
-                Digit: DigitsFromNonZeroValue<$t> + PartialOrd + Zeroable,
+                Digit: DigitsFromNonZeroValue<$integer> + Ord,
                 const SEPARATOR: char,
                 const SHIFT: usize,
-            > PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $t
+            > PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $integer
+        where
+            Self: PartialEq<BigInt<Digit, SEPARATOR, SHIFT>>,
         {
-            fn le(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
-                value_to_sign(*self) < other.sign
-                    || value_to_sign(*self) == other.sign
-                        && !{
-                            if self.is_positive() {
-                                digits_lesser_than(
-                                    &other.digits,
-                                    &Digit::digits_from_non_zero_value::<SHIFT>(*self),
-                                )
-                            } else {
-                                digits_lesser_than(
-                                    &Digit::digits_from_non_zero_value::<SHIFT>(*self),
-                                    &other.digits,
-                                )
-                            }
-                        }
-            }
-
-            fn lt(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
-                value_to_sign(*self) < other.sign
-                    || value_to_sign(*self) == other.sign
-                        && if self.is_positive() {
-                            digits_lesser_than(
-                                &Digit::digits_from_non_zero_value::<SHIFT>(*self),
-                                &other.digits,
-                            )
+            fn partial_cmp(
+                &self,
+                other: &BigInt<Digit, SEPARATOR, SHIFT>,
+            ) -> Option<Ordering> {
+                Some(match (self.signum() as BigIntSign).cmp(&other.sign) {
+                    Ordering::Equal => {
+                        if self.is_zero() {
+                            Ordering::Equal
                         } else {
-                            digits_lesser_than(
-                                &other.digits,
-                                &Digit::digits_from_non_zero_value::<SHIFT>(*self),
-                            )
-                        }
-            }
-
-            fn ge(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
-                value_to_sign(*self) > other.sign
-                    || value_to_sign(*self) == other.sign
-                        && !{
-                            if self.is_positive() {
-                                digits_lesser_than(
-                                    &Digit::digits_from_non_zero_value::<SHIFT>(*self),
-                                    &other.digits,
-                                )
-                            } else {
-                                digits_lesser_than(
-                                    &other.digits,
-                                    &Digit::digits_from_non_zero_value::<SHIFT>(*self),
-                                )
-                            }
-                        }
-            }
-
-            fn gt(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
-                value_to_sign(*self) > other.sign
-                    || value_to_sign(*self) == other.sign
-                        && if self.is_positive() {
-                            digits_lesser_than(
-                                &other.digits,
-                                &Digit::digits_from_non_zero_value::<SHIFT>(*self),
-                            )
-                        } else {
-                            digits_lesser_than(
-                                &Digit::digits_from_non_zero_value::<SHIFT>(*self),
+                            compare_digits(
+                                &Digit::digits_from_non_zero_value::<SHIFT>(
+                                    *self,
+                                ),
                                 &other.digits,
                             )
                         }
-            }
-
-            fn partial_cmp(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> Option<Ordering> {
-                Some(if self.lt(other) {
-                    Ordering::Less
-                } else if self.gt(other) {
-                    Ordering::Greater
-                } else {
-                    Ordering::Equal
+                    }
+                    value => value,
                 })
             }
         }
@@ -316,58 +134,41 @@ macro_rules! signed_primitive_partial_ord_to_big_int_impl {
 signed_primitive_partial_ord_to_big_int_impl!(i8 i16 i32 i64 i128 isize);
 
 macro_rules! unsigned_primitive_partial_ord_to_big_int_impl {
-    ($($t:ty)*) => ($(
+    ($($integer:ty)*) => ($(
         impl<
-                Digit: DigitsFromNonZeroValue<$t> + PartialOrd + Zeroable,
+                Digit: DigitsFromNonZeroValue<$integer> + Ord,
                 const SEPARATOR: char,
                 const SHIFT: usize,
-            > PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $t
+            > PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $integer
+        where
+            Self: PartialEq<BigInt<Digit, SEPARATOR, SHIFT>>,
+            BigInt<Digit, SEPARATOR, SHIFT>: Signed,
         {
-            fn ge(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
-                !other.is_positive()
-                    || !self.is_zero()
-                        && digits_lesser_than(
-                            &Digit::digits_from_non_zero_value::<SHIFT>(*self),
-                            &other.digits,
-                        )
-            }
-
-            fn gt(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
-                other.is_negative()
-                    || !self.is_zero()
-                        && (other.is_zero()
-                            || digits_lesser_than(
+            fn partial_cmp(
+                &self,
+                other: &BigInt<Digit, SEPARATOR, SHIFT>,
+            ) -> Option<Ordering> {
+                Some(match other.sign() {
+                    Sign::Negative => Ordering::Greater,
+                    Sign::Positive => {
+                        if self.is_zero() {
+                            Ordering::Less
+                        } else {
+                            compare_digits(
+                                &Digit::digits_from_non_zero_value::<SHIFT>(
+                                    *self,
+                                ),
                                 &other.digits,
-                                &Digit::digits_from_non_zero_value::<SHIFT>(*self),
-                            ))
-            }
-
-            fn le(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
-                self.is_zero() && other.is_zero()
-                    || other.is_positive()
-                        && (self.is_zero()
-                            || !digits_lesser_than(
-                                &other.digits,
-                                &Digit::digits_from_non_zero_value::<SHIFT>(*self),
-                            ))
-            }
-
-            fn lt(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> bool {
-                other.is_positive()
-                    && (self.is_zero()
-                        || digits_lesser_than(
-                            &Digit::digits_from_non_zero_value::<SHIFT>(*self),
-                            &other.digits,
-                        ))
-            }
-
-            fn partial_cmp(&self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> Option<Ordering> {
-                Some(if other.lt(self) {
-                    Ordering::Less
-                } else if other.gt(self) {
-                    Ordering::Greater
-                } else {
-                    Ordering::Equal
+                            )
+                        }
+                    }
+                    Sign::Zero => {
+                        if self.is_zero() {
+                            Ordering::Equal
+                        } else {
+                            Ordering::Greater
+                        }
+                    }
                 })
             }
         }

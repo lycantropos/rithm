@@ -1063,7 +1063,18 @@ impl<
 }
 
 #[inline]
-pub(super) fn digits_lesser_than<Digit: PartialOrd>(
+pub(super) fn compare_digits<Digit: Ord>(
+    left: &[Digit],
+    right: &[Digit],
+) -> Ordering {
+    match left.len().cmp(&right.len()) {
+        Ordering::Equal => left.iter().rev().cmp(right.iter().rev()),
+        value => value,
+    }
+}
+
+#[inline]
+fn digits_lesser_than<Digit: PartialOrd>(
     left: &[Digit],
     right: &[Digit],
 ) -> bool {

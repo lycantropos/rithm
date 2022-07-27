@@ -8,17 +8,15 @@ use super::types::{BigInt, Sign as BigIntSign};
 impl<Digit: Ord, const SEPARATOR: char, const SHIFT: usize> PartialOrd
     for BigInt<Digit, SEPARATOR, SHIFT>
 where
-    Self: PartialEq,
+    Self: PartialEq + Signed,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(match self.sign.cmp(&other.sign) {
-            Ordering::Equal => {
-                if self.sign.is_zero() {
-                    Ordering::Equal
-                } else {
-                    compare_digits(&self.digits, &other.digits)
-                }
-            }
+            Ordering::Equal => match self.sign() {
+                Sign::Negative => compare_digits(&other.digits, &self.digits),
+                Sign::Positive => compare_digits(&self.digits, &other.digits),
+                Sign::Zero => Ordering::Equal,
+            },
             value => value,
         })
     }
@@ -32,22 +30,25 @@ macro_rules! big_int_partial_ord_to_signed_primitive_impl {
                 const SHIFT: usize,
             > PartialOrd<$integer> for BigInt<Digit, SEPARATOR, SHIFT>
         where
-            Self: PartialEq<$integer>,
+            Self: PartialEq<$integer> + Signed,
         {
             fn partial_cmp(&self, other: &$integer) -> Option<Ordering> {
                 Some(match self.sign.cmp(&(other.signum() as BigIntSign)) {
-                    Ordering::Equal => {
-                        if self.sign.is_zero() {
-                            Ordering::Equal
-                        } else {
-                            compare_digits(
-                                &self.digits,
-                                &Digit::digits_from_non_zero_value::<SHIFT>(
-                                    *other,
-                                ),
-                            )
-                        }
-                    }
+                    Ordering::Equal => match self.sign() {
+                        Sign::Negative => compare_digits(
+                            &Digit::digits_from_non_zero_value::<SHIFT>(
+                                *other,
+                            ),
+                            &self.digits,
+                        ),
+                        Sign::Positive => compare_digits(
+                            &self.digits,
+                            &Digit::digits_from_non_zero_value::<SHIFT>(
+                                *other,
+                            ),
+                        ),
+                        Sign::Zero => Ordering::Equal,
+                    },
                     value => value,
                 })
             }
@@ -105,6 +106,7 @@ macro_rules! signed_primitive_partial_ord_to_big_int_impl {
                 const SHIFT: usize,
             > PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $integer
         where
+            BigInt<Digit, SEPARATOR, SHIFT>: Signed,
             Self: PartialEq<BigInt<Digit, SEPARATOR, SHIFT>>,
         {
             fn partial_cmp(
@@ -112,18 +114,17 @@ macro_rules! signed_primitive_partial_ord_to_big_int_impl {
                 other: &BigInt<Digit, SEPARATOR, SHIFT>,
             ) -> Option<Ordering> {
                 Some(match (self.signum() as BigIntSign).cmp(&other.sign) {
-                    Ordering::Equal => {
-                        if self.is_zero() {
-                            Ordering::Equal
-                        } else {
-                            compare_digits(
-                                &Digit::digits_from_non_zero_value::<SHIFT>(
-                                    *self,
-                                ),
-                                &other.digits,
-                            )
-                        }
-                    }
+                    Ordering::Equal => match other.sign() {
+                        Sign::Negative => compare_digits(
+                            &other.digits,
+                            &Digit::digits_from_non_zero_value::<SHIFT>(*self),
+                        ),
+                        Sign::Positive => compare_digits(
+                            &Digit::digits_from_non_zero_value::<SHIFT>(*self),
+                            &other.digits,
+                        ),
+                        Sign::Zero => Ordering::Equal,
+                    },
                     value => value,
                 })
             }
@@ -141,8 +142,8 @@ macro_rules! unsigned_primitive_partial_ord_to_big_int_impl {
                 const SHIFT: usize,
             > PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>> for $integer
         where
-            Self: PartialEq<BigInt<Digit, SEPARATOR, SHIFT>>,
             BigInt<Digit, SEPARATOR, SHIFT>: Signed,
+            Self: PartialEq<BigInt<Digit, SEPARATOR, SHIFT>>,
         {
             fn partial_cmp(
                 &self,

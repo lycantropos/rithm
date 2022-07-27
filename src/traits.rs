@@ -129,43 +129,43 @@ pub trait MantissaDigits {
     const MANTISSA_DIGITS: usize;
 }
 
-macro_rules! primitive_mantissa_digits_impl {
-    ($($t:ty)*) => ($(
-        impl MantissaDigits for $t {
-            const MANTISSA_DIGITS: usize = <$t>::MANTISSA_DIGITS as usize;
+macro_rules! float_mantissa_digits_impl {
+    ($($float:ty)*) => ($(
+        impl MantissaDigits for $float {
+            const MANTISSA_DIGITS: usize = <$float>::MANTISSA_DIGITS as usize;
         }
     )*)
 }
 
-primitive_mantissa_digits_impl!(f32 f64);
+float_mantissa_digits_impl!(f32 f64);
 
 pub trait MaxExp {
     const MAX_EXP: i32;
 }
 
-macro_rules! primitive_max_exp_impl {
-    ($($t:ty)*) => ($(
-        impl MaxExp for $t {
-            const MAX_EXP: i32 = <$t>::MAX_EXP;
+macro_rules! float_max_exp_impl {
+    ($($float:ty)*) => ($(
+        impl MaxExp for $float {
+            const MAX_EXP: i32 = <$float>::MAX_EXP;
         }
     )*)
 }
 
-primitive_max_exp_impl!(f32 f64);
+float_max_exp_impl!(f32 f64);
 
 pub trait MinExp {
     const MIN_EXP: i32;
 }
 
-macro_rules! primitive_min_exp_impl {
-    ($($t:ty)*) => ($(
-        impl MinExp for $t {
-            const MIN_EXP: i32 = <$t>::MIN_EXP;
+macro_rules! float_min_exp_impl {
+    ($($float:ty)*) => ($(
+        impl MinExp for $float {
+            const MIN_EXP: i32 = <$float>::MIN_EXP;
         }
     )*)
 }
 
-primitive_min_exp_impl!(f32 f64);
+float_min_exp_impl!(f32 f64);
 
 pub trait Oppose {
     type Result: Signed + Neg<Output = Self::Result>;
@@ -249,20 +249,20 @@ pub trait WrappingSub<Subtrahend = Self> {
     fn wrapping_sub(self, subtrahend: Subtrahend) -> Self::Output;
 }
 
-macro_rules! primitive_wrapping_sub_impl {
-    ($($t:ty)*) => ($(
-        impl WrappingSub for $t {
-            type Output = $t;
+macro_rules! integer_wrapping_sub_impl {
+    ($($integer:ty)*) => ($(
+        impl WrappingSub for $integer {
+            type Output = $integer;
 
             #[inline(always)]
             fn wrapping_sub(self, subtrahend: Self) -> Self::Output {
-                <$t>::wrapping_sub(self, subtrahend)
+                <$integer>::wrapping_sub(self, subtrahend)
             }
         }
     )*)
 }
 
-primitive_wrapping_sub_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+integer_wrapping_sub_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
 
 pub type DoublePrecisionOf<T> = <T as DoublePrecision>::Result;
 pub type OppositionOf<T> = <T as Oppose>::Result;

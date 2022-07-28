@@ -339,6 +339,8 @@ jobs:
             [net]
             git-fetch-with-cli = true
             EOF
+          CIBW_BEFORE_BUILD: >
+            pip install -U setuptools pip -r requirements-setup.txt
           CIBW_BUILD: ${{ matrix.python_tag }}-${{ matrix.platform.tag }}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT_LINUX: PATH="$HOME/.cargo/bin:$PATH"

@@ -243,7 +243,7 @@ impl_float_unchecked_to_int!(
     f64 => u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize
 );
 
-pub trait WrappingSub<Subtrahend = Self> {
+pub(crate) trait WrappingSub<Subtrahend = Self> {
     type Output;
 
     fn wrapping_sub(self, subtrahend: Subtrahend) -> Self::Output;
@@ -262,7 +262,9 @@ macro_rules! integer_wrapping_sub_impl {
     )*)
 }
 
-integer_wrapping_sub_impl!(i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+integer_wrapping_sub_impl!(
+    i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
+);
 
 pub type DoublePrecisionOf<T> = <T as DoublePrecision>::Result;
 pub type OppositionOf<T> = <T as Oppose>::Result;

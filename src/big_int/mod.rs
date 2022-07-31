@@ -2,8 +2,7 @@ pub(crate) use self::constants::{
     MAX_REPRESENTABLE_BASE, MIN_REPRESENTABLE_BASE,
 };
 pub use self::contracts::is_valid_shift;
-pub use self::types::BigInt;
-pub(crate) use self::types::{ShlError, ShrError, TryFromFloatError};
+pub use self::types::{BigInt, ShlError, ShrError, TryFromFloatError};
 
 mod abs;
 mod add;

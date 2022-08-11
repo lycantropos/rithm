@@ -2,7 +2,7 @@
 name = "rithm"
 description = "Arbitrary precision arithmetic."
 license = "MIT"
-version = "10.1.0"
+version = "10.1.1-alpha"
 edition = "2018"
 
 [lib]

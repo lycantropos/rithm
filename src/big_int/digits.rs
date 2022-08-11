@@ -1947,32 +1947,35 @@ pub(super) trait ReduceDigitsToFloat<Output>: Sized {
     fn reduce_digits_to_float<const SHIFT: usize>(digits: &[Self]) -> Output;
 }
 
-impl<
-        Digit: Copy,
-        Output: Add<Output = Output>
-            + Mul<Output = Output>
-            + From<f32>
-            + From<Digit>
-            + Zeroable,
-    > ReduceDigitsToFloat<Output> for Digit
-{
-    fn reduce_digits_to_float<const SHIFT: usize>(digits: &[Self]) -> Output {
-        debug_assert!(SHIFT < ((1 << f32::EXPONENT_BITS_COUNT) - 1));
-        let mut result = Output::zero();
-        const EXPONENT_BASE: u32 =
-            (1 << (f32::EXPONENT_BITS_COUNT - 1usize)) - 1;
-        let scale = unsafe {
-            transmute::<u32, f32>(
-                (EXPONENT_BASE + (SHIFT as u32))
-                    << f32::SIGNIFICAND_BITS_COUNT,
-            )
-        };
-        for &digit in digits.iter().rev() {
-            result = result * Output::from(scale) + Output::from(digit);
+macro_rules! reduce_digits_to_float_impl {
+    ($($float:ty)*) => ($(
+        impl<Digit: Copy> ReduceDigitsToFloat<$float> for Digit
+        where
+            $float: From<Digit>,
+        {
+            fn reduce_digits_to_float<const SHIFT: usize>(
+                digits: &[Self],
+            ) -> $float {
+                debug_assert!(SHIFT < ((1 << f32::EXPONENT_BITS_COUNT) - 1));
+                let mut result = 0 as $float;
+                const EXPONENT_BASE: u32 =
+                    (1 << (f32::EXPONENT_BITS_COUNT - 1usize)) - 1;
+                let scale = unsafe {
+                    transmute::<u32, f32>(
+                        (EXPONENT_BASE + (SHIFT as u32))
+                            << f32::SIGNIFICAND_BITS_COUNT,
+                    )
+                } as $float;
+                for &digit in digits.iter().rev() {
+                    result = result * scale + <$float>::from(digit);
+                }
+                result
+            }
         }
-        result
-    }
+    )*)
 }
+
+reduce_digits_to_float_impl!(f32 f64);
 
 pub(super) trait PrimitiveShiftDigitsLeft: Sized {
     fn primitive_shift_digits_left<const SHIFT: usize>(

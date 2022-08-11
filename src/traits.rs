@@ -11,7 +11,7 @@ pub trait TryDivAsFloat<Divisor, Output> {
         -> Result<Output, Self::Error>;
 }
 
-macro_rules! impl_try_div_integer_as_float {
+macro_rules! try_div_integer_as_float_impl {
     ($($integer:ty)+ => $float:ty) => {
         $(
             impl TryDivAsFloat<Self, $float> for $integer {
@@ -30,10 +30,10 @@ macro_rules! impl_try_div_integer_as_float {
     }
 }
 
-impl_try_div_integer_as_float!(
+try_div_integer_as_float_impl!(
     u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize => f32
 );
-impl_try_div_integer_as_float!(
+try_div_integer_as_float_impl!(
     u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize => f64
 );
 
@@ -223,7 +223,7 @@ pub trait UncheckedToInt<Int> {
     unsafe fn unchecked_to_int(self) -> Int;
 }
 
-macro_rules! impl_float_unchecked_to_int {
+macro_rules! impl_float_unchecked_to_int_impl {
     ($float:ty => $($integer:ty)+) => {
         $(
             impl UncheckedToInt<$integer> for $float {
@@ -236,10 +236,10 @@ macro_rules! impl_float_unchecked_to_int {
     }
 }
 
-impl_float_unchecked_to_int!(
+impl_float_unchecked_to_int_impl!(
     f32 => u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize
 );
-impl_float_unchecked_to_int!(
+impl_float_unchecked_to_int_impl!(
     f64 => u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize
 );
 

@@ -5,7 +5,7 @@ use crate::traits::TryDivAsFloat;
 
 use super::types::Fraction;
 
-macro_rules! try_float_from_big_int_fraction {
+macro_rules! try_float_from_big_int_fraction_impl {
     ($($float:ty)*) => ($(
         impl<Digit, const SEPARATOR: char, const SHIFT: usize>
             TryFrom<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>> for $float
@@ -43,9 +43,9 @@ macro_rules! try_float_from_big_int_fraction {
     )*)
 }
 
-try_float_from_big_int_fraction!(f32 f64);
+try_float_from_big_int_fraction_impl!(f32 f64);
 
-macro_rules! try_float_from_integer_fraction {
+macro_rules! try_float_from_integer_fraction_impl {
     ($float:ty => $($integer:ty)*) => ($(
         impl TryFrom<Fraction<$integer>> for $float {
             type Error = <$integer as TryDivAsFloat<$integer, $float>>::Error;
@@ -59,9 +59,9 @@ macro_rules! try_float_from_integer_fraction {
     )*)
 }
 
-try_float_from_integer_fraction!(
-    f32 => i8 i16 i32 i64 isize u8 u16 u32 u64 usize
+try_float_from_integer_fraction_impl!(
+    f32 => i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
 );
-try_float_from_integer_fraction!(
-    f64 => i8 i16 i32 i64 isize u8 u16 u32 u64 usize
+try_float_from_integer_fraction_impl!(
+    f64 => i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
 );

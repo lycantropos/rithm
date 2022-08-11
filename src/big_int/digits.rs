@@ -499,7 +499,7 @@ pub trait TryDivDigitsAsFloat<Output>: Sized {
     ) -> Result<Output, Self::Error>;
 }
 
-macro_rules! checked_div_digits_as_float {
+macro_rules! checked_div_digits_as_float_impl {
     ($($float:ty)*) => ($(
         impl<
                 Digit: AddAssign
@@ -689,7 +689,7 @@ macro_rules! checked_div_digits_as_float {
     )*)
 }
 
-checked_div_digits_as_float!(f32 f64);
+checked_div_digits_as_float_impl!(f32 f64);
 
 pub(super) trait CheckedDivComponents: Sized {
     fn checked_div_components<const SHIFT: usize>(

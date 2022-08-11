@@ -8,7 +8,7 @@ use super::types::{
     TryIntoUnsignedIntegerError,
 };
 
-macro_rules! float_try_from_big_int {
+macro_rules! float_try_from_big_int_impl {
     ($($float:ty)*) => ($(
         impl<
                 Digit: FractExpDigits<$float>,
@@ -54,9 +54,9 @@ macro_rules! float_try_from_big_int {
     )*)
 }
 
-float_try_from_big_int!(f32 f64);
+float_try_from_big_int_impl!(f32 f64);
 
-macro_rules! signed_integer_try_from_big_int {
+macro_rules! signed_integer_try_from_big_int_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: MaybeReduceDigits<$integer> + Zeroable,
@@ -104,9 +104,9 @@ macro_rules! signed_integer_try_from_big_int {
     )*)
 }
 
-signed_integer_try_from_big_int!(i8 i16 i32 i64 i128 isize);
+signed_integer_try_from_big_int_impl!(i8 i16 i32 i64 i128 isize);
 
-macro_rules! unsigned_integer_try_from_big_int {
+macro_rules! unsigned_integer_try_from_big_int_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: MaybeReduceDigits<$integer> + Zeroable,
@@ -150,4 +150,4 @@ macro_rules! unsigned_integer_try_from_big_int {
     )*)
 }
 
-unsigned_integer_try_from_big_int!(u8 u16 u32 u64 u128 usize);
+unsigned_integer_try_from_big_int_impl!(u8 u16 u32 u64 u128 usize);

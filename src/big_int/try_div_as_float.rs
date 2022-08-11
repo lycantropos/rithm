@@ -3,7 +3,7 @@ use crate::traits::TryDivAsFloat;
 use super::digits::TryDivDigitsAsFloat;
 use super::types::BigInt;
 
-macro_rules! try_div_big_int_as_float {
+macro_rules! try_div_big_int_as_float_impl {
     ($($float:ty)*) => ($(
         impl<
                 Digit: TryDivDigitsAsFloat<$float>,
@@ -98,4 +98,4 @@ macro_rules! try_div_big_int_as_float {
     )*)
 }
 
-try_div_big_int_as_float!(f32 f64);
+try_div_big_int_as_float_impl!(f32 f64);

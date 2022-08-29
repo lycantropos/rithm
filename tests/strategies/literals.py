@@ -39,8 +39,15 @@ prefixed_hexadecimal_int_strings = strategies.from_regex(
                          whitespaces=whitespaces_class))
 )
 int_strings_with_bases = (
-    (strategies.tuples(decimal_int_strings_with_leading_zeros,
-                       strategies.just(10))
+    (strategies.tuples(
+            strategies.from_regex(compile_(
+                    fr'\A{whitespaces_class}*[+-]?0({separator}0+)*'
+                    fr'{whitespaces_class}*\Z'
+            )),
+            strategies.sampled_from(range(2, 37))
+    )
+     | strategies.tuples(decimal_int_strings_with_leading_zeros,
+                         strategies.just(10))
      | strategies.tuples(decimal_int_strings_without_leading_zeros,
                          strategies.sampled_from([0, 10]))
      | strategies.one_of([strategies.tuples(

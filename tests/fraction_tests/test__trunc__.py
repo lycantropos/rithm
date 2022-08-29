@@ -25,8 +25,9 @@ def test_value(fraction: Fraction) -> None:
 
 
 @given(strategies.ints_with_builtins)
-def test_connection_with_builtin(fraction_with_builtin: FractionWithBuiltin
-                                 ) -> None:
+def test_connection_with_builtin(
+        fraction_with_builtin: FractionWithBuiltin
+) -> None:
     fraction, builtin_fraction = fraction_with_builtin
 
     assert is_equivalent_to_builtin_int(math.trunc(fraction),

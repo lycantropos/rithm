@@ -48,8 +48,9 @@ def test_float_connection_with_builtin(float_: float) -> None:
 
 
 @given(strategies.ints_with_builtins)
-def test_numerator_only_connection_with_builtin(numerators: IntWithBuiltin
-                                                ) -> None:
+def test_numerator_only_connection_with_builtin(
+        numerators: IntWithBuiltin
+) -> None:
     numerator, builtin_numerator = numerators
 
     result = Fraction(numerator)
@@ -73,7 +74,7 @@ def test_invalid_numerator(numerator: Any, denominator: IntOrBuiltin) -> None:
 
 
 @given(strategies.ints_or_builtins, strategies.invalid_fractions_components)
-def test_invalid_denominator(numerator: IntOrBuiltin, denominator: Any
-                             ) -> None:
+def test_invalid_denominator(numerator: IntOrBuiltin,
+                             denominator: Any) -> None:
     with pytest.raises(TypeError):
         Fraction(numerator, denominator)

@@ -12,17 +12,18 @@ def test_alternatives(minuend: Int, subtrahend: Int) -> None:
 
 
 @given(strategies.ints, strategies.ints_with_builtins)
-def test_polymorphism(minuend: Int, subtrahend_with_builtin: IntWithBuiltin
-                      ) -> None:
+def test_polymorphism(minuend: Int,
+                      subtrahend_with_builtin: IntWithBuiltin) -> None:
     subtrahend, subtrahend_builtin = subtrahend_with_builtin
 
     assert minuend - subtrahend == minuend - subtrahend_builtin
 
 
 @given(strategies.ints_with_builtins, strategies.ints_with_builtins)
-def test_connection_with_builtin(minuend_with_builtin: IntWithBuiltin,
-                                 subtrahend_with_builtin: IntWithBuiltin
-                                 ) -> None:
+def test_connection_with_builtin(
+        minuend_with_builtin: IntWithBuiltin,
+        subtrahend_with_builtin: IntWithBuiltin
+) -> None:
     minuend, minuend_builtin = minuend_with_builtin
     subtrahend, subtrahend_builtin = subtrahend_with_builtin
 

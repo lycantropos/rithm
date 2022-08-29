@@ -682,9 +682,10 @@ class Fraction:
         )
 
 
-def _divmod_rationals(dividend: _Union[Fraction, Int, int],
-                      divisor: _Union[Fraction, Int, int]
-                      ) -> _Tuple[Int, Fraction]:
+def _divmod_rationals(
+        dividend: _Union[Fraction, Int, int],
+        divisor: _Union[Fraction, Int, int]
+) -> _Tuple[Int, Fraction]:
     quotient, remainder_numerator = divmod(
             dividend.numerator * divisor.denominator,
             dividend.denominator * divisor.numerator
@@ -694,14 +695,14 @@ def _divmod_rationals(dividend: _Union[Fraction, Int, int],
                               dividend.denominator * divisor.denominator)
 
 
-def _normalize_components_moduli(numerator: Int, denominator: Int
-                                 ) -> _Tuple[Int, Int]:
+def _normalize_components_moduli(numerator: Int,
+                                 denominator: Int) -> _Tuple[Int, Int]:
     gcd = numerator.gcd(denominator)
     return numerator // gcd, denominator // gcd
 
 
-def _normalize_components_sign(numerator: Int, denominator: Int
-                               ) -> _Tuple[Int, Int]:
+def _normalize_components_sign(numerator: Int,
+                               denominator: Int) -> _Tuple[Int, Int]:
     return ((-numerator, -denominator)
             if denominator < _ZERO
             else (numerator, denominator))

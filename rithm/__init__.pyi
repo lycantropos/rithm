@@ -139,10 +139,11 @@ class Int:
     def __pos__(self) -> 'Int':
         ...
 
-    def __pow__(self,
-                exponent: _Union['Int', int],
-                divisor: _Union['Int', None, int] = ...
-                ) -> _Union['Fraction', 'Int']:
+    def __pow__(
+            self,
+            exponent: _Union['Int', int],
+            divisor: _Union['Int', None, int] = ...
+    ) -> _Union['Fraction', 'Int']:
         ...
 
     def __radd__(self, other: int) -> Int:
@@ -175,10 +176,11 @@ class Int:
     def __round__(self, digits: _Optional[int] = ...) -> 'Int':
         ...
 
-    def __rpow__(self,
-                 base: int,
-                 divisor: _Union['Int', None, int] = ...
-                 ) -> _Union['Fraction', 'Int']:
+    def __rpow__(
+            self,
+            base: int,
+            divisor: _Union['Int', None, int] = ...
+    ) -> _Union['Fraction', 'Int']:
         ...
 
     def __rrshift__(self, other: int) -> 'Int':
@@ -228,9 +230,9 @@ class Fraction:
         ...
 
     @_overload
-    def __new__(cls,
-                _value: _Union['Fraction', Int, _Rational, float, int] = ...
-                ) -> 'Fraction':
+    def __new__(
+            cls, _value: _Union['Fraction', Int, _Rational, float, int] = ...
+    ) -> 'Fraction':
         ...
 
     @_overload
@@ -251,8 +253,9 @@ class Fraction:
     def __ceil__(self) -> 'Int':
         ...
 
-    def __divmod__(self, divisor: _Union['Fraction', Int, int]
-                   ) -> _Tuple[Int, 'Fraction']:
+    def __divmod__(
+            self, divisor: _Union['Fraction', Int, int]
+    ) -> _Tuple[Int, 'Fraction']:
         ...
 
     @_overload
@@ -302,15 +305,16 @@ class Fraction:
     def __pos__(self) -> 'Fraction':
         ...
 
-    def __pow__(self, exponent: _Union['Int', int], divisor: None = ...
-                ) -> 'Fraction':
+    def __pow__(self,
+                exponent: _Union['Int', int],
+                divisor: None = ...) -> 'Fraction':
         ...
 
     def __radd__(self, other: _Union[Int, int]) -> 'Fraction':
         ...
 
-    def __rdivmod__(self, dividend: _Union[Int, int]
-                    ) -> _Tuple[Int, 'Fraction']:
+    def __rdivmod__(self,
+                    dividend: _Union[Int, int]) -> _Tuple[Int, 'Fraction']:
         ...
 
     def __repr__(self) -> str:

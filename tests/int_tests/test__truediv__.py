@@ -10,8 +10,8 @@ from . import strategies
 
 
 @given(strategies.ints, strategies.ints_with_builtins)
-def test_polymorphism(dividend: Int, divisor_with_builtin: IntWithBuiltin
-                      ) -> None:
+def test_polymorphism(dividend: Int,
+                      divisor_with_builtin: IntWithBuiltin) -> None:
     divisor, divisor_builtin = divisor_with_builtin
 
     try:

@@ -55,9 +55,10 @@ def is_fraction_valid(fraction: Fraction) -> bool:
             and (fraction.numerator != 0 or fraction.denominator == 1))
 
 
-def to_fraction_with_builtin(numerators_pair: IntWithBuiltin,
-                             denominators_pair: Optional[IntWithBuiltin] = None
-                             ) -> FractionWithBuiltin:
+def to_fraction_with_builtin(
+        numerators_pair: IntWithBuiltin,
+        denominators_pair: Optional[IntWithBuiltin] = None
+) -> FractionWithBuiltin:
     numerator, builtin_numerator = numerators_pair
     if denominators_pair is None:
         return Fraction(numerator), fractions.Fraction(builtin_numerator)

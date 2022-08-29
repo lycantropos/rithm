@@ -9,8 +9,8 @@ from . import strategies
 
 
 @given(strategies.ints_with_builtins, strategies.fractions)
-def test_polymorphism(dividend_with_builtin: IntWithBuiltin, divisor: Fraction
-                      ) -> None:
+def test_polymorphism(dividend_with_builtin: IntWithBuiltin,
+                      divisor: Fraction) -> None:
     dividend, dividend_builtin = dividend_with_builtin
 
     try:
@@ -23,9 +23,10 @@ def test_polymorphism(dividend_with_builtin: IntWithBuiltin, divisor: Fraction
 
 
 @given(strategies.ints_with_builtins, strategies.fractions_with_builtins)
-def test_connection_with_builtin(dividend_with_builtin: IntWithBuiltin,
-                                 divisor_with_builtin: FractionWithBuiltin
-                                 ) -> None:
+def test_connection_with_builtin(
+        dividend_with_builtin: IntWithBuiltin,
+        divisor_with_builtin: FractionWithBuiltin
+) -> None:
     dividend, dividend_builtin = dividend_with_builtin
     divisor, divisor_builtin = divisor_with_builtin
 

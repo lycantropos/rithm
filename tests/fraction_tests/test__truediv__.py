@@ -33,8 +33,8 @@ def test_left_absorbing_element(dividend: Fraction, divisor: Fraction) -> None:
 
 
 @given(strategies.fractions, strategies.ints_with_builtins)
-def test_polymorphism(dividend: Fraction, divisor_with_builtin: IntWithBuiltin
-                      ) -> None:
+def test_polymorphism(dividend: Fraction,
+                      divisor_with_builtin: IntWithBuiltin) -> None:
     divisor, divisor_builtin = divisor_with_builtin
 
     try:
@@ -47,9 +47,10 @@ def test_polymorphism(dividend: Fraction, divisor_with_builtin: IntWithBuiltin
 
 
 @given(strategies.fractions_with_builtins, strategies.rationals_with_builtins)
-def test_connection_with_builtin(dividend_with_builtin: FractionWithBuiltin,
-                                 divisor_with_builtin: RationalWithBuiltin
-                                 ) -> None:
+def test_connection_with_builtin(
+        dividend_with_builtin: FractionWithBuiltin,
+        divisor_with_builtin: RationalWithBuiltin
+) -> None:
     dividend, dividend_builtin = dividend_with_builtin
     divisor, divisor_builtin = divisor_with_builtin
 

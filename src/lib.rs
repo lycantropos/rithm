@@ -6,7 +6,7 @@ use pyo3::exceptions::*;
 use pyo3::prelude::{
     pyclass, pymethods, pymodule, PyModule, PyResult, Python,
 };
-use pyo3::type_object::PyTypeObject;
+use pyo3::type_object::PyTypeInfo;
 use pyo3::types::{PyBytes, PyFloat, PyLong, PyString, PyType};
 use pyo3::{
     intern, AsPyPointer, IntoPy, Py, PyAny, PyErr, PyObject, PyRef, ToPyObject,

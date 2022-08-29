@@ -7,7 +7,9 @@ use crate::traits::HasSignBit;
 
 use super::constants::{MAX_REPRESENTABLE_BASE, MIN_REPRESENTABLE_BASE};
 use super::contracts::is_valid_shift;
-use super::digits::{to_digits_sign, BinaryBaseFromDigits};
+use super::digits::{
+    to_digits_sign, trim_leading_zeros, BinaryBaseFromDigits,
+};
 use super::types::{BigInt, Sign, TryFromStringError};
 
 pub trait TryFromString: Sized {
@@ -94,7 +96,13 @@ fn parse_digits<const SEPARATOR: char>(
     if characters.peek() == Some(&SEPARATOR) {
         return Err(TryFromStringError::StartsWithSeparator);
     }
-    let mut result: Vec<u8> = Vec::new();
+    let mut result: Vec<u8> = {
+        let (_, maybe_characters_count) = characters.size_hint();
+        debug_assert!(maybe_characters_count.is_some());
+        let characters_count =
+            unsafe { maybe_characters_count.unwrap_unchecked() };
+        Vec::with_capacity(characters_count)
+    };
     let mut prev: char = SEPARATOR;
     for character in characters {
         if character != SEPARATOR {
@@ -108,11 +116,15 @@ fn parse_digits<const SEPARATOR: char>(
         }
         prev = character;
     }
-    if prev == SEPARATOR {
-        return Err(TryFromStringError::EndsWithSeparator);
+    if result.is_empty() {
+        Err(TryFromStringError::NoDigits)
+    } else if prev == SEPARATOR {
+        Err(TryFromStringError::EndsWithSeparator)
+    } else {
+        result.reverse();
+        trim_leading_zeros(&mut result);
+        Ok(result)
     }
-    result.reverse();
-    Ok(result)
 }
 
 #[inline]

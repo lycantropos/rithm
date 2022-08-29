@@ -176,6 +176,7 @@ pub enum TryFromStringError {
     ConsecutiveSeparators,
     EndsWithSeparator,
     InvalidDigit(char, u8),
+    NoDigits,
     StartsWithSeparator,
 }
 
@@ -198,6 +199,7 @@ impl TryFromStringError {
             TryFromStringError::InvalidDigit(character, base) => {
                 format!("Invalid digit in base {}: {:?}.", base, character)
             }
+            TryFromStringError::NoDigits => String::from("No digits found."),
             TryFromStringError::StartsWithSeparator => {
                 String::from("Should not start with separator.")
             }

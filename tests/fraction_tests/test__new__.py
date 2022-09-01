@@ -47,6 +47,15 @@ def test_float_connection_with_builtin(float_: float) -> None:
                                                  fractions.Fraction(float_))
 
 
+@given(strategies.builtin_fractions)
+def test_rational_connection_with_builtin(
+        rational: fractions.Fraction
+) -> None:
+    result = Fraction(rational)
+
+    assert is_equivalent_to_builtin_fraction(result, rational)
+
+
 @given(strategies.ints_with_builtins)
 def test_numerator_only_connection_with_builtin(
         numerators: IntWithBuiltin

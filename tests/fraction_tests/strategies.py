@@ -19,6 +19,7 @@ ints_or_builtins = ints | integers
 non_zero_ints = ints.filter(bool)
 non_zero_ints_or_builtins = non_zero_ints | non_zero_integers
 zero_ints = strategies.builds(Int)
+builtin_fractions = strategies.fractions()
 fractions = (strategies.builds(Fraction, ints)
              | strategies.builds(Fraction, ints, non_zero_ints))
 fractions |= (strategies.builds(Fraction, ints)

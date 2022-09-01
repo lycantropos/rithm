@@ -1,6 +1,6 @@
 """Arbitrary precision arithmetic."""
 
-__version__ = '10.3.0-alpha'
+__version__ = '10.3.0'
 
 try:
     from ._crithm import (Endianness,

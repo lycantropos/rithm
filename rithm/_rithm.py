@@ -365,8 +365,8 @@ class Fraction:
             elif isinstance(_numerator, (Int, int)):
                 numerator, denominator = Int(_numerator), _ONE
             elif isinstance(_numerator, _Rational):
-                numerator, denominator = (_numerator.numerator,
-                                          _numerator.denominator)
+                numerator, denominator = (Int(_numerator.numerator),
+                                          Int(_numerator.denominator))
             else:
                 raise TypeError('First argument should be of '
                                 f'type {Int}, {int} or {float}, '

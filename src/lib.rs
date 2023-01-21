@@ -815,8 +815,7 @@ fn try_py_long_to_big_int(value: &PyAny) -> PyResult<BigInt> {
             Ordering::Less => Err(PyErr::fetch(py)),
             Ordering::Equal => Ok(BigInt::zero()),
             Ordering::Greater => {
-                let bytes_count =
-                    bits_count / (u8::BITS as usize) + 1;
+                let bytes_count = bits_count / (u8::BITS as usize) + 1;
                 let mut buffer = vec![0u8; bytes_count];
                 if ffi::_PyLong_AsByteArray(
                     Py::<PyLong>::from_owned_ptr(py, value).as_ptr()

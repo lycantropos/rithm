@@ -1514,7 +1514,7 @@ impl<
             if shortest.len() == 1 && shortest[0].is_zero() {
                 vec![Self::zero()]
             } else {
-                Self::multiply_digits_plain::<SHIFT>(*shortest, *longest)
+                Self::multiply_digits_plain::<SHIFT>(shortest, longest)
             }
         } else {
             let are_digits_lopsided = 2 * shortest.len() <= longest.len();
@@ -1529,8 +1529,7 @@ impl<
                     let product = Self::multiply_digits::<SHIFT>(
                         shortest,
                         &longest[processed_digits_count
-                            ..processed_digits_count + step_digits_count]
-                            .to_vec(),
+                            ..processed_digits_count + step_digits_count],
                     );
                     Self::sum_digits_in_place::<SHIFT>(
                         &mut result[processed_digits_count..],
@@ -1544,12 +1543,12 @@ impl<
             } else {
                 let shift = longest.len() >> 1;
                 let (shortest_high, shortest_low) =
-                    split_digits(*shortest, shift);
+                    split_digits(shortest, shift);
                 let (longest_high, longest_low) =
                     if shortest.as_ptr() == longest.as_ptr() {
                         (shortest_high.clone(), shortest_low.clone())
                     } else {
-                        split_digits(*longest, shift)
+                        split_digits(longest, shift)
                     };
                 let mut result =
                     vec![Self::zero(); shortest.len() + longest.len()];
@@ -2053,7 +2052,7 @@ impl<
         shift: &[Self],
     ) -> Result<Vec<Self>, ShlError> {
         let (shift_quotient_digits, shift_remainder) =
-            Self::div_rem_digits_by_digit::<SHIFT>(&shift, unsafe {
+            Self::div_rem_digits_by_digit::<SHIFT>(shift, unsafe {
                 Self::try_from(SHIFT).unwrap_unchecked()
             });
         let shift_quotient =
@@ -2063,7 +2062,7 @@ impl<
             Err(ShlError::TooLarge)
         } else {
             Self::primitive_shift_digits_left::<SHIFT>(
-                &base,
+                base,
                 shift_quotient,
                 shift_remainder,
             )
@@ -2225,7 +2224,7 @@ impl<
         shift: &[Self],
     ) -> (Sign, Vec<Self>) {
         let (shift_quotient_digits, shift_remainder) =
-            Self::div_rem_digits_by_digit::<SHIFT>(&shift, unsafe {
+            Self::div_rem_digits_by_digit::<SHIFT>(shift, unsafe {
                 Self::try_from(SHIFT).unwrap_unchecked()
             });
         let shift_quotient =
@@ -2239,7 +2238,7 @@ impl<
             }
         } else if base_sign.is_negative() {
             let (inverted_sign, inverted_digits) =
-                Self::invert_components::<SHIFT>(base_sign, &base);
+                Self::invert_components::<SHIFT>(base_sign, base);
             let digits = Self::primitive_shift_digits_right::<SHIFT>(
                 &inverted_digits,
                 shift_quotient,
@@ -2251,7 +2250,7 @@ impl<
             )
         } else {
             let digits = Self::primitive_shift_digits_right::<SHIFT>(
-                &base,
+                base,
                 shift_quotient,
                 shift_remainder,
             );

@@ -370,7 +370,7 @@ impl PyInt {
     fn __rdivmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
         let py = dividend.py();
         if dividend.is_instance(PyLong::type_object(py))? {
-            try_divmod(&try_py_long_to_big_int(dividend)?, &self.0).map(
+            try_divmod(try_py_long_to_big_int(dividend)?, &self.0).map(
                 |(quotient, remainder)| {
                     (PyInt(quotient), PyInt(remainder)).into_py(py)
                 },
@@ -816,7 +816,7 @@ fn try_py_long_to_big_int(value: &PyAny) -> PyResult<BigInt> {
             Ordering::Equal => Ok(BigInt::zero()),
             Ordering::Greater => {
                 let bytes_count =
-                    (bits_count as usize) / (u8::BITS as usize) + 1;
+                    bits_count / (u8::BITS as usize) + 1;
                 let mut buffer = vec![0u8; bytes_count];
                 if ffi::_PyLong_AsByteArray(
                     Py::<PyLong>::from_owned_ptr(py, value).as_ptr()

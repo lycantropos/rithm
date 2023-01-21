@@ -186,8 +186,7 @@ impl TryFromStringError {
             TryFromStringError::BaseOutOfBounds(base) => {
                 format!(
                     "Base should be zero or in range from {MIN_REPRESENTABLE_BASE} \
-                     to {MAX_REPRESENTABLE_BASE}, but found: {}.",
-                    base
+                     to {MAX_REPRESENTABLE_BASE}, but found: {base}."
                 )
             }
             TryFromStringError::ConsecutiveSeparators => {
@@ -197,7 +196,7 @@ impl TryFromStringError {
                 String::from("Should not end with separator.")
             }
             TryFromStringError::InvalidDigit(character, base) => {
-                format!("Invalid digit in base {}: {:?}.", base, character)
+                format!("Invalid digit in base {base}: {character:?}.")
             }
             TryFromStringError::NoDigits => String::from("No digits found."),
             TryFromStringError::StartsWithSeparator => {

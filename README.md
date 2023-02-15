@@ -52,32 +52,32 @@ Usage
 
 With setup
 ```python
->>> from rithm import Int
+>>> from rithm.integer import Int
 
 ```
 we can:
 - construct
   ```python
   >>> Int()
-  rithm.Int(0)
+  Int(0)
   >>> Int(9)
-  rithm.Int(9)
+  Int(9)
   >>> Int('9')
-  rithm.Int(9)
+  Int(9)
   >>> Int('0b1_001', 2)
-  rithm.Int(9)
+  Int(9)
   >>> Int('0o11', 8)
-  rithm.Int(9)
+  Int(9)
   >>> Int('0x9', 16)
-  rithm.Int(9)
+  Int(9)
   >>> Int('1_001', 2)
-  rithm.Int(9)
+  Int(9)
   >>> Int('0o11', 8)
-  rithm.Int(9)
+  Int(9)
   >>> Int('9', 16)
-  rithm.Int(9)
+  Int(9)
   >>> Int(9.99)
-  rithm.Int(9)
+  Int(9)
 
   ```
 - compare
@@ -97,35 +97,35 @@ we can:
 - calculate
   ```python
   >>> abs(Int(-9))
-  rithm.Int(9)
+  Int(9)
   >>> Int(4) + Int(5)
-  rithm.Int(9)
+  Int(9)
   >>> Int(9) & Int(11)
-  rithm.Int(9)
+  Int(9)
   >>> Int(19) // Int(2)
-  rithm.Int(9)
+  Int(9)
   >>> ~Int(-10)
-  rithm.Int(9)
+  Int(9)
   >>> Int(19) % Int(10)
-  rithm.Int(9)
+  Int(9)
   >>> Int(3) * Int(3)
-  rithm.Int(9)
+  Int(9)
   >>> -Int(-9)
-  rithm.Int(9)
+  Int(9)
   >>> Int(1) | Int(8)
-  rithm.Int(9)
+  Int(9)
   >>> Int(3) ** Int(2)
-  rithm.Int(9)
+  Int(9)
   >>> Int(5) << Int(1)
-  rithm.Int(10)
+  Int(10)
   >>> Int(5) >> Int(1)
-  rithm.Int(2)
+  Int(2)
   >>> Int(25) - Int(16)
-  rithm.Int(9)
+  Int(9)
   >>> Int(18) / Int(2)
-  rithm.Fraction(rithm.Int(9), rithm.Int(1))
+  Fraction(Int(9), Int(1))
   >>> Int(2) ^ Int(11)
-  rithm.Int(9)
+  Int(9)
   
   ```
 
@@ -133,22 +133,22 @@ we can:
 
 With setup
 ```python
->>> from rithm import Fraction
+>>> from rithm.fraction import Fraction
 
 ```
 we can:
 - construct
   ```python
   >>> Fraction()
-  rithm.Fraction(rithm.Int(0), rithm.Int(1))
+  Fraction(Int(0), Int(1))
   >>> Fraction(1)
-  rithm.Fraction(rithm.Int(1), rithm.Int(1))
+  Fraction(Int(1), Int(1))
   >>> Fraction(1, 2)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  Fraction(Int(1), Int(2))
   >>> Fraction(50, 100)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  Fraction(Int(1), Int(2))
   >>> Fraction(0.5)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  Fraction(Int(1), Int(2))
 
   ```
 - compare
@@ -168,23 +168,23 @@ we can:
 - calculate
   ```python
   >>> abs(Fraction(-1, 2))
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  Fraction(Int(1), Int(2))
   >>> Fraction(1, 3) + Fraction(1, 6)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  Fraction(Int(1), Int(2))
   >>> Fraction(3, 2) // Fraction(1)
-  rithm.Int(1)
+  Int(1)
   >>> Fraction(3, 2) % Fraction(1)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  Fraction(Int(1), Int(2))
   >>> Fraction(1, 3) * Fraction(3, 2)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  Fraction(Int(1), Int(2))
   >>> -Fraction(-1, 2)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  Fraction(Int(1), Int(2))
   >>> Fraction(1, 2) ** 2
-  rithm.Fraction(rithm.Int(1), rithm.Int(4))
+  Fraction(Int(1), Int(4))
   >>> Fraction(3, 2) - Fraction(1)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  Fraction(Int(1), Int(2))
   >>> Fraction(1, 3) / Fraction(2, 3)
-  rithm.Fraction(rithm.Int(1), rithm.Int(2))
+  Fraction(Int(1), Int(2))
 
   ```
 

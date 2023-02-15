@@ -1,26 +1,26 @@
+from __future__ import annotations
+
+import typing as _t
 from numbers import Rational as _Rational
-from typing import (Any as _Any,
-                    Optional as _Optional,
-                    Tuple as _Tuple,
-                    Union as _Union,
-                    overload as _overload)
+
+import typing_extensions as _te
 
 __version__: str = ...
 
 
 class Endianness:
-    BIG: 'Endianness' = ...
-    LITTLE: 'Endianness' = ...
+    BIG: Endianness = ...
+    LITTLE: Endianness = ...
 
     def __repr__(self) -> str:
         ...
 
 
 class TieBreaking:
-    AWAY_FROM_ZERO: 'TieBreaking' = ...
-    TO_EVEN: 'TieBreaking' = ...
-    TO_ODD: 'TieBreaking' = ...
-    TOWARD_ZERO: 'TieBreaking' = ...
+    AWAY_FROM_ZERO: TieBreaking = ...
+    TO_EVEN: TieBreaking = ...
+    TO_ODD: TieBreaking = ...
+    TOWARD_ZERO: TieBreaking = ...
 
     def __repr__(self) -> str:
         ...
@@ -28,17 +28,17 @@ class TieBreaking:
 
 class Int:
     @property
-    def denominator(self) -> 'Int':
+    def denominator(self) -> _te.Self:
         ...
 
     @property
-    def numerator(self) -> 'Int':
+    def numerator(self) -> _te.Self:
         ...
 
-    def bit_length(self) -> 'Int':
+    def bit_length(self) -> _te.Self:
         ...
 
-    def gcd(self, other: 'Int') -> 'Int':
+    def gcd(self, other: _te.Self) -> _te.Self:
         ...
 
     def is_power_of_two(self) -> bool:
@@ -48,59 +48,61 @@ class Int:
         ...
 
     @classmethod
-    def from_bytes(cls, value: bytes, endianness: Endianness) -> 'Int':
+    def from_bytes(cls, value: bytes, endianness: Endianness) -> _te.Self:
         ...
 
-    @_overload
-    def __new__(cls, _value: _Union['Int', int] = ...) -> 'Int':
+    @_t.overload
+    def __new__(cls, _value: _t.Union[_te.Self, int] = ...) -> _te.Self:
         ...
 
-    @_overload
-    def __new__(cls, _value: str, _base: _Optional[int] = ...) -> 'Int':
+    @_t.overload
+    def __new__(cls, _value: str, _base: _t.Optional[int] = ...) -> _te.Self:
         ...
 
-    def __abs__(self) -> 'Int':
+    def __abs__(self) -> _te.Self:
         ...
 
-    def __add__(self, other: _Union['Int', int]) -> 'Int':
+    def __add__(self, other: _t.Union[_te.Self, int]) -> _te.Self:
         ...
 
-    def __and__(self, other: _Union['Int', int]) -> 'Int':
+    def __and__(self, other: _t.Union[_te.Self, int]) -> _te.Self:
         ...
 
     def __bool__(self) -> bool:
         ...
 
-    def __ceil__(self) -> 'Int':
+    def __ceil__(self) -> _te.Self:
         ...
 
-    def __divmod__(self, other: _Union['Int', int]) -> _Tuple['Int', 'Int']:
+    def __divmod__(
+            self, other: _t.Union[_te.Self, int]
+    ) -> _t.Tuple[_te.Self, _te.Self]:
         ...
 
-    @_overload
-    def __eq__(self, other: 'Int') -> bool:
+    @_t.overload
+    def __eq__(self, other: _te.Self) -> bool:
         ...
 
-    @_overload
-    def __eq__(self, other: _Any) -> _Any:
+    @_t.overload
+    def __eq__(self, other: _t.Any) -> _t.Any:
         ...
 
     def __float__(self) -> float:
         ...
 
-    def __floor__(self) -> 'Int':
+    def __floor__(self) -> _te.Self:
         ...
 
-    def __floordiv__(self, other: _Union['Int', int]) -> 'Int':
+    def __floordiv__(self, other: _t.Union[_te.Self, int]) -> _te.Self:
         ...
 
-    def __ge__(self, other: 'Int') -> bool:
+    def __ge__(self, other: _te.Self) -> bool:
         ...
 
     def __getstate__(self) -> int:
         ...
 
-    def __gt__(self, other: 'Int') -> bool:
+    def __gt__(self, other: _te.Self) -> bool:
         ...
 
     def __hash__(self) -> int:
@@ -112,90 +114,90 @@ class Int:
     def __int__(self) -> int:
         ...
 
-    def __invert__(self) -> 'Int':
+    def __invert__(self) -> _te.Self:
         ...
 
-    def __le__(self, other: 'Int') -> bool:
+    def __le__(self, other: _te.Self) -> bool:
         ...
 
-    def __lshift__(self, other: _Union['Int', int]) -> 'Int':
+    def __lshift__(self, other: _t.Union[_te.Self, int]) -> _te.Self:
         ...
 
-    def __lt__(self, other: 'Int') -> bool:
+    def __lt__(self, other: _te.Self) -> bool:
         ...
 
-    def __mod__(self, other: _Union['Int', int]) -> 'Int':
+    def __mod__(self, other: _t.Union[_te.Self, int]) -> _te.Self:
         ...
 
-    def __mul__(self, other: 'Int') -> 'Int':
+    def __mul__(self, other: _te.Self) -> _te.Self:
         ...
 
-    def __neg__(self) -> 'Int':
+    def __neg__(self) -> _te.Self:
         ...
 
-    def __or__(self, other: _Union['Int', int]) -> 'Int':
+    def __or__(self, other: _t.Union[_te.Self, int]) -> _te.Self:
         ...
 
-    def __pos__(self) -> 'Int':
+    def __pos__(self) -> _te.Self:
         ...
 
     def __pow__(
             self,
-            exponent: _Union['Int', int],
-            divisor: _Union['Int', None, int] = ...
-    ) -> _Union['Fraction', 'Int']:
+            exponent: _t.Union[_te.Self, int],
+            divisor: _t.Union[_te.Self, None, int] = ...
+    ) -> _t.Union[Fraction, _te.Self]:
         ...
 
-    def __radd__(self, other: int) -> Int:
+    def __radd__(self, other: int) -> _te.Self:
         ...
 
-    def __rand__(self, other: int) -> Int:
+    def __rand__(self, other: int) -> _te.Self:
         ...
 
-    def __rdivmod__(self, other: int) -> _Tuple['Int', 'Int']:
+    def __rdivmod__(self, other: int) -> _t.Tuple[_te.Self, _te.Self]:
         ...
 
     def __repr__(self) -> str:
         ...
 
-    def __rfloordiv__(self, other: int) -> 'Int':
+    def __rfloordiv__(self, other: int) -> _te.Self:
         ...
 
-    def __rlshift__(self, other: int) -> 'Int':
+    def __rlshift__(self, other: int) -> _te.Self:
         ...
 
-    def __rmod__(self, other: int) -> 'Int':
+    def __rmod__(self, other: int) -> _te.Self:
         ...
 
-    def __rmul__(self, other: int) -> 'Int':
+    def __rmul__(self, other: int) -> _te.Self:
         ...
 
-    def __ror__(self, other: int) -> 'Int':
+    def __ror__(self, other: int) -> _te.Self:
         ...
 
-    def __round__(self, digits: _Optional[int] = ...) -> 'Int':
+    def __round__(self, digits: _t.Optional[int] = ...) -> _te.Self:
         ...
 
     def __rpow__(
             self,
             base: int,
-            divisor: _Union['Int', None, int] = ...
-    ) -> _Union['Fraction', 'Int']:
+            divisor: _t.Union[_te.Self, None, int] = ...
+    ) -> _t.Union[Fraction, _te.Self]:
         ...
 
-    def __rrshift__(self, other: int) -> 'Int':
+    def __rrshift__(self, other: int) -> _te.Self:
         ...
 
-    def __rshift__(self, other: _Union['Int', int]) -> 'Int':
+    def __rshift__(self, other: _t.Union[_te.Self, int]) -> _te.Self:
         ...
 
-    def __rsub__(self, other: int) -> 'Int':
+    def __rsub__(self, other: int) -> _te.Self:
         ...
 
-    def __rtruediv__(self, other: int) -> 'Fraction':
+    def __rtruediv__(self, other: int) -> Fraction:
         ...
 
-    def __rxor__(self, other: int) -> 'Int':
+    def __rxor__(self, other: int) -> _te.Self:
         ...
 
     def __setstate__(self, state: int) -> None:
@@ -204,16 +206,16 @@ class Int:
     def __str__(self) -> str:
         ...
 
-    def __sub__(self, other: _Union['Int', int]) -> 'Int':
+    def __sub__(self, other: _t.Union[_te.Self, int]) -> _te.Self:
         ...
 
-    def __truediv__(self, other: _Union['Int', int]) -> 'Fraction':
+    def __truediv__(self, other: _t.Union[_te.Self, int]) -> Fraction:
         ...
 
-    def __trunc__(self) -> 'Int':
+    def __trunc__(self) -> _te.Self:
         ...
 
-    def __xor__(self, other: _Union['Int', int]) -> 'Int':
+    def __xor__(self, other: _t.Union[_te.Self, int]) -> _te.Self:
         ...
 
 
@@ -229,130 +231,130 @@ class Fraction:
     def round(self, tie_breaking: TieBreaking) -> Int:
         ...
 
-    @_overload
+    @_t.overload
     def __new__(
-            cls, _value: _Union['Fraction', Int, _Rational, float, int] = ...
-    ) -> 'Fraction':
+            cls, _value: _t.Union[_te.Self, Int, _Rational, float, int] = ...
+    ) -> _te.Self:
         ...
 
-    @_overload
+    @_t.overload
     def __new__(cls,
-                _numerator: _Union[Int, int],
-                _denominator: _Union[Int, int]) -> 'Fraction':
+                _numerator: _t.Union[Int, int],
+                _denominator: _t.Union[Int, int]) -> _te.Self:
         ...
 
-    def __abs__(self) -> 'Fraction':
+    def __abs__(self) -> _te.Self:
         ...
 
-    def __add__(self, other: _Union['Fraction', Int, int]) -> 'Fraction':
+    def __add__(self, other: _t.Union[_te.Self, Int, int]) -> _te.Self:
         ...
 
     def __bool__(self) -> bool:
         ...
 
-    def __ceil__(self) -> 'Int':
+    def __ceil__(self) -> Int:
         ...
 
     def __divmod__(
-            self, divisor: _Union['Fraction', Int, int]
-    ) -> _Tuple[Int, 'Fraction']:
+            self, divisor: _t.Union[_te.Self, Int, int]
+    ) -> _t.Tuple[Int, _te.Self]:
         ...
 
-    @_overload
-    def __eq__(self, other: _Union['Fraction', Int, int]) -> bool:
+    @_t.overload
+    def __eq__(self, other: _t.Union[_te.Self, Int, int]) -> bool:
         ...
 
-    @_overload
-    def __eq__(self, other: _Any) -> _Any:
+    @_t.overload
+    def __eq__(self, other: _t.Any) -> _t.Any:
         ...
 
     def __float__(self) -> float:
         ...
 
-    def __floor__(self) -> 'Int':
+    def __floor__(self) -> Int:
         ...
 
-    def __floordiv__(self, divisor: _Union['Fraction', Int, int]) -> Int:
+    def __floordiv__(self, divisor: _t.Union[_te.Self, Int, int]) -> Int:
         ...
 
-    def __ge__(self, other: _Union['Fraction', Int, int]) -> bool:
+    def __ge__(self, other: _t.Union[_te.Self, Int, int]) -> bool:
         ...
 
-    def __getstate__(self) -> _Tuple[Int, Int]:
+    def __getstate__(self) -> _t.Tuple[Int, Int]:
         ...
 
-    def __gt__(self, other: _Union['Fraction', Int, int]) -> bool:
+    def __gt__(self, other: _t.Union[_te.Self, Int, int]) -> bool:
         ...
 
     def __hash__(self) -> int:
         ...
 
-    def __le__(self, other: _Union['Fraction', Int, int]) -> bool:
+    def __le__(self, other: _t.Union[_te.Self, Int, int]) -> bool:
         ...
 
-    def __lt__(self, other: _Union['Fraction', Int, int]) -> bool:
+    def __lt__(self, other: _t.Union[_te.Self, Int, int]) -> bool:
         ...
 
-    def __mod__(self, divisor: _Union['Fraction', Int, int]) -> 'Fraction':
+    def __mod__(self, divisor: _t.Union[_te.Self, Int, int]) -> _te.Self:
         ...
 
-    def __mul__(self, other: _Union['Fraction', Int, int]) -> 'Fraction':
+    def __mul__(self, other: _t.Union[_te.Self, Int, int]) -> _te.Self:
         ...
 
-    def __neg__(self) -> 'Fraction':
+    def __neg__(self) -> _te.Self:
         ...
 
-    def __pos__(self) -> 'Fraction':
+    def __pos__(self) -> _te.Self:
         ...
 
     def __pow__(self,
-                exponent: _Union['Int', int],
-                divisor: None = ...) -> 'Fraction':
+                exponent: _t.Union[Int, int],
+                divisor: None = ...) -> _te.Self:
         ...
 
-    def __radd__(self, other: _Union[Int, int]) -> 'Fraction':
+    def __radd__(self, other: _t.Union[Int, int]) -> _te.Self:
         ...
 
     def __rdivmod__(self,
-                    dividend: _Union[Int, int]) -> _Tuple[Int, 'Fraction']:
+                    dividend: _t.Union[Int, int]) -> _t.Tuple[Int, _te.Self]:
         ...
 
     def __repr__(self) -> str:
         ...
 
-    def __rfloordiv__(self, dividend: _Union[Int, int]) -> Int:
+    def __rfloordiv__(self, dividend: _t.Union[Int, int]) -> Int:
         ...
 
-    def __rmod__(self, dividend: _Union[Int, int]) -> 'Fraction':
+    def __rmod__(self, dividend: _t.Union[Int, int]) -> _te.Self:
         ...
 
-    def __rmul__(self, other: _Union[Int, int]) -> 'Fraction':
+    def __rmul__(self, other: _t.Union[Int, int]) -> _te.Self:
         ...
 
-    @_overload
+    @_t.overload
     def __round__(self, digits: None = ...) -> Int:
         ...
 
-    @_overload
-    def __round__(self, digits: int) -> 'Fraction':
+    @_t.overload
+    def __round__(self, digits: int) -> _te.Self:
         ...
 
-    def __rsub__(self, subtrahend: _Union[Int, int]) -> 'Fraction':
+    def __rsub__(self, subtrahend: _t.Union[Int, int]) -> _te.Self:
         ...
 
-    def __setstate__(self, state: _Tuple[Int, Int]) -> None:
+    def __setstate__(self, state: _t.Tuple[Int, Int]) -> None:
         ...
 
     def __str__(self) -> str:
         ...
 
-    def __sub__(self, minuend: _Union['Fraction', Int, int]) -> 'Fraction':
+    def __sub__(self, minuend: _t.Union[_te.Self, Int, int]) -> _te.Self:
         ...
 
-    def __rtruediv__(self, dividend: _Union[Int, int]) -> 'Fraction':
+    def __rtruediv__(self, dividend: _t.Union[Int, int]) -> _te.Self:
         ...
 
-    def __truediv__(self, divisor: _Union['Fraction', Int, int]) -> 'Fraction':
+    def __truediv__(self, divisor: _t.Union[_te.Self, Int, int]) -> _te.Self:
         ...
 
     def __trunc__(self) -> Int:

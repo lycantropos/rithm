@@ -44,21 +44,21 @@ const PICKLE_SERIALIZATION_ENDIANNESS: Endianness = Endianness::Little;
 type BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
 type Fraction = fraction::Fraction<BigInt>;
 
-#[pyclass(name = "Endianness", module = "rithm")]
+#[pyclass(name = "Endianness", module = "rithm.enums")]
 #[derive(Clone)]
 struct PyEndianness(Endianness);
 
-#[pyclass(name = "Fraction", module = "rithm", subclass)]
+#[pyclass(name = "Fraction", module = "rithm.fraction", subclass)]
 #[pyo3(text_signature = "(numerator=None, denominator=None, /)")]
 #[derive(Clone)]
 struct PyFraction(Fraction);
 
-#[pyclass(name = "Int", module = "rithm", subclass)]
+#[pyclass(name = "Int", module = "rithm.integer", subclass)]
 #[pyo3(text_signature = "(value=None, base=None, /)")]
 #[derive(Clone)]
 struct PyInt(BigInt);
 
-#[pyclass(name = "TieBreaking", module = "rithm")]
+#[pyclass(name = "TieBreaking", module = "rithm.enums")]
 #[derive(Clone)]
 struct PyTieBreaking(TieBreaking);
 
@@ -71,7 +71,7 @@ impl PyEndianness {
 
     fn __repr__(&self) -> String {
         format!(
-            "rithm.Endianness.{}",
+            "rithm.enums.Endianness.{}",
             match self.0 {
                 Endianness::Big => "BIG",
                 Endianness::Little => "LITTLE",
@@ -94,7 +94,7 @@ impl PyTieBreaking {
 
     fn __repr__(&self) -> String {
         format!(
-            "rithm.TieBreaking.{}",
+            "rithm.enums.TieBreaking.{}",
             match self.0 {
                 TieBreaking::AwayFromZero => "AWAY_FROM_ZERO",
                 TieBreaking::ToEven => "TO_EVEN",
@@ -381,7 +381,7 @@ impl PyInt {
     }
 
     fn __repr__(&self) -> String {
-        format!("rithm.Int({})", self.0)
+        format!("rithm.integer.Int({})", self.0)
     }
 
     fn __rfloordiv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
@@ -1114,7 +1114,7 @@ impl PyFraction {
 
     fn __repr__(&self) -> String {
         format!(
-            "rithm.Fraction({}, {})",
+            "rithm.fraction.Fraction({}, {})",
             self.numerator().__repr__(),
             self.denominator().__repr__()
         )

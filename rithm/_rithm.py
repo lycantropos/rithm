@@ -12,7 +12,7 @@ import typing_extensions as _te
 
 
 class _BaseEnum(_Enum):
-    __module__ = 'rithm'
+    __module__ = 'rithm.enums'
 
     def __repr__(self) -> str:
         return f'{type(self).__module__}.{type(self).__qualname__}.{self.name}'
@@ -62,7 +62,7 @@ class Int:
 
     _value: int
 
-    __module__ = 'rithm'
+    __module__ = 'rithm.integer'
     __slots__ = '_value',
 
     @_t.overload
@@ -396,7 +396,7 @@ class Fraction:
     _denominator: Int
     _numerator: Int
 
-    __module__ = 'rithm'
+    __module__ = 'rithm.fraction'
     __slots__ = '_denominator', '_numerator'
 
     def __new__(cls,

@@ -71,7 +71,7 @@ impl PyEndianness {
 
     fn __repr__(&self) -> String {
         format!(
-            "rithm.enums.Endianness.{}",
+            "Endianness.{}",
             match self.0 {
                 Endianness::Big => "BIG",
                 Endianness::Little => "LITTLE",
@@ -94,7 +94,7 @@ impl PyTieBreaking {
 
     fn __repr__(&self) -> String {
         format!(
-            "rithm.enums.TieBreaking.{}",
+            "TieBreaking.{}",
             match self.0 {
                 TieBreaking::AwayFromZero => "AWAY_FROM_ZERO",
                 TieBreaking::ToEven => "TO_EVEN",
@@ -381,7 +381,7 @@ impl PyInt {
     }
 
     fn __repr__(&self) -> String {
-        format!("rithm.integer.Int({})", self.0)
+        format!("Int({})", self.0)
     }
 
     fn __rfloordiv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
@@ -1114,7 +1114,7 @@ impl PyFraction {
 
     fn __repr__(&self) -> String {
         format!(
-            "rithm.fraction.Fraction({}, {})",
+            "Fraction({}, {})",
             self.numerator().__repr__(),
             self.denominator().__repr__()
         )

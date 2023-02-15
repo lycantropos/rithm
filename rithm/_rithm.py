@@ -15,7 +15,7 @@ class _BaseEnum(_Enum):
     __module__ = 'rithm.enums'
 
     def __repr__(self) -> str:
-        return f'{type(self).__module__}.{type(self).__qualname__}.{self.name}'
+        return f'{type(self).__qualname__}.{self.name}'
 
 
 class Endianness(_BaseEnum):
@@ -258,8 +258,7 @@ class Int:
         return Int(quotient), Int(remainder)
 
     def __repr__(self) -> str:
-        return (f'{type(self).__module__}.{type(self).__qualname__}'
-                f'({self._value})')
+        return f'{type(self).__qualname__}({self._value})'
 
     def __rfloordiv__(self, other: int) -> _te.Self:
         return (Int(other // self._value)
@@ -594,7 +593,7 @@ class Fraction:
                 else NotImplemented)
 
     def __repr__(self) -> str:
-        return (f'{type(self).__module__}.{type(self).__qualname__}'
+        return (f'{type(self).__qualname__}'
                 f'({self.numerator!r}, {self.denominator!r})')
 
     def __rfloordiv__(self, dividend: _t.Union[Int, int]) -> Int:

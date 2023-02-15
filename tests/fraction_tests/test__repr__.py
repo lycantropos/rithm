@@ -10,4 +10,4 @@ from . import strategies
 def test_round_trip(fraction: Fraction) -> None:
     result = repr(fraction)
 
-    assert eval(result, sys.modules) == fraction
+    assert eval(result, vars(sys.modules[Fraction.__module__])) == fraction

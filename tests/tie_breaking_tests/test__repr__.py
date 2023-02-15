@@ -10,4 +10,5 @@ from . import strategies
 def test_round_trip(tie_breaking: TieBreaking) -> None:
     result = repr(tie_breaking)
 
-    assert eval(result, sys.modules) is tie_breaking
+    assert (eval(result, vars(sys.modules[TieBreaking.__module__]))
+            is tie_breaking)

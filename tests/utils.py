@@ -5,8 +5,8 @@ from typing import (Optional,
                     TypeVar,
                     Union)
 
-from rithm import (Fraction,
-                   Int)
+from rithm.fraction import Fraction
+from rithm.integer import Int
 
 FractionOrIntOrBuiltinInt = Union[Fraction, Int, int]
 FractionWithBuiltin = Tuple[Fraction, fractions.Fraction]

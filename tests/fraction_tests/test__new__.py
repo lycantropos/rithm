@@ -3,11 +3,11 @@ from typing import Any
 
 import pytest
 from hypothesis import given
-from rithm import Fraction
+
+from rithm.fraction import Fraction
 from tests.utils import (IntOrBuiltin,
                          IntWithBuiltin,
                          is_equivalent_to_builtin_fraction)
-
 from . import strategies
 
 

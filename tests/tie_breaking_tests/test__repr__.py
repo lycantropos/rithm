@@ -2,7 +2,7 @@ import sys
 
 from hypothesis import given
 
-from rithm import TieBreaking
+from rithm.enums import TieBreaking
 from . import strategies
 
 

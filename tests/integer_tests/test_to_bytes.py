@@ -1,7 +1,7 @@
 from hypothesis import given
 
-from rithm import (Endianness,
-                   Int)
+from rithm.enums import Endianness
+from rithm.integer import Int
 from tests.utils import IntWithBuiltin
 from . import strategies
 

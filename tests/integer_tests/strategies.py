@@ -3,8 +3,8 @@ from operator import itemgetter
 
 from hypothesis import strategies
 
-from rithm import (Endianness,
-                   Int)
+from rithm.enums import Endianness
+from rithm.integer import Int
 from tests.strategies import (decimal_int_strings_with_leading_zeros,
                               int_strings_with_bases)
 from tests.utils import to_int_with_builtin

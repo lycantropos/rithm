@@ -2,7 +2,7 @@ import sys
 
 from hypothesis import given
 
-from rithm import Endianness
+from rithm.enums import Endianness
 from . import strategies
 
 

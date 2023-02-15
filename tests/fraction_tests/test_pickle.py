@@ -1,6 +1,6 @@
 from hypothesis import given
 
-from rithm import Fraction
+from rithm.fraction import Fraction
 from tests.utils import pickle_round_trip
 from . import strategies
 

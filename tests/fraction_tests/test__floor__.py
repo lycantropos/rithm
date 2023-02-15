@@ -2,8 +2,8 @@ import math
 
 from hypothesis import given
 
-from rithm import (Fraction,
-                   Int)
+from rithm.fraction import Fraction
+from rithm.integer import Int
 from . import strategies
 
 

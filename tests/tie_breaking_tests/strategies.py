@@ -1,6 +1,6 @@
 from hypothesis import strategies
 
-from rithm import TieBreaking
+from rithm.enums import TieBreaking
 
 tie_breakings = strategies.sampled_from([TieBreaking.AWAY_FROM_ZERO,
                                          TieBreaking.TO_EVEN,

@@ -1,7 +1,7 @@
 import pytest
 from hypothesis import given
 
-from rithm import Int
+from rithm.integer import Int
 from tests.utils import IntWithBuiltin
 from . import strategies
 

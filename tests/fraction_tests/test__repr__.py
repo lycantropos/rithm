@@ -2,7 +2,7 @@ import sys
 
 from hypothesis import given
 
-from rithm import Fraction
+from rithm.fraction import Fraction
 from . import strategies
 
 

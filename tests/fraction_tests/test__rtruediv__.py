@@ -1,7 +1,7 @@
 import pytest
 from hypothesis import given
 
-from rithm import Fraction
+from rithm.fraction import Fraction
 from tests.utils import (FractionWithBuiltin,
                          IntWithBuiltin,
                          is_equivalent_to_builtin_fraction)

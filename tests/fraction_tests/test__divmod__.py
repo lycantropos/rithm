@@ -1,8 +1,8 @@
 import pytest
 from hypothesis import given
 
-from rithm import (Fraction,
-                   Int)
+from rithm.fraction import Fraction
+from rithm.integer import Int
 from tests.utils import (FractionOrIntOrBuiltinInt,
                          FractionWithBuiltin,
                          IntWithBuiltin,

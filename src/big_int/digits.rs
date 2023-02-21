@@ -1924,7 +1924,7 @@ pub(super) trait MaybeReduceDigits<Output>: Sized {
 
 impl<
         Digit: Copy,
-        Output: CheckedShl<usize, Output = Option<Output>>
+        Output: CheckedShl<u32, Output = Option<Output>>
             + BitOr<Output = Output>
             + TryFrom<Digit>
             + Zeroable,
@@ -1935,8 +1935,9 @@ impl<
     ) -> Option<Output> {
         let mut result = Output::zero();
         for &digit in digits.iter().rev() {
-            result =
-                result.checked_shl(SHIFT)? | Output::try_from(digit).ok()?;
+            result = result.checked_shl(unsafe {
+                u32::try_from(SHIFT).unwrap_unchecked()
+            })? | Output::try_from(digit).ok()?;
         }
         Some(result)
     }

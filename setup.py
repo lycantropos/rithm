@@ -16,7 +16,6 @@ def read_file(path_string: str) -> str:
 parameters = dict(
         name=rithm.__name__,
         packages=find_packages(exclude=('tests', 'tests.*')),
-        package_data={rithm.__name__: ['__init__.pyi', 'py.typed']},
         version=rithm.__version__,
         description=rithm.__doc__,
         long_description=read_file('README.md'),

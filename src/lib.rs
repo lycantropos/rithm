@@ -48,21 +48,21 @@ const PICKLE_SERIALIZATION_ENDIANNESS: Endianness = Endianness::Little;
 type BigInt = big_int::BigInt<Digit, DIGIT_BITNESS>;
 type Fraction = fraction::Fraction<BigInt>;
 
-#[pyclass(name = "Endianness", module = "rithm.enums")]
+#[pyclass(name = "Endianness", module = "rithm.enums", frozen)]
 #[derive(Clone)]
 struct PyEndianness(Endianness);
 
-#[pyclass(name = "Fraction", module = "rithm.fraction", subclass)]
+#[pyclass(name = "Fraction", module = "rithm.fraction")]
 #[pyo3(text_signature = "(numerator=None, denominator=None, /)")]
 #[derive(Clone)]
 struct PyFraction(Fraction);
 
-#[pyclass(name = "Int", module = "rithm.integer", subclass)]
+#[pyclass(name = "Int", module = "rithm.integer")]
 #[pyo3(text_signature = "(value=None, base=None, /)")]
 #[derive(Clone)]
 struct PyInt(BigInt);
 
-#[pyclass(name = "TieBreaking", module = "rithm.enums")]
+#[pyclass(name = "TieBreaking", module = "rithm.enums", frozen)]
 #[derive(Clone)]
 struct PyTieBreaking(TieBreaking);
 

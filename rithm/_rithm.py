@@ -65,6 +65,10 @@ class Int:
     __module__ = 'rithm.integer'
     __slots__ = '_value',
 
+    def __init_subclass__(cls, **_kwargs: _t.Any) -> _t.NoReturn:
+        raise TypeError(f'type {cls.__qualname__!r} '
+                        'is not an acceptable base type')
+
     @_t.overload
     def __new__(cls, _value: _t.Union[_te.Self, float, int] = ...) -> _te.Self:
         ...
@@ -397,6 +401,10 @@ class Fraction:
 
     __module__ = 'rithm.fraction'
     __slots__ = '_denominator', '_numerator'
+
+    def __init_subclass__(cls, **_kwargs: _t.Any) -> _t.NoReturn:
+        raise TypeError(f'type {cls.__qualname__!r} '
+                        'is not an acceptable base type')
 
     def __new__(cls,
                 _numerator: _t.Union[Int, int, float] = _ZERO,

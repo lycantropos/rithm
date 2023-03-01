@@ -34,7 +34,7 @@ class Int:
         ...
 
     @_t.overload
-    def __new__(cls, _value: _t.Union[_te.Self, int] = ...) -> _te.Self:
+    def __new__(cls, _value: _t.Union[_te.Self, float, int] = ...) -> _te.Self:
         ...
 
     @_t.overload

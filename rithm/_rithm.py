@@ -66,7 +66,7 @@ class Int:
     __slots__ = '_value',
 
     @_t.overload
-    def __new__(cls, _value: _t.Union[_te.Self, int] = ...) -> _te.Self:
+    def __new__(cls, _value: _t.Union[_te.Self, float, int] = ...) -> _te.Self:
         ...
 
     @_t.overload
@@ -74,7 +74,7 @@ class Int:
         ...
 
     def __new__(cls,
-                _value: _t.Union[_te.Self, int, str] = 0,
+                _value: _t.Union[_te.Self, float, int, str] = 0,
                 _base: _t.Optional[int] = None) -> _te.Self:
         self = super().__new__(cls)
         if _base is None:

@@ -9,7 +9,7 @@ impl<Digit: IsPowerOfTwo + Zeroable, const DIGIT_BITNESS: usize> IsPowerOfTwo
         self.sign.is_positive()
             && self.digits[..self.digits.len() - 1]
                 .iter()
-                .all(|digit| digit.is_zero())
+                .all(Zeroable::is_zero)
             && self.digits[self.digits.len() - 1].is_power_of_two()
     }
 }

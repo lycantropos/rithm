@@ -80,10 +80,10 @@ macro_rules! try_integer_fraction_from_float_impl {
                 {
                     Err(FromFloatConversionError::OutOfBounds)
                 } else {
-                    let (mut fraction, mut exponent) = value.fract_exp();
                     const MAX_EXPONENT_MODULUS: u32 = <$integer>::BITS
                         - 1
                         - (is_signed::<$integer>() as u32);
+                    let (mut fraction, mut exponent) = value.fract_exp();
                     if (exponent.abs() as u32) > MAX_EXPONENT_MODULUS {
                         if exponent.is_negative() {
                             fraction *= ((exponent

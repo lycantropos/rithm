@@ -175,7 +175,7 @@ where
         for digit in source.iter().rev() {
             let mut accumulator: DoublePrecisionOf<Self> =
                 DoublePrecisionOf::<Self>::from(*digit);
-            for result_position in result.iter_mut() {
+            for result_position in &mut result {
                 let step: DoublePrecisionOf<Self> =
                     (<DoublePrecisionOf<Self> as From<Self>>::from(
                         *result_position,
@@ -528,6 +528,8 @@ macro_rules! checked_div_digits_as_float_impl {
                 dividend_digits: &[Self],
                 divisor_digits: &[Self],
             ) -> Result<$float, Self::Error> {
+                const NON_EXPONENT_BITS_COUNT: usize =
+                    <$float>::TOTAL_BITS_COUNT - <$float>::EXPONENT_BITS_COUNT;
                 if divisor_digits.len() == 1 && divisor_digits[0].is_zero() {
                     return Err(CheckedDivAsFloatError::ZeroDivision);
                 }
@@ -536,29 +538,30 @@ macro_rules! checked_div_digits_as_float_impl {
                 }
                 let dividend_digits_count = dividend_digits.len();
                 let divisor_digits_count = divisor_digits.len();
-                const NON_EXPONENT_DIGITS: usize =
-                    <$float>::TOTAL_BITS_COUNT - <$float>::EXPONENT_BITS_COUNT;
                 let dividend_is_small = dividend_digits_count
-                    <= (NON_EXPONENT_DIGITS / DIGIT_BITNESS)
+                    <= (NON_EXPONENT_BITS_COUNT / DIGIT_BITNESS)
                     || (dividend_digits_count
-                        == (NON_EXPONENT_DIGITS / DIGIT_BITNESS) + 1
-                        && (dividend_digits[(NON_EXPONENT_DIGITS / DIGIT_BITNESS)]
-                            >> (NON_EXPONENT_DIGITS % DIGIT_BITNESS))
+                        == (NON_EXPONENT_BITS_COUNT / DIGIT_BITNESS) + 1
+                        && (dividend_digits
+                            [(NON_EXPONENT_BITS_COUNT / DIGIT_BITNESS)]
+                            >> (NON_EXPONENT_BITS_COUNT % DIGIT_BITNESS))
                             .is_zero());
                 let divisor_is_small = divisor_digits_count
-                    <= (NON_EXPONENT_DIGITS / DIGIT_BITNESS)
+                    <= (NON_EXPONENT_BITS_COUNT / DIGIT_BITNESS)
                     || (divisor_digits_count
-                        == (NON_EXPONENT_DIGITS / DIGIT_BITNESS) + 1
-                        && (divisor_digits[(NON_EXPONENT_DIGITS / DIGIT_BITNESS)]
-                            >> (NON_EXPONENT_DIGITS % DIGIT_BITNESS))
+                        == (NON_EXPONENT_BITS_COUNT / DIGIT_BITNESS) + 1
+                        && (divisor_digits
+                            [(NON_EXPONENT_BITS_COUNT / DIGIT_BITNESS)]
+                            >> (NON_EXPONENT_BITS_COUNT % DIGIT_BITNESS))
                             .is_zero());
                 if dividend_is_small && divisor_is_small {
                     let reduced_dividend =
                         Self::reduce_digits_to_float::<DIGIT_BITNESS>(
                             dividend_digits,
                         );
-                    let reduced_divisor =
-                        Self::reduce_digits_to_float::<DIGIT_BITNESS>(divisor_digits);
+                    let reduced_divisor = Self::reduce_digits_to_float::<
+                        DIGIT_BITNESS,
+                    >(divisor_digits);
                     return Ok(reduced_dividend / reduced_divisor);
                 }
                 let digits_count_difference = (dividend_digits_count as isize)
@@ -583,12 +586,13 @@ macro_rules! checked_div_digits_as_float_impl {
                     return Err(CheckedDivAsFloatError::TooLarge);
                 } else if bit_lengths_difference
                     < (<$float>::MIN_EXP as isize)
-                        - ((NON_EXPONENT_DIGITS as isize) - 1)
+                        - ((NON_EXPONENT_BITS_COUNT as isize) - 1)
                 {
                     return Ok(<$float>::zero());
                 }
-                let shift = bit_lengths_difference.max(<$float>::MIN_EXP as isize)
-                    - (NON_EXPONENT_DIGITS as isize)
+                let shift = bit_lengths_difference
+                    .max(<$float>::MIN_EXP as isize)
+                    - (NON_EXPONENT_BITS_COUNT as isize)
                     - 2;
                 let mut inexact = false;
                 let mut quotient_digits = if shift <= 0 {
@@ -602,11 +606,12 @@ macro_rules! checked_div_digits_as_float_impl {
                         dividend_digits_count + shift_digits + 1;
                     let mut quotient_data =
                         vec![Self::zero(); quotient_digits_count];
-                    let remainder = Self::shift_digits_left_in_place::<DIGIT_BITNESS>(
-                        dividend_digits,
-                        ((-shift) as usize) % DIGIT_BITNESS,
-                        &mut quotient_data[shift_digits..],
-                    );
+                    let remainder =
+                        Self::shift_digits_left_in_place::<DIGIT_BITNESS>(
+                            dividend_digits,
+                            ((-shift) as usize) % DIGIT_BITNESS,
+                            &mut quotient_data[shift_digits..],
+                        );
                     quotient_data[dividend_digits_count + shift_digits] =
                         remainder;
                     quotient_data
@@ -616,11 +621,12 @@ macro_rules! checked_div_digits_as_float_impl {
                         dividend_digits_count - shift_digits;
                     let mut quotient_data =
                         vec![Self::zero(); quotient_digits_count];
-                    let remainder = Self::shift_digits_right_in_place::<DIGIT_BITNESS>(
-                        &dividend_digits[shift_digits..],
-                        (shift as usize) % DIGIT_BITNESS,
-                        &mut quotient_data,
-                    );
+                    let remainder =
+                        Self::shift_digits_right_in_place::<DIGIT_BITNESS>(
+                            &dividend_digits[shift_digits..],
+                            (shift as usize) % DIGIT_BITNESS,
+                            &mut quotient_data,
+                        );
                     if !remainder.is_zero() {
                         inexact = true;
                     }
@@ -654,12 +660,13 @@ macro_rules! checked_div_digits_as_float_impl {
                         inexact = true;
                     }
                 }
-                let quotient_bit_length = ((quotient_digits.len() - 1) * DIGIT_BITNESS
+                let quotient_bit_length = ((quotient_digits.len() - 1)
+                    * DIGIT_BITNESS
                     + quotient_digits[quotient_digits.len() - 1].bit_length())
                     as isize;
                 let extra_bits = quotient_bit_length
                     .max((<$float>::MIN_EXP as isize) - shift)
-                    - (NON_EXPONENT_DIGITS as isize);
+                    - (NON_EXPONENT_BITS_COUNT as isize);
                 let mask = Self::one() << ((extra_bits as usize) - 1);
                 let mut quotient_low_digit =
                     quotient_digits[0] | Self::from(inexact as u8);
@@ -672,10 +679,12 @@ macro_rules! checked_div_digits_as_float_impl {
                 }
                 quotient_digits[0] = quotient_low_digit
                     & !(Self::from(2u8) * mask - Self::from(1u8));
-                let reduced_quotient =
-                    Self::reduce_digits_to_float::<DIGIT_BITNESS>(&quotient_digits);
+                let reduced_quotient = Self::reduce_digits_to_float::<
+                    DIGIT_BITNESS,
+                >(&quotient_digits);
                 if shift + quotient_bit_length >= (<$float>::MAX_EXP as isize)
-                    && (shift + quotient_bit_length > (<$float>::MAX_EXP as isize)
+                    && (shift + quotient_bit_length
+                        > (<$float>::MAX_EXP as isize)
                         || reduced_quotient
                             == (1 as $float)
                                 .load_exp(quotient_bit_length as i32))
@@ -858,7 +867,7 @@ impl<
             Some((
                 dividend_sign * divisor_sign,
                 quotient_digits,
-                dividend_sign * ((!remainder_digit.is_zero()) as Sign),
+                dividend_sign * Sign::from(!remainder_digit.is_zero()),
                 vec![remainder_digit],
             ))
         } else {
@@ -963,7 +972,7 @@ impl<
                 dividend, divisor[0],
             );
             Some((
-                dividend_sign * ((!remainder.is_zero()) as Sign),
+                dividend_sign * Sign::from(!remainder.is_zero()),
                 vec![remainder],
             ))
         } else {
@@ -1023,7 +1032,7 @@ impl<
                 let (_, digit) = Digit::div_rem_digits_by_digit::<DIGIT_BITNESS>(
                     dividend, divisor[0],
                 );
-                (dividend_sign * ((!digit.is_zero()) as Sign), vec![digit])
+                (dividend_sign * Sign::from(!digit.is_zero()), vec![digit])
             } else {
                 let (_, digits) = Digit::div_rem_by_two_or_more_digits::<
                     DIGIT_BITNESS,
@@ -1425,20 +1434,22 @@ where
             }
             result_size
         };
-        const HALF_EVEN_CORRECTION: [i8; 8] = [0, -1, -2, 1, 0, -1, 2, 1];
-        result_digits[0] = unsafe {
-            Self::try_from(
-                OppositionOf::<Self>::try_from(result_digits[0])
-                    .unwrap_unchecked()
-                    + OppositionOf::<Self>::from(
-                        HALF_EVEN_CORRECTION[usize::try_from(
-                            result_digits[0] & Self::from(7u8),
-                        )
-                        .unwrap_unchecked()],
-                    ),
-            )
-            .unwrap_unchecked()
-        };
+        {
+            const HALF_EVEN_CORRECTION: [i8; 8] = [0, -1, -2, 1, 0, -1, 2, 1];
+            result_digits[0] = unsafe {
+                Self::try_from(
+                    OppositionOf::<Self>::try_from(result_digits[0])
+                        .unwrap_unchecked()
+                        + OppositionOf::<Self>::from(
+                            HALF_EVEN_CORRECTION[usize::try_from(
+                                result_digits[0] & Self::from(7u8),
+                            )
+                            .unwrap_unchecked()],
+                        ),
+                )
+                .unwrap_unchecked()
+            };
+        }
         result_digits_count -= 1;
         let mut fraction = Fraction::from(result_digits[result_digits_count]);
         while result_digits_count > 0 {
@@ -1507,13 +1518,13 @@ impl<
         first: &[Self],
         second: &[Self],
     ) -> Vec<Self> {
+        const KARATSUBA_CUTOFF: usize = 70;
+        const KARATSUBA_SQUARE_CUTOFF: usize = KARATSUBA_CUTOFF * 2;
         let (longest, shortest) = if first.len() < second.len() {
             (&second, &first)
         } else {
             (&first, &second)
         };
-        const KARATSUBA_CUTOFF: usize = 70;
-        const KARATSUBA_SQUARE_CUTOFF: usize = KARATSUBA_CUTOFF * 2;
         if shortest.len()
             <= if shortest.as_ptr() == longest.as_ptr() {
                 KARATSUBA_SQUARE_CUTOFF
@@ -1763,11 +1774,11 @@ where
         source: &[Source],
         source_base: usize,
     ) -> Vec<Self> {
-        let target_digit_mask =
-            DoublePrecisionOf::<Self>::digit_mask(TARGET_SHIFT);
         static mut BASES_LOGS: [f64; 37] = [0.0; 37];
         static mut INFIMUM_BASES_EXPONENTS: [usize; 37] = [0; 37];
         static mut INFIMUM_BASES_POWERS: [usize; 37] = [0; 37];
+        let target_digit_mask =
+            DoublePrecisionOf::<Self>::digit_mask(TARGET_SHIFT);
         if unsafe { BASES_LOGS[source_base] } == 0.0 {
             let bases_log = (source_base as f64).ln()
                 / ((1usize << TARGET_SHIFT) as f64).ln();
@@ -1784,7 +1795,7 @@ where
             }
             unsafe { INFIMUM_BASES_POWERS[source_base] = infimum_base_power };
             unsafe {
-                INFIMUM_BASES_EXPONENTS[source_base] = infimum_base_exponent
+                INFIMUM_BASES_EXPONENTS[source_base] = infimum_base_exponent;
             };
         }
         let digits_count_upper_bound =
@@ -1815,7 +1826,7 @@ where
             } else {
                 source_base.pow(base_exponent as u32)
             };
-            for result_position in result.iter_mut() {
+            for result_position in &mut result {
                 accumulator += <DoublePrecisionOf<Self> as From<Self>>::from(
                     *result_position,
                 ) * unsafe {
@@ -1869,9 +1880,9 @@ where
         source: &[Source],
         source_base: usize,
     ) -> Vec<Self> {
+        static mut BASES_LOGS: [f64; 37] = [0.0; 37];
         let target_digit_mask =
             DoublePrecisionOf::<Self>::digit_mask(TARGET_SHIFT);
-        static mut BASES_LOGS: [f64; 37] = [0.0; 37];
         if unsafe { BASES_LOGS[source_base] } == 0.0 {
             let bases_log = (source_base as f64).ln()
                 / ((1usize << TARGET_SHIFT) as f64).ln();
@@ -1886,7 +1897,7 @@ where
         };
         for &digit in source.iter().rev() {
             let mut accumulator = DoublePrecisionOf::<Self>::from(digit);
-            for result_position in result.iter_mut() {
+            for result_position in &mut result {
                 accumulator += <DoublePrecisionOf<Self> as From<Self>>::from(
                     *result_position,
                 ) * source_base;
@@ -1974,10 +1985,10 @@ macro_rules! reduce_digits_to_float_impl {
             fn reduce_digits_to_float<const DIGIT_BITNESS: usize>(
                 digits: &[Self],
             ) -> $float {
+                const EXPONENT_BASE: u32 =
+                    (1 << (<f32>::EXPONENT_BITS_COUNT - 1usize)) - 1;
                 debug_assert!(DIGIT_BITNESS < ((1 << f32::EXPONENT_BITS_COUNT) - 1));
                 let mut result = 0 as $float;
-                const EXPONENT_BASE: u32 =
-                    (1 << (f32::EXPONENT_BITS_COUNT - 1usize)) - 1;
                 let scale = unsafe {
                     transmute::<u32, f32>(
                         (EXPONENT_BASE + (DIGIT_BITNESS as u32))
@@ -2025,7 +2036,7 @@ where
             .try_reserve_exact(
                 digits.len()
                     + shift_quotient
-                    + if shift_remainder.is_zero() { 0 } else { 1 },
+                    + usize::from(!shift_remainder.is_zero()),
             )
             .ok()?;
         for _ in 0..shift_quotient {
@@ -2389,7 +2400,7 @@ impl<
                 longest_size = index + 1;
                 shortest_size = index + 1;
             }
-            _ => {}
+            Ordering::Greater => {}
         };
         let mut result = Vec::<Self>::with_capacity(longest_size);
         let mut accumulator = Self::zero();
@@ -2598,7 +2609,7 @@ impl<Digit: Shl<usize, Output = Digit> + Sub<Output = Digit> + Unitary>
 
 #[inline]
 pub(super) fn to_digits_sign<Digit: Zeroable>(digits: &[Digit]) -> Sign {
-    (digits.len() > 1 || !digits[0].is_zero()) as Sign
+    Sign::from(digits.len() > 1 || !digits[0].is_zero())
 }
 
 pub(super) trait GcdDigits: Sized {

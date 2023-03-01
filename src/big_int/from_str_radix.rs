@@ -13,8 +13,8 @@ where
 
     fn from_str_radix(string: &str, radix: u32) -> Result<Self, Self::Error> {
         if radix != 0
-            && (radix < (MIN_REPRESENTABLE_BASE as u32)
-                || radix > (MAX_REPRESENTABLE_BASE as u32))
+            && (radix < u32::from(MIN_REPRESENTABLE_BASE)
+                || radix > u32::from(MAX_REPRESENTABLE_BASE))
         {
             Err(TryFromStringError::BaseOutOfBounds(radix))
         } else {

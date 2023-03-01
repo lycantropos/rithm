@@ -2,7 +2,10 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 
 use pyo3::basic::CompareOp;
-use pyo3::exceptions::*;
+use pyo3::exceptions::{
+    PyMemoryError, PyOverflowError, PyTypeError, PyValueError,
+    PyZeroDivisionError,
+};
 use pyo3::prelude::{
     pyclass, pymethods, pymodule, PyModule, PyResult, Python,
 };
@@ -38,7 +41,7 @@ const _: () =
 const HASH_BITS: usize = 31;
 #[cfg(not(target_arch = "x86"))]
 const HASH_BITS: usize = 61;
-const HASH_INF: ffi::Py_hash_t = 314159;
+const HASH_INF: ffi::Py_hash_t = 314_159;
 const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
 const PICKLE_SERIALIZATION_ENDIANNESS: Endianness = Endianness::Little;
 
@@ -158,7 +161,7 @@ impl PyInt {
         }
     }
 
-    fn to_bytes(&self, endianness: PyEndianness, py: Python) -> PyObject {
+    fn to_bytes(&self, endianness: &PyEndianness, py: Python) -> PyObject {
         PyBytes::new(py, &self.0.to_bytes(endianness.0)).to_object(py)
     }
 
@@ -166,7 +169,7 @@ impl PyInt {
     fn from_bytes(
         _cls: &PyType,
         mut bytes: Vec<u8>,
-        endianness: PyEndianness,
+        endianness: &PyEndianness,
     ) -> PyInt {
         PyInt(BigInt::from_bytes(bytes.as_mut_slice(), endianness.0))
     }
@@ -190,7 +193,7 @@ impl PyInt {
     }
 
     #[getter]
-    fn denominator(&self) -> Self {
+    fn denominator(_slf: PyRef<Self>) -> Self {
         PyInt(BigInt::one())
     }
 
@@ -819,8 +822,9 @@ fn try_py_long_to_big_int(value: &PyAny) -> PyResult<BigInt> {
                 let bytes_count = bits_count / (u8::BITS as usize) + 1;
                 let mut buffer = vec![0u8; bytes_count];
                 if ffi::_PyLong_AsByteArray(
-                    Py::<PyLong>::from_owned_ptr(py, value).as_ptr()
-                        as *mut ffi::PyLongObject,
+                    Py::<PyLong>::from_owned_ptr(py, value)
+                        .as_ptr()
+                        .cast::<ffi::PyLongObject>(),
                     buffer.as_mut_ptr(),
                     buffer.len(),
                     1,
@@ -913,7 +917,7 @@ impl PyFraction {
         PyInt(self.0.numerator().clone())
     }
 
-    fn round(&self, tie_breaking: PyTieBreaking) -> PyInt {
+    fn round(&self, tie_breaking: &PyTieBreaking) -> PyInt {
         PyInt((&self.0).round(tie_breaking.0))
     }
 
@@ -1078,9 +1082,7 @@ impl PyFraction {
 
     fn __pow__(&self, exponent: &PyAny, modulo: &PyAny) -> PyResult<PyObject> {
         let py = exponent.py();
-        if !modulo.is_none() {
-            Ok(py.NotImplemented())
-        } else {
+        if modulo.is_none() {
             match try_py_any_to_maybe_big_int(exponent)? {
                 Some(exponent) => match (&self.0).checked_pow(exponent) {
                     Some(power) => Ok(PyFraction(power).into_py(py)),
@@ -1090,6 +1092,8 @@ impl PyFraction {
                 },
                 None => Ok(py.NotImplemented()),
             }
+        } else {
+            Ok(py.NotImplemented())
         }
     }
 
@@ -1317,7 +1321,7 @@ fn hash(value: &BigInt) -> usize {
         }
     }
     if value.is_negative() {
-        result = usize::MAX - result + 1
+        result = usize::MAX - result + 1;
     };
     if result == usize::MAX {
         result - 1

@@ -75,9 +75,9 @@ fn guess_base(characters: &mut Peekable<Chars>) -> u8 {
         10
     } else {
         match characters.clone().nth(1) {
-            Some('b') | Some('B') => 2,
-            Some('o') | Some('O') => 8,
-            Some('x') | Some('X') => 16,
+            Some('b' | 'B') => 2,
+            Some('o' | 'O') => 8,
+            Some('x' | 'X') => 16,
             _ => 10,
         }
     }
@@ -127,17 +127,17 @@ fn parse_sign(characters: &mut Peekable<Chars>) -> i8 {
 fn skip_prefix(characters: &mut Peekable<Chars>, base: u8) {
     if characters.peek() == Some(&'0') {
         match characters.clone().nth(1) {
-            Some('b') | Some('B') => {
+            Some('b' | 'B') => {
                 if base == 2 {
                     characters.nth(1);
                 }
             }
-            Some('o') | Some('O') => {
+            Some('o' | 'O') => {
                 if base == 8 {
                     characters.nth(1);
                 }
             }
-            Some('x') | Some('X') => {
+            Some('x' | 'X') => {
                 if base == 16 {
                     characters.nth(1);
                 }

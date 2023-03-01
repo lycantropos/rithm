@@ -32,8 +32,7 @@ impl<
             sign,
             digits: Digit::binary_base_from_binary_digits(
                 &bytes[..bytes.len()
-                    - ((bytes.len() > 1 && bytes[bytes.len() - 1].is_zero())
-                        as usize)],
+                    - usize::from(bytes.len() > 1 && bytes[bytes.len() - 1].is_zero())],
                 u8::BITS as usize,
                 DIGIT_BITNESS,
             ),

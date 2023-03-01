@@ -55,7 +55,7 @@ pub enum CheckedPowRemEuclidError {
 }
 
 impl CheckedPowRemEuclidError {
-    fn description(&self) -> &str {
+    fn description(self) -> &'static str {
         match self {
             CheckedPowRemEuclidError::ZeroDivisor => {
                 "Divisor should not be zero."
@@ -87,22 +87,18 @@ pub enum ShlError {
 }
 
 impl ShlError {
-    fn description(&self) -> String {
+    fn description(self) -> &'static str {
         match self {
-            ShlError::NegativeShift => {
-                String::from("Shift by negative step is undefined.")
-            }
-            ShlError::OutOfMemory => {
-                String::from("Not enough memory for shift result.")
-            }
-            ShlError::TooLarge => String::from("Too large shift step."),
+            ShlError::NegativeShift => "Shift by negative step is undefined.",
+            ShlError::OutOfMemory => "Not enough memory for shift result.",
+            ShlError::TooLarge => "Too large shift step.",
         }
     }
 }
 
 impl Debug for ShlError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(&self.description())
+        formatter.write_str(self.description())
     }
 }
 
@@ -118,18 +114,16 @@ pub enum ShrError {
 }
 
 impl ShrError {
-    fn description(&self) -> String {
+    fn description(self) -> &'static str {
         match self {
-            ShrError::NegativeShift => {
-                String::from("Shift by negative step is undefined.")
-            }
+            ShrError::NegativeShift => "Shift by negative step is undefined.",
         }
     }
 }
 
 impl Debug for ShrError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str(&self.description())
+        formatter.write_str(self.description())
     }
 }
 
@@ -146,7 +140,7 @@ pub enum TryFromFloatError {
 }
 
 impl TryFromFloatError {
-    fn description(&self) -> &str {
+    fn description(self) -> &'static str {
         match self {
             TryFromFloatError::Infinity => {
                 "Conversion of infinity is undefined."
@@ -176,7 +170,7 @@ pub enum TryFromStringError {
 }
 
 impl TryFromStringError {
-    fn description(&self) -> String {
+    fn description(self) -> String {
         match self {
             TryFromStringError::BaseOutOfBounds(base) => {
                 format!(

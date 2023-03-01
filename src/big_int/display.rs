@@ -55,7 +55,7 @@ where
             DIGIT_BITNESS,
             power(base, shift),
         );
-        let characters_count = (self.is_negative() as usize)
+        let characters_count = usize::from(self.is_negative())
             + (digits.len() - 1) * shift
             + floor_log(
                 unsafe {

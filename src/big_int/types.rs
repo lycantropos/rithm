@@ -6,14 +6,12 @@ pub(super) type Sign = i8;
 pub(super) type WindowDigit = u8;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct BigInt<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> {
+pub struct BigInt<Digit, const DIGIT_BITNESS: usize> {
     pub(super) sign: Sign,
     pub(super) digits: Vec<Digit>,
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
-{
+impl<Digit, const DIGIT_BITNESS: usize> BigInt<Digit, DIGIT_BITNESS> {
     pub(crate) fn digits(&self) -> &[Digit] {
         &self.digits
     }
@@ -173,11 +171,8 @@ impl Display for TryFromFloatError {
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum TryFromStringError {
     BaseOutOfBounds(u32),
-    ConsecutiveSeparators,
-    EndsWithSeparator,
     InvalidDigit(char, u8),
     NoDigits,
-    StartsWithSeparator,
 }
 
 impl TryFromStringError {
@@ -189,19 +184,10 @@ impl TryFromStringError {
                      to {MAX_REPRESENTABLE_BASE}, but found: {base}."
                 )
             }
-            TryFromStringError::ConsecutiveSeparators => {
-                String::from("Consecutive separators found.")
-            }
-            TryFromStringError::EndsWithSeparator => {
-                String::from("Should not end with separator.")
-            }
             TryFromStringError::InvalidDigit(character, base) => {
                 format!("Invalid digit in base {base}: {character:?}.")
             }
             TryFromStringError::NoDigits => String::from("No digits found."),
-            TryFromStringError::StartsWithSeparator => {
-                String::from("Should not start with separator.")
-            }
         }
     }
 }

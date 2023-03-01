@@ -12,14 +12,13 @@ macro_rules! float_try_from_big_int_impl {
     ($($float:ty)*) => ($(
         impl<
                 Digit: FractExpDigits<$float>,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > TryFrom<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $float
+            > TryFrom<BigInt<Digit, DIGIT_BITNESS>> for $float
         {
             type Error = TryIntoFloatError;
 
             fn try_from(
-                value: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                value: BigInt<Digit, DIGIT_BITNESS>,
             ) -> Result<Self, Self::Error> {
                 match Digit::fract_exp_digits::<DIGIT_BITNESS>(&value.digits) {
                     Some((fraction_modulus, exponent)) => {
@@ -33,14 +32,13 @@ macro_rules! float_try_from_big_int_impl {
 
         impl<
                 Digit: FractExpDigits<$float>,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > TryFrom<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $float
+            > TryFrom<&BigInt<Digit, DIGIT_BITNESS>> for $float
         {
             type Error = TryIntoFloatError;
 
             fn try_from(
-                value: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                value: &BigInt<Digit, DIGIT_BITNESS>,
             ) -> Result<Self, Self::Error> {
                 match Digit::fract_exp_digits::<DIGIT_BITNESS>(&value.digits) {
                     Some((fraction_modulus, exponent)) => {
@@ -60,14 +58,13 @@ macro_rules! signed_integer_try_from_big_int_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: MaybeReduceDigits<$integer> + Zeroable,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > TryFrom<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $integer
+            > TryFrom<BigInt<Digit, DIGIT_BITNESS>> for $integer
         {
             type Error = TryIntoSignedIntegerError;
 
             fn try_from(
-                value: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                value: BigInt<Digit, DIGIT_BITNESS>,
             ) -> Result<Self, Self::Error> {
                 let result =
                     Digit::maybe_reduce_digits::<DIGIT_BITNESS>(&value.digits)
@@ -82,14 +79,13 @@ macro_rules! signed_integer_try_from_big_int_impl {
 
         impl<
                 Digit: MaybeReduceDigits<$integer> + Zeroable,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > TryFrom<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $integer
+            > TryFrom<&BigInt<Digit, DIGIT_BITNESS>> for $integer
         {
             type Error = TryIntoSignedIntegerError;
 
             fn try_from(
-                value: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                value: &BigInt<Digit, DIGIT_BITNESS>,
             ) -> Result<Self, Self::Error> {
                 let result =
                     Digit::maybe_reduce_digits::<DIGIT_BITNESS>(&value.digits)
@@ -110,14 +106,13 @@ macro_rules! unsigned_integer_try_from_big_int_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: MaybeReduceDigits<$integer> + Zeroable,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > TryFrom<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $integer
+            > TryFrom<BigInt<Digit, DIGIT_BITNESS>> for $integer
         {
             type Error = TryIntoUnsignedIntegerError;
 
             fn try_from(
-                value: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                value: BigInt<Digit, DIGIT_BITNESS>,
             ) -> Result<Self, Self::Error> {
                 if value.is_negative() {
                     Err(TryIntoUnsignedIntegerError::Negative)
@@ -130,14 +125,13 @@ macro_rules! unsigned_integer_try_from_big_int_impl {
 
         impl<
                 Digit: MaybeReduceDigits<$integer> + Zeroable,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > TryFrom<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $integer
+            > TryFrom<&BigInt<Digit, DIGIT_BITNESS>> for $integer
         {
             type Error = TryIntoUnsignedIntegerError;
 
             fn try_from(
-                value: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                value: &BigInt<Digit, DIGIT_BITNESS>,
             ) -> Result<Self, Self::Error> {
                 if value.is_negative() {
                     Err(TryIntoUnsignedIntegerError::Negative)

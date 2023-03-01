@@ -3,11 +3,8 @@ use traiter::numbers::CheckedDivRem;
 use super::digits::CheckedDivRemComponents;
 use super::types::BigInt;
 
-impl<
-        Digit: CheckedDivRemComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > CheckedDivRem for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: CheckedDivRemComponents, const DIGIT_BITNESS: usize> CheckedDivRem
+    for BigInt<Digit, DIGIT_BITNESS>
 {
     type Output = Option<(Self, Self)>;
 
@@ -40,11 +37,8 @@ impl<
     }
 }
 
-impl<
-        Digit: CheckedDivRemComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > CheckedDivRem<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: CheckedDivRemComponents, const DIGIT_BITNESS: usize>
+    CheckedDivRem<&Self> for BigInt<Digit, DIGIT_BITNESS>
 {
     type Output = Option<(Self, Self)>;
 
@@ -77,21 +71,16 @@ impl<
     }
 }
 
-impl<
-        Digit: CheckedDivRemComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > CheckedDivRem<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: CheckedDivRemComponents, const DIGIT_BITNESS: usize>
+    CheckedDivRem<BigInt<Digit, DIGIT_BITNESS>>
+    for &BigInt<Digit, DIGIT_BITNESS>
 {
-    type Output = Option<(
-        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-    )>;
+    type Output =
+        Option<(BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>)>;
 
     fn checked_div_rem(
         self,
-        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        divisor: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
         Digit::checked_div_rem_components::<DIGIT_BITNESS>(
             self.sign,
@@ -107,11 +96,11 @@ impl<
                 remainder_digits,
             )| {
                 (
-                    BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
+                    BigInt::<Digit, DIGIT_BITNESS> {
                         sign: quotient_sign,
                         digits: quotient_digits,
                     },
-                    BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
+                    BigInt::<Digit, DIGIT_BITNESS> {
                         sign: remainder_sign,
                         digits: remainder_digits,
                     },
@@ -121,16 +110,11 @@ impl<
     }
 }
 
-impl<
-        Digit: CheckedDivRemComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > CheckedDivRem for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: CheckedDivRemComponents, const DIGIT_BITNESS: usize> CheckedDivRem
+    for &BigInt<Digit, DIGIT_BITNESS>
 {
-    type Output = Option<(
-        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-    )>;
+    type Output =
+        Option<(BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>)>;
 
     fn checked_div_rem(self, divisor: Self) -> Self::Output {
         Digit::checked_div_rem_components::<DIGIT_BITNESS>(
@@ -147,11 +131,11 @@ impl<
                 remainder_digits,
             )| {
                 (
-                    BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
+                    BigInt::<Digit, DIGIT_BITNESS> {
                         sign: quotient_sign,
                         digits: quotient_digits,
                     },
-                    BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
+                    BigInt::<Digit, DIGIT_BITNESS> {
                         sign: remainder_sign,
                         digits: remainder_digits,
                     },

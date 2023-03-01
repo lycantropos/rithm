@@ -3,11 +3,8 @@ use std::ops::Sub;
 use super::digits::SubtractComponents;
 use super::types::BigInt;
 
-impl<
-        Digit: SubtractComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > Sub for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: SubtractComponents, const DIGIT_BITNESS: usize> Sub
+    for BigInt<Digit, DIGIT_BITNESS>
 {
     type Output = Self;
 
@@ -22,11 +19,8 @@ impl<
     }
 }
 
-impl<
-        Digit: SubtractComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > Sub<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: SubtractComponents, const DIGIT_BITNESS: usize> Sub<&Self>
+    for BigInt<Digit, DIGIT_BITNESS>
 {
     type Output = Self;
 
@@ -41,19 +35,12 @@ impl<
     }
 }
 
-impl<
-        Digit: SubtractComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > Sub<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: SubtractComponents, const DIGIT_BITNESS: usize>
+    Sub<BigInt<Digit, DIGIT_BITNESS>> for &BigInt<Digit, DIGIT_BITNESS>
 {
-    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
+    type Output = BigInt<Digit, DIGIT_BITNESS>;
 
-    fn sub(
-        self,
-        subtrahend: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-    ) -> Self::Output {
+    fn sub(self, subtrahend: BigInt<Digit, DIGIT_BITNESS>) -> Self::Output {
         let (sign, digits) = Digit::subtract_components::<DIGIT_BITNESS>(
             self.sign,
             &self.digits,
@@ -64,13 +51,10 @@ impl<
     }
 }
 
-impl<
-        Digit: SubtractComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > Sub for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: SubtractComponents, const DIGIT_BITNESS: usize> Sub
+    for &BigInt<Digit, DIGIT_BITNESS>
 {
-    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
+    type Output = BigInt<Digit, DIGIT_BITNESS>;
 
     fn sub(self, subtrahend: Self) -> Self::Output {
         let (sign, digits) = Digit::subtract_components::<DIGIT_BITNESS>(

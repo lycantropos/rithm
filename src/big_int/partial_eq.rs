@@ -7,11 +7,10 @@ macro_rules! integer_partial_eq_big_int_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: DigitsFromNonZeroValue<$integer> + PartialEq + Zeroable,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > PartialEq<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $integer
+            > PartialEq<BigInt<Digit, DIGIT_BITNESS>> for $integer
         {
-            fn eq(&self, other: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>) -> bool {
+            fn eq(&self, other: &BigInt<Digit, DIGIT_BITNESS>) -> bool {
                 value_to_sign(*self) == other.sign
                     && (self.is_zero()
                         || Digit::digits_from_non_zero_value::<DIGIT_BITNESS>(*self)
@@ -21,9 +20,8 @@ macro_rules! integer_partial_eq_big_int_impl {
 
         impl<
                 Digit: DigitsFromNonZeroValue<$integer> + PartialEq + Zeroable,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > PartialEq<$integer> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+            > PartialEq<$integer> for BigInt<Digit, DIGIT_BITNESS>
         {
             fn eq(&self, other: &$integer) -> bool {
                 self.sign == value_to_sign(*other)

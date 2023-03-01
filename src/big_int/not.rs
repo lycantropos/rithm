@@ -4,11 +4,8 @@ use crate::big_int::digits::InvertComponents;
 
 use super::types::BigInt;
 
-impl<
-        Digit: InvertComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > Not for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: InvertComponents, const DIGIT_BITNESS: usize> Not
+    for BigInt<Digit, DIGIT_BITNESS>
 {
     type Output = Self;
 
@@ -19,13 +16,10 @@ impl<
     }
 }
 
-impl<
-        Digit: InvertComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > Not for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: InvertComponents, const DIGIT_BITNESS: usize> Not
+    for &BigInt<Digit, DIGIT_BITNESS>
 {
-    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
+    type Output = BigInt<Digit, DIGIT_BITNESS>;
 
     fn not(self) -> Self::Output {
         let (sign, digits) =

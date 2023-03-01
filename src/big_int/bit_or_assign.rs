@@ -3,11 +3,8 @@ use std::ops::BitOrAssign;
 use super::digits::BitwiseOrComponents;
 use super::types::BigInt;
 
-impl<
-        Digit: BitwiseOrComponents + Clone,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > BitOrAssign for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: BitwiseOrComponents + Clone, const DIGIT_BITNESS: usize>
+    BitOrAssign for BigInt<Digit, DIGIT_BITNESS>
 {
     fn bitor_assign(&mut self, other: Self) {
         (self.sign, self.digits) = Digit::bitwise_or_components::<DIGIT_BITNESS>(
@@ -19,11 +16,8 @@ impl<
     }
 }
 
-impl<
-        Digit: BitwiseOrComponents + Clone,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > BitOrAssign<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: BitwiseOrComponents + Clone, const DIGIT_BITNESS: usize>
+    BitOrAssign<&Self> for BigInt<Digit, DIGIT_BITNESS>
 {
     fn bitor_assign(&mut self, other: &Self) {
         (self.sign, self.digits) = Digit::bitwise_or_components::<DIGIT_BITNESS>(

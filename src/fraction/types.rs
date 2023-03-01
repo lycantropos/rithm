@@ -65,8 +65,8 @@ pub trait NormalizeModuli<Other = Self> {
     fn normalize_moduli(self, other: Other) -> Self::Output;
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> NormalizeModuli
-    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> NormalizeModuli
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     for<'a> Self: CheckedDiv<Output = Option<Self>>
         + CheckedDiv<&'a Self, Output = Option<Self>>,
@@ -84,8 +84,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    NormalizeModuli<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> NormalizeModuli<&Self>
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     for<'a> Self: CheckedDiv<&'a Self, Output = Option<Self>>,
     for<'a> &'a Self:
@@ -103,24 +103,21 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    NormalizeModuli<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize>
+    NormalizeModuli<BigInt<Digit, DIGIT_BITNESS>>
+    for &BigInt<Digit, DIGIT_BITNESS>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDiv<Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
-        + Gcd<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
-        CheckedDiv<Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: CheckedDiv<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
+        + Gcd<Output = BigInt<Digit, DIGIT_BITNESS>>,
+    BigInt<Digit, DIGIT_BITNESS>:
+        CheckedDiv<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>,
 {
-    type Output = (
-        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-    );
+    type Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>);
 
     #[inline]
     fn normalize_moduli(
         self,
-        other: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        other: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
         let gcd = self.gcd(&other);
         (
@@ -130,19 +127,16 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> NormalizeModuli
-    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> NormalizeModuli
+    for &BigInt<Digit, DIGIT_BITNESS>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDiv<Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: CheckedDiv<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
         + CheckedDiv<
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-        > + Gcd<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+            BigInt<Digit, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
+        > + Gcd<Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
-    type Output = (
-        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-    );
+    type Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>);
 
     #[inline]
     fn normalize_moduli(self, other: Self) -> Self::Output {
@@ -181,8 +175,8 @@ pub trait NormalizeSign<Other = Self> {
     fn normalize_sign(self, other: Other) -> Self::Output;
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> NormalizeSign
-    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> NormalizeSign
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     Self: Neg<Output = Self> + Signed,
 {

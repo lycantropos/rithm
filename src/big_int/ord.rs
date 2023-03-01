@@ -5,8 +5,8 @@ use traiter::numbers::{Sign, Signed};
 use super::digits::compare_digits;
 use super::types::BigInt;
 
-impl<Digit: Ord, const SEPARATOR: char, const DIGIT_BITNESS: usize> Ord
-    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: Ord, const DIGIT_BITNESS: usize> Ord
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     Self: Signed,
 {

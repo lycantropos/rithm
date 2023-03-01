@@ -5,8 +5,8 @@ use traiter::numbers::{Sign, Signed, Zeroable};
 use super::digits::{compare_digits, DigitsFromNonZeroValue};
 use super::types::{BigInt, Sign as BigIntSign};
 
-impl<Digit: Ord, const SEPARATOR: char, const DIGIT_BITNESS: usize> PartialOrd
-    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: Ord, const DIGIT_BITNESS: usize> PartialOrd
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     Self: PartialEq + Signed,
 {
@@ -26,9 +26,8 @@ macro_rules! big_int_partial_ord_signed_integer_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: DigitsFromNonZeroValue<$integer> + Ord,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > PartialOrd<$integer> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+            > PartialOrd<$integer> for BigInt<Digit, DIGIT_BITNESS>
         where
             Self: PartialEq<$integer> + Signed,
         {
@@ -62,9 +61,8 @@ macro_rules! big_int_partial_ord_unsigned_integer_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: DigitsFromNonZeroValue<$integer> + Ord,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > PartialOrd<$integer> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+            > PartialOrd<$integer> for BigInt<Digit, DIGIT_BITNESS>
         where
             Self: PartialEq<$integer> + Signed,
         {
@@ -102,16 +100,15 @@ macro_rules! signed_integer_partial_ord_big_int_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: DigitsFromNonZeroValue<$integer> + Ord,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > PartialOrd<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $integer
+            > PartialOrd<BigInt<Digit, DIGIT_BITNESS>> for $integer
         where
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Signed,
-            Self: PartialEq<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+            BigInt<Digit, DIGIT_BITNESS>: Signed,
+            Self: PartialEq<BigInt<Digit, DIGIT_BITNESS>>,
         {
             fn partial_cmp(
                 &self,
-                other: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                other: &BigInt<Digit, DIGIT_BITNESS>,
             ) -> Option<Ordering> {
                 Some(match (self.signum() as BigIntSign).cmp(&other.sign) {
                     Ordering::Equal => match other.sign() {
@@ -138,16 +135,15 @@ macro_rules! unsigned_integer_partial_ord_big_int_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: DigitsFromNonZeroValue<$integer> + Ord,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > PartialOrd<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $integer
+            > PartialOrd<BigInt<Digit, DIGIT_BITNESS>> for $integer
         where
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Signed,
-            Self: PartialEq<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+            BigInt<Digit, DIGIT_BITNESS>: Signed,
+            Self: PartialEq<BigInt<Digit, DIGIT_BITNESS>>,
         {
             fn partial_cmp(
                 &self,
-                other: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                other: &BigInt<Digit, DIGIT_BITNESS>,
             ) -> Option<Ordering> {
                 Some(match other.sign() {
                     Sign::Negative => Ordering::Greater,

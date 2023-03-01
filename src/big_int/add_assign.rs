@@ -3,11 +3,8 @@ use std::ops::AddAssign;
 use super::digits::SumComponents;
 use super::types::BigInt;
 
-impl<
-        Digit: SumComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > AddAssign<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: SumComponents, const DIGIT_BITNESS: usize> AddAssign<&Self>
+    for BigInt<Digit, DIGIT_BITNESS>
 {
     fn add_assign(&mut self, other: &Self) {
         (self.sign, self.digits) = Digit::sum_components::<DIGIT_BITNESS>(
@@ -19,11 +16,8 @@ impl<
     }
 }
 
-impl<
-        Digit: SumComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > AddAssign for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: SumComponents, const DIGIT_BITNESS: usize> AddAssign
+    for BigInt<Digit, DIGIT_BITNESS>
 {
     fn add_assign(&mut self, other: Self) {
         (self.sign, self.digits) = Digit::sum_components::<DIGIT_BITNESS>(

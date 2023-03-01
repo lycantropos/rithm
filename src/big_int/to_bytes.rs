@@ -14,9 +14,8 @@ impl<
             + From<u8>
             + Oppose
             + Zeroable,
-        const SEPARATOR: char,
         const DIGIT_BITNESS: usize,
-    > ToBytes for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+    > ToBytes for BigInt<Digit, DIGIT_BITNESS>
 where
     u8: TryFrom<Digit>,
 {

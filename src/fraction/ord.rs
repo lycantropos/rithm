@@ -5,12 +5,12 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Ord
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> Ord
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
-        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Ord,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
+    BigInt<Digit, DIGIT_BITNESS>: Ord,
     Self: Eq + PartialOrd,
 {
     fn cmp(&self, other: &Self) -> Ordering {

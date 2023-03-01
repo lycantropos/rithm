@@ -11,9 +11,8 @@ macro_rules! try_from_float_impl {
     ($($float:ty)*) => ($(
         impl<
                 Digit: Copy + Zeroable,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > TryFrom<$float> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+            > TryFrom<$float> for BigInt<Digit, DIGIT_BITNESS>
         where
             $float: From<Digit> + UncheckedToInt<Digit>,
         {
@@ -58,8 +57,8 @@ macro_rules! try_from_float_impl {
 
 try_from_float_impl!(f32 f64);
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> TryFrom<&str>
-    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> TryFrom<&str>
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     Self: TryFromString,
 {

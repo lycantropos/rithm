@@ -11,9 +11,8 @@ use super::types::{BigInt, Sign};
 
 impl<
         Digit: BinaryBaseFromBinaryDigits<u8> + HasSignBit,
-        const SEPARATOR: char,
         const DIGIT_BITNESS: usize,
-    > FromBytes for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+    > FromBytes for BigInt<Digit, DIGIT_BITNESS>
 {
     fn from_bytes(bytes: &[u8], endianness: Endianness) -> Self {
         let mut bytes = bytes.to_vec();

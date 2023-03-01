@@ -3,11 +3,8 @@ use std::ops::BitAnd;
 use super::digits::BitwiseAndComponents;
 use super::types::BigInt;
 
-impl<
-        Digit: BitwiseAndComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > BitAnd for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: BitwiseAndComponents, const DIGIT_BITNESS: usize> BitAnd
+    for BigInt<Digit, DIGIT_BITNESS>
 {
     type Output = Self;
 
@@ -22,11 +19,8 @@ impl<
     }
 }
 
-impl<
-        Digit: BitwiseAndComponents + Clone,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > BitAnd<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: BitwiseAndComponents + Clone, const DIGIT_BITNESS: usize>
+    BitAnd<&Self> for BigInt<Digit, DIGIT_BITNESS>
 {
     type Output = Self;
 
@@ -41,19 +35,12 @@ impl<
     }
 }
 
-impl<
-        Digit: BitwiseAndComponents + Clone,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > BitAnd<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: BitwiseAndComponents + Clone, const DIGIT_BITNESS: usize>
+    BitAnd<BigInt<Digit, DIGIT_BITNESS>> for &BigInt<Digit, DIGIT_BITNESS>
 {
-    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
+    type Output = BigInt<Digit, DIGIT_BITNESS>;
 
-    fn bitand(
-        self,
-        other: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-    ) -> Self::Output {
+    fn bitand(self, other: BigInt<Digit, DIGIT_BITNESS>) -> Self::Output {
         let (sign, digits) = Digit::bitwise_and_components::<DIGIT_BITNESS>(
             self.sign,
             self.digits.clone(),
@@ -64,13 +51,10 @@ impl<
     }
 }
 
-impl<
-        Digit: BitwiseAndComponents + Clone,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > BitAnd for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: BitwiseAndComponents + Clone, const DIGIT_BITNESS: usize> BitAnd
+    for &BigInt<Digit, DIGIT_BITNESS>
 {
-    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
+    type Output = BigInt<Digit, DIGIT_BITNESS>;
 
     fn bitand(self, other: Self) -> Self::Output {
         let (sign, digits) = Digit::bitwise_and_components::<DIGIT_BITNESS>(

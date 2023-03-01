@@ -5,11 +5,8 @@ use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 use super::digits::CheckedRemComponents;
 use super::types::BigInt;
 
-impl<
-        Digit: CheckedRemComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > RemAssign for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: CheckedRemComponents, const DIGIT_BITNESS: usize> RemAssign
+    for BigInt<Digit, DIGIT_BITNESS>
 {
     fn rem_assign(&mut self, divisor: Self) {
         (self.sign, self.digits) =
@@ -23,11 +20,8 @@ impl<
     }
 }
 
-impl<
-        Digit: CheckedRemComponents,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > RemAssign<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: CheckedRemComponents, const DIGIT_BITNESS: usize> RemAssign<&Self>
+    for BigInt<Digit, DIGIT_BITNESS>
 {
     fn rem_assign(&mut self, divisor: &Self) {
         (self.sign, self.digits) =

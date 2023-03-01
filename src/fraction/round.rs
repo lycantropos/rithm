@@ -9,23 +9,23 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Round
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> Round
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Add<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: Add<Output = BigInt<Digit, DIGIT_BITNESS>>
         + CheckedDivRemEuclid<
-            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            &'a BigInt<Digit, DIGIT_BITNESS>,
             Output = Option<(
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             )>,
         > + Ord
         + Parity
-        + Shl<usize, Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+        + Shl<usize, Output = BigInt<Digit, DIGIT_BITNESS>>
         + Signed
         + Unitary,
 {
-    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
+    type Output = BigInt<Digit, DIGIT_BITNESS>;
 
     fn round(self, tie_breaking: TieBreaking) -> Self::Output {
         let (quotient, remainder) = unsafe {
@@ -41,36 +41,36 @@ where
                     TieBreaking::ToOdd => quotient.is_even(),
                     TieBreaking::TowardZero => quotient.is_negative(),
                 } {
-                    quotient + BigInt::<Digit, SEPARATOR, DIGIT_BITNESS>::one()
+                    quotient + BigInt::<Digit, DIGIT_BITNESS>::one()
                 } else {
                     quotient
                 }
             }
             Ordering::Greater => {
-                quotient + BigInt::<Digit, SEPARATOR, DIGIT_BITNESS>::one()
+                quotient + BigInt::<Digit, DIGIT_BITNESS>::one()
             }
             Ordering::Less => quotient,
         }
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Round
-    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> Round
+    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivRemEuclid<
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: CheckedDivRemEuclid<
         Output = Option<(
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            BigInt<Digit, DIGIT_BITNESS>,
+            BigInt<Digit, DIGIT_BITNESS>,
         )>,
     >,
-    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Add<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: Add<Output = BigInt<Digit, DIGIT_BITNESS>>
         + Ord
         + Parity
-        + Shl<usize, Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+        + Shl<usize, Output = BigInt<Digit, DIGIT_BITNESS>>
         + Signed
         + Unitary,
 {
-    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
+    type Output = BigInt<Digit, DIGIT_BITNESS>;
 
     fn round(self, tie_breaking: TieBreaking) -> Self::Output {
         let (quotient, remainder) = unsafe {
@@ -86,13 +86,13 @@ where
                     TieBreaking::ToOdd => quotient.is_even(),
                     TieBreaking::TowardZero => quotient.is_negative(),
                 } {
-                    quotient + BigInt::<Digit, SEPARATOR, DIGIT_BITNESS>::one()
+                    quotient + BigInt::<Digit, DIGIT_BITNESS>::one()
                 } else {
                     quotient
                 }
             }
             Ordering::Greater => {
-                quotient + BigInt::<Digit, SEPARATOR, DIGIT_BITNESS>::one()
+                quotient + BigInt::<Digit, DIGIT_BITNESS>::one()
             }
             Ordering::Less => quotient,
         }

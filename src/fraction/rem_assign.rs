@@ -7,19 +7,19 @@ use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
 use super::types::{Fraction, NormalizeModuli};
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> RemAssign
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> RemAssign
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + Mul<
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            BigInt<Digit, DIGIT_BITNESS>,
+            Output = BigInt<Digit, DIGIT_BITNESS>,
         >,
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    BigInt<Digit, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
         + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
 {
@@ -32,16 +32,16 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> RemAssign<&Self>
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> RemAssign<&Self>
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
-        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
+    BigInt<Digit, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
         + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
 {
@@ -54,29 +54,22 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    RemAssign<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> RemAssign<BigInt<Digit, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: CheckedRem<
+            BigInt<Digit, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
         > + Mul<
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            BigInt<Digit, DIGIT_BITNESS>,
+            Output = BigInt<Digit, DIGIT_BITNESS>,
         >,
-    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
-        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        Output = (
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        ),
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: NormalizeModuli<
+        &'a BigInt<Digit, DIGIT_BITNESS>,
+        Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
     >,
 {
-    fn rem_assign(
-        &mut self,
-        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-    ) {
+    fn rem_assign(&mut self, divisor: BigInt<Digit, DIGIT_BITNESS>) {
         (self.numerator, self.denominator) = self
             .numerator
             .checked_rem(&self.denominator * divisor)
@@ -85,26 +78,20 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    RemAssign<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize>
+    RemAssign<&BigInt<Digit, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-        > + Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
-        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        Output = (
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        ),
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: CheckedRem<
+            BigInt<Digit, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
+        > + Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: NormalizeModuli<
+        &'a BigInt<Digit, DIGIT_BITNESS>,
+        Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
     >,
 {
-    fn rem_assign(
-        &mut self,
-        divisor: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-    ) {
+    fn rem_assign(&mut self, divisor: &BigInt<Digit, DIGIT_BITNESS>) {
         (self.numerator, self.denominator) = self
             .numerator
             .checked_rem(&self.denominator * divisor)

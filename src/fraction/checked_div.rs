@@ -6,19 +6,19 @@ use crate::big_int::BigInt;
 
 use super::types::{Fraction, NormalizeModuli, NormalizeSign};
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> CheckedDiv
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> CheckedDiv
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         > + NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
     Self: Zeroable,
@@ -44,20 +44,20 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDiv<&Self> for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> CheckedDiv<&Self>
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeModuli<
-            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            &'a BigInt<Digit, DIGIT_BITNESS>,
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         > + NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
     Self: Zeroable,
@@ -83,31 +83,28 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDiv<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
-    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDiv<Fraction<BigInt<Digit, DIGIT_BITNESS>>>
+    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
-        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        Output = (
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        ),
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: NormalizeModuli<
+        BigInt<Digit, DIGIT_BITNESS>,
+        Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
     >,
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>: Zeroable,
+    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
+    type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
     fn checked_div(
         self,
-        divisor: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        divisor: Fraction<BigInt<Digit, DIGIT_BITNESS>>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -119,7 +116,7 @@ where
             let (numerator, denominator) = (dividend_numerator
                 * divisor_denominator)
                 .normalize_sign(dividend_denominator * divisor_numerator);
-            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
+            Some(Fraction::<BigInt<Digit, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })
@@ -127,25 +124,22 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> CheckedDiv
-    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> CheckedDiv
+    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
-        Output = (
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        ),
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: NormalizeModuli<
+        Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
     >,
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>: Zeroable,
+    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
+    type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
     fn checked_div(self, divisor: Self) -> Self::Output {
         if divisor.is_zero() {
@@ -158,7 +152,7 @@ where
             let (numerator, denominator) = (dividend_numerator
                 * divisor_denominator)
                 .normalize_sign(dividend_denominator * divisor_numerator);
-            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
+            Some(Fraction::<BigInt<Digit, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })
@@ -166,20 +160,20 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDiv<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDiv<BigInt<Digit, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         > + NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         > + Zeroable,
 {
@@ -187,7 +181,7 @@ where
 
     fn checked_div(
         self,
-        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        divisor: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -204,21 +198,21 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDiv<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDiv<&BigInt<Digit, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeModuli<
-            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            &'a BigInt<Digit, DIGIT_BITNESS>,
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         > + NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         > + Zeroable,
 {
@@ -226,7 +220,7 @@ where
 
     fn checked_div(
         self,
-        divisor: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        divisor: &BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -243,32 +237,32 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDiv<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDiv<BigInt<Digit, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeSign<
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         > + Zeroable,
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<
+            BigInt<Digit, DIGIT_BITNESS>,
+            Output = BigInt<Digit, DIGIT_BITNESS>,
         > + NormalizeModuli<
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            BigInt<Digit, DIGIT_BITNESS>,
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
+    type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
     fn checked_div(
         self,
-        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        divisor: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -277,7 +271,7 @@ where
                 self.numerator.normalize_moduli(divisor);
             let (numerator, denominator) = dividend_numerator
                 .normalize_sign(&self.denominator * divisor_numerator);
-            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
+            Some(Fraction::<BigInt<Digit, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })
@@ -285,31 +279,31 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDiv<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDiv<&BigInt<Digit, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeSign<
+    BigInt<Digit, DIGIT_BITNESS>: NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         > + Zeroable,
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<
+            BigInt<Digit, DIGIT_BITNESS>,
+            Output = BigInt<Digit, DIGIT_BITNESS>,
         > + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
+    type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
     fn checked_div(
         self,
-        divisor: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        divisor: &BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -318,7 +312,7 @@ where
                 self.numerator.normalize_moduli(divisor);
             let (numerator, denominator) = dividend_numerator
                 .normalize_sign(&self.denominator * divisor_numerator);
-            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
+            Some(Fraction::<BigInt<Digit, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })
@@ -326,8 +320,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDiv<Fraction<Self>> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> CheckedDiv<Fraction<Self>>
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     Fraction<Self>: Zeroable,
     Self: Mul<Output = Self>
@@ -352,8 +346,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDiv<&Fraction<Self>> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> CheckedDiv<&Fraction<Self>>
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     Fraction<Self>: Zeroable,
     for<'a> Self: Mul<&'a Self, Output = Self>
@@ -378,31 +372,28 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDiv<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
-    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDiv<Fraction<BigInt<Digit, DIGIT_BITNESS>>>
+    for &BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>: Zeroable,
+    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
     Self: NormalizeModuli<
-        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        Output = (
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        ),
+        BigInt<Digit, DIGIT_BITNESS>,
+        Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
     >,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
+    type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
     fn checked_div(
         self,
-        divisor: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        divisor: Fraction<BigInt<Digit, DIGIT_BITNESS>>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -411,7 +402,7 @@ where
                 self.normalize_moduli(divisor.numerator);
             let (numerator, denominator) = (dividend * divisor.denominator)
                 .normalize_sign(divisor_numerator);
-            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
+            Some(Fraction::<BigInt<Digit, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })
@@ -419,32 +410,29 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDiv<&Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
-    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDiv<&Fraction<BigInt<Digit, DIGIT_BITNESS>>>
+    for &BigInt<Digit, DIGIT_BITNESS>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
-        Output = (
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        ),
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: NormalizeModuli<
+        Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
     >,
-    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<
-            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: Mul<
+            &'a BigInt<Digit, DIGIT_BITNESS>,
+            Output = BigInt<Digit, DIGIT_BITNESS>,
         > + NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>: Zeroable,
+    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
+    type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
     fn checked_div(
         self,
-        divisor: &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        divisor: &Fraction<BigInt<Digit, DIGIT_BITNESS>>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -453,7 +441,7 @@ where
                 self.normalize_moduli(&divisor.numerator);
             let (numerator, denominator) = (dividend * &divisor.denominator)
                 .normalize_sign(divisor_numerator);
-            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
+            Some(Fraction::<BigInt<Digit, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })

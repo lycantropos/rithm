@@ -6,8 +6,8 @@ use super::constants::{WINDOW_BASE, WINDOW_CUTOFF, WINDOW_SHIFT};
 use super::digits::LesserBinaryBaseFromBinaryDigits;
 use super::types::{BigInt, WindowDigit};
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> CheckedPow<Self>
-    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> CheckedPow<Self>
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     Self: UncheckedPow + Signed,
 {
@@ -22,8 +22,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedPow<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> CheckedPow<&Self>
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     Self: UncheckedPow + Signed,
 {
@@ -38,17 +38,16 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedPow<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedPow<BigInt<Digit, DIGIT_BITNESS>> for &BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: UncheckedPow + Signed,
+    BigInt<Digit, DIGIT_BITNESS>: UncheckedPow + Signed,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+    type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
     fn checked_pow(
         self,
-        exponent: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        exponent: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
         if exponent.is_negative() {
             None
@@ -58,12 +57,12 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> CheckedPow<Self>
-    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> CheckedPow<Self>
+    for &BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: UncheckedPow + Signed,
+    BigInt<Digit, DIGIT_BITNESS>: UncheckedPow + Signed,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+    type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
     fn checked_pow(self, exponent: Self) -> Self::Output {
         if exponent.is_negative() {
@@ -88,9 +87,8 @@ impl<
             + ShrAssign<usize>
             + Unitary
             + Zeroable,
-        const SEPARATOR: char,
         const DIGIT_BITNESS: usize,
-    > UncheckedPow for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+    > UncheckedPow for BigInt<Digit, DIGIT_BITNESS>
 where
     for<'a> Self: Mul<Output = Self> + MulAssign<&'a Self>,
     for<'a> &'a Self: Mul<Output = Self>,

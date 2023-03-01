@@ -9,11 +9,8 @@ use super::digits::{
 };
 use super::types::{BigInt, ShrError};
 
-impl<
-        Digit: ShiftDigitsRight,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > CheckedShr for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: ShiftDigitsRight, const DIGIT_BITNESS: usize> CheckedShr
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     Self: Signed,
 {
@@ -28,18 +25,15 @@ where
                     &self.digits,
                     &shift.digits,
                 );
-                Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> { sign, digits })
+                Ok(BigInt::<Digit, DIGIT_BITNESS> { sign, digits })
             }
             Sign::Zero => Ok(self),
         }
     }
 }
 
-impl<
-        Digit: ShiftDigitsRight,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > CheckedShr<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: ShiftDigitsRight, const DIGIT_BITNESS: usize> CheckedShr<&Self>
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     Self: Signed,
 {
@@ -54,28 +48,21 @@ where
                     &self.digits,
                     &shift.digits,
                 );
-                Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> { sign, digits })
+                Ok(BigInt::<Digit, DIGIT_BITNESS> { sign, digits })
             }
             Sign::Zero => Ok(self),
         }
     }
 }
 
-impl<
-        Digit: ShiftDigitsRight,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > CheckedShr<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: ShiftDigitsRight, const DIGIT_BITNESS: usize>
+    CheckedShr<BigInt<Digit, DIGIT_BITNESS>> for &BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Clone + Signed,
+    BigInt<Digit, DIGIT_BITNESS>: Clone + Signed,
 {
-    type Output = Result<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, ShrError>;
+    type Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShrError>;
 
-    fn checked_shr(
-        self,
-        shift: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-    ) -> Self::Output {
+    fn checked_shr(self, shift: BigInt<Digit, DIGIT_BITNESS>) -> Self::Output {
         match shift.sign() {
             Sign::Negative => Err(ShrError::NegativeShift),
             Sign::Positive => {
@@ -84,22 +71,19 @@ where
                     &self.digits,
                     &shift.digits,
                 );
-                Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> { sign, digits })
+                Ok(BigInt::<Digit, DIGIT_BITNESS> { sign, digits })
             }
             Sign::Zero => Ok(self.clone()),
         }
     }
 }
 
-impl<
-        Digit: ShiftDigitsRight,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > CheckedShr for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: ShiftDigitsRight, const DIGIT_BITNESS: usize> CheckedShr
+    for &BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Clone + Signed,
+    BigInt<Digit, DIGIT_BITNESS>: Clone + Signed,
 {
-    type Output = Result<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, ShrError>;
+    type Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShrError>;
 
     fn checked_shr(self, shift: Self) -> Self::Output {
         match shift.sign() {
@@ -110,7 +94,7 @@ where
                     &self.digits,
                     &shift.digits,
                 );
-                Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> { sign, digits })
+                Ok(BigInt::<Digit, DIGIT_BITNESS> { sign, digits })
             }
             Sign::Zero => Ok(self.clone()),
         }
@@ -121,9 +105,8 @@ macro_rules! checked_shr_signed_integer_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: PrimitiveShiftDigitsRight + TryFrom<usize> + Zeroable,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > CheckedShr<$integer> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+            > CheckedShr<$integer> for BigInt<Digit, DIGIT_BITNESS>
         where
             Self: Clone + Not<Output = Self>,
         {
@@ -187,15 +170,14 @@ macro_rules! checked_shr_signed_integer_impl {
 
         impl<
                 Digit: PrimitiveShiftDigitsRight + TryFrom<usize> + Zeroable,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > CheckedShr<$integer> for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+            > CheckedShr<$integer> for &BigInt<Digit, DIGIT_BITNESS>
         where
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
-                Clone + Not<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-            Self: Not<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+            BigInt<Digit, DIGIT_BITNESS>:
+                Clone + Not<Output = BigInt<Digit, DIGIT_BITNESS>>,
+            Self: Not<Output = BigInt<Digit, DIGIT_BITNESS>>,
         {
-            type Output = Result<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, ShrError>;
+            type Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShrError>;
 
             fn checked_shr(self, shift: $integer) -> Self::Output {
                 debug_assert!(
@@ -214,7 +196,7 @@ macro_rules! checked_shr_signed_integer_impl {
                                     .unwrap_unchecked()
                             } >= (usize::MAX / size_of::<Digit>())
                         {
-                            Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS>::zero())
+                            Ok(BigInt::<Digit, DIGIT_BITNESS>::zero())
                         } else if self.is_negative() {
                             let inverted = !self;
                             let digits = Digit::primitive_shift_digits_right::<
@@ -227,7 +209,7 @@ macro_rules! checked_shr_signed_integer_impl {
                                         .unwrap_unchecked()
                                 },
                             );
-                            Ok(!BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
+                            Ok(!BigInt::<Digit, DIGIT_BITNESS> {
                                 sign: inverted.sign * to_digits_sign(&digits),
                                 digits,
                             })
@@ -242,7 +224,7 @@ macro_rules! checked_shr_signed_integer_impl {
                                         .unwrap_unchecked()
                                 },
                             );
-                            Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
+                            Ok(BigInt::<Digit, DIGIT_BITNESS> {
                                 sign: self.sign * to_digits_sign(&digits),
                                 digits,
                             })
@@ -261,9 +243,8 @@ macro_rules! checked_shr_unsigned_integer_impl {
     ($($integer:ty)*) => ($(
         impl<
                 Digit: PrimitiveShiftDigitsRight + TryFrom<usize> + Zeroable,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > CheckedShr<$integer> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+            > CheckedShr<$integer> for BigInt<Digit, DIGIT_BITNESS>
         {
             type Output = Result<Self, ShrError>;
 
@@ -305,13 +286,12 @@ macro_rules! checked_shr_unsigned_integer_impl {
 
         impl<
                 Digit: PrimitiveShiftDigitsRight + TryFrom<usize> + Zeroable,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > CheckedShr<$integer> for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+            > CheckedShr<$integer> for &BigInt<Digit, DIGIT_BITNESS>
         where
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Clone,
+            BigInt<Digit, DIGIT_BITNESS>: Clone,
         {
-            type Output = Result<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, ShrError>;
+            type Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShrError>;
 
             fn checked_shr(self, shift: $integer) -> Self::Output {
                 debug_assert!(
@@ -329,7 +309,7 @@ macro_rules! checked_shr_unsigned_integer_impl {
                             usize::try_from(shift_quotient).unwrap_unchecked()
                         } >= (usize::MAX / size_of::<Digit>())
                     {
-                        Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS>::zero())
+                        Ok(BigInt::<Digit, DIGIT_BITNESS>::zero())
                     } else {
                         let digits =
                             Digit::primitive_shift_digits_right::<DIGIT_BITNESS>(
@@ -340,7 +320,7 @@ macro_rules! checked_shr_unsigned_integer_impl {
                                         .unwrap_unchecked()
                                 },
                             );
-                        Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
+                        Ok(BigInt::<Digit, DIGIT_BITNESS> {
                             sign: self.sign * to_digits_sign(&digits),
                             digits,
                         })

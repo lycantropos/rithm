@@ -42,7 +42,7 @@ const HASH_INF: ffi::Py_hash_t = 314159;
 const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
 const PICKLE_SERIALIZATION_ENDIANNESS: Endianness = Endianness::Little;
 
-type BigInt = big_int::BigInt<Digit, '_', DIGIT_BITNESS>;
+type BigInt = big_int::BigInt<Digit, DIGIT_BITNESS>;
 type Fraction = fraction::Fraction<BigInt>;
 
 #[pyclass(name = "Endianness", module = "rithm.enums")]

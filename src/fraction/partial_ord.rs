@@ -5,12 +5,12 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> PartialOrd
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> PartialOrd
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
-        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: PartialOrd,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
+    BigInt<Digit, DIGIT_BITNESS>: PartialOrd,
     Self: PartialEq,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -19,25 +19,25 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    PartialOrd<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize>
+    PartialOrd<BigInt<Digit, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
-        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: PartialOrd,
-    Self: PartialEq<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
+    BigInt<Digit, DIGIT_BITNESS>: PartialOrd,
+    Self: PartialEq<BigInt<Digit, DIGIT_BITNESS>>,
 {
     fn partial_cmp(
         &self,
-        other: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        other: &BigInt<Digit, DIGIT_BITNESS>,
     ) -> Option<Ordering> {
         self.numerator.partial_cmp(&(&self.denominator * other))
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    PartialOrd<Fraction<Self>> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> PartialOrd<Fraction<Self>>
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     for<'a> &'a Self: Mul<Output = Self>,
     Self: PartialEq<Fraction<Self>> + PartialOrd,

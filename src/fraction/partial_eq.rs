@@ -4,10 +4,10 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> PartialEq
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> PartialEq
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: PartialEq,
+    BigInt<Digit, DIGIT_BITNESS>: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         self.numerator.eq(&other.numerator)
@@ -15,27 +15,23 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    PartialEq<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> PartialEq<BigInt<Digit, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: PartialEq + Unitary,
+    BigInt<Digit, DIGIT_BITNESS>: PartialEq + Unitary,
 {
-    fn eq(&self, other: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>) -> bool {
+    fn eq(&self, other: &BigInt<Digit, DIGIT_BITNESS>) -> bool {
         self.denominator.is_one() && self.numerator.eq(other)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    PartialEq<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
-    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize>
+    PartialEq<Fraction<BigInt<Digit, DIGIT_BITNESS>>>
+    for BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: PartialEq + Unitary,
+    BigInt<Digit, DIGIT_BITNESS>: PartialEq + Unitary,
 {
-    fn eq(
-        &self,
-        other: &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-    ) -> bool {
+    fn eq(&self, other: &Fraction<BigInt<Digit, DIGIT_BITNESS>>) -> bool {
         other.denominator.is_one() && other.numerator.eq(self)
     }
 }

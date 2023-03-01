@@ -2,8 +2,8 @@ use traiter::numbers::Zeroable;
 
 use super::types::{BigInt, Sign};
 
-impl<Digit: Zeroable, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    Zeroable for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: Zeroable, const DIGIT_BITNESS: usize> Zeroable
+    for BigInt<Digit, DIGIT_BITNESS>
 {
     fn zero() -> Self {
         Self {

@@ -4,17 +4,14 @@ use traiter::numbers::BitLength;
 
 use super::types::BigInt;
 
-impl<
-        Digit: BitLength<Output = usize> + Copy,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > BitLength for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: BitLength<Output = usize> + Copy, const DIGIT_BITNESS: usize>
+    BitLength for &BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Add<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    BigInt<Digit, DIGIT_BITNESS>: Add<Output = BigInt<Digit, DIGIT_BITNESS>>
         + From<usize>
-        + Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        + Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
-    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
+    type Output = BigInt<Digit, DIGIT_BITNESS>;
 
     fn bit_length(self) -> Self::Output {
         if self.digits.len() <= usize::MAX / DIGIT_BITNESS {

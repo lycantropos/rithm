@@ -2,8 +2,7 @@ use traiter::numbers::{Sign, Signed, Zeroable};
 
 use super::types::BigInt;
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Signed
-    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> Signed for BigInt<Digit, DIGIT_BITNESS>
 where
     Self: Zeroable,
 {

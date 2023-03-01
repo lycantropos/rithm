@@ -12,13 +12,12 @@ macro_rules! big_int_fraction_try_from_float_impl {
     ($($float:ty)*) => ($(
         impl<
                 Digit: Copy + TryFrom<usize> + Unitary + Zeroable,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > TryFrom<$float> for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+            > TryFrom<$float> for Fraction<BigInt<Digit, DIGIT_BITNESS>>
         where
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedShl<
+            BigInt<Digit, DIGIT_BITNESS>: CheckedShl<
                 u32,
-                Output = Result<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, ShlError>,
+                Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShlError>,
             >,
             $float: From<Digit> + UncheckedToInt<Digit>,
         {
@@ -40,11 +39,11 @@ macro_rules! big_int_fraction_try_from_float_impl {
                     }
                     let mut numerator = unsafe {
                         <$float as UncheckedToInt<
-                            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                            BigInt<Digit, DIGIT_BITNESS>,
                         >>::unchecked_to_int(fraction)
                     };
                     let mut denominator =
-                        BigInt::<Digit, SEPARATOR, DIGIT_BITNESS>::one();
+                        BigInt::<Digit, DIGIT_BITNESS>::one();
                     if exponent.is_negative() {
                         denominator = denominator
                             .checked_shl((-exponent) as u32)

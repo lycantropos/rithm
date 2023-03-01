@@ -2,11 +2,8 @@ use traiter::numbers::{IsPowerOfTwo, Zeroable};
 
 use super::types::BigInt;
 
-impl<
-        Digit: IsPowerOfTwo + Zeroable,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > IsPowerOfTwo for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: IsPowerOfTwo + Zeroable, const DIGIT_BITNESS: usize> IsPowerOfTwo
+    for BigInt<Digit, DIGIT_BITNESS>
 {
     fn is_power_of_two(&self) -> bool {
         self.sign.is_positive()

@@ -38,19 +38,14 @@ const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
 
 impl<
         Digit: BinaryBaseFromDigits<u8> + HasSignBit + Zeroable,
-        const SEPARATOR: char,
         const DIGIT_BITNESS: usize,
-    > TryFromString for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+    > TryFromString for BigInt<Digit, DIGIT_BITNESS>
 {
     fn try_from_string(
         string: &str,
         mut base: u8,
     ) -> Result<Self, TryFromStringError> {
         debug_assert!(is_valid_digit_bitness::<Digit, DIGIT_BITNESS>());
-        debug_assert!(
-            ASCII_CODES_DIGIT_VALUES[SEPARATOR as usize]
-                >= MAX_REPRESENTABLE_BASE
-        );
         debug_assert!(
             base == 0
                 || (MIN_REPRESENTABLE_BASE..=MAX_REPRESENTABLE_BASE)
@@ -61,8 +56,8 @@ impl<
         if base == 0 {
             base = guess_base(&mut characters);
         };
-        skip_prefix::<SEPARATOR>(&mut characters, base);
-        parse_digits::<SEPARATOR>(characters, base).map(|digits| {
+        skip_prefix(&mut characters, base);
+        parse_digits(characters, base).map(|digits| {
             let digits = Digit::binary_base_from_digits::<DIGIT_BITNESS>(
                 &digits,
                 base as usize,
@@ -89,37 +84,26 @@ fn guess_base(characters: &mut Peekable<Chars>) -> u8 {
 }
 
 #[inline]
-fn parse_digits<const SEPARATOR: char>(
-    mut characters: Peekable<Chars>,
+fn parse_digits(
+    characters: Peekable<Chars>,
     base: u8,
 ) -> Result<Vec<u8>, TryFromStringError> {
-    if characters.peek() == Some(&SEPARATOR) {
-        return Err(TryFromStringError::StartsWithSeparator);
-    }
-    let mut result: Vec<u8> = {
+    let mut result = {
         let (_, maybe_characters_count) = characters.size_hint();
         debug_assert!(maybe_characters_count.is_some());
         let characters_count =
             unsafe { maybe_characters_count.unwrap_unchecked() };
-        Vec::with_capacity(characters_count)
+        Vec::<u8>::with_capacity(characters_count)
     };
-    let mut prev: char = SEPARATOR;
     for character in characters {
-        if character != SEPARATOR {
-            let digit = ASCII_CODES_DIGIT_VALUES[character as usize];
-            if digit >= base {
-                return Err(TryFromStringError::InvalidDigit(character, base));
-            }
-            result.push(digit);
-        } else if prev == SEPARATOR {
-            return Err(TryFromStringError::ConsecutiveSeparators);
+        let digit = ASCII_CODES_DIGIT_VALUES[character as usize];
+        if digit >= base {
+            return Err(TryFromStringError::InvalidDigit(character, base));
         }
-        prev = character;
+        result.push(digit);
     }
     if result.is_empty() {
         Err(TryFromStringError::NoDigits)
-    } else if prev == SEPARATOR {
-        Err(TryFromStringError::EndsWithSeparator)
     } else {
         result.reverse();
         trim_leading_zeros(&mut result);
@@ -140,28 +124,22 @@ fn parse_sign(characters: &mut Peekable<Chars>) -> i8 {
     }
 }
 
-fn skip_prefix<const SEPARATOR: char>(
-    characters: &mut Peekable<Chars>,
-    base: u8,
-) {
+fn skip_prefix(characters: &mut Peekable<Chars>, base: u8) {
     if characters.peek() == Some(&'0') {
         match characters.clone().nth(1) {
             Some('b') | Some('B') => {
                 if base == 2 {
                     characters.nth(1);
-                    characters.next_if_eq(&SEPARATOR);
                 }
             }
             Some('o') | Some('O') => {
                 if base == 8 {
                     characters.nth(1);
-                    characters.next_if_eq(&SEPARATOR);
                 }
             }
             Some('x') | Some('X') => {
                 if base == 16 {
                     characters.nth(1);
-                    characters.next_if_eq(&SEPARATOR);
                 }
             }
             _ => {}

@@ -6,14 +6,13 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> CheckedDivEuclid
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> CheckedDivEuclid
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
-            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-        > + Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    BigInt<Digit, DIGIT_BITNESS>: CheckedDivEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
+        + Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+    type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
     fn checked_div_euclid(self, divisor: Self) -> Self::Output {
         (self.numerator * divisor.denominator)
@@ -21,18 +20,16 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDivEuclid<&Self>
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> CheckedDivEuclid<&Self>
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
-            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-        > + Mul<
-            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedDivEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
+        + Mul<
+            &'a BigInt<Digit, DIGIT_BITNESS>,
+            Output = BigInt<Digit, DIGIT_BITNESS>,
         >,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+    type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
     fn checked_div_euclid(self, divisor: &Self) -> Self::Output {
         (self.numerator * &divisor.denominator)
@@ -40,39 +37,37 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDivEuclid<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
-    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDivEuclid<Fraction<BigInt<Digit, DIGIT_BITNESS>>>
+    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
-        Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-    >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<
-        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    BigInt<Digit, DIGIT_BITNESS>:
+        CheckedDivEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<
+        BigInt<Digit, DIGIT_BITNESS>,
+        Output = BigInt<Digit, DIGIT_BITNESS>,
     >,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+    type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
     fn checked_div_euclid(
         self,
-        divisor: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        divisor: Fraction<BigInt<Digit, DIGIT_BITNESS>>,
     ) -> Self::Output {
         (&self.numerator * divisor.denominator)
             .checked_div_euclid(&self.denominator * divisor.numerator)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> CheckedDivEuclid
-    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> CheckedDivEuclid
+    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
-        Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-    >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
-        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    BigInt<Digit, DIGIT_BITNESS>:
+        CheckedDivEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+    type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
     fn checked_div_euclid(self, divisor: Self) -> Self::Output {
         (&self.numerator * &divisor.denominator)
@@ -80,93 +75,90 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDivEuclid<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDivEuclid<BigInt<Digit, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
-            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-        > + Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    BigInt<Digit, DIGIT_BITNESS>: CheckedDivEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
+        + Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+    type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
     fn checked_div_euclid(
         self,
-        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        divisor: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
         self.numerator
             .checked_div_euclid(self.denominator * divisor)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDivEuclid<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDivEuclid<&BigInt<Digit, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
-            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-        > + Mul<
-            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedDivEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
+        + Mul<
+            &'a BigInt<Digit, DIGIT_BITNESS>,
+            Output = BigInt<Digit, DIGIT_BITNESS>,
         >,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+    type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
     fn checked_div_euclid(
         self,
-        divisor: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        divisor: &BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
         self.numerator
             .checked_div_euclid(self.denominator * divisor)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDivEuclid<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDivEuclid<BigInt<Digit, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: CheckedDivEuclid<
+            BigInt<Digit, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
         > + Mul<
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            BigInt<Digit, DIGIT_BITNESS>,
+            Output = BigInt<Digit, DIGIT_BITNESS>,
         >,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+    type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
     fn checked_div_euclid(
         self,
-        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        divisor: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
         self.numerator
             .checked_div_euclid(&self.denominator * divisor)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDivEuclid<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDivEuclid<&BigInt<Digit, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
-            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-        > + Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: CheckedDivEuclid<
+            BigInt<Digit, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
+        > + Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+    type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
     fn checked_div_euclid(
         self,
-        divisor: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        divisor: &BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
         self.numerator
             .checked_div_euclid(&self.denominator * divisor)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDivEuclid<Fraction<Self>>
-    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> CheckedDivEuclid<Fraction<Self>>
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     Self: CheckedDivEuclid<Output = Option<Self>> + Mul<Output = Self>,
 {
@@ -177,9 +169,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDivEuclid<&Fraction<Self>>
-    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> CheckedDivEuclid<&Fraction<Self>>
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     for<'a> Self: CheckedDivEuclid<&'a Self, Output = Option<Self>>
         + Mul<&'a Self, Output = Self>,
@@ -191,44 +182,43 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDivEuclid<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
-    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDivEuclid<Fraction<BigInt<Digit, DIGIT_BITNESS>>>
+    for &BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
-        Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-    >,
+    BigInt<Digit, DIGIT_BITNESS>:
+        CheckedDivEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>,
     for<'a> Self: Mul<
-        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        BigInt<Digit, DIGIT_BITNESS>,
+        Output = BigInt<Digit, DIGIT_BITNESS>,
     >,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+    type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
     fn checked_div_euclid(
         self,
-        divisor: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        divisor: Fraction<BigInt<Digit, DIGIT_BITNESS>>,
     ) -> Self::Output {
         (self * divisor.denominator).checked_div_euclid(divisor.numerator)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
-    CheckedDivEuclid<&Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
-    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedDivEuclid<&Fraction<BigInt<Digit, DIGIT_BITNESS>>>
+    for &BigInt<Digit, DIGIT_BITNESS>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
-        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
-        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedDivEuclid<
+        &'a BigInt<Digit, DIGIT_BITNESS>,
+        Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
     >,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+    type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
     fn checked_div_euclid(
         self,
-        divisor: &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        divisor: &Fraction<BigInt<Digit, DIGIT_BITNESS>>,
     ) -> Self::Output {
         (self * &divisor.denominator).checked_div_euclid(&divisor.numerator)
     }

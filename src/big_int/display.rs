@@ -8,8 +8,8 @@ use super::constants::MAX_REPRESENTABLE_BASE;
 use super::digits::BaseFromBinaryDigits;
 use super::types::BigInt;
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Display
-    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit, const DIGIT_BITNESS: usize> Display
+    for BigInt<Digit, DIGIT_BITNESS>
 where
     Self: ToBaseString,
 {
@@ -36,9 +36,8 @@ impl<
             + RemEuclid<Output = Digit>
             + TryFrom<usize>
             + Zeroable,
-        const SEPARATOR: char,
         const DIGIT_BITNESS: usize,
-    > ToBaseString for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+    > ToBaseString for BigInt<Digit, DIGIT_BITNESS>
 where
     usize: TryFrom<Digit>,
 {

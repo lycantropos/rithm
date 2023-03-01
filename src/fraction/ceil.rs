@@ -6,14 +6,13 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Ceil
-    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> Ceil
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
-            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
-        > + Neg<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    BigInt<Digit, DIGIT_BITNESS>: CheckedDivEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
+        + Neg<Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
-    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
+    type Output = BigInt<Digit, DIGIT_BITNESS>;
 
     fn ceil(self) -> Self::Output {
         -unsafe {
@@ -24,17 +23,17 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Ceil
-    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+impl<Digit, const DIGIT_BITNESS: usize> Ceil
+    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
-        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-        Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedDivEuclid<
+        &'a BigInt<Digit, DIGIT_BITNESS>,
+        Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
     >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
-        Neg<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
+        Neg<Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
-    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
+    type Output = BigInt<Digit, DIGIT_BITNESS>;
 
     fn ceil(self) -> Self::Output {
         -unsafe {

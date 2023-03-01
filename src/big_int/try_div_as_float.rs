@@ -7,9 +7,8 @@ macro_rules! try_div_big_int_as_float_impl {
     ($($float:ty)*) => ($(
         impl<
                 Digit: TryDivDigitsAsFloat<$float>,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > TryDivAsFloat<Self, $float> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+            > TryDivAsFloat<Self, $float> for BigInt<Digit, DIGIT_BITNESS>
         {
             type Error = <Digit as TryDivDigitsAsFloat<$float>>::Error;
 
@@ -29,10 +28,9 @@ macro_rules! try_div_big_int_as_float_impl {
 
         impl<
                 Digit: TryDivDigitsAsFloat<$float>,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
             > TryDivAsFloat<&Self, $float>
-            for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+            for BigInt<Digit, DIGIT_BITNESS>
         {
             type Error = <Digit as TryDivDigitsAsFloat<$float>>::Error;
 
@@ -52,16 +50,15 @@ macro_rules! try_div_big_int_as_float_impl {
 
         impl<
                 Digit: TryDivDigitsAsFloat<$float>,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
-            > TryDivAsFloat<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, $float>
-            for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+            > TryDivAsFloat<BigInt<Digit, DIGIT_BITNESS>, $float>
+            for &BigInt<Digit, DIGIT_BITNESS>
         {
             type Error = <Digit as TryDivDigitsAsFloat<$float>>::Error;
 
             fn try_div_as_float(
                 self,
-                divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                divisor: BigInt<Digit, DIGIT_BITNESS>,
             ) -> Result<$float, Self::Error> {
                 Digit::checked_div_digits_as_float::<DIGIT_BITNESS>(
                     &self.digits,
@@ -75,10 +72,9 @@ macro_rules! try_div_big_int_as_float_impl {
 
         impl<
                 Digit: TryDivDigitsAsFloat<$float>,
-                const SEPARATOR: char,
                 const DIGIT_BITNESS: usize,
             > TryDivAsFloat<Self, $float>
-            for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+            for &BigInt<Digit, DIGIT_BITNESS>
         {
             type Error = <Digit as TryDivDigitsAsFloat<$float>>::Error;
 

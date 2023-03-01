@@ -3,8 +3,8 @@ use traiter::numbers::Gcd;
 use super::digits::GcdDigits;
 use super::types::BigInt;
 
-impl<Digit: GcdDigits, const SEPARATOR: char, const DIGIT_BITNESS: usize> Gcd
-    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: GcdDigits, const DIGIT_BITNESS: usize> Gcd
+    for BigInt<Digit, DIGIT_BITNESS>
 {
     type Output = Self;
 
@@ -15,11 +15,8 @@ impl<Digit: GcdDigits, const SEPARATOR: char, const DIGIT_BITNESS: usize> Gcd
     }
 }
 
-impl<
-        Digit: Clone + GcdDigits,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > Gcd<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: Clone + GcdDigits, const DIGIT_BITNESS: usize> Gcd<&Self>
+    for BigInt<Digit, DIGIT_BITNESS>
 {
     type Output = Self;
 
@@ -32,19 +29,12 @@ impl<
     }
 }
 
-impl<
-        Digit: Clone + GcdDigits,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > Gcd<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
-    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: Clone + GcdDigits, const DIGIT_BITNESS: usize>
+    Gcd<BigInt<Digit, DIGIT_BITNESS>> for &BigInt<Digit, DIGIT_BITNESS>
 {
-    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
+    type Output = BigInt<Digit, DIGIT_BITNESS>;
 
-    fn gcd(
-        self,
-        other: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
-    ) -> Self::Output {
+    fn gcd(self, other: BigInt<Digit, DIGIT_BITNESS>) -> Self::Output {
         let (sign, digits) = Digit::gcd_digits::<DIGIT_BITNESS>(
             self.digits.clone(),
             other.digits,
@@ -53,13 +43,10 @@ impl<
     }
 }
 
-impl<
-        Digit: Clone + GcdDigits,
-        const SEPARATOR: char,
-        const DIGIT_BITNESS: usize,
-    > Gcd for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
+impl<Digit: Clone + GcdDigits, const DIGIT_BITNESS: usize> Gcd
+    for &BigInt<Digit, DIGIT_BITNESS>
 {
-    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
+    type Output = BigInt<Digit, DIGIT_BITNESS>;
 
     fn gcd(self, other: Self) -> Self::Output {
         let (sign, digits) = Digit::gcd_digits::<DIGIT_BITNESS>(

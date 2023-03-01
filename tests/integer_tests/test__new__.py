@@ -40,7 +40,7 @@ def test_float_determinism(float_: float) -> None:
         result = Int(float_)
     except (OverflowError, ValueError) as exception:
         with pytest.raises(type(exception)):
-            Int(float_)
+            int(float_)
     else:
         assert result == Int(float_)
 
@@ -79,12 +79,12 @@ def test_string_with_base_connection_with_builtin(
 
 
 @given(strategies.int_strings, strategies.out_of_range_bases)
-def test_string_with_out_of_range_base(string: int, base: int) -> None:
+def test_string_with_out_of_range_base(string: str, base: int) -> None:
     with pytest.raises(ValueError):
         Int(string, base)
 
 
 @given(strategies.invalid_int_strings, strategies.bases)
-def test_invalid_string_with_base(string: int, base: int) -> None:
+def test_invalid_string_with_base(string: str, base: int) -> None:
     with pytest.raises(ValueError):
         Int(string, base)

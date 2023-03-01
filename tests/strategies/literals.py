@@ -1,48 +1,31 @@
 import re
 import string
-import sys
 from functools import partial
 
 from hypothesis import strategies
 
 compile_ = partial(re.compile,
                    flags=re.ASCII)
-separator = '_?' if sys.version_info >= (3, 6) else ''
-whitespaces_class = r'[\f\n\r\t\v ]'
+_whitespaces = r'[\f\n\r\t\v ]'
 decimal_int_strings_with_leading_zeros = strategies.from_regex(
-        compile_(r'\A{whitespaces}*[+-]?\d({separator}\d+)*{whitespaces}*\Z'
-                 .format(separator=separator,
-                         whitespaces=whitespaces_class))
+        compile_(fr'\A{_whitespaces}*[+-]?\d(\d+)*{_whitespaces}*\Z')
 )
 decimal_int_strings_without_leading_zeros = strategies.from_regex(
-        compile_(r'\A{whitespaces}*[+-]?(\d|[1-9]({separator}\d+)+)'
-                 r'{whitespaces}*\Z'
-                 .format(separator=separator,
-                         whitespaces=whitespaces_class))
+        compile_(fr'\A{_whitespaces}*[+-]?(\d|[1-9](\d+)+){_whitespaces}*\Z')
 )
 prefixed_binary_int_strings = strategies.from_regex(
-        compile_(r'\A{whitespaces}*[+-]?0b({separator}[0-1]+)+'
-                 r'{whitespaces}*\Z'
-                 .format(separator=separator,
-                         whitespaces=whitespaces_class))
+        compile_(fr'\A{_whitespaces}*[+-]?0b([0-1]+)+{_whitespaces}*\Z')
 )
 prefixed_octal_int_strings = strategies.from_regex(
-        compile_(r'\A{whitespaces}*[+-]?0o({separator}[0-7]+)+'
-                 r'{whitespaces}*\Z'
-                 .format(separator=separator,
-                         whitespaces=whitespaces_class))
+        compile_(fr'\A{_whitespaces}*[+-]?0o([0-7]+)+{_whitespaces}*\Z')
 )
 prefixed_hexadecimal_int_strings = strategies.from_regex(
-        compile_(r'\A{whitespaces}*[+-]?0x({separator}[\da-f]+)+'
-                 r'{whitespaces}*\Z'
-                 .format(separator=separator,
-                         whitespaces=whitespaces_class))
+        compile_(fr'\A{_whitespaces}*[+-]?0x([\da-f]+)+{_whitespaces}*\Z')
 )
 int_strings_with_bases = (
     (strategies.tuples(
             strategies.from_regex(compile_(
-                    fr'\A{whitespaces_class}*[+-]?0({separator}0+)*'
-                    fr'{whitespaces_class}*\Z'
+                    fr'\A{_whitespaces}*[+-]?0(0+)*{_whitespaces}*\Z'
             )),
             strategies.sampled_from(range(2, 37))
     )
@@ -53,26 +36,22 @@ int_strings_with_bases = (
      | strategies.one_of([strategies.tuples(
                     strategies.from_regex(
                             compile_(r'\A{whitespaces}*[+-]?{digits}'
-                                     r'({separator}{digits}+)*'
-                                     r'{whitespaces}*\Z'
+                                     r'({digits}+)*{whitespaces}*\Z'
                                      .format(digits='[0-{}]'.format(max_digit),
-                                             separator=separator,
-                                             whitespaces=whitespaces_class))),
+                                             whitespaces=_whitespaces))),
                     strategies.just(max_digit + 1))
                 for max_digit in range(1, 10)
             ])
      | strategies.one_of([strategies.tuples(
                     strategies.from_regex(compile_(
-                            (r'\A{whitespaces}*[+-]?{digits}'
-                             r'({separator}{digits}+)*'
+                            (r'\A{whitespaces}*[+-]?{digits}({digits}+)*'
                              r'{whitespaces}*\Z'
                              .format(digits
                                      =('[0-9a-{max_lower}'
                                        'A-{max_upper}]'
                                        .format(max_lower=max_lower,
                                                max_upper=max_lower.upper())),
-                                     separator=separator,
-                                     whitespaces=whitespaces_class))
+                                     whitespaces=_whitespaces))
                     )),
                     strategies.just(base))
                 for base, max_lower in enumerate(string.ascii_lowercase,

@@ -7,8 +7,8 @@ use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Rem
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Rem
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
     Self: CheckedRem<Output = Option<Self>>,
 {
@@ -20,8 +20,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Rem<&Self>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Rem<&Self>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
     for<'a> Self: CheckedRem<&'a Self, Output = Option<Self>>,
 {
@@ -33,33 +33,34 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Rem<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Rem<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
     Self: CheckedRem<
-        Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
-        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+        Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn rem(
         self,
-        divisor: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        divisor: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         self.checked_rem(divisor)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Rem
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Rem
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    Self:
-        CheckedRem<Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>>,
+    Self: CheckedRem<
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
+    >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn rem(self, divisor: Self) -> Self::Output {
         self.checked_rem(divisor)
@@ -67,71 +68,88 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Rem<BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
-where
-    Self: CheckedRem<BigInt<Digit, SEPARATOR, SHIFT>, Output = Option<Self>>,
-{
-    type Output = Self;
-
-    fn rem(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        self.checked_rem(divisor)
-            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Rem<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
-where
-    for<'a> Self:
-        CheckedRem<&'a BigInt<Digit, SEPARATOR, SHIFT>, Output = Option<Self>>,
-{
-    type Output = Self;
-
-    fn rem(self, divisor: &BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        self.checked_rem(divisor)
-            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Rem<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Rem<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
     Self: CheckedRem<
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Option<Self>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Self;
 
-    fn rem(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn rem(
+        self,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
         self.checked_rem(divisor)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Rem<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Rem<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
     for<'a> Self: CheckedRem<
-        &'a BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Option<Self>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Self;
 
-    fn rem(self, divisor: &BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn rem(
+        self,
+        divisor: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
         self.checked_rem(divisor)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Rem<Fraction<Self>>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Rem<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+where
+    Self: CheckedRem<
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+
+    fn rem(
+        self,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
+        self.checked_rem(divisor)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Rem<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+where
+    for<'a> Self: CheckedRem<
+        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+
+    fn rem(
+        self,
+        divisor: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
+        self.checked_rem(divisor)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Rem<Fraction<Self>> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: CheckedRem<Fraction<Self>, Output = Option<Fraction<Self>>>,
 {
@@ -143,8 +161,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Rem<&Fraction<Self>>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Rem<&Fraction<Self>> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     for<'a> Self:
         CheckedRem<&'a Fraction<Self>, Output = Option<Fraction<Self>>>,
@@ -157,40 +175,40 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Rem<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Rem<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: CheckedRem<
-        Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
-        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+        Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn rem(
         self,
-        divisor: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        divisor: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         self.checked_rem(divisor)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Rem<&Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Rem<&Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: CheckedRem<
-        &'a Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
-        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<
+        &'a Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn rem(
         self,
-        divisor: &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        divisor: &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         self.checked_rem(divisor)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)

@@ -6,13 +6,13 @@ pub(super) type Sign = i8;
 pub(super) type WindowDigit = u8;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct BigInt<Digit, const SEPARATOR: char, const SHIFT: usize> {
+pub struct BigInt<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> {
     pub(super) sign: Sign,
     pub(super) digits: Vec<Digit>,
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     pub(crate) fn digits(&self) -> &[Digit] {
         &self.digits

@@ -5,64 +5,81 @@ use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Pow<BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
-where
-    Self: CheckedPow<BigInt<Digit, SEPARATOR, SHIFT>, Output = Option<Self>>,
-{
-    type Output = Self;
-
-    fn pow(self, exponent: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        self.checked_pow(exponent)
-            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Pow<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
-where
-    for<'a> Self:
-        CheckedPow<&'a BigInt<Digit, SEPARATOR, SHIFT>, Output = Option<Self>>,
-{
-    type Output = Self;
-
-    fn pow(self, exponent: &BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        self.checked_pow(exponent)
-            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Pow<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Pow<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
     Self: CheckedPow<
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Option<Self>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Self;
 
-    fn pow(self, exponent: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn pow(
+        self,
+        exponent: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
         self.checked_pow(exponent)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Pow<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Pow<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
     for<'a> Self: CheckedPow<
-        &'a BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Option<Self>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Self;
 
-    fn pow(self, exponent: &BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn pow(
+        self,
+        exponent: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
+        self.checked_pow(exponent)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Pow<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+where
+    Self: CheckedPow<
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+
+    fn pow(
+        self,
+        exponent: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
+        self.checked_pow(exponent)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Pow<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+where
+    for<'a> Self: CheckedPow<
+        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+
+    fn pow(
+        self,
+        exponent: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
         self.checked_pow(exponent)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
     }

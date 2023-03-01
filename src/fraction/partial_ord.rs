@@ -5,12 +5,12 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> PartialOrd
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> PartialOrd
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    BigInt<Digit, SEPARATOR, SHIFT>: PartialOrd,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: PartialOrd,
     Self: PartialEq,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -19,25 +19,25 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    PartialOrd<BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    PartialOrd<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    BigInt<Digit, SEPARATOR, SHIFT>: PartialOrd,
-    Self: PartialEq<BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: PartialOrd,
+    Self: PartialEq<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
     fn partial_cmp(
         &self,
-        other: &BigInt<Digit, SEPARATOR, SHIFT>,
+        other: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Option<Ordering> {
         self.numerator.partial_cmp(&(&self.denominator * other))
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    PartialOrd<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    PartialOrd<Fraction<Self>> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     for<'a> &'a Self: Mul<Output = Self>,
     Self: PartialEq<Fraction<Self>> + PartialOrd,

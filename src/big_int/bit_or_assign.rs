@@ -6,11 +6,11 @@ use super::types::BigInt;
 impl<
         Digit: BitwiseOrComponents + Clone,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > BitOrAssign for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > BitOrAssign for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     fn bitor_assign(&mut self, other: Self) {
-        (self.sign, self.digits) = Digit::bitwise_or_components::<SHIFT>(
+        (self.sign, self.digits) = Digit::bitwise_or_components::<DIGIT_BITNESS>(
             self.sign,
             self.digits.clone(),
             other.sign,
@@ -22,11 +22,11 @@ impl<
 impl<
         Digit: BitwiseOrComponents + Clone,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > BitOrAssign<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > BitOrAssign<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     fn bitor_assign(&mut self, other: &Self) {
-        (self.sign, self.digits) = Digit::bitwise_or_components::<SHIFT>(
+        (self.sign, self.digits) = Digit::bitwise_or_components::<DIGIT_BITNESS>(
             self.sign,
             self.digits.clone(),
             other.sign,

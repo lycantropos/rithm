@@ -6,8 +6,8 @@ use traiter::numbers::{
 
 use super::types::BigInt;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclidInv
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRemEuclidInv for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     for<'a> Self: CheckedRemEuclidInv<&'a Self, Output = Option<Self>>,
 {
@@ -18,8 +18,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedRemEuclidInv<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRemEuclidInv<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     for<'a> Self: Clone
         + Mul<&'a Self, Output = Self>
@@ -58,34 +58,34 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedRemEuclidInv<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRemEuclidInv<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedRemEuclidInv<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRemEuclidInv<
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
         > + Clone,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn checked_rem_euclid_inv(
         self,
-        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         self.clone().checked_rem_euclid_inv(&divisor)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedRemEuclidInv
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRemEuclidInv for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedRemEuclidInv<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRemEuclidInv<
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
         > + Clone,
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn checked_rem_euclid_inv(self, divisor: Self) -> Self::Output {
         self.clone().checked_rem_euclid_inv(divisor)

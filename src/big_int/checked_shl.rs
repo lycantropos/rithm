@@ -6,8 +6,11 @@ use traiter::numbers::{CheckedShl, DivRem, Sign, Signed, Zeroable};
 use super::digits::{PrimitiveShiftDigitsLeft, ShiftDigitsLeft};
 use super::types::{BigInt, ShlError};
 
-impl<Digit: ShiftDigitsLeft, const SEPARATOR: char, const SHIFT: usize>
-    CheckedShl for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ShiftDigitsLeft,
+        const SEPARATOR: char,
+        const DIGIT_BITNESS: usize,
+    > CheckedShl for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: Signed,
 {
@@ -16,9 +19,9 @@ where
     fn checked_shl(self, shift: Self) -> Self::Output {
         match shift.sign() {
             Sign::Negative => Err(ShlError::NegativeShift),
-            Sign::Positive => Ok(BigInt::<Digit, SEPARATOR, SHIFT> {
+            Sign::Positive => Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
                 sign: self.sign,
-                digits: Digit::shift_digits_left::<SHIFT>(
+                digits: Digit::shift_digits_left::<DIGIT_BITNESS>(
                     &self.digits,
                     &shift.digits,
                 )?,
@@ -28,8 +31,11 @@ where
     }
 }
 
-impl<Digit: ShiftDigitsLeft, const SEPARATOR: char, const SHIFT: usize>
-    CheckedShl<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ShiftDigitsLeft,
+        const SEPARATOR: char,
+        const DIGIT_BITNESS: usize,
+    > CheckedShl<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: Signed,
 {
@@ -38,9 +44,9 @@ where
     fn checked_shl(self, shift: &Self) -> Self::Output {
         match shift.sign() {
             Sign::Negative => Err(ShlError::NegativeShift),
-            Sign::Positive => Ok(BigInt::<Digit, SEPARATOR, SHIFT> {
+            Sign::Positive => Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
                 sign: self.sign,
-                digits: Digit::shift_digits_left::<SHIFT>(
+                digits: Digit::shift_digits_left::<DIGIT_BITNESS>(
                     &self.digits,
                     &shift.digits,
                 )?,
@@ -50,23 +56,26 @@ where
     }
 }
 
-impl<Digit: ShiftDigitsLeft, const SEPARATOR: char, const SHIFT: usize>
-    CheckedShl<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ShiftDigitsLeft,
+        const SEPARATOR: char,
+        const DIGIT_BITNESS: usize,
+    > CheckedShl<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: Clone + Signed,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Clone + Signed,
 {
-    type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShlError>;
+    type Output = Result<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, ShlError>;
 
     fn checked_shl(
         self,
-        shift: BigInt<Digit, SEPARATOR, SHIFT>,
+        shift: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         match shift.sign() {
             Sign::Negative => Err(ShlError::NegativeShift),
-            Sign::Positive => Ok(BigInt::<Digit, SEPARATOR, SHIFT> {
+            Sign::Positive => Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
                 sign: self.sign,
-                digits: Digit::shift_digits_left::<SHIFT>(
+                digits: Digit::shift_digits_left::<DIGIT_BITNESS>(
                     &self.digits,
                     &shift.digits,
                 )?,
@@ -76,19 +85,22 @@ where
     }
 }
 
-impl<Digit: ShiftDigitsLeft, const SEPARATOR: char, const SHIFT: usize>
-    CheckedShl for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: ShiftDigitsLeft,
+        const SEPARATOR: char,
+        const DIGIT_BITNESS: usize,
+    > CheckedShl for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: Clone + Signed,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Clone + Signed,
 {
-    type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShlError>;
+    type Output = Result<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, ShlError>;
 
     fn checked_shl(self, shift: Self) -> Self::Output {
         match shift.sign() {
             Sign::Negative => Err(ShlError::NegativeShift),
-            Sign::Positive => Ok(BigInt::<Digit, SEPARATOR, SHIFT> {
+            Sign::Positive => Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
                 sign: self.sign,
-                digits: Digit::shift_digits_left::<SHIFT>(
+                digits: Digit::shift_digits_left::<DIGIT_BITNESS>(
                     &self.digits,
                     &shift.digits,
                 )?,
@@ -103,21 +115,21 @@ macro_rules! checked_shl_signed_integer_impl {
         impl<
                 Digit: PrimitiveShiftDigitsLeft + TryFrom<usize>,
                 const SEPARATOR: char,
-                const SHIFT: usize,
-            > CheckedShl<$integer> for BigInt<Digit, SEPARATOR, SHIFT>
+                const DIGIT_BITNESS: usize,
+            > CheckedShl<$integer> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
         {
             type Output = Result<Self, ShlError>;
 
             fn checked_shl(self, shift: $integer) -> Self::Output {
                 debug_assert!(
                     usize::BITS < <$integer>::BITS
-                        || SHIFT < <$integer>::MAX as usize
+                        || DIGIT_BITNESS < <$integer>::MAX as usize
                 );
                 match shift.sign() {
                     Sign::Negative => Err(ShlError::NegativeShift),
                     Sign::Positive => {
                         let (shift_quotient, shift_remainder) =
-                            shift.div_rem(SHIFT as $integer);
+                            shift.div_rem(DIGIT_BITNESS as $integer);
                         if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
                             >= (usize::BITS as usize)
                             && unsafe {
@@ -128,7 +140,7 @@ macro_rules! checked_shl_signed_integer_impl {
                             Err(ShlError::TooLarge)
                         } else {
                             let digits = Digit::primitive_shift_digits_left::<
-                                SHIFT,
+                                DIGIT_BITNESS,
                             >(
                                 &self.digits,
                                 shift_quotient as usize,
@@ -152,23 +164,23 @@ macro_rules! checked_shl_signed_integer_impl {
         impl<
                 Digit: PrimitiveShiftDigitsLeft + TryFrom<usize>,
                 const SEPARATOR: char,
-                const SHIFT: usize,
-            > CheckedShl<$integer> for &BigInt<Digit, SEPARATOR, SHIFT>
+                const DIGIT_BITNESS: usize,
+            > CheckedShl<$integer> for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
         where
-            BigInt<Digit, SEPARATOR, SHIFT>: Clone,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Clone,
         {
-            type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShlError>;
+            type Output = Result<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, ShlError>;
 
             fn checked_shl(self, shift: $integer) -> Self::Output {
                 debug_assert!(
                     usize::BITS < <$integer>::BITS
-                        || SHIFT < <$integer>::MAX as usize
+                        || DIGIT_BITNESS < <$integer>::MAX as usize
                 );
                 match shift.sign() {
                     Sign::Negative => Err(ShlError::NegativeShift),
                     Sign::Positive => {
                         let (shift_quotient, shift_remainder) =
-                            shift.div_rem(SHIFT as $integer);
+                            shift.div_rem(DIGIT_BITNESS as $integer);
                         if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
                             >= (usize::BITS as usize)
                             && unsafe {
@@ -179,7 +191,7 @@ macro_rules! checked_shl_signed_integer_impl {
                             Err(ShlError::TooLarge)
                         } else {
                             let digits = Digit::primitive_shift_digits_left::<
-                                SHIFT,
+                                DIGIT_BITNESS,
                             >(
                                 &self.digits,
                                 shift_quotient as usize,
@@ -189,7 +201,7 @@ macro_rules! checked_shl_signed_integer_impl {
                                 },
                             )
                             .ok_or(ShlError::OutOfMemory)?;
-                            Ok(BigInt::<Digit, SEPARATOR, SHIFT> {
+                            Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
                                 sign: self.sign,
                                 digits,
                             })
@@ -209,23 +221,23 @@ macro_rules! checked_shl_unsigned_integer_impl {
         impl<
                 Digit: PrimitiveShiftDigitsLeft + TryFrom<usize>,
                 const SEPARATOR: char,
-                const SHIFT: usize,
-            > CheckedShl<$integer> for BigInt<Digit, SEPARATOR, SHIFT>
+                const DIGIT_BITNESS: usize,
+            > CheckedShl<$integer> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
         where
-            BigInt<Digit, SEPARATOR, SHIFT>: Zeroable,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Zeroable,
         {
             type Output = Result<Self, ShlError>;
 
             fn checked_shl(self, shift: $integer) -> Self::Output {
                 debug_assert!(
                     usize::BITS < <$integer>::BITS
-                        || SHIFT < <$integer>::MAX as usize
+                        || DIGIT_BITNESS < <$integer>::MAX as usize
                 );
                 if shift.is_zero() {
                     Ok(self)
                 } else {
                     let (shift_quotient, shift_remainder) =
-                        shift.div_rem(SHIFT as $integer);
+                        shift.div_rem(DIGIT_BITNESS as $integer);
                     if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
                         >= (usize::BITS as usize)
                         && unsafe {
@@ -235,7 +247,7 @@ macro_rules! checked_shl_unsigned_integer_impl {
                         Err(ShlError::TooLarge)
                     } else {
                         let digits =
-                            Digit::primitive_shift_digits_left::<SHIFT>(
+                            Digit::primitive_shift_digits_left::<DIGIT_BITNESS>(
                                 &self.digits,
                                 shift_quotient as usize,
                                 unsafe {
@@ -256,23 +268,23 @@ macro_rules! checked_shl_unsigned_integer_impl {
         impl<
                 Digit: PrimitiveShiftDigitsLeft + TryFrom<usize>,
                 const SEPARATOR: char,
-                const SHIFT: usize,
-            > CheckedShl<$integer> for &BigInt<Digit, SEPARATOR, SHIFT>
+                const DIGIT_BITNESS: usize,
+            > CheckedShl<$integer> for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
         where
-            BigInt<Digit, SEPARATOR, SHIFT>: Clone + Zeroable,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Clone + Zeroable,
         {
-            type Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShlError>;
+            type Output = Result<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, ShlError>;
 
             fn checked_shl(self, shift: $integer) -> Self::Output {
                 debug_assert!(
                     usize::BITS < <$integer>::BITS
-                        || SHIFT < <$integer>::MAX as usize
+                        || DIGIT_BITNESS < <$integer>::MAX as usize
                 );
                 if shift.is_zero() {
                     Ok(self.clone())
                 } else {
                     let (shift_quotient, shift_remainder) =
-                        shift.div_rem(SHIFT as $integer);
+                        shift.div_rem(DIGIT_BITNESS as $integer);
                     if (<$integer>::BITS as usize) + 8 * size_of::<Digit>()
                         >= (usize::BITS as usize)
                         && unsafe {
@@ -282,7 +294,7 @@ macro_rules! checked_shl_unsigned_integer_impl {
                         Err(ShlError::TooLarge)
                     } else {
                         let digits =
-                            Digit::primitive_shift_digits_left::<SHIFT>(
+                            Digit::primitive_shift_digits_left::<DIGIT_BITNESS>(
                                 &self.digits,
                                 shift_quotient as usize,
                                 unsafe {
@@ -291,7 +303,7 @@ macro_rules! checked_shl_unsigned_integer_impl {
                                 },
                             )
                             .ok_or(ShlError::OutOfMemory)?;
-                        Ok(BigInt::<Digit, SEPARATOR, SHIFT> {
+                        Ok(BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
                             sign: self.sign,
                             digits,
                         })

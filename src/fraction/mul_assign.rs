@@ -4,18 +4,18 @@ use crate::big_int::BigInt;
 
 use super::types::{Fraction, NormalizeModuli};
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> MulAssign
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> MulAssign
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
-        BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         Output = (
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         ),
     >,
-    BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
     fn mul_assign(&mut self, other: Self) {
         let (numerator, other_denominator) =
@@ -27,17 +27,17 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> MulAssign<&Self>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> MulAssign<&Self>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
         Output = (
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         ),
     >,
-    BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
     fn mul_assign(&mut self, other: &Self) {
         let (numerator, other_denominator) =
@@ -49,43 +49,43 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    MulAssign<BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    MulAssign<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         > + NormalizeModuli<
-            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
 {
-    fn mul_assign(&mut self, other: BigInt<Digit, SEPARATOR, SHIFT>) {
+    fn mul_assign(&mut self, other: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>) {
         let (denominator, other) = self.denominator.normalize_moduli(other);
         self.numerator = &self.numerator * other;
         self.denominator = denominator;
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    MulAssign<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    MulAssign<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         > + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
 {
-    fn mul_assign(&mut self, other: &BigInt<Digit, SEPARATOR, SHIFT>) {
+    fn mul_assign(&mut self, other: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>) {
         let (denominator, other) = self.denominator.normalize_moduli(other);
         self.numerator = &self.numerator * other;
         self.denominator = denominator;

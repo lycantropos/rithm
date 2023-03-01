@@ -13,15 +13,15 @@ macro_rules! float_try_from_big_int_impl {
         impl<
                 Digit: FractExpDigits<$float>,
                 const SEPARATOR: char,
-                const SHIFT: usize,
-            > TryFrom<BigInt<Digit, SEPARATOR, SHIFT>> for $float
+                const DIGIT_BITNESS: usize,
+            > TryFrom<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $float
         {
             type Error = TryIntoFloatError;
 
             fn try_from(
-                value: BigInt<Digit, SEPARATOR, SHIFT>,
+                value: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ) -> Result<Self, Self::Error> {
-                match Digit::fract_exp_digits::<SHIFT>(&value.digits) {
+                match Digit::fract_exp_digits::<DIGIT_BITNESS>(&value.digits) {
                     Some((fraction_modulus, exponent)) => {
                         Ok(((value.sign as $float) * fraction_modulus)
                             .load_exp(exponent))
@@ -34,15 +34,15 @@ macro_rules! float_try_from_big_int_impl {
         impl<
                 Digit: FractExpDigits<$float>,
                 const SEPARATOR: char,
-                const SHIFT: usize,
-            > TryFrom<&BigInt<Digit, SEPARATOR, SHIFT>> for $float
+                const DIGIT_BITNESS: usize,
+            > TryFrom<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $float
         {
             type Error = TryIntoFloatError;
 
             fn try_from(
-                value: &BigInt<Digit, SEPARATOR, SHIFT>,
+                value: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ) -> Result<Self, Self::Error> {
-                match Digit::fract_exp_digits::<SHIFT>(&value.digits) {
+                match Digit::fract_exp_digits::<DIGIT_BITNESS>(&value.digits) {
                     Some((fraction_modulus, exponent)) => {
                         Ok(((value.sign as $float) * fraction_modulus)
                             .load_exp(exponent))
@@ -61,16 +61,16 @@ macro_rules! signed_integer_try_from_big_int_impl {
         impl<
                 Digit: MaybeReduceDigits<$integer> + Zeroable,
                 const SEPARATOR: char,
-                const SHIFT: usize,
-            > TryFrom<BigInt<Digit, SEPARATOR, SHIFT>> for $integer
+                const DIGIT_BITNESS: usize,
+            > TryFrom<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $integer
         {
             type Error = TryIntoSignedIntegerError;
 
             fn try_from(
-                value: BigInt<Digit, SEPARATOR, SHIFT>,
+                value: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ) -> Result<Self, Self::Error> {
                 let result =
-                    Digit::maybe_reduce_digits::<SHIFT>(&value.digits)
+                    Digit::maybe_reduce_digits::<DIGIT_BITNESS>(&value.digits)
                         .ok_or(TryIntoSignedIntegerError::TooLarge);
                 if value.is_negative() {
                     result.map(|value| -value)
@@ -83,16 +83,16 @@ macro_rules! signed_integer_try_from_big_int_impl {
         impl<
                 Digit: MaybeReduceDigits<$integer> + Zeroable,
                 const SEPARATOR: char,
-                const SHIFT: usize,
-            > TryFrom<&BigInt<Digit, SEPARATOR, SHIFT>> for $integer
+                const DIGIT_BITNESS: usize,
+            > TryFrom<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $integer
         {
             type Error = TryIntoSignedIntegerError;
 
             fn try_from(
-                value: &BigInt<Digit, SEPARATOR, SHIFT>,
+                value: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ) -> Result<Self, Self::Error> {
                 let result =
-                    Digit::maybe_reduce_digits::<SHIFT>(&value.digits)
+                    Digit::maybe_reduce_digits::<DIGIT_BITNESS>(&value.digits)
                         .ok_or(TryIntoSignedIntegerError::TooLarge);
                 if value.is_negative() {
                     result.map(|value| -value)
@@ -111,18 +111,18 @@ macro_rules! unsigned_integer_try_from_big_int_impl {
         impl<
                 Digit: MaybeReduceDigits<$integer> + Zeroable,
                 const SEPARATOR: char,
-                const SHIFT: usize,
-            > TryFrom<BigInt<Digit, SEPARATOR, SHIFT>> for $integer
+                const DIGIT_BITNESS: usize,
+            > TryFrom<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $integer
         {
             type Error = TryIntoUnsignedIntegerError;
 
             fn try_from(
-                value: BigInt<Digit, SEPARATOR, SHIFT>,
+                value: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ) -> Result<Self, Self::Error> {
                 if value.is_negative() {
                     Err(TryIntoUnsignedIntegerError::Negative)
                 } else {
-                    Digit::maybe_reduce_digits::<SHIFT>(&value.digits)
+                    Digit::maybe_reduce_digits::<DIGIT_BITNESS>(&value.digits)
                         .ok_or(TryIntoUnsignedIntegerError::TooLarge)
                 }
             }
@@ -131,18 +131,18 @@ macro_rules! unsigned_integer_try_from_big_int_impl {
         impl<
                 Digit: MaybeReduceDigits<$integer> + Zeroable,
                 const SEPARATOR: char,
-                const SHIFT: usize,
-            > TryFrom<&BigInt<Digit, SEPARATOR, SHIFT>> for $integer
+                const DIGIT_BITNESS: usize,
+            > TryFrom<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> for $integer
         {
             type Error = TryIntoUnsignedIntegerError;
 
             fn try_from(
-                value: &BigInt<Digit, SEPARATOR, SHIFT>,
+                value: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ) -> Result<Self, Self::Error> {
                 if value.is_negative() {
                     Err(TryIntoUnsignedIntegerError::Negative)
                 } else {
-                    Digit::maybe_reduce_digits::<SHIFT>(&value.digits)
+                    Digit::maybe_reduce_digits::<DIGIT_BITNESS>(&value.digits)
                         .ok_or(TryIntoUnsignedIntegerError::TooLarge)
                 }
             }

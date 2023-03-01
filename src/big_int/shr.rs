@@ -4,8 +4,8 @@ use traiter::numbers::CheckedShr;
 
 use super::types::{BigInt, ShrError};
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Shr
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Shr
+    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: CheckedShr<Output = Result<Self, ShrError>>,
 {
@@ -16,8 +16,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Shr<&Self>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Shr<&Self>
+    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     for<'a> Self: CheckedShr<&'a Self, Output = Result<Self, ShrError>>,
 {
@@ -28,28 +28,33 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Shr<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Shr<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: CheckedShr<
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShrError>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Result<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, ShrError>,
     >,
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
 
-    fn shr(self, shift: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn shr(
+        self,
+        shift: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
         self.checked_shr(shift).unwrap()
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Shr
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Shr
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    Self:
-        CheckedShr<Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShrError>>,
+    Self: CheckedShr<
+        Output = Result<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, ShrError>,
+    >,
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
 
     fn shr(self, shift: Self) -> Self::Output {
         self.checked_shr(shift).unwrap()
@@ -58,12 +63,12 @@ where
 
 macro_rules! checked_shr_integer_impl {
     ($($integer:ty)*) => ($(
-        impl<Digit, const SEPARATOR: char, const SHIFT: usize> Shr<$integer>
-            for BigInt<Digit, SEPARATOR, SHIFT>
+        impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Shr<$integer>
+            for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
         where
             Self: CheckedShr<
                 $integer,
-                Output = Result<BigInt<Digit, SEPARATOR, SHIFT>, ShrError>,
+                Output = Result<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, ShrError>,
             >,
         {
             type Output = Self;

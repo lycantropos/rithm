@@ -8,8 +8,8 @@ use super::types::BigInt;
 impl<
         Digit: CheckedDivRemEuclidComponents,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > DivRemEuclid for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > DivRemEuclid for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = (Self, Self);
 
@@ -22,8 +22,8 @@ impl<
 impl<
         Digit: CheckedDivRemEuclidComponents,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > DivRemEuclid<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > DivRemEuclid<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = (Self, Self);
 
@@ -36,18 +36,18 @@ impl<
 impl<
         Digit: CheckedDivRemEuclidComponents,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > DivRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > DivRemEuclid<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = (
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        BigInt<Digit, SEPARATOR, SHIFT>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     );
 
     fn div_rem_euclid(
         self,
-        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         self.checked_div_rem_euclid(divisor)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
@@ -57,12 +57,12 @@ impl<
 impl<
         Digit: CheckedDivRemEuclidComponents,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > DivRemEuclid for &BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > DivRemEuclid for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = (
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        BigInt<Digit, SEPARATOR, SHIFT>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     );
 
     fn div_rem_euclid(self, divisor: Self) -> Self::Output {

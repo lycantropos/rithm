@@ -4,8 +4,8 @@ use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
 use super::types::BigInt;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivEuclid
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> DivEuclid
+    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: CheckedDivEuclid<Output = Option<Self>>,
 {
@@ -17,8 +17,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivEuclid<&Self>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> DivEuclid<&Self>
+    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     for<'a> Self: CheckedDivEuclid<&'a Self, Output = Option<Self>>,
 {
@@ -30,32 +30,34 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    DivEuclid<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    DivEuclid<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: CheckedDivEuclid<
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     >,
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
 
     fn div_euclid(
         self,
-        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         self.checked_div_euclid(divisor)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> DivEuclid
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> DivEuclid
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    Self: CheckedDivEuclid<Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>>,
+    Self: CheckedDivEuclid<
+        Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    >,
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
 
     fn div_euclid(self, divisor: Self) -> Self::Output {
         self.checked_div_euclid(divisor)

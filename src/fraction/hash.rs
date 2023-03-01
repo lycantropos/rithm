@@ -4,10 +4,10 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Hash
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Hash
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: Hash,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Hash,
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.numerator.hash(state);

@@ -6,13 +6,13 @@ use super::types::BigInt;
 impl<
         Digit: CheckedDivRemComponents,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivRem for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > CheckedDivRem for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = Option<(Self, Self)>;
 
     fn checked_div_rem(self, divisor: Self) -> Self::Output {
-        Digit::checked_div_rem_components::<SHIFT>(
+        Digit::checked_div_rem_components::<DIGIT_BITNESS>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -43,13 +43,13 @@ impl<
 impl<
         Digit: CheckedDivRemComponents,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivRem<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > CheckedDivRem<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = Option<(Self, Self)>;
 
     fn checked_div_rem(self, divisor: &Self) -> Self::Output {
-        Digit::checked_div_rem_components::<SHIFT>(
+        Digit::checked_div_rem_components::<DIGIT_BITNESS>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -80,20 +80,20 @@ impl<
 impl<
         Digit: CheckedDivRemComponents,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivRem<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > CheckedDivRem<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = Option<(
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        BigInt<Digit, SEPARATOR, SHIFT>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     )>;
 
     fn checked_div_rem(
         self,
-        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
-        Digit::checked_div_rem_components::<SHIFT>(
+        Digit::checked_div_rem_components::<DIGIT_BITNESS>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -107,11 +107,11 @@ impl<
                 remainder_digits,
             )| {
                 (
-                    BigInt::<Digit, SEPARATOR, SHIFT> {
+                    BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
                         sign: quotient_sign,
                         digits: quotient_digits,
                     },
-                    BigInt::<Digit, SEPARATOR, SHIFT> {
+                    BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
                         sign: remainder_sign,
                         digits: remainder_digits,
                     },
@@ -124,16 +124,16 @@ impl<
 impl<
         Digit: CheckedDivRemComponents,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDivRem for &BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > CheckedDivRem for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = Option<(
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        BigInt<Digit, SEPARATOR, SHIFT>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     )>;
 
     fn checked_div_rem(self, divisor: Self) -> Self::Output {
-        Digit::checked_div_rem_components::<SHIFT>(
+        Digit::checked_div_rem_components::<DIGIT_BITNESS>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -147,11 +147,11 @@ impl<
                 remainder_digits,
             )| {
                 (
-                    BigInt::<Digit, SEPARATOR, SHIFT> {
+                    BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
                         sign: quotient_sign,
                         digits: quotient_digits,
                     },
-                    BigInt::<Digit, SEPARATOR, SHIFT> {
+                    BigInt::<Digit, SEPARATOR, DIGIT_BITNESS> {
                         sign: remainder_sign,
                         digits: remainder_digits,
                     },

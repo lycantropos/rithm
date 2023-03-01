@@ -6,21 +6,21 @@ use crate::big_int::BigInt;
 
 use super::types::{Fraction, NormalizeSign};
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedPow<BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedPow<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedPow<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedPow<
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
         > + CheckedPow<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
-        > + Neg<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        > + Neg<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
         + NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         > + Signed,
     Self: Zeroable,
@@ -29,7 +29,7 @@ where
 
     fn checked_pow(
         self,
-        exponent: BigInt<Digit, SEPARATOR, SHIFT>,
+        exponent: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         if exponent.is_negative() {
             if self.is_zero() {
@@ -53,22 +53,22 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedPow<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedPow<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Neg<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedPow<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Neg<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedPow<
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
         > + CheckedPow<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
         > + NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         > + Signed,
     Self: Zeroable,
@@ -77,7 +77,7 @@ where
 
     fn checked_pow(
         self,
-        exponent: &BigInt<Digit, SEPARATOR, SHIFT>,
+        exponent: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         if exponent.is_negative() {
             if self.is_zero() {
@@ -101,31 +101,31 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedPow<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedPow<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: CheckedPow<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedPow<
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
         > + CheckedPow<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
         >,
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: Neg<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Neg<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
         + NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         > + Signed,
-    Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Zeroable,
+    Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>: Zeroable,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
 
     fn checked_pow(
         self,
-        exponent: BigInt<Digit, SEPARATOR, SHIFT>,
+        exponent: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         if exponent.is_negative() {
             if self.is_zero() {
@@ -135,13 +135,13 @@ where
                 let (numerator, denominator) =
                     (self.denominator.checked_pow(&exponent)?)
                         .normalize_sign(self.numerator.checked_pow(exponent)?);
-                Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+                Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                     numerator,
                     denominator,
                 })
             }
         } else {
-            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator: self.numerator.checked_pow(&exponent)?,
                 denominator: self.denominator.checked_pow(exponent)?,
             })
@@ -149,30 +149,30 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedPow<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedPow<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: CheckedPow<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedPow<
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
         > + CheckedPow<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
-        > + Neg<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: NormalizeSign<
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        > + Neg<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeSign<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         > + Signed,
-    Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Zeroable,
+    Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>: Zeroable,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
 
     fn checked_pow(
         self,
-        exponent: &BigInt<Digit, SEPARATOR, SHIFT>,
+        exponent: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         if exponent.is_negative() {
             if self.is_zero() {
@@ -182,13 +182,13 @@ where
                 let (numerator, denominator) =
                     (self.denominator.checked_pow(&exponent)?)
                         .normalize_sign(self.numerator.checked_pow(exponent)?);
-                Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+                Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                     numerator,
                     denominator,
                 })
             }
         } else {
-            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator: self.numerator.checked_pow(exponent)?,
                 denominator: self.denominator.checked_pow(exponent)?,
             })

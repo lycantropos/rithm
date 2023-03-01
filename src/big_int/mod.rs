@@ -1,7 +1,7 @@
 pub(crate) use self::constants::{
     MAX_REPRESENTABLE_BASE, MIN_REPRESENTABLE_BASE,
 };
-pub use self::contracts::is_valid_shift;
+pub use self::contracts::is_valid_digit_bitness;
 pub use self::types::{BigInt, ShlError, ShrError, TryFromFloatError};
 
 mod abs;

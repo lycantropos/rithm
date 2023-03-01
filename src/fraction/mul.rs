@@ -4,14 +4,14 @@ use crate::big_int::BigInt;
 
 use super::types::{Fraction, NormalizeModuli};
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Mul
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Mul
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
         + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
 {
@@ -29,15 +29,15 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Mul<&Self>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Mul<&Self>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
         + NormalizeModuli<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
 {
@@ -55,25 +55,25 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Mul<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Mul<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
-        BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         Output = (
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         ),
     >,
-    BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn mul(
         self,
-        other: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        other: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         let (numerator, other_denominator) =
             self.numerator.normalize_moduli(other.denominator);
@@ -86,19 +86,19 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Mul
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Mul
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
         Output = (
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         ),
     >,
-    BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn mul(self, other: Self) -> Self::Output {
         let (numerator, other_denominator) =
@@ -112,21 +112,24 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Mul<BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Mul<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
         + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
 {
     type Output = Self;
 
-    fn mul(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn mul(
+        self,
+        other: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
         let (denominator, other) = self.denominator.normalize_moduli(other);
         Self::Output {
             numerator: self.numerator * other,
@@ -135,22 +138,25 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Mul<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Mul<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
         + NormalizeModuli<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
 {
     type Output = Self;
 
-    fn mul(self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn mul(
+        self,
+        other: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
         let (denominator, other) = self.denominator.normalize_moduli(other);
         Self::Output {
             numerator: self.numerator * other,
@@ -159,24 +165,27 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Mul<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Mul<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         > + NormalizeModuli<
-            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
-    fn mul(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn mul(
+        self,
+        other: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
         let (denominator, other) = self.denominator.normalize_moduli(other);
         Self::Output {
             numerator: &self.numerator * other,
@@ -185,23 +194,26 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Mul<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Mul<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         > + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
-    fn mul(self, other: &BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn mul(
+        self,
+        other: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
         let (denominator, other) = self.denominator.normalize_moduli(other);
         Self::Output {
             numerator: &self.numerator * other,
@@ -210,8 +222,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Mul<Fraction<Self>>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Mul<Fraction<Self>> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Fraction<Self>: Mul<Self, Output = Fraction<Self>>,
 {
@@ -222,8 +234,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Mul<&Fraction<Self>>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Mul<&Fraction<Self>> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     for<'a> &'a Fraction<Self>: Mul<Self, Output = Fraction<Self>>,
 {
@@ -234,39 +246,39 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Mul<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Mul<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    for<'a> Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Mul<
-        &'a BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>: Mul<
+        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn mul(
         self,
-        other: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        other: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         other * self
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Mul<&Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Mul<&Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    for<'a> &'a Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Mul<
-        &'a BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> &'a Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>: Mul<
+        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn mul(
         self,
-        other: &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        other: &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         other * self
     }

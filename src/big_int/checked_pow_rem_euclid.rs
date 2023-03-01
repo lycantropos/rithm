@@ -9,8 +9,8 @@ use super::constants::{WINDOW_BASE, WINDOW_CUTOFF, WINDOW_SHIFT};
 use super::digits::LesserBinaryBaseFromBinaryDigits;
 use super::types::{BigInt, CheckedPowRemEuclidError, WindowDigit};
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedPowRemEuclid<Self, Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedPowRemEuclid<Self, Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: CheckedPowAbsRemEuclid + Signed + Sub<Output = Self>,
 {
@@ -38,8 +38,9 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedPowRemEuclid<Self, &Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedPowRemEuclid<Self, &Self>
+    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: CheckedPowAbsRemEuclid + Signed + Sub<Output = Self>,
     for<'a> &'a Self: Abs<Output = Self>,
@@ -68,8 +69,9 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedPowRemEuclid<&Self, Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedPowRemEuclid<&Self, Self>
+    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: CheckedPowAbsRemEuclid + Signed + Sub<Output = Self>,
 {
@@ -97,8 +99,9 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedPowRemEuclid<&Self, &Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedPowRemEuclid<&Self, &Self>
+    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: CheckedPowAbsRemEuclid + Signed + Sub<Output = Self>,
     for<'a> &'a Self: Abs<Output = Self>,
@@ -127,24 +130,26 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
     CheckedPowRemEuclid<
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        BigInt<Digit, SEPARATOR, SHIFT>,
-    > for &BigInt<Digit, SEPARATOR, SHIFT>
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    > for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: CheckedPowAbsRemEuclid
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedPowAbsRemEuclid
         + Clone
         + Signed
-        + Sub<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+        + Sub<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
-    type Output =
-        Result<BigInt<Digit, SEPARATOR, SHIFT>, CheckedPowRemEuclidError>;
+    type Output = Result<
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        CheckedPowRemEuclidError,
+    >;
 
     fn checked_pow_rem_euclid(
         self,
-        exponent: BigInt<Digit, SEPARATOR, SHIFT>,
-        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+        exponent: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         if divisor.is_zero() {
             Err(CheckedPowRemEuclidError::ZeroDivisor)
@@ -164,22 +169,24 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedPowRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>, Self>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedPowRemEuclid<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, Self>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: CheckedPowAbsRemEuclid
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedPowAbsRemEuclid
         + Clone
         + Signed
-        + Sub<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    Self: Abs<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+        + Sub<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    Self: Abs<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
-    type Output =
-        Result<BigInt<Digit, SEPARATOR, SHIFT>, CheckedPowRemEuclidError>;
+    type Output = Result<
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        CheckedPowRemEuclidError,
+    >;
 
     fn checked_pow_rem_euclid(
         self,
-        exponent: BigInt<Digit, SEPARATOR, SHIFT>,
+        exponent: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         divisor: Self,
     ) -> Self::Output {
         if divisor.is_zero() {
@@ -200,22 +207,24 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedPowRemEuclid<Self, BigInt<Digit, SEPARATOR, SHIFT>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedPowRemEuclid<Self, BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: CheckedPowAbsRemEuclid
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedPowAbsRemEuclid
         + Clone
         + Signed
-        + Sub<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+        + Sub<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
-    type Output =
-        Result<BigInt<Digit, SEPARATOR, SHIFT>, CheckedPowRemEuclidError>;
+    type Output = Result<
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        CheckedPowRemEuclidError,
+    >;
 
     fn checked_pow_rem_euclid(
         self,
         exponent: Self,
-        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         if divisor.is_zero() {
             Err(CheckedPowRemEuclidError::ZeroDivisor)
@@ -235,17 +244,20 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedPowRemEuclid<Self, Self> for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedPowRemEuclid<Self, Self>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: CheckedPowAbsRemEuclid
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedPowAbsRemEuclid
         + Clone
         + Signed
-        + Sub<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    Self: Abs<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+        + Sub<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    Self: Abs<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
-    type Output =
-        Result<BigInt<Digit, SEPARATOR, SHIFT>, CheckedPowRemEuclidError>;
+    type Output = Result<
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        CheckedPowRemEuclidError,
+    >;
 
     fn checked_pow_rem_euclid(
         self,
@@ -278,8 +290,8 @@ pub trait CheckedPowAbsRemEuclid: Sized {
     ) -> Result<Self, CheckedPowRemEuclidError>;
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedPowAbsRemEuclid
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedPowAbsRemEuclid for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: CheckedPowAbsRemEuclidImpl + Signed + Unitary,
     for<'a> Self: CheckedRemEuclidInv<&'a Self, Output = Option<Self>>,
@@ -323,8 +335,8 @@ impl<
             + Unitary
             + Zeroable,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedPowAbsRemEuclidImpl for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > CheckedPowAbsRemEuclidImpl for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: Unitary + Zeroable,
     for<'a> Self: CheckedRemEuclidInv<&'a Self, Output = Option<Self>>
@@ -400,7 +412,7 @@ where
                     exponent_digit = unsafe {
                         *exponent_digits_iterator.next().unwrap_unchecked()
                     };
-                    exponent_digit_mask = Digit::one() << (SHIFT - 1);
+                    exponent_digit_mask = Digit::one() << (DIGIT_BITNESS - 1);
                 }
                 result
             } else {
@@ -416,7 +428,7 @@ where
                 let exponent_window_digits: Vec<WindowDigit> =
                     WindowDigit::lesser_binary_base_from_binary_digits(
                         &exponent.digits,
-                        SHIFT,
+                        DIGIT_BITNESS,
                         WINDOW_SHIFT,
                     );
                 let mut result = Self::one();

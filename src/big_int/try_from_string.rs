@@ -6,7 +6,7 @@ use traiter::numbers::{Unitary, Zeroable};
 use crate::traits::HasSignBit;
 
 use super::constants::{MAX_REPRESENTABLE_BASE, MIN_REPRESENTABLE_BASE};
-use super::contracts::is_valid_shift;
+use super::contracts::is_valid_digit_bitness;
 use super::digits::{
     to_digits_sign, trim_leading_zeros, BinaryBaseFromDigits,
 };
@@ -39,14 +39,14 @@ const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
 impl<
         Digit: BinaryBaseFromDigits<u8> + HasSignBit + Zeroable,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > TryFromString for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > TryFromString for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     fn try_from_string(
         string: &str,
         mut base: u8,
     ) -> Result<Self, TryFromStringError> {
-        debug_assert!(is_valid_shift::<Digit, SHIFT>());
+        debug_assert!(is_valid_digit_bitness::<Digit, DIGIT_BITNESS>());
         debug_assert!(
             ASCII_CODES_DIGIT_VALUES[SEPARATOR as usize]
                 >= MAX_REPRESENTABLE_BASE
@@ -63,7 +63,7 @@ impl<
         };
         skip_prefix::<SEPARATOR>(&mut characters, base);
         parse_digits::<SEPARATOR>(characters, base).map(|digits| {
-            let digits = Digit::binary_base_from_digits::<SHIFT>(
+            let digits = Digit::binary_base_from_digits::<DIGIT_BITNESS>(
                 &digits,
                 base as usize,
             );

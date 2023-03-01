@@ -4,13 +4,14 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Floor
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Floor
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>:
-        CheckedDivEuclid<Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>>,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
+        Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    >,
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
 
     fn floor(self) -> Self::Output {
         unsafe {
@@ -21,13 +22,14 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Floor
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Floor
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        CheckedDivEuclid<Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivEuclid<
+        Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    >,
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
 
     fn floor(self) -> Self::Output {
         unsafe {

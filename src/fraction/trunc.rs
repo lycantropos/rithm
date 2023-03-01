@@ -4,14 +4,14 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Trunc
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Trunc
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    Self: Ceil<Output = BigInt<Digit, SEPARATOR, SHIFT>>
-        + Floor<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+    Self: Ceil<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+        + Floor<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
         + Signed,
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
 
     fn trunc(self) -> Self::Output {
         if self.is_negative() {
@@ -22,14 +22,14 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Trunc
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Trunc
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Signed,
-    Self: Ceil<Output = BigInt<Digit, SEPARATOR, SHIFT>>
-        + Floor<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+    Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>: Signed,
+    Self: Ceil<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+        + Floor<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
 
     fn trunc(self) -> Self::Output {
         if self.is_negative() {

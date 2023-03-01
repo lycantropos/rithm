@@ -6,13 +6,13 @@ use super::types::BigInt;
 impl<
         Digit: BitwiseXorComponents,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > BitXor for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > BitXor for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = Self;
 
     fn bitxor(self, other: Self) -> Self::Output {
-        let (sign, digits) = Digit::bitwise_xor_components::<SHIFT>(
+        let (sign, digits) = Digit::bitwise_xor_components::<DIGIT_BITNESS>(
             self.sign,
             self.digits,
             other.sign,
@@ -25,13 +25,13 @@ impl<
 impl<
         Digit: BitwiseXorComponents + Clone,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > BitXor<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > BitXor<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = Self;
 
     fn bitxor(self, other: &Self) -> Self::Output {
-        let (sign, digits) = Digit::bitwise_xor_components::<SHIFT>(
+        let (sign, digits) = Digit::bitwise_xor_components::<DIGIT_BITNESS>(
             self.sign,
             self.digits,
             other.sign,
@@ -44,14 +44,17 @@ impl<
 impl<
         Digit: BitwiseXorComponents + Clone,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > BitXor<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > BitXor<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
 
-    fn bitxor(self, other: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        let (sign, digits) = Digit::bitwise_xor_components::<SHIFT>(
+    fn bitxor(
+        self,
+        other: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
+        let (sign, digits) = Digit::bitwise_xor_components::<DIGIT_BITNESS>(
             self.sign,
             self.digits.clone(),
             other.sign,
@@ -64,13 +67,13 @@ impl<
 impl<
         Digit: BitwiseXorComponents + Clone,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > BitXor for &BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > BitXor for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
 
     fn bitxor(self, other: Self) -> Self::Output {
-        let (sign, digits) = Digit::bitwise_xor_components::<SHIFT>(
+        let (sign, digits) = Digit::bitwise_xor_components::<DIGIT_BITNESS>(
             self.sign,
             self.digits.clone(),
             other.sign,

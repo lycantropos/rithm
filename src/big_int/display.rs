@@ -8,8 +8,8 @@ use super::constants::MAX_REPRESENTABLE_BASE;
 use super::digits::BaseFromBinaryDigits;
 use super::types::BigInt;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Display
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Display
+    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: ToBaseString,
 {
@@ -37,22 +37,23 @@ impl<
             + TryFrom<usize>
             + Zeroable,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > ToBaseString for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > ToBaseString for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     usize: TryFrom<Digit>,
 {
     fn to_base_string(&self, base: usize) -> String {
-        let shift = if (1usize << SHIFT) >= (MAX_REPRESENTABLE_BASE as usize)
-            || base < (1usize << SHIFT)
+        let shift = if (1usize << DIGIT_BITNESS)
+            >= (MAX_REPRESENTABLE_BASE as usize)
+            || base < (1usize << DIGIT_BITNESS)
         {
-            unsafe { floor_log(1 << SHIFT, base).unwrap_unchecked() }
+            unsafe { floor_log(1 << DIGIT_BITNESS, base).unwrap_unchecked() }
         } else {
             1usize
         };
         let digits = Digit::base_from_binary_digits(
             &self.digits,
-            SHIFT,
+            DIGIT_BITNESS,
             power(base, shift),
         );
         let characters_count = (self.is_negative() as usize)

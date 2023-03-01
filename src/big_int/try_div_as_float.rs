@@ -8,8 +8,8 @@ macro_rules! try_div_big_int_as_float_impl {
         impl<
                 Digit: TryDivDigitsAsFloat<$float>,
                 const SEPARATOR: char,
-                const SHIFT: usize,
-            > TryDivAsFloat<Self, $float> for BigInt<Digit, SEPARATOR, SHIFT>
+                const DIGIT_BITNESS: usize,
+            > TryDivAsFloat<Self, $float> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
         {
             type Error = <Digit as TryDivDigitsAsFloat<$float>>::Error;
 
@@ -17,7 +17,7 @@ macro_rules! try_div_big_int_as_float_impl {
                 self,
                 divisor: Self,
             ) -> Result<$float, Self::Error> {
-                Digit::checked_div_digits_as_float::<SHIFT>(
+                Digit::checked_div_digits_as_float::<DIGIT_BITNESS>(
                     &self.digits,
                     &divisor.digits,
                 )
@@ -30,9 +30,9 @@ macro_rules! try_div_big_int_as_float_impl {
         impl<
                 Digit: TryDivDigitsAsFloat<$float>,
                 const SEPARATOR: char,
-                const SHIFT: usize,
+                const DIGIT_BITNESS: usize,
             > TryDivAsFloat<&Self, $float>
-            for BigInt<Digit, SEPARATOR, SHIFT>
+            for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
         {
             type Error = <Digit as TryDivDigitsAsFloat<$float>>::Error;
 
@@ -40,7 +40,7 @@ macro_rules! try_div_big_int_as_float_impl {
                 self,
                 divisor: &Self,
             ) -> Result<$float, Self::Error> {
-                Digit::checked_div_digits_as_float::<SHIFT>(
+                Digit::checked_div_digits_as_float::<DIGIT_BITNESS>(
                     &self.digits,
                     &divisor.digits,
                 )
@@ -53,17 +53,17 @@ macro_rules! try_div_big_int_as_float_impl {
         impl<
                 Digit: TryDivDigitsAsFloat<$float>,
                 const SEPARATOR: char,
-                const SHIFT: usize,
-            > TryDivAsFloat<BigInt<Digit, SEPARATOR, SHIFT>, $float>
-            for &BigInt<Digit, SEPARATOR, SHIFT>
+                const DIGIT_BITNESS: usize,
+            > TryDivAsFloat<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, $float>
+            for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
         {
             type Error = <Digit as TryDivDigitsAsFloat<$float>>::Error;
 
             fn try_div_as_float(
                 self,
-                divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+                divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ) -> Result<$float, Self::Error> {
-                Digit::checked_div_digits_as_float::<SHIFT>(
+                Digit::checked_div_digits_as_float::<DIGIT_BITNESS>(
                     &self.digits,
                     &divisor.digits,
                 )
@@ -76,9 +76,9 @@ macro_rules! try_div_big_int_as_float_impl {
         impl<
                 Digit: TryDivDigitsAsFloat<$float>,
                 const SEPARATOR: char,
-                const SHIFT: usize,
+                const DIGIT_BITNESS: usize,
             > TryDivAsFloat<Self, $float>
-            for &BigInt<Digit, SEPARATOR, SHIFT>
+            for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
         {
             type Error = <Digit as TryDivDigitsAsFloat<$float>>::Error;
 
@@ -86,7 +86,7 @@ macro_rules! try_div_big_int_as_float_impl {
                 self,
                 divisor: Self,
             ) -> Result<$float, Self::Error> {
-                Digit::checked_div_digits_as_float::<SHIFT>(
+                Digit::checked_div_digits_as_float::<DIGIT_BITNESS>(
                     &self.digits,
                     &divisor.digits,
                 )

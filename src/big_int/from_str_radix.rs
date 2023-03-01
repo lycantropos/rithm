@@ -4,8 +4,8 @@ use super::constants::{MAX_REPRESENTABLE_BASE, MIN_REPRESENTABLE_BASE};
 use super::try_from_string::TryFromString;
 use super::types::{BigInt, TryFromStringError};
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> FromStrRadix
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> FromStrRadix
+    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: TryFromString,
 {

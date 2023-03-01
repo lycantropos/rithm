@@ -4,8 +4,8 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Abs
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Abs
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 {
     type Output = Self;
 
@@ -17,14 +17,14 @@ impl<Digit, const SEPARATOR: char, const SHIFT: usize> Abs
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Abs
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Abs
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: Clone,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Abs<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Clone,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Abs<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn abs(self) -> Self::Output {
         Self::Output {

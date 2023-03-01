@@ -3,13 +3,16 @@ use std::ops::Sub;
 use super::digits::SubtractComponents;
 use super::types::BigInt;
 
-impl<Digit: SubtractComponents, const SEPARATOR: char, const SHIFT: usize> Sub
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: SubtractComponents,
+        const SEPARATOR: char,
+        const DIGIT_BITNESS: usize,
+    > Sub for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = Self;
 
     fn sub(self, subtrahend: Self) -> Self::Output {
-        let (sign, digits) = Digit::subtract_components::<SHIFT>(
+        let (sign, digits) = Digit::subtract_components::<DIGIT_BITNESS>(
             self.sign,
             &self.digits,
             subtrahend.sign,
@@ -19,13 +22,16 @@ impl<Digit: SubtractComponents, const SEPARATOR: char, const SHIFT: usize> Sub
     }
 }
 
-impl<Digit: SubtractComponents, const SEPARATOR: char, const SHIFT: usize>
-    Sub<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: SubtractComponents,
+        const SEPARATOR: char,
+        const DIGIT_BITNESS: usize,
+    > Sub<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = Self;
 
     fn sub(self, subtrahend: &Self) -> Self::Output {
-        let (sign, digits) = Digit::subtract_components::<SHIFT>(
+        let (sign, digits) = Digit::subtract_components::<DIGIT_BITNESS>(
             self.sign,
             &self.digits,
             subtrahend.sign,
@@ -35,13 +41,20 @@ impl<Digit: SubtractComponents, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: SubtractComponents, const SEPARATOR: char, const SHIFT: usize>
-    Sub<BigInt<Digit, SEPARATOR, SHIFT>> for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: SubtractComponents,
+        const SEPARATOR: char,
+        const DIGIT_BITNESS: usize,
+    > Sub<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
 
-    fn sub(self, subtrahend: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        let (sign, digits) = Digit::subtract_components::<SHIFT>(
+    fn sub(
+        self,
+        subtrahend: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
+        let (sign, digits) = Digit::subtract_components::<DIGIT_BITNESS>(
             self.sign,
             &self.digits,
             subtrahend.sign,
@@ -51,13 +64,16 @@ impl<Digit: SubtractComponents, const SEPARATOR: char, const SHIFT: usize>
     }
 }
 
-impl<Digit: SubtractComponents, const SEPARATOR: char, const SHIFT: usize> Sub
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: SubtractComponents,
+        const SEPARATOR: char,
+        const DIGIT_BITNESS: usize,
+    > Sub for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
-    type Output = BigInt<Digit, SEPARATOR, SHIFT>;
+    type Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>;
 
     fn sub(self, subtrahend: Self) -> Self::Output {
-        let (sign, digits) = Digit::subtract_components::<SHIFT>(
+        let (sign, digits) = Digit::subtract_components::<DIGIT_BITNESS>(
             self.sign,
             &self.digits,
             subtrahend.sign,

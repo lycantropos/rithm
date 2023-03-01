@@ -7,8 +7,8 @@ use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Div
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Div
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
     Self: CheckedDiv<Output = Option<Self>>,
 {
@@ -20,8 +20,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Div<&Self>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Div<&Self>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
     for<'a> Self: CheckedDiv<&'a Self, Output = Option<Self>>,
 {
@@ -33,33 +33,34 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Div<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Div<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
     Self: CheckedDiv<
-        Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
-        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+        Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn div(
         self,
-        divisor: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        divisor: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         self.checked_div(divisor)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Div
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Div
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    Self:
-        CheckedDiv<Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>>,
+    Self: CheckedDiv<
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
+    >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn div(self, divisor: Self) -> Self::Output {
         self.checked_div(divisor)
@@ -67,71 +68,88 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Div<BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
-where
-    Self: CheckedDiv<BigInt<Digit, SEPARATOR, SHIFT>, Output = Option<Self>>,
-{
-    type Output = Self;
-
-    fn div(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        self.checked_div(divisor)
-            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Div<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
-where
-    for<'a> Self:
-        CheckedDiv<&'a BigInt<Digit, SEPARATOR, SHIFT>, Output = Option<Self>>,
-{
-    type Output = Self;
-
-    fn div(self, divisor: &BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
-        self.checked_div(divisor)
-            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
-    }
-}
-
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Div<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Div<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
     Self: CheckedDiv<
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Option<Self>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Self;
 
-    fn div(self, divisor: BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn div(
+        self,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
         self.checked_div(divisor)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Div<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Div<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
     for<'a> Self: CheckedDiv<
-        &'a BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Option<Self>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Self;
 
-    fn div(self, divisor: &BigInt<Digit, SEPARATOR, SHIFT>) -> Self::Output {
+    fn div(
+        self,
+        divisor: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
         self.checked_div(divisor)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Div<Fraction<Self>>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Div<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+where
+    Self: CheckedDiv<
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+
+    fn div(
+        self,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
+        self.checked_div(divisor)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Div<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+where
+    for<'a> Self: CheckedDiv<
+        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
+    >,
+{
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
+
+    fn div(
+        self,
+        divisor: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+    ) -> Self::Output {
+        self.checked_div(divisor)
+            .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
+    }
+}
+
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Div<Fraction<Self>> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: CheckedDiv<Fraction<Self>, Output = Option<Fraction<Self>>>,
 {
@@ -143,8 +161,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Div<&Fraction<Self>>
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Div<&Fraction<Self>> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     for<'a> Self:
         CheckedDiv<&'a Fraction<Self>, Output = Option<Fraction<Self>>>,
@@ -157,40 +175,40 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Div<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Div<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     Self: CheckedDiv<
-        Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
-        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+        Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn div(
         self,
-        divisor: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        divisor: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         self.checked_div(divisor)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    Div<&Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    Div<&Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: CheckedDiv<
-        &'a Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
-        Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDiv<
+        &'a Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>,
     >,
 {
-    type Output = Fraction<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn div(
         self,
-        divisor: &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        divisor: &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         self.checked_div(divisor)
             .expect(UNDEFINED_DIVISION_ERROR_MESSAGE)

@@ -7,35 +7,35 @@ use super::types::Fraction;
 
 macro_rules! try_float_from_big_int_fraction_impl {
     ($($float:ty)*) => ($(
-        impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-            TryFrom<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>> for $float
+        impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+            TryFrom<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>> for $float
         where
-            BigInt<Digit, SEPARATOR, SHIFT>:
-                TryDivAsFloat<BigInt<Digit, SEPARATOR, SHIFT>, $float>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+                TryDivAsFloat<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, $float>,
         {
-            type Error = <BigInt<Digit, SEPARATOR, SHIFT> as TryDivAsFloat<
-                BigInt<Digit, SEPARATOR, SHIFT>,
+            type Error = <BigInt<Digit, SEPARATOR, DIGIT_BITNESS> as TryDivAsFloat<
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
                 $float,
             >>::Error;
 
             fn try_from(
-                value: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+                value: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
             ) -> Result<$float, Self::Error> {
                 value.numerator.try_div_as_float(value.denominator)
             }
         }
 
-        impl<'component, Digit, const SEPARATOR: char, const SHIFT: usize>
-            TryFrom<&'component Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
+        impl<'component, Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+            TryFrom<&'component Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
             for $float
         where
-            for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-                TryDivAsFloat<&'a BigInt<Digit, SEPARATOR, SHIFT>, $float>,
+            for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+                TryDivAsFloat<&'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, $float>,
         {
-            type Error = <&'component BigInt<Digit, SEPARATOR, SHIFT> as TryDivAsFloat<&'component BigInt<Digit, SEPARATOR, SHIFT>, $float>>::Error;
+            type Error = <&'component BigInt<Digit, SEPARATOR, DIGIT_BITNESS> as TryDivAsFloat<&'component BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, $float>>::Error;
 
             fn try_from(
-                value: &'component Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+                value: &'component Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
             ) -> Result<$float, Self::Error> {
                 value.numerator.try_div_as_float(&value.denominator)
             }

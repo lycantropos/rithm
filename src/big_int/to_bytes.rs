@@ -15,8 +15,8 @@ impl<
             + Oppose
             + Zeroable,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > ToBytes for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > ToBytes for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     u8: TryFrom<Digit>,
 {
@@ -25,7 +25,7 @@ where
     fn to_bytes(&self, endianness: Endianness) -> Self::Output {
         let mut result = Digit::binary_base_from_binary_digits(
             &self.digits,
-            SHIFT,
+            DIGIT_BITNESS,
             u8::BITS as usize,
         )
         .iter()

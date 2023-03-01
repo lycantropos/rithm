@@ -4,19 +4,19 @@ use crate::big_int::BigInt;
 
 use super::types::{Fraction, NormalizeModuli};
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> SubAssign
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> SubAssign
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
-        > + Sub<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+        > + Sub<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
         + Mul<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         >,
 {
     fn sub_assign(&mut self, other: Self) {
@@ -27,17 +27,17 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> SubAssign<&Self>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> SubAssign<&Self>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
-        > + Sub<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+        > + Sub<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
     fn sub_assign(&mut self, other: &Self) {
         (self.numerator, self.denominator) = (&self.numerator
@@ -47,50 +47,50 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    SubAssign<BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    SubAssign<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
-        &'a BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
+        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         Output = (
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         ),
     >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         > + Sub<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         >,
 {
-    fn sub_assign(&mut self, other: BigInt<Digit, SEPARATOR, SHIFT>) {
+    fn sub_assign(&mut self, other: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>) {
         (self.numerator, self.denominator) = (&self.numerator
             - &self.denominator * other)
             .normalize_moduli(&self.denominator);
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    SubAssign<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    SubAssign<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
-        &'a BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
+        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         Output = (
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         ),
     >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
         + Sub<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         >,
 {
-    fn sub_assign(&mut self, other: &BigInt<Digit, SEPARATOR, SHIFT>) {
+    fn sub_assign(&mut self, other: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>) {
         (self.numerator, self.denominator) = (&self.numerator
             - &self.denominator * other)
             .normalize_moduli(&self.denominator);

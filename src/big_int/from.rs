@@ -3,8 +3,11 @@ use traiter::numbers::{Unitary, Zeroable};
 use super::digits::{non_zero_value_to_sign, DigitsFromNonZeroValue};
 use super::types::BigInt;
 
-impl<Digit: Unitary + Zeroable, const SEPARATOR: char, const SHIFT: usize>
-    From<bool> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<
+        Digit: Unitary + Zeroable,
+        const SEPARATOR: char,
+        const DIGIT_BITNESS: usize,
+    > From<bool> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     fn from(value: bool) -> Self {
         if value {
@@ -20,8 +23,8 @@ macro_rules! from_integer_impl {
         impl<
                 Digit: DigitsFromNonZeroValue<$integer> + Zeroable,
                 const SEPARATOR: char,
-                const SHIFT: usize,
-            > From<$integer> for BigInt<Digit, SEPARATOR, SHIFT>
+                const DIGIT_BITNESS: usize,
+            > From<$integer> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
         {
             fn from(value: $integer) -> Self {
                 if value.is_zero() {
@@ -29,7 +32,7 @@ macro_rules! from_integer_impl {
                 } else {
                     Self {
                         sign: non_zero_value_to_sign(value),
-                        digits: Digit::digits_from_non_zero_value::<SHIFT>(
+                        digits: Digit::digits_from_non_zero_value::<DIGIT_BITNESS>(
                             value,
                         ),
                     }

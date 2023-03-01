@@ -4,10 +4,10 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> Signed
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> Signed
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: Signed,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Signed,
     Self: Zeroable,
 {
     fn is_negative(&self) -> bool {

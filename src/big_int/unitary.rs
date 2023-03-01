@@ -2,8 +2,8 @@ use traiter::numbers::Unitary;
 
 use super::types::{BigInt, Sign};
 
-impl<Digit: Unitary, const SEPARATOR: char, const SHIFT: usize> Unitary
-    for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit: Unitary, const SEPARATOR: char, const DIGIT_BITNESS: usize> Unitary
+    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     fn one() -> Self {
         Self {

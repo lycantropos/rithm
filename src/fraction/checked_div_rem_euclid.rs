@@ -6,30 +6,30 @@ use crate::big_int::BigInt;
 
 use super::types::{Fraction, NormalizeModuli};
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRemEuclid
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedDivRemEuclid for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedDivRemEuclid<
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivRemEuclid<
             Output = Option<(
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             )>,
         > + Mul<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
-        > + Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        > + Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
         + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     >,
 {
-    type Output = Option<(BigInt<Digit, SEPARATOR, SHIFT>, Self)>;
+    type Output = Option<(BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, Self)>;
 
     fn checked_div_rem_euclid(self, divisor: Self) -> Self::Output {
         let (quotient, remainder_numerator) = (self.numerator
@@ -47,27 +47,28 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRemEuclid<&Self> for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedDivRemEuclid<&Self>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedDivRemEuclid<
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivRemEuclid<
             Output = Option<(
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             )>,
         > + Mul<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         > + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
-    type Output = Option<(BigInt<Digit, SEPARATOR, SHIFT>, Self)>;
+    type Output = Option<(BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, Self)>;
 
     fn checked_div_rem_euclid(self, divisor: &Self) -> Self::Output {
         let (quotient, remainder_numerator) = (self.numerator
@@ -85,35 +86,35 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRemEuclid<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedDivRemEuclid<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: CheckedDivRemEuclid<
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivRemEuclid<
             Output = Option<(
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             )>,
         > + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
         + Mul<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         >,
 {
     type Output = Option<(
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     )>;
 
     fn checked_div_rem_euclid(
         self,
-        divisor: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        divisor: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         let (quotient, remainder_numerator) = (&self.numerator
             * &divisor.denominator)
@@ -122,7 +123,7 @@ where
             .normalize_moduli(&self.denominator * divisor.denominator);
         Some((
             quotient,
-            Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator: remainder_numerator,
                 denominator: remainder_denominator,
             },
@@ -130,26 +131,26 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedDivRemEuclid
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedDivRemEuclid for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: CheckedDivRemEuclid<
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivRemEuclid<
             Output = Option<(
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             )>,
         > + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
     type Output = Option<(
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     )>;
 
     fn checked_div_rem_euclid(self, divisor: Self) -> Self::Output {
@@ -160,7 +161,7 @@ where
             .normalize_moduli(&self.denominator * &divisor.denominator);
         Some((
             quotient,
-            Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator: remainder_numerator,
                 denominator: remainder_denominator,
             },
@@ -168,30 +169,30 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedDivRemEuclid<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedDivRemEuclid<
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivRemEuclid<
             Output = Option<(
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             )>,
         > + Mul<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         > + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
 {
-    type Output = Option<(BigInt<Digit, SEPARATOR, SHIFT>, Self)>;
+    type Output = Option<(BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, Self)>;
 
     fn checked_div_rem_euclid(
         self,
-        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         let (quotient, remainder_numerator) = self
             .numerator
@@ -208,29 +209,29 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRemEuclid<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedDivRemEuclid<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    BigInt<Digit, SEPARATOR, SHIFT>: CheckedDivRemEuclid<
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivRemEuclid<
             Output = Option<(
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             )>,
         > + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
 {
-    type Output = Option<(BigInt<Digit, SEPARATOR, SHIFT>, Self)>;
+    type Output = Option<(BigInt<Digit, SEPARATOR, DIGIT_BITNESS>, Self)>;
 
     fn checked_div_rem_euclid(
         self,
-        divisor: &BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         let (quotient, remainder_numerator) = self
             .numerator
@@ -247,36 +248,36 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRemEuclid<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedDivRemEuclid<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: CheckedDivRemEuclid<
-        BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivRemEuclid<
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         Output = Option<(
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         )>,
     >,
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: Mul<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         > + NormalizeModuli<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
 {
     type Output = Option<(
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     )>;
 
     fn checked_div_rem_euclid(
         self,
-        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         let (quotient, remainder_numerator) = self
             .numerator
@@ -285,7 +286,7 @@ where
             remainder_numerator.normalize_moduli(&self.denominator);
         Some((
             quotient,
-            Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator: remainder_numerator,
                 denominator: remainder_denominator,
             },
@@ -293,33 +294,33 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRemEuclid<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedDivRemEuclid<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: CheckedDivRemEuclid<
-            BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivRemEuclid<
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             Output = Option<(
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             )>,
-        > + Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
-        &'a BigInt<Digit, SEPARATOR, SHIFT>,
+        > + Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
+        &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         Output = (
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         ),
     >,
 {
     type Output = Option<(
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     )>;
 
     fn checked_div_rem_euclid(
         self,
-        divisor: &BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         let (quotient, remainder_numerator) = self
             .numerator
@@ -328,7 +329,7 @@ where
             remainder_numerator.normalize_moduli(&self.denominator);
         Some((
             quotient,
-            Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator: remainder_numerator,
                 denominator: remainder_denominator,
             },
@@ -336,8 +337,9 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRemEuclid<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedDivRemEuclid<Fraction<Self>>
+    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     for<'a> Self: CheckedDivRemEuclid<Self, Output = Option<(Self, Self)>>
         + Mul<&'a Self, Output = Self>
@@ -360,8 +362,9 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRemEuclid<&Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedDivRemEuclid<&Fraction<Self>>
+    for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     for<'a> Self: CheckedDivRemEuclid<&'a Self, Output = Option<(Self, Self)>>
         + Mul<&'a Self, Output = Self>
@@ -384,32 +387,32 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRemEuclid<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedDivRemEuclid<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    BigInt<Digit, SEPARATOR, SHIFT>: CheckedDivRemEuclid<
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivRemEuclid<
             Output = Option<(
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             )>,
         > + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
 {
     type Output = Option<(
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     )>;
 
     fn checked_div_rem_euclid(
         self,
-        divisor: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        divisor: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         let (quotient, remainder_numerator) = (self * &divisor.denominator)
             .checked_div_rem_euclid(divisor.numerator)?;
@@ -417,7 +420,7 @@ where
             remainder_numerator.normalize_moduli(divisor.denominator);
         Some((
             quotient,
-            Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator: remainder_numerator,
                 denominator: remainder_denominator,
             },
@@ -425,34 +428,34 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedDivRemEuclid<&Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedDivRemEuclid<&Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedDivRemEuclid<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedDivRemEuclid<
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             Output = Option<(
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             )>,
         > + NormalizeModuli<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
 {
     type Output = Option<(
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     )>;
 
     fn checked_div_rem_euclid(
         self,
-        divisor: &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        divisor: &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         let (quotient, remainder_numerator) = (self * &divisor.denominator)
             .checked_div_rem_euclid(&divisor.numerator)?;
@@ -460,7 +463,7 @@ where
             remainder_numerator.normalize_moduli(&divisor.denominator);
         Some((
             quotient,
-            Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator: remainder_numerator,
                 denominator: remainder_denominator,
             },

@@ -336,7 +336,7 @@ where
 }
 
 pub(super) trait BitwiseAndComponents: Sized {
-    fn bitwise_and_components<const SHIFT: usize>(
+    fn bitwise_and_components<const DIGIT_BITNESS: usize>(
         first_sign: Sign,
         first: Vec<Self>,
         second_sign: Sign,
@@ -348,7 +348,7 @@ impl<
         Digit: BitAndAssign + ComplementInPlace + Copy + DigitMask + Zeroable,
     > BitwiseAndComponents for Digit
 {
-    fn bitwise_and_components<const SHIFT: usize>(
+    fn bitwise_and_components<const DIGIT_BITNESS: usize>(
         first_sign: Sign,
         first: Vec<Self>,
         second_sign: Sign,
@@ -361,10 +361,10 @@ impl<
                 (first_sign, first, second_sign, second)
             };
         if longest_sign.is_negative() {
-            Digit::complement_in_place::<SHIFT>(&mut longest);
+            Digit::complement_in_place::<DIGIT_BITNESS>(&mut longest);
         };
         if shortest_sign.is_negative() {
-            Digit::complement_in_place::<SHIFT>(&mut shortest);
+            Digit::complement_in_place::<DIGIT_BITNESS>(&mut shortest);
         };
         let mut result = longest;
         if !shortest_sign.is_negative() {
@@ -375,8 +375,8 @@ impl<
         }
         let mut sign = longest_sign & shortest_sign;
         if sign.is_negative() {
-            result.push(Digit::digit_mask(SHIFT));
-            Digit::complement_in_place::<SHIFT>(&mut result);
+            result.push(Digit::digit_mask(DIGIT_BITNESS));
+            Digit::complement_in_place::<DIGIT_BITNESS>(&mut result);
         }
         trim_leading_zeros(&mut result);
         sign *= to_digits_sign(&result);
@@ -385,7 +385,7 @@ impl<
 }
 
 pub(super) trait BitwiseOrComponents: Sized {
-    fn bitwise_or_components<const SHIFT: usize>(
+    fn bitwise_or_components<const DIGIT_BITNESS: usize>(
         first_sign: Sign,
         first: Vec<Self>,
         second_sign: Sign,
@@ -396,7 +396,7 @@ pub(super) trait BitwiseOrComponents: Sized {
 impl<Digit: BitOrAssign + ComplementInPlace + Copy + DigitMask + Zeroable>
     BitwiseOrComponents for Digit
 {
-    fn bitwise_or_components<const SHIFT: usize>(
+    fn bitwise_or_components<const DIGIT_BITNESS: usize>(
         first_sign: Sign,
         first: Vec<Self>,
         second_sign: Sign,
@@ -409,10 +409,10 @@ impl<Digit: BitOrAssign + ComplementInPlace + Copy + DigitMask + Zeroable>
                 (first_sign, first, second_sign, second)
             };
         if longest_sign.is_negative() {
-            Self::complement_in_place::<SHIFT>(&mut longest);
+            Self::complement_in_place::<DIGIT_BITNESS>(&mut longest);
         };
         if shortest_sign.is_negative() {
-            Self::complement_in_place::<SHIFT>(&mut shortest);
+            Self::complement_in_place::<DIGIT_BITNESS>(&mut shortest);
         };
         let mut result = longest;
         if shortest_sign.is_negative() {
@@ -423,8 +423,8 @@ impl<Digit: BitOrAssign + ComplementInPlace + Copy + DigitMask + Zeroable>
         }
         let sign = longest_sign | shortest_sign;
         if sign.is_negative() {
-            result.push(Self::digit_mask(SHIFT));
-            Self::complement_in_place::<SHIFT>(&mut result);
+            result.push(Self::digit_mask(DIGIT_BITNESS));
+            Self::complement_in_place::<DIGIT_BITNESS>(&mut result);
         }
         trim_leading_zeros(&mut result);
         (sign, result)
@@ -432,7 +432,7 @@ impl<Digit: BitOrAssign + ComplementInPlace + Copy + DigitMask + Zeroable>
 }
 
 pub(super) trait BitwiseXorComponents: Sized {
-    fn bitwise_xor_components<const SHIFT: usize>(
+    fn bitwise_xor_components<const DIGIT_BITNESS: usize>(
         first_sign: Sign,
         first: Vec<Self>,
         second_sign: Sign,
@@ -444,7 +444,7 @@ impl<
         Digit: BitXorAssign + ComplementInPlace + Copy + DigitMask + Zeroable,
     > BitwiseXorComponents for Digit
 {
-    fn bitwise_xor_components<const SHIFT: usize>(
+    fn bitwise_xor_components<const DIGIT_BITNESS: usize>(
         first_sign: Sign,
         first: Vec<Self>,
         second_sign: Sign,
@@ -457,17 +457,17 @@ impl<
                 (first_sign, first, second_sign, second)
             };
         if longest_sign.is_negative() {
-            Self::complement_in_place::<SHIFT>(&mut longest);
+            Self::complement_in_place::<DIGIT_BITNESS>(&mut longest);
         };
         if shortest_sign.is_negative() {
-            Self::complement_in_place::<SHIFT>(&mut shortest);
+            Self::complement_in_place::<DIGIT_BITNESS>(&mut shortest);
         };
         let mut result = longest;
         for index in 0..shortest.len() {
             result[index] ^= shortest[index];
         }
         if shortest_sign.is_negative() {
-            let digit_mask = Self::digit_mask(SHIFT);
+            let digit_mask = Self::digit_mask(DIGIT_BITNESS);
             for index in shortest.len()..result.len() {
                 result[index] ^= digit_mask;
             }
@@ -475,8 +475,8 @@ impl<
         let sign_is_negative =
             longest_sign.is_negative() ^ shortest_sign.is_negative();
         if sign_is_negative {
-            result.push(Self::digit_mask(SHIFT));
-            Self::complement_in_place::<SHIFT>(&mut result);
+            result.push(Self::digit_mask(DIGIT_BITNESS));
+            Self::complement_in_place::<DIGIT_BITNESS>(&mut result);
         }
         trim_leading_zeros(&mut result);
         (
@@ -493,7 +493,7 @@ impl<
 pub trait TryDivDigitsAsFloat<Output>: Sized {
     type Error;
 
-    fn checked_div_digits_as_float<const SHIFT: usize>(
+    fn checked_div_digits_as_float<const DIGIT_BITNESS: usize>(
         dividend_digits: &[Self],
         divisor_digits: &[Self],
     ) -> Result<Output, Self::Error>;
@@ -524,7 +524,7 @@ macro_rules! checked_div_digits_as_float_impl {
         {
             type Error = CheckedDivAsFloatError;
 
-            fn checked_div_digits_as_float<const SHIFT: usize>(
+            fn checked_div_digits_as_float<const DIGIT_BITNESS: usize>(
                 dividend_digits: &[Self],
                 divisor_digits: &[Self],
             ) -> Result<$float, Self::Error> {
@@ -539,41 +539,41 @@ macro_rules! checked_div_digits_as_float_impl {
                 const NON_EXPONENT_DIGITS: usize =
                     <$float>::TOTAL_BITS_COUNT - <$float>::EXPONENT_BITS_COUNT;
                 let dividend_is_small = dividend_digits_count
-                    <= (NON_EXPONENT_DIGITS / SHIFT)
+                    <= (NON_EXPONENT_DIGITS / DIGIT_BITNESS)
                     || (dividend_digits_count
-                        == (NON_EXPONENT_DIGITS / SHIFT) + 1
-                        && (dividend_digits[(NON_EXPONENT_DIGITS / SHIFT)]
-                            >> (NON_EXPONENT_DIGITS % SHIFT))
+                        == (NON_EXPONENT_DIGITS / DIGIT_BITNESS) + 1
+                        && (dividend_digits[(NON_EXPONENT_DIGITS / DIGIT_BITNESS)]
+                            >> (NON_EXPONENT_DIGITS % DIGIT_BITNESS))
                             .is_zero());
                 let divisor_is_small = divisor_digits_count
-                    <= (NON_EXPONENT_DIGITS / SHIFT)
+                    <= (NON_EXPONENT_DIGITS / DIGIT_BITNESS)
                     || (divisor_digits_count
-                        == (NON_EXPONENT_DIGITS / SHIFT) + 1
-                        && (divisor_digits[(NON_EXPONENT_DIGITS / SHIFT)]
-                            >> (NON_EXPONENT_DIGITS % SHIFT))
+                        == (NON_EXPONENT_DIGITS / DIGIT_BITNESS) + 1
+                        && (divisor_digits[(NON_EXPONENT_DIGITS / DIGIT_BITNESS)]
+                            >> (NON_EXPONENT_DIGITS % DIGIT_BITNESS))
                             .is_zero());
                 if dividend_is_small && divisor_is_small {
                     let reduced_dividend =
-                        Self::reduce_digits_to_float::<SHIFT>(
+                        Self::reduce_digits_to_float::<DIGIT_BITNESS>(
                             dividend_digits,
                         );
                     let reduced_divisor =
-                        Self::reduce_digits_to_float::<SHIFT>(divisor_digits);
+                        Self::reduce_digits_to_float::<DIGIT_BITNESS>(divisor_digits);
                     return Ok(reduced_dividend / reduced_divisor);
                 }
                 let digits_count_difference = (dividend_digits_count as isize)
                     - (divisor_digits_count as isize);
                 if digits_count_difference
-                    > (((usize::MAX / SHIFT) - 1) as isize)
+                    > (((usize::MAX / DIGIT_BITNESS) - 1) as isize)
                 {
                     return Err(CheckedDivAsFloatError::TooLarge);
                 } else if digits_count_difference
-                    < 1isize - ((usize::MAX / SHIFT) as isize)
+                    < 1isize - ((usize::MAX / DIGIT_BITNESS) as isize)
                 {
                     return Ok(<$float>::zero());
                 }
                 let bit_lengths_difference = digits_count_difference
-                    * (SHIFT as isize)
+                    * (DIGIT_BITNESS as isize)
                     + (((dividend_digits[dividend_digits.len() - 1]
                         .bit_length()) as isize)
                         - (divisor_digits[divisor_digits.len() - 1]
@@ -592,7 +592,7 @@ macro_rules! checked_div_digits_as_float_impl {
                     - 2;
                 let mut inexact = false;
                 let mut quotient_digits = if shift <= 0 {
-                    let shift_digits = ((-shift) as usize) / SHIFT;
+                    let shift_digits = ((-shift) as usize) / DIGIT_BITNESS;
                     if dividend_digits_count
                         >= ((isize::MAX - 1) as usize) - shift_digits
                     {
@@ -602,23 +602,23 @@ macro_rules! checked_div_digits_as_float_impl {
                         dividend_digits_count + shift_digits + 1;
                     let mut quotient_data =
                         vec![Self::zero(); quotient_digits_count];
-                    let remainder = Self::shift_digits_left_in_place::<SHIFT>(
+                    let remainder = Self::shift_digits_left_in_place::<DIGIT_BITNESS>(
                         dividend_digits,
-                        ((-shift) as usize) % SHIFT,
+                        ((-shift) as usize) % DIGIT_BITNESS,
                         &mut quotient_data[shift_digits..],
                     );
                     quotient_data[dividend_digits_count + shift_digits] =
                         remainder;
                     quotient_data
                 } else {
-                    let mut shift_digits = (shift as usize) / SHIFT;
+                    let mut shift_digits = (shift as usize) / DIGIT_BITNESS;
                     let quotient_digits_count =
                         dividend_digits_count - shift_digits;
                     let mut quotient_data =
                         vec![Self::zero(); quotient_digits_count];
-                    let remainder = Self::shift_digits_right_in_place::<SHIFT>(
+                    let remainder = Self::shift_digits_right_in_place::<DIGIT_BITNESS>(
                         &dividend_digits[shift_digits..],
-                        (shift as usize) % SHIFT,
+                        (shift as usize) % DIGIT_BITNESS,
                         &mut quotient_data,
                     );
                     if !remainder.is_zero() {
@@ -635,7 +635,7 @@ macro_rules! checked_div_digits_as_float_impl {
                 trim_leading_zeros(&mut quotient_digits);
                 if divisor_digits_count == 1 {
                     let (next_quotient_digits, remainder) =
-                        Self::div_rem_digits_by_digit::<SHIFT>(
+                        Self::div_rem_digits_by_digit::<DIGIT_BITNESS>(
                             &quotient_digits,
                             divisor_digits[0],
                         );
@@ -645,7 +645,7 @@ macro_rules! checked_div_digits_as_float_impl {
                     }
                 } else {
                     let (next_quotient_digits, remainder) =
-                        Self::div_rem_by_two_or_more_digits::<SHIFT>(
+                        Self::div_rem_by_two_or_more_digits::<DIGIT_BITNESS>(
                             &quotient_digits,
                             divisor_digits,
                         );
@@ -654,7 +654,7 @@ macro_rules! checked_div_digits_as_float_impl {
                         inexact = true;
                     }
                 }
-                let quotient_bit_length = ((quotient_digits.len() - 1) * SHIFT
+                let quotient_bit_length = ((quotient_digits.len() - 1) * DIGIT_BITNESS
                     + quotient_digits[quotient_digits.len() - 1].bit_length())
                     as isize;
                 let extra_bits = quotient_bit_length
@@ -673,7 +673,7 @@ macro_rules! checked_div_digits_as_float_impl {
                 quotient_digits[0] = quotient_low_digit
                     & !(Self::from(2u8) * mask - Self::from(1u8));
                 let reduced_quotient =
-                    Self::reduce_digits_to_float::<SHIFT>(&quotient_digits);
+                    Self::reduce_digits_to_float::<DIGIT_BITNESS>(&quotient_digits);
                 if shift + quotient_bit_length >= (<$float>::MAX_EXP as isize)
                     && (shift + quotient_bit_length > (<$float>::MAX_EXP as isize)
                         || reduced_quotient
@@ -692,7 +692,7 @@ macro_rules! checked_div_digits_as_float_impl {
 checked_div_digits_as_float_impl!(f32 f64);
 
 pub(super) trait CheckedDivComponents: Sized {
-    fn checked_div_components<const SHIFT: usize>(
+    fn checked_div_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
         dividend: &[Self],
         divisor_sign: Sign,
@@ -708,7 +708,7 @@ impl<
             + Zeroable,
     > CheckedDivComponents for Digit
 {
-    fn checked_div_components<const SHIFT: usize>(
+    fn checked_div_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
         dividend: &[Self],
         divisor_sign: Sign,
@@ -721,13 +721,14 @@ impl<
         {
             Some((Sign::zero(), vec![Self::zero()]))
         } else if divisor.len() == 1 {
-            let (digits, _) =
-                Self::div_rem_digits_by_digit::<SHIFT>(dividend, divisor[0]);
+            let (digits, _) = Self::div_rem_digits_by_digit::<DIGIT_BITNESS>(
+                dividend, divisor[0],
+            );
             Some((dividend_sign * divisor_sign, digits))
         } else {
-            let (digits, _) = Self::div_rem_by_two_or_more_digits::<SHIFT>(
-                dividend, divisor,
-            );
+            let (digits, _) = Self::div_rem_by_two_or_more_digits::<
+                DIGIT_BITNESS,
+            >(dividend, divisor);
             Some((
                 dividend_sign * divisor_sign * to_digits_sign(&digits),
                 digits,
@@ -737,7 +738,7 @@ impl<
 }
 
 pub(super) trait CheckedDivEuclidComponents: Sized {
-    fn checked_div_euclid_components<const SHIFT: usize>(
+    fn checked_div_euclid_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
         dividend: &[Self],
         divisor_sign: Sign,
@@ -755,7 +756,7 @@ impl<
             + Zeroable,
     > CheckedDivEuclidComponents for Digit
 {
-    fn checked_div_euclid_components<const SHIFT: usize>(
+    fn checked_div_euclid_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
         dividend: &[Self],
         divisor_sign: Sign,
@@ -781,7 +782,7 @@ impl<
                 == 1
             {
                 let (digits, remainder_digit) =
-                    Self::div_rem_digits_by_digit::<SHIFT>(
+                    Self::div_rem_digits_by_digit::<DIGIT_BITNESS>(
                         dividend, divisor[0],
                     );
                 (
@@ -791,7 +792,7 @@ impl<
                 )
             } else {
                 let (digits, remainder) = Self::div_rem_by_two_or_more_digits::<
-                    SHIFT,
+                    DIGIT_BITNESS,
                 >(dividend, divisor);
                 (
                     dividend_sign * divisor_sign * to_digits_sign(&digits),
@@ -805,7 +806,8 @@ impl<
                     || (dividend_sign.is_positive()
                         && divisor_sign.is_negative()))
             {
-                digits = Self::sum_digits::<SHIFT>(&digits, &[Self::one()]);
+                digits =
+                    Self::sum_digits::<DIGIT_BITNESS>(&digits, &[Self::one()]);
             }
             Some((sign, digits))
         }
@@ -813,7 +815,7 @@ impl<
 }
 
 pub(super) trait CheckedDivRemComponents: Sized {
-    fn checked_div_rem_components<const SHIFT: usize>(
+    fn checked_div_rem_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
         dividend: &[Self],
         divisor_sign: Sign,
@@ -829,7 +831,7 @@ impl<
             + Zeroable,
     > CheckedDivRemComponents for Digit
 {
-    fn checked_div_rem_components<const SHIFT: usize>(
+    fn checked_div_rem_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
         dividend: &[Self],
         divisor_sign: Sign,
@@ -850,7 +852,9 @@ impl<
             ))
         } else if divisor.len() == 1 {
             let (quotient_digits, remainder_digit) =
-                Self::div_rem_digits_by_digit::<SHIFT>(dividend, divisor[0]);
+                Self::div_rem_digits_by_digit::<DIGIT_BITNESS>(
+                    dividend, divisor[0],
+                );
             Some((
                 dividend_sign * divisor_sign,
                 quotient_digits,
@@ -859,7 +863,7 @@ impl<
             ))
         } else {
             let (quotient_digits, remainder_digits) =
-                Self::div_rem_by_two_or_more_digits::<SHIFT>(
+                Self::div_rem_by_two_or_more_digits::<DIGIT_BITNESS>(
                     dividend, divisor,
                 );
             Some((
@@ -875,7 +879,7 @@ impl<
 }
 
 pub(super) trait CheckedDivRemEuclidComponents: Sized {
-    fn checked_div_rem_euclid_components<const SHIFT: usize>(
+    fn checked_div_rem_euclid_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
         dividend: &[Self],
         divisor_sign: Sign,
@@ -887,7 +891,7 @@ impl<
         Digit: CheckedDivRemComponents + SubtractComponents + SumComponents + Unitary,
     > CheckedDivRemEuclidComponents for Digit
 {
-    fn checked_div_rem_euclid_components<const SHIFT: usize>(
+    fn checked_div_rem_euclid_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
         dividend: &[Digit],
         divisor_sign: Sign,
@@ -898,7 +902,7 @@ impl<
             mut quotient,
             mut remainder_sign,
             mut remainder,
-        ) = Digit::checked_div_rem_components::<SHIFT>(
+        ) = Digit::checked_div_rem_components::<DIGIT_BITNESS>(
             dividend_sign,
             dividend,
             divisor_sign,
@@ -907,13 +911,14 @@ impl<
         if (divisor_sign.is_negative() && remainder_sign.is_positive())
             || (divisor_sign.is_positive() && remainder_sign.is_negative())
         {
-            (quotient_sign, quotient) = Digit::subtract_components::<SHIFT>(
-                quotient_sign,
-                &quotient,
-                Sign::one(),
-                &[Digit::one()],
-            );
-            (remainder_sign, remainder) = Digit::sum_components::<SHIFT>(
+            (quotient_sign, quotient) =
+                Digit::subtract_components::<DIGIT_BITNESS>(
+                    quotient_sign,
+                    &quotient,
+                    Sign::one(),
+                    &[Digit::one()],
+                );
+            (remainder_sign, remainder) = Digit::sum_components::<DIGIT_BITNESS>(
                 remainder_sign,
                 &remainder,
                 divisor_sign,
@@ -925,7 +930,7 @@ impl<
 }
 
 pub(super) trait CheckedRemComponents: Sized {
-    fn checked_rem_components<const SHIFT: usize>(
+    fn checked_rem_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
         dividend: &[Self],
         divisor_sign: Sign,
@@ -941,7 +946,7 @@ impl<
             + Zeroable,
     > CheckedRemComponents for Digit
 {
-    fn checked_rem_components<const SHIFT: usize>(
+    fn checked_rem_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
         dividend: &[Self],
         divisor_sign: Sign,
@@ -954,23 +959,24 @@ impl<
         {
             Some((dividend_sign, dividend.to_vec()))
         } else if divisor.len() == 1 {
-            let (_, remainder) =
-                Self::div_rem_digits_by_digit::<SHIFT>(dividend, divisor[0]);
+            let (_, remainder) = Self::div_rem_digits_by_digit::<DIGIT_BITNESS>(
+                dividend, divisor[0],
+            );
             Some((
                 dividend_sign * ((!remainder.is_zero()) as Sign),
                 vec![remainder],
             ))
         } else {
-            let (_, remainder) = Self::div_rem_by_two_or_more_digits::<SHIFT>(
-                dividend, divisor,
-            );
+            let (_, remainder) = Self::div_rem_by_two_or_more_digits::<
+                DIGIT_BITNESS,
+            >(dividend, divisor);
             Some((dividend_sign * to_digits_sign(&remainder), remainder))
         }
     }
 }
 
 pub(super) trait CheckedRemEuclidComponents: Sized {
-    fn checked_rem_euclid_components<const SHIFT: usize>(
+    fn checked_rem_euclid_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
         dividend: &[Self],
         divisor_sign: Sign,
@@ -987,7 +993,7 @@ impl<
             + Zeroable,
     > CheckedRemEuclidComponents for Digit
 {
-    fn checked_rem_euclid_components<const SHIFT: usize>(
+    fn checked_rem_euclid_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
         dividend: &[Self],
         divisor_sign: Sign,
@@ -1003,7 +1009,7 @@ impl<
                     || (dividend_sign.is_positive()
                         && divisor_sign.is_negative())
                 {
-                    Digit::subtract_digits::<SHIFT>(
+                    Digit::subtract_digits::<DIGIT_BITNESS>(
                         dividend,
                         divisor,
                         dividend_sign,
@@ -1014,21 +1020,22 @@ impl<
             )
         } else {
             let (mut sign, mut digits) = if divisor.len() == 1 {
-                let (_, digit) = Digit::div_rem_digits_by_digit::<SHIFT>(
+                let (_, digit) = Digit::div_rem_digits_by_digit::<DIGIT_BITNESS>(
                     dividend, divisor[0],
                 );
                 (dividend_sign * ((!digit.is_zero()) as Sign), vec![digit])
             } else {
-                let (_, digits) = Digit::div_rem_by_two_or_more_digits::<SHIFT>(
-                    dividend, divisor,
-                );
+                let (_, digits) = Digit::div_rem_by_two_or_more_digits::<
+                    DIGIT_BITNESS,
+                >(dividend, divisor);
                 (dividend_sign * to_digits_sign(&digits), digits)
             };
             if (divisor_sign.is_negative() && sign.is_positive())
                 || (divisor_sign.is_positive() && sign.is_negative())
             {
-                (sign, digits) =
-                    Digit::subtract_digits::<SHIFT>(&digits, divisor, sign);
+                (sign, digits) = Digit::subtract_digits::<DIGIT_BITNESS>(
+                    &digits, divisor, sign,
+                );
             }
             Some((sign, digits))
         }
@@ -1036,7 +1043,7 @@ impl<
 }
 
 pub(super) trait ComplementInPlace: Sized {
-    fn complement_in_place<const SHIFT: usize>(digits: &mut [Self]);
+    fn complement_in_place<const DIGIT_BITNESS: usize>(digits: &mut [Self]);
 }
 
 impl<
@@ -1050,13 +1057,13 @@ impl<
             + Zeroable,
     > ComplementInPlace for Digit
 {
-    fn complement_in_place<const SHIFT: usize>(digits: &mut [Self]) {
+    fn complement_in_place<const DIGIT_BITNESS: usize>(digits: &mut [Self]) {
         let mut accumulator = Self::one();
-        let digit_mask = Self::digit_mask(SHIFT);
+        let digit_mask = Self::digit_mask(DIGIT_BITNESS);
         for index in 0..digits.len() {
             accumulator += digits[index] ^ digit_mask;
             digits[index] = accumulator & digit_mask;
-            accumulator >>= SHIFT;
+            accumulator >>= DIGIT_BITNESS;
         }
         debug_assert!(accumulator.is_zero());
     }
@@ -1084,7 +1091,7 @@ fn digits_lesser_than<Digit: PartialOrd>(
 }
 
 pub(super) trait DivRemDigitsByDigit: Sized {
-    fn div_rem_digits_by_digit<const SHIFT: usize>(
+    fn div_rem_digits_by_digit<const DIGIT_BITNESS: usize>(
         dividend: &[Self],
         divisor: Self,
     ) -> (Vec<Self>, Self);
@@ -1102,7 +1109,7 @@ where
         + SubAssign
         + Zeroable,
 {
-    fn div_rem_digits_by_digit<const SHIFT: usize>(
+    fn div_rem_digits_by_digit<const DIGIT_BITNESS: usize>(
         dividend: &[Self],
         divisor: Self,
     ) -> (Vec<Self>, Self) {
@@ -1111,7 +1118,7 @@ where
         let digits_count = dividend.len();
         let divisor = DoublePrecisionOf::<Self>::from(divisor);
         for offset in 1..=digits_count {
-            remainder <<= SHIFT;
+            remainder <<= DIGIT_BITNESS;
             remainder |= DoublePrecisionOf::<Self>::from(
                 dividend[digits_count - offset],
             );
@@ -1130,7 +1137,7 @@ where
 }
 
 pub(super) trait DivRemDigitsByTwoOrMoreDigits: Sized {
-    fn div_rem_by_two_or_more_digits<const SHIFT: usize>(
+    fn div_rem_by_two_or_more_digits<const DIGIT_BITNESS: usize>(
         dividend: &[Self],
         divisor: &[Self],
     ) -> (Vec<Self>, Vec<Self>);
@@ -1180,7 +1187,7 @@ where
         + Shr<usize, Output = OppositionOf<DoublePrecisionOf<Digit>>>
         + Sub<Output = OppositionOf<DoublePrecisionOf<Digit>>>,
 {
-    fn div_rem_by_two_or_more_digits<const SHIFT: usize>(
+    fn div_rem_by_two_or_more_digits<const DIGIT_BITNESS: usize>(
         dividend: &[Digit],
         divisor: &[Digit],
     ) -> (Vec<Digit>, Vec<Digit>) {
@@ -1189,13 +1196,13 @@ where
         let mut dividend_normalized =
             vec![Digit::zero(); dividend_digits_count];
         let mut divisor_normalized = vec![Digit::zero(); divisor_digits_count];
-        let shift = SHIFT - divisor[divisor.len() - 1].bit_length();
-        Digit::shift_digits_left_in_place::<SHIFT>(
+        let shift = DIGIT_BITNESS - divisor[divisor.len() - 1].bit_length();
+        Digit::shift_digits_left_in_place::<DIGIT_BITNESS>(
             divisor,
             shift,
             divisor_normalized.as_mut_slice(),
         );
-        let accumulator = Digit::shift_digits_left_in_place::<SHIFT>(
+        let accumulator = Digit::shift_digits_left_in_place::<DIGIT_BITNESS>(
             dividend,
             shift,
             dividend_normalized.as_mut_slice(),
@@ -1214,12 +1221,12 @@ where
         let penult_divisor_digit_normalized =
             divisor_normalized[divisor_digits_count - 2];
         let mut quotient_position = quotient_size;
-        let base = Digit::one() << SHIFT;
-        let digit_mask = Digit::digit_mask(SHIFT);
+        let base = Digit::one() << DIGIT_BITNESS;
+        let digit_mask = Digit::digit_mask(DIGIT_BITNESS);
         for offset in (0..quotient_size).rev() {
             let step = (DoublePrecisionOf::<Digit>::from(
                 dividend_normalized[offset + divisor_digits_count],
-            ) << SHIFT)
+            ) << DIGIT_BITNESS)
                 | DoublePrecisionOf::<Digit>::from(
                     dividend_normalized[offset + divisor_digits_count - 1],
                 );
@@ -1244,7 +1251,8 @@ where
             while DoublePrecisionOf::<Digit>::from(
                 penult_divisor_digit_normalized,
             ) * DoublePrecisionOf::<Digit>::from(quotient_digit)
-                > ((DoublePrecisionOf::<Digit>::from(step_remainder) << SHIFT)
+                > ((DoublePrecisionOf::<Digit>::from(step_remainder)
+                    << DIGIT_BITNESS)
                     | DoublePrecisionOf::<Digit>::from(
                         dividend_normalized[offset + divisor_digits_count - 2],
                     ))
@@ -1276,7 +1284,7 @@ where
                     .unwrap_unchecked()
                 };
                 accumulator = unsafe {
-                    OppositionOf::<Digit>::try_from(step >> SHIFT)
+                    OppositionOf::<Digit>::try_from(step >> DIGIT_BITNESS)
                         .unwrap_unchecked()
                 };
             }
@@ -1295,7 +1303,7 @@ where
                         + divisor_normalized[index];
                     dividend_normalized[offset + index] =
                         accumulator & digit_mask;
-                    accumulator >>= SHIFT;
+                    accumulator >>= DIGIT_BITNESS;
                 }
                 quotient_digit -= Digit::one();
             }
@@ -1307,7 +1315,7 @@ where
         }
         trim_leading_zeros(&mut quotient);
         let mut remainder = divisor_normalized;
-        Digit::shift_digits_right_in_place::<SHIFT>(
+        Digit::shift_digits_right_in_place::<DIGIT_BITNESS>(
             &dividend_normalized[..divisor_digits_count],
             shift,
             remainder.as_mut_slice(),
@@ -1318,7 +1326,7 @@ where
 }
 
 pub(super) trait FractExpDigits<Fraction>: Sized {
-    fn fract_exp_digits<const SHIFT: usize>(
+    fn fract_exp_digits<const DIGIT_BITNESS: usize>(
         digits: &[Self],
     ) -> Option<(Fraction, i32)>;
 }
@@ -1359,63 +1367,64 @@ where
         Add<Output = OppositionOf<Digit>> + From<i8> + TryFrom<Digit>,
     usize: TryFrom<Digit>,
 {
-    fn fract_exp_digits<const SHIFT: usize>(
+    fn fract_exp_digits<const DIGIT_BITNESS: usize>(
         digits: &[Self],
     ) -> Option<(Fraction, i32)> {
         let mut result_digits =
             vec![
                 Self::zero();
-                2usize + (Fraction::MANTISSA_DIGITS + 1usize) / SHIFT
+                2usize + (Fraction::MANTISSA_DIGITS + 1usize) / DIGIT_BITNESS
             ];
         let size = digits.len();
         let mut bits_count = digits[digits.len() - 1].bit_length();
-        if size > (usize::MAX - 1) / SHIFT
-            && (size > (usize::MAX - 1) / SHIFT + 1
-                || bits_count > (usize::MAX - 1) % SHIFT + 1)
+        if size > (usize::MAX - 1) / DIGIT_BITNESS
+            && (size > (usize::MAX - 1) / DIGIT_BITNESS + 1
+                || bits_count > (usize::MAX - 1) % DIGIT_BITNESS + 1)
         {
             return None;
         }
-        bits_count += (size - 1) * SHIFT;
-        let mut result_digits_count =
-            if bits_count <= Fraction::MANTISSA_DIGITS + 2 {
-                let shift_digits =
-                    (Fraction::MANTISSA_DIGITS + 2 - bits_count) / SHIFT;
-                let shift_bits =
-                    (Fraction::MANTISSA_DIGITS + 2 - bits_count) % SHIFT;
-                let mut result_size = shift_digits;
-                let remainder = Self::shift_digits_left_in_place::<SHIFT>(
-                    digits,
-                    shift_bits,
-                    &mut result_digits[result_size..],
-                );
-                result_size += size;
-                result_digits[result_size] = remainder;
-                result_size += 1;
-                result_size
-            } else {
-                let mut shift_digits =
-                    (bits_count - Fraction::MANTISSA_DIGITS - 2) / SHIFT;
-                let shift_bits =
-                    (bits_count - Fraction::MANTISSA_DIGITS - 2) % SHIFT;
-                let remainder = Self::shift_digits_right_in_place::<SHIFT>(
-                    &digits[shift_digits..],
-                    shift_bits,
-                    &mut result_digits,
-                );
-                let result_size = size - shift_digits;
-                if remainder.is_zero() {
-                    while shift_digits > 0 {
-                        shift_digits -= 1;
-                        if !digits[shift_digits].is_zero() {
-                            result_digits[0] |= Self::one();
-                            break;
-                        }
+        bits_count += (size - 1) * DIGIT_BITNESS;
+        let mut result_digits_count = if bits_count
+            <= Fraction::MANTISSA_DIGITS + 2
+        {
+            let shift_digits =
+                (Fraction::MANTISSA_DIGITS + 2 - bits_count) / DIGIT_BITNESS;
+            let shift_bits =
+                (Fraction::MANTISSA_DIGITS + 2 - bits_count) % DIGIT_BITNESS;
+            let mut result_size = shift_digits;
+            let remainder = Self::shift_digits_left_in_place::<DIGIT_BITNESS>(
+                digits,
+                shift_bits,
+                &mut result_digits[result_size..],
+            );
+            result_size += size;
+            result_digits[result_size] = remainder;
+            result_size += 1;
+            result_size
+        } else {
+            let mut shift_digits =
+                (bits_count - Fraction::MANTISSA_DIGITS - 2) / DIGIT_BITNESS;
+            let shift_bits =
+                (bits_count - Fraction::MANTISSA_DIGITS - 2) % DIGIT_BITNESS;
+            let remainder = Self::shift_digits_right_in_place::<DIGIT_BITNESS>(
+                &digits[shift_digits..],
+                shift_bits,
+                &mut result_digits,
+            );
+            let result_size = size - shift_digits;
+            if remainder.is_zero() {
+                while shift_digits > 0 {
+                    shift_digits -= 1;
+                    if !digits[shift_digits].is_zero() {
+                        result_digits[0] |= Self::one();
+                        break;
                     }
-                } else {
-                    result_digits[0] |= Self::one();
                 }
-                result_size
-            };
+            } else {
+                result_digits[0] |= Self::one();
+            }
+            result_size
+        };
         const HALF_EVEN_CORRECTION: [i8; 8] = [0, -1, -2, 1, 0, -1, 2, 1];
         result_digits[0] = unsafe {
             Self::try_from(
@@ -1434,7 +1443,8 @@ where
         let mut fraction = Fraction::from(result_digits[result_digits_count]);
         while result_digits_count > 0 {
             result_digits_count -= 1;
-            fraction = fraction * Fraction::from((1usize << SHIFT) as f32)
+            fraction = fraction
+                * Fraction::from((1usize << DIGIT_BITNESS) as f32)
                 + Fraction::from(result_digits[result_digits_count]);
         }
         fraction /=
@@ -1456,18 +1466,18 @@ where
 }
 
 pub(super) trait InvertComponents: Sized {
-    fn invert_components<const SHIFT: usize>(
+    fn invert_components<const DIGIT_BITNESS: usize>(
         sign: Sign,
         digits: &[Self],
     ) -> (Sign, Vec<Self>);
 }
 
 impl<Digit: SumComponents + Unitary> InvertComponents for Digit {
-    fn invert_components<const SHIFT: usize>(
+    fn invert_components<const DIGIT_BITNESS: usize>(
         sign: Sign,
         digits: &[Digit],
     ) -> (Sign, Vec<Digit>) {
-        let (sign, digits) = Digit::sum_components::<SHIFT>(
+        let (sign, digits) = Digit::sum_components::<DIGIT_BITNESS>(
             sign,
             digits,
             Sign::one(),
@@ -1478,7 +1488,7 @@ impl<Digit: SumComponents + Unitary> InvertComponents for Digit {
 }
 
 pub(super) trait MultiplyDigits: Sized {
-    fn multiply_digits<const SHIFT: usize>(
+    fn multiply_digits<const DIGIT_BITNESS: usize>(
         first: &[Self],
         second: &[Self],
     ) -> Vec<Self>;
@@ -1493,7 +1503,7 @@ impl<
             + Zeroable,
     > MultiplyDigits for Digit
 {
-    fn multiply_digits<const SHIFT: usize>(
+    fn multiply_digits<const DIGIT_BITNESS: usize>(
         first: &[Self],
         second: &[Self],
     ) -> Vec<Self> {
@@ -1514,7 +1524,7 @@ impl<
             if shortest.len() == 1 && shortest[0].is_zero() {
                 vec![Self::zero()]
             } else {
-                Self::multiply_digits_plain::<SHIFT>(shortest, longest)
+                Self::multiply_digits_plain::<DIGIT_BITNESS>(shortest, longest)
             }
         } else {
             let are_digits_lopsided = 2 * shortest.len() <= longest.len();
@@ -1526,12 +1536,12 @@ impl<
                 let mut processed_digits_count = 0;
                 while longest_size > 0 {
                     let step_digits_count = longest_size.min(shortest_size);
-                    let product = Self::multiply_digits::<SHIFT>(
+                    let product = Self::multiply_digits::<DIGIT_BITNESS>(
                         shortest,
                         &longest[processed_digits_count
                             ..processed_digits_count + step_digits_count],
                     );
-                    Self::sum_digits_in_place::<SHIFT>(
+                    Self::sum_digits_in_place::<DIGIT_BITNESS>(
                         &mut result[processed_digits_count..],
                         &product,
                     );
@@ -1552,41 +1562,47 @@ impl<
                     };
                 let mut result =
                     vec![Self::zero(); shortest.len() + longest.len()];
-                let highs_product = Self::multiply_digits::<SHIFT>(
+                let highs_product = Self::multiply_digits::<DIGIT_BITNESS>(
                     &shortest_high,
                     &longest_high,
                 );
                 for (index, &digit) in highs_product.iter().enumerate() {
                     result[index + 2 * shift] = digit;
                 }
-                let lows_product = Self::multiply_digits::<SHIFT>(
+                let lows_product = Self::multiply_digits::<DIGIT_BITNESS>(
                     &shortest_low,
                     &longest_low,
                 );
                 for (index, &digit) in lows_product.iter().enumerate() {
                     result[index] = digit;
                 }
-                Self::subtract_digits_in_place::<SHIFT>(
+                Self::subtract_digits_in_place::<DIGIT_BITNESS>(
                     &mut result[shift..],
                     &lows_product,
                 );
-                Self::subtract_digits_in_place::<SHIFT>(
+                Self::subtract_digits_in_place::<DIGIT_BITNESS>(
                     &mut result[shift..],
                     &highs_product,
                 );
-                let shortest_components_sum =
-                    Self::sum_digits::<SHIFT>(&shortest_high, &shortest_low);
+                let shortest_components_sum = Self::sum_digits::<DIGIT_BITNESS>(
+                    &shortest_high,
+                    &shortest_low,
+                );
                 let longest_components_sum =
                     if shortest.as_ptr() == longest.as_ptr() {
                         shortest_components_sum.clone()
                     } else {
-                        Self::sum_digits::<SHIFT>(&longest_high, &longest_low)
+                        Self::sum_digits::<DIGIT_BITNESS>(
+                            &longest_high,
+                            &longest_low,
+                        )
                     };
-                let components_sums_product = Self::multiply_digits::<SHIFT>(
-                    &shortest_components_sum,
-                    &longest_components_sum,
-                );
-                Self::sum_digits_in_place::<SHIFT>(
+                let components_sums_product =
+                    Self::multiply_digits::<DIGIT_BITNESS>(
+                        &shortest_components_sum,
+                        &longest_components_sum,
+                    );
+                Self::sum_digits_in_place::<DIGIT_BITNESS>(
                     &mut result[shift..],
                     &components_sums_product,
                 );
@@ -1598,7 +1614,7 @@ impl<
 }
 
 pub(super) trait MultiplyDigitsPlain: Sized {
-    fn multiply_digits_plain<const SHIFT: usize>(
+    fn multiply_digits_plain<const DIGIT_BITNESS: usize>(
         shortest: &[Self],
         longest: &[Self],
     ) -> Vec<Self>;
@@ -1622,12 +1638,12 @@ where
         + ShrAssign<usize>
         + Zeroable,
 {
-    fn multiply_digits_plain<const SHIFT: usize>(
+    fn multiply_digits_plain<const DIGIT_BITNESS: usize>(
         shortest: &[Self],
         longest: &[Self],
     ) -> Vec<Self> {
         let mut result = vec![Self::zero(); shortest.len() + longest.len()];
-        let digit_mask = DoublePrecisionOf::<Self>::digit_mask(SHIFT);
+        let digit_mask = DoublePrecisionOf::<Self>::digit_mask(DIGIT_BITNESS);
         if shortest.as_ptr() == longest.as_ptr() {
             for index in 0..shortest.len() {
                 let mut digit =
@@ -1640,7 +1656,7 @@ where
                     Self::try_from(accumulator & digit_mask).unwrap_unchecked()
                 };
                 result_position += 1;
-                accumulator >>= SHIFT;
+                accumulator >>= DIGIT_BITNESS;
                 digit <<= 1;
                 for next_index in index + 1..shortest.len() {
                     accumulator += DoublePrecisionOf::<Self>::from(
@@ -1653,7 +1669,7 @@ where
                             .unwrap_unchecked()
                     };
                     result_position += 1;
-                    accumulator >>= SHIFT;
+                    accumulator >>= DIGIT_BITNESS;
                 }
                 if !accumulator.is_zero() {
                     accumulator += DoublePrecisionOf::<Self>::from(
@@ -1664,7 +1680,7 @@ where
                             .unwrap_unchecked()
                     };
                     result_position += 1;
-                    accumulator >>= SHIFT;
+                    accumulator >>= DIGIT_BITNESS;
                 }
                 if !accumulator.is_zero() {
                     result[result_position] += unsafe {
@@ -1690,7 +1706,7 @@ where
                             .unwrap_unchecked()
                     };
                     result_position += 1;
-                    accumulator >>= SHIFT;
+                    accumulator >>= DIGIT_BITNESS;
                 }
                 if !accumulator.is_zero() {
                     result[result_position] += unsafe {
@@ -1896,7 +1912,7 @@ where
 }
 
 pub(super) trait ReduceDigits<Output>: Sized {
-    fn reduce_digits<const SHIFT: usize>(digits: &[Self]) -> Output;
+    fn reduce_digits<const DIGIT_BITNESS: usize>(digits: &[Self]) -> Output;
 }
 
 impl<
@@ -1907,17 +1923,17 @@ impl<
             + Zeroable,
     > ReduceDigits<Output> for Digit
 {
-    fn reduce_digits<const SHIFT: usize>(digits: &[Self]) -> Output {
+    fn reduce_digits<const DIGIT_BITNESS: usize>(digits: &[Self]) -> Output {
         let mut result = Output::zero();
         for &digit in digits.iter().rev() {
-            result = (result << SHIFT) | Output::from(digit);
+            result = (result << DIGIT_BITNESS) | Output::from(digit);
         }
         result
     }
 }
 
 pub(super) trait MaybeReduceDigits<Output>: Sized {
-    fn maybe_reduce_digits<const SHIFT: usize>(
+    fn maybe_reduce_digits<const DIGIT_BITNESS: usize>(
         digits: &[Self],
     ) -> Option<Output>;
 }
@@ -1930,13 +1946,13 @@ impl<
             + Zeroable,
     > MaybeReduceDigits<Output> for Digit
 {
-    fn maybe_reduce_digits<const SHIFT: usize>(
+    fn maybe_reduce_digits<const DIGIT_BITNESS: usize>(
         digits: &[Self],
     ) -> Option<Output> {
         let mut result = Output::zero();
         for &digit in digits.iter().rev() {
             result = result.checked_shl(unsafe {
-                u32::try_from(SHIFT).unwrap_unchecked()
+                u32::try_from(DIGIT_BITNESS).unwrap_unchecked()
             })? | Output::try_from(digit).ok()?;
         }
         Some(result)
@@ -1944,7 +1960,9 @@ impl<
 }
 
 pub(super) trait ReduceDigitsToFloat<Output>: Sized {
-    fn reduce_digits_to_float<const SHIFT: usize>(digits: &[Self]) -> Output;
+    fn reduce_digits_to_float<const DIGIT_BITNESS: usize>(
+        digits: &[Self],
+    ) -> Output;
 }
 
 macro_rules! reduce_digits_to_float_impl {
@@ -1953,16 +1971,16 @@ macro_rules! reduce_digits_to_float_impl {
         where
             $float: From<Digit>,
         {
-            fn reduce_digits_to_float<const SHIFT: usize>(
+            fn reduce_digits_to_float<const DIGIT_BITNESS: usize>(
                 digits: &[Self],
             ) -> $float {
-                debug_assert!(SHIFT < ((1 << f32::EXPONENT_BITS_COUNT) - 1));
+                debug_assert!(DIGIT_BITNESS < ((1 << f32::EXPONENT_BITS_COUNT) - 1));
                 let mut result = 0 as $float;
                 const EXPONENT_BASE: u32 =
                     (1 << (f32::EXPONENT_BITS_COUNT - 1usize)) - 1;
                 let scale = unsafe {
                     transmute::<u32, f32>(
-                        (EXPONENT_BASE + (SHIFT as u32))
+                        (EXPONENT_BASE + (DIGIT_BITNESS as u32))
                             << f32::SIGNIFICAND_BITS_COUNT,
                     )
                 } as $float;
@@ -1978,7 +1996,7 @@ macro_rules! reduce_digits_to_float_impl {
 reduce_digits_to_float_impl!(f32 f64);
 
 pub(super) trait PrimitiveShiftDigitsLeft: Sized {
-    fn primitive_shift_digits_left<const SHIFT: usize>(
+    fn primitive_shift_digits_left<const DIGIT_BITNESS: usize>(
         digits: &[Self],
         shift_quotient: usize,
         shift_remainder: Self,
@@ -1997,7 +2015,7 @@ where
         + ShrAssign<usize>
         + Zeroable,
 {
-    fn primitive_shift_digits_left<const SHIFT: usize>(
+    fn primitive_shift_digits_left<const DIGIT_BITNESS: usize>(
         digits: &[Self],
         shift_quotient: usize,
         shift_remainder: Self,
@@ -2014,14 +2032,14 @@ where
             result.push(Self::zero());
         }
         let mut accumulator = DoublePrecisionOf::<Self>::zero();
-        let digit_mask = DoublePrecisionOf::<Self>::digit_mask(SHIFT);
+        let digit_mask = DoublePrecisionOf::<Self>::digit_mask(DIGIT_BITNESS);
         for &digit in digits {
             accumulator |=
                 DoublePrecisionOf::<Self>::from(digit) << shift_remainder;
             result.push(unsafe {
                 Self::try_from(accumulator & digit_mask).unwrap_unchecked()
             });
-            accumulator >>= SHIFT;
+            accumulator >>= DIGIT_BITNESS;
         }
         if !shift_remainder.is_zero() {
             result.push(unsafe {
@@ -2034,7 +2052,7 @@ where
 }
 
 pub(super) trait ShiftDigitsLeft: Sized {
-    fn shift_digits_left<const SHIFT: usize>(
+    fn shift_digits_left<const DIGIT_BITNESS: usize>(
         base: &[Self],
         shift: &[Self],
     ) -> Result<Vec<Self>, ShlError>;
@@ -2048,21 +2066,21 @@ impl<
             + TryFrom<usize>,
     > ShiftDigitsLeft for Digit
 {
-    fn shift_digits_left<const SHIFT: usize>(
+    fn shift_digits_left<const DIGIT_BITNESS: usize>(
         base: &[Self],
         shift: &[Self],
     ) -> Result<Vec<Self>, ShlError> {
         let (shift_quotient_digits, shift_remainder) =
-            Self::div_rem_digits_by_digit::<SHIFT>(shift, unsafe {
-                Self::try_from(SHIFT).unwrap_unchecked()
+            Self::div_rem_digits_by_digit::<DIGIT_BITNESS>(shift, unsafe {
+                Self::try_from(DIGIT_BITNESS).unwrap_unchecked()
             });
         let shift_quotient =
-            Self::maybe_reduce_digits::<SHIFT>(&shift_quotient_digits)
+            Self::maybe_reduce_digits::<DIGIT_BITNESS>(&shift_quotient_digits)
                 .ok_or(ShlError::TooLarge)?;
         if shift_quotient >= usize::MAX / size_of::<Self>() {
             Err(ShlError::TooLarge)
         } else {
-            Self::primitive_shift_digits_left::<SHIFT>(
+            Self::primitive_shift_digits_left::<DIGIT_BITNESS>(
                 base,
                 shift_quotient,
                 shift_remainder,
@@ -2073,7 +2091,7 @@ impl<
 }
 
 pub(super) trait ShiftDigitsLeftInPlace: Sized {
-    fn shift_digits_left_in_place<const SHIFT: usize>(
+    fn shift_digits_left_in_place<const DIGIT_BITNESS: usize>(
         input: &[Self],
         shift: usize,
         output: &mut [Self],
@@ -2092,27 +2110,27 @@ where
         + ShrAssign<usize>
         + Zeroable,
 {
-    fn shift_digits_left_in_place<const SHIFT: usize>(
+    fn shift_digits_left_in_place<const DIGIT_BITNESS: usize>(
         input: &[Self],
         shift: usize,
         output: &mut [Self],
     ) -> Self {
         let mut accumulator = DoublePrecisionOf::<Self>::zero();
-        let mask = DoublePrecisionOf::<Self>::digit_mask(SHIFT);
+        let mask = DoublePrecisionOf::<Self>::digit_mask(DIGIT_BITNESS);
         for index in 0..input.len() {
             accumulator |=
                 DoublePrecisionOf::<Self>::from(input[index]) << shift;
             output[index] = unsafe {
                 Self::try_from(accumulator & mask).unwrap_unchecked()
             };
-            accumulator >>= SHIFT;
+            accumulator >>= DIGIT_BITNESS;
         }
         unsafe { Self::try_from(accumulator).unwrap_unchecked() }
     }
 }
 
 pub(super) trait ShiftDigitsRightInPlace: Sized {
-    fn shift_digits_right_in_place<const SHIFT: usize>(
+    fn shift_digits_right_in_place<const DIGIT_BITNESS: usize>(
         input: &[Self],
         shift: usize,
         output: &mut [Self],
@@ -2131,7 +2149,7 @@ where
         + ShlAssign<usize>
         + Zeroable,
 {
-    fn shift_digits_right_in_place<const SHIFT: usize>(
+    fn shift_digits_right_in_place<const DIGIT_BITNESS: usize>(
         input: &[Self],
         shift: usize,
         output: &mut [Self],
@@ -2139,7 +2157,7 @@ where
         let mut accumulator = DoublePrecisionOf::<Self>::zero();
         let mask = DoublePrecisionOf::<Self>::digit_mask(shift);
         for index in (0..input.len()).rev() {
-            accumulator <<= SHIFT;
+            accumulator <<= DIGIT_BITNESS;
             accumulator |= DoublePrecisionOf::<Self>::from(input[index]);
             output[index] = unsafe {
                 Self::try_from(accumulator >> shift).unwrap_unchecked()
@@ -2151,7 +2169,7 @@ where
 }
 
 pub(super) trait PrimitiveShiftDigitsRight: Sized {
-    fn primitive_shift_digits_right<const SHIFT: usize>(
+    fn primitive_shift_digits_right<const DIGIT_BITNESS: usize>(
         digits: &[Self],
         shift_quotient: usize,
         shift_remainder: Self,
@@ -2171,7 +2189,7 @@ impl<
 where
     usize: TryFrom<Digit>,
 {
-    fn primitive_shift_digits_right<const SHIFT: usize>(
+    fn primitive_shift_digits_right<const DIGIT_BITNESS: usize>(
         digits: &[Self],
         shift_quotient: usize,
         shift_remainder: Self,
@@ -2182,9 +2200,9 @@ where
         let result_digits_count = digits.len() - shift_quotient;
         let shift_remainder =
             unsafe { usize::try_from(shift_remainder).unwrap_unchecked() };
-        let high_shift = SHIFT - shift_remainder;
+        let high_shift = DIGIT_BITNESS - shift_remainder;
         let low_mask = Self::digit_mask(high_shift);
-        let high_mask = Self::digit_mask(SHIFT) ^ low_mask;
+        let high_mask = Self::digit_mask(DIGIT_BITNESS) ^ low_mask;
         let mut result = vec![Self::zero(); result_digits_count];
         let mut position = shift_quotient;
         for index in 0..result_digits_count {
@@ -2201,7 +2219,7 @@ where
 }
 
 pub(super) trait ShiftDigitsRight: Sized {
-    fn shift_digits_right<const SHIFT: usize>(
+    fn shift_digits_right<const DIGIT_BITNESS: usize>(
         base_sign: Sign,
         base: &[Self],
         shift: &[Self],
@@ -2219,17 +2237,17 @@ impl<
             + Zeroable,
     > ShiftDigitsRight for Digit
 {
-    fn shift_digits_right<const SHIFT: usize>(
+    fn shift_digits_right<const DIGIT_BITNESS: usize>(
         base_sign: Sign,
         base: &[Self],
         shift: &[Self],
     ) -> (Sign, Vec<Self>) {
         let (shift_quotient_digits, shift_remainder) =
-            Self::div_rem_digits_by_digit::<SHIFT>(shift, unsafe {
-                Self::try_from(SHIFT).unwrap_unchecked()
+            Self::div_rem_digits_by_digit::<DIGIT_BITNESS>(shift, unsafe {
+                Self::try_from(DIGIT_BITNESS).unwrap_unchecked()
             });
         let shift_quotient =
-            Self::maybe_reduce_digits::<SHIFT>(&shift_quotient_digits)
+            Self::maybe_reduce_digits::<DIGIT_BITNESS>(&shift_quotient_digits)
                 .unwrap_or(usize::MAX / size_of::<Self>());
         if shift_quotient >= usize::MAX / size_of::<Self>() {
             if base_sign.is_negative() {
@@ -2239,18 +2257,18 @@ impl<
             }
         } else if base_sign.is_negative() {
             let (inverted_sign, inverted_digits) =
-                Self::invert_components::<SHIFT>(base_sign, base);
-            let digits = Self::primitive_shift_digits_right::<SHIFT>(
+                Self::invert_components::<DIGIT_BITNESS>(base_sign, base);
+            let digits = Self::primitive_shift_digits_right::<DIGIT_BITNESS>(
                 &inverted_digits,
                 shift_quotient,
                 shift_remainder,
             );
-            Self::invert_components::<SHIFT>(
+            Self::invert_components::<DIGIT_BITNESS>(
                 inverted_sign * to_digits_sign(&digits),
                 &digits,
             )
         } else {
-            let digits = Self::primitive_shift_digits_right::<SHIFT>(
+            let digits = Self::primitive_shift_digits_right::<DIGIT_BITNESS>(
                 base,
                 shift_quotient,
                 shift_remainder,
@@ -2275,7 +2293,7 @@ where
 }
 
 pub(super) trait SubtractComponents: Sized {
-    fn subtract_components<const SHIFT: usize>(
+    fn subtract_components<const DIGIT_BITNESS: usize>(
         minuend_sign: Sign,
         minuend: &[Self],
         subtrahend_sign: Sign,
@@ -2284,7 +2302,7 @@ pub(super) trait SubtractComponents: Sized {
 }
 
 impl<Digit: SubtractDigits + SumDigits> SubtractComponents for Digit {
-    fn subtract_components<const SHIFT: usize>(
+    fn subtract_components<const DIGIT_BITNESS: usize>(
         minuend_sign: Sign,
         minuend: &[Self],
         subtrahend_sign: Sign,
@@ -2292,24 +2310,34 @@ impl<Digit: SubtractDigits + SumDigits> SubtractComponents for Digit {
     ) -> (Sign, Vec<Self>) {
         if minuend_sign.is_negative() {
             if subtrahend_sign.is_negative() {
-                Self::subtract_digits::<SHIFT>(
+                Self::subtract_digits::<DIGIT_BITNESS>(
                     subtrahend,
                     minuend,
                     Sign::one(),
                 )
             } else {
-                (-Sign::one(), Self::sum_digits::<SHIFT>(minuend, subtrahend))
+                (
+                    -Sign::one(),
+                    Self::sum_digits::<DIGIT_BITNESS>(minuend, subtrahend),
+                )
             }
         } else if subtrahend_sign.is_negative() {
-            (Sign::one(), Self::sum_digits::<SHIFT>(minuend, subtrahend))
+            (
+                Sign::one(),
+                Self::sum_digits::<DIGIT_BITNESS>(minuend, subtrahend),
+            )
         } else {
-            Self::subtract_digits::<SHIFT>(minuend, subtrahend, Sign::one())
+            Self::subtract_digits::<DIGIT_BITNESS>(
+                minuend,
+                subtrahend,
+                Sign::one(),
+            )
         }
     }
 }
 
 pub(super) trait SubtractDigits: Sized {
-    fn subtract_digits<const SHIFT: usize>(
+    fn subtract_digits<const DIGIT_BITNESS: usize>(
         first: &[Self],
         second: &[Self],
         sign: Sign,
@@ -2328,7 +2356,7 @@ impl<
             + Zeroable,
     > SubtractDigits for Digit
 {
-    fn subtract_digits<const SHIFT: usize>(
+    fn subtract_digits<const DIGIT_BITNESS: usize>(
         first: &[Self],
         second: &[Self],
         mut sign: Sign,
@@ -2365,19 +2393,19 @@ impl<
         };
         let mut result = Vec::<Self>::with_capacity(longest_size);
         let mut accumulator = Self::zero();
-        let digit_mask = Self::digit_mask(SHIFT);
+        let digit_mask = Self::digit_mask(DIGIT_BITNESS);
         for index in 0..shortest_size {
             accumulator = longest[index]
                 .wrapping_sub(shortest[index])
                 .wrapping_sub(accumulator);
             result.push(accumulator & digit_mask);
-            accumulator >>= SHIFT;
+            accumulator >>= DIGIT_BITNESS;
             accumulator &= Self::one();
         }
         for index in shortest_size..longest_size {
             accumulator = longest[index].wrapping_sub(accumulator);
             result.push(accumulator & digit_mask);
-            accumulator >>= SHIFT;
+            accumulator >>= DIGIT_BITNESS;
             accumulator &= Self::one();
         }
         trim_leading_zeros(&mut result);
@@ -2386,7 +2414,7 @@ impl<
 }
 
 pub(super) trait SubtractDigitsInPlace: Sized {
-    fn subtract_digits_in_place<const SHIFT: usize>(
+    fn subtract_digits_in_place<const DIGIT_BITNESS: usize>(
         longest: &mut [Self],
         shortest: &[Self],
     ) -> Self;
@@ -2403,18 +2431,18 @@ impl<
             + Zeroable,
     > SubtractDigitsInPlace for Digit
 {
-    fn subtract_digits_in_place<const SHIFT: usize>(
+    fn subtract_digits_in_place<const DIGIT_BITNESS: usize>(
         longest: &mut [Self],
         shortest: &[Self],
     ) -> Self {
         let mut accumulator = Self::zero();
-        let digit_mask = Self::digit_mask(SHIFT);
+        let digit_mask = Self::digit_mask(DIGIT_BITNESS);
         for index in 0..shortest.len() {
             accumulator = longest[index]
                 .wrapping_sub(shortest[index])
                 .wrapping_sub(accumulator);
             longest[index] = accumulator & digit_mask;
-            accumulator >>= SHIFT;
+            accumulator >>= DIGIT_BITNESS;
             accumulator &= Self::one();
         }
         for index in shortest.len()..longest.len() {
@@ -2423,7 +2451,7 @@ impl<
             }
             accumulator = longest[index].wrapping_sub(accumulator);
             longest[index] = accumulator & digit_mask;
-            accumulator >>= SHIFT;
+            accumulator >>= DIGIT_BITNESS;
             accumulator &= Self::one();
         }
         accumulator
@@ -2431,7 +2459,7 @@ impl<
 }
 
 pub(super) trait SumComponents: Sized {
-    fn sum_components<const SHIFT: usize>(
+    fn sum_components<const DIGIT_BITNESS: usize>(
         first_sign: Sign,
         first: &[Self],
         second_sign: Sign,
@@ -2440,7 +2468,7 @@ pub(super) trait SumComponents: Sized {
 }
 
 impl<Digit: SubtractDigits + SumDigits> SumComponents for Digit {
-    fn sum_components<const SHIFT: usize>(
+    fn sum_components<const DIGIT_BITNESS: usize>(
         first_sign: Sign,
         first: &[Self],
         second_sign: Sign,
@@ -2448,23 +2476,30 @@ impl<Digit: SubtractDigits + SumDigits> SumComponents for Digit {
     ) -> (Sign, Vec<Self>) {
         if first_sign.is_negative() {
             if second_sign.is_negative() {
-                (-Sign::one(), Self::sum_digits::<SHIFT>(first, second))
+                (
+                    -Sign::one(),
+                    Self::sum_digits::<DIGIT_BITNESS>(first, second),
+                )
             } else {
-                Self::subtract_digits::<SHIFT>(second, first, Sign::one())
+                Self::subtract_digits::<DIGIT_BITNESS>(
+                    second,
+                    first,
+                    Sign::one(),
+                )
             }
         } else if second_sign.is_negative() {
-            Self::subtract_digits::<SHIFT>(first, second, Sign::one())
+            Self::subtract_digits::<DIGIT_BITNESS>(first, second, Sign::one())
         } else {
             (
                 first_sign.max(second_sign),
-                Self::sum_digits::<SHIFT>(first, second),
+                Self::sum_digits::<DIGIT_BITNESS>(first, second),
             )
         }
     }
 }
 
 pub(super) trait SumDigits: Sized {
-    fn sum_digits<const SHIFT: usize>(
+    fn sum_digits<const DIGIT_BITNESS: usize>(
         first: &[Self],
         second: &[Self],
     ) -> Vec<Self>;
@@ -2480,7 +2515,7 @@ impl<
             + Zeroable,
     > SumDigits for Digit
 {
-    fn sum_digits<const SHIFT: usize>(
+    fn sum_digits<const DIGIT_BITNESS: usize>(
         first: &[Self],
         second: &[Self],
     ) -> Vec<Self> {
@@ -2491,16 +2526,16 @@ impl<
         };
         let mut result = Vec::<Self>::with_capacity(longest.len() + 1);
         let mut accumulator: Self = Self::zero();
-        let digit_mask = Self::digit_mask(SHIFT);
+        let digit_mask = Self::digit_mask(DIGIT_BITNESS);
         for index in 0..shortest.len() {
             accumulator += longest[index] + shortest[index];
             result.push(accumulator & digit_mask);
-            accumulator >>= SHIFT;
+            accumulator >>= DIGIT_BITNESS;
         }
         for index in shortest.len()..longest.len() {
             accumulator += longest[index];
             result.push(accumulator & digit_mask);
-            accumulator >>= SHIFT;
+            accumulator >>= DIGIT_BITNESS;
         }
         result.push(accumulator);
         trim_leading_zeros(&mut result);
@@ -2509,7 +2544,7 @@ impl<
 }
 
 pub(super) trait SumDigitsInPlace: Sized {
-    fn sum_digits_in_place<const SHIFT: usize>(
+    fn sum_digits_in_place<const DIGIT_BITNESS: usize>(
         longest: &mut [Self],
         shortest: &[Self],
     ) -> Self;
@@ -2525,16 +2560,16 @@ impl<
             + Zeroable,
     > SumDigitsInPlace for Digit
 {
-    fn sum_digits_in_place<const SHIFT: usize>(
+    fn sum_digits_in_place<const DIGIT_BITNESS: usize>(
         longest: &mut [Self],
         shortest: &[Self],
     ) -> Self {
         let mut accumulator = Self::zero();
-        let digit_mask = Self::digit_mask(SHIFT);
+        let digit_mask = Self::digit_mask(DIGIT_BITNESS);
         for index in 0..shortest.len() {
             accumulator = longest[index] + shortest[index] + accumulator;
             longest[index] = accumulator & digit_mask;
-            accumulator >>= SHIFT;
+            accumulator >>= DIGIT_BITNESS;
         }
         for index in shortest.len()..longest.len() {
             if accumulator.is_zero() {
@@ -2542,7 +2577,7 @@ impl<
             }
             accumulator += longest[index];
             longest[index] = accumulator & digit_mask;
-            accumulator >>= SHIFT;
+            accumulator >>= DIGIT_BITNESS;
         }
         accumulator
     }
@@ -2567,7 +2602,7 @@ pub(super) fn to_digits_sign<Digit: Zeroable>(digits: &[Digit]) -> Sign {
 }
 
 pub(super) trait GcdDigits: Sized {
-    fn gcd_digits<const SHIFT: usize>(
+    fn gcd_digits<const DIGIT_BITNESS: usize>(
         first: Vec<Self>,
         second: Vec<Self>,
     ) -> (Sign, Vec<Self>);
@@ -2616,7 +2651,7 @@ where
         + Unitary
         + Zeroable,
 {
-    fn gcd_digits<const SHIFT: usize>(
+    fn gcd_digits<const DIGIT_BITNESS: usize>(
         first: Vec<Self>,
         second: Vec<Self>,
     ) -> (Sign, Vec<Self>) {
@@ -2640,10 +2675,10 @@ where
             let mut largest_leading_bits =
                 (OppositionOf::<DoublePrecisionOf<Self>>::from(
                     largest[largest_digits_count - 1],
-                ) << (2 * SHIFT - highest_digit_bit_length))
+                ) << (2 * DIGIT_BITNESS - highest_digit_bit_length))
                     | (OppositionOf::<DoublePrecisionOf<Self>>::from(
                         largest[largest_digits_count - 2],
-                    ) << (SHIFT - highest_digit_bit_length))
+                    ) << (DIGIT_BITNESS - highest_digit_bit_length))
                     | OppositionOf::<DoublePrecisionOf<Self>>::from(
                         largest[largest_digits_count - 3]
                             >> highest_digit_bit_length,
@@ -2659,13 +2694,13 @@ where
                 } | if smallest_digits_count >= largest_digits_count - 1 {
                     OppositionOf::<DoublePrecisionOf<Self>>::from(
                         smallest[largest_digits_count - 2],
-                    ) << (SHIFT - highest_digit_bit_length)
+                    ) << (DIGIT_BITNESS - highest_digit_bit_length)
                 } else {
                     OppositionOf::<DoublePrecisionOf<Self>>::zero()
                 } | if smallest_digits_count >= largest_digits_count {
                     OppositionOf::<DoublePrecisionOf<Self>>::from(
                         smallest[largest_digits_count - 1],
-                    ) << (2 * SHIFT - highest_digit_bit_length)
+                    ) << (2 * DIGIT_BITNESS - highest_digit_bit_length)
                 } else {
                     OppositionOf::<DoublePrecisionOf<Self>>::zero()
                 };
@@ -2705,14 +2740,15 @@ where
             }
             if iterations_count == 0 {
                 (largest, smallest) = if smallest_digits_count == 1 {
-                    let (_, remainder) = Self::div_rem_digits_by_digit::<SHIFT>(
-                        &largest,
-                        smallest[0],
+                    let (_, remainder) = Self::div_rem_digits_by_digit::<
+                        DIGIT_BITNESS,
+                    >(
+                        &largest, smallest[0]
                     );
                     (smallest, vec![remainder])
                 } else {
                     let (_, remainder) =
-                        Self::div_rem_by_two_or_more_digits::<SHIFT>(
+                        Self::div_rem_by_two_or_more_digits::<DIGIT_BITNESS>(
                             &largest, &smallest,
                         );
                     (smallest, remainder)
@@ -2726,7 +2762,9 @@ where
                     (-fourth_coefficient, -third_coefficient);
             }
             let digit_mask =
-                OppositionOf::<DoublePrecisionOf<Self>>::digit_mask(SHIFT);
+                OppositionOf::<DoublePrecisionOf<Self>>::digit_mask(
+                    DIGIT_BITNESS,
+                );
             let mut next_largest_accumulator =
                 OppositionOf::<DoublePrecisionOf<Self>>::zero();
             let mut next_smallest_accumulator =
@@ -2762,8 +2800,8 @@ where
                     Self::try_from(next_smallest_accumulator & digit_mask)
                         .unwrap_unchecked()
                 });
-                next_largest_accumulator >>= SHIFT;
-                next_smallest_accumulator >>= SHIFT;
+                next_largest_accumulator >>= DIGIT_BITNESS;
+                next_smallest_accumulator >>= DIGIT_BITNESS;
             }
             for index in smallest_digits_count..largest_digits_count {
                 next_largest_accumulator += first_coefficient
@@ -2782,22 +2820,24 @@ where
                     Self::try_from(next_smallest_accumulator & digit_mask)
                         .unwrap_unchecked()
                 });
-                next_largest_accumulator >>= SHIFT;
-                next_smallest_accumulator >>= SHIFT;
+                next_largest_accumulator >>= DIGIT_BITNESS;
+                next_smallest_accumulator >>= DIGIT_BITNESS;
             }
             trim_leading_zeros(&mut next_largest_digits);
             trim_leading_zeros(&mut next_smallest_digits);
             largest = next_largest_digits;
             smallest = next_smallest_digits;
         }
-        let reduced_result = Self::reduce_digits::<SHIFT>(&largest)
-            .gcd(Self::reduce_digits::<SHIFT>(&smallest));
+        let reduced_result = Self::reduce_digits::<DIGIT_BITNESS>(&largest)
+            .gcd(Self::reduce_digits::<DIGIT_BITNESS>(&smallest));
         if reduced_result.is_zero() {
             (Sign::zero(), vec![Self::zero(); 1])
         } else {
             (
                 Sign::one(),
-                Self::digits_from_non_zero_value::<SHIFT>(reduced_result),
+                Self::digits_from_non_zero_value::<DIGIT_BITNESS>(
+                    reduced_result,
+                ),
             )
         }
     }
@@ -2814,7 +2854,7 @@ pub(super) fn trim_leading_zeros<Digit: Zeroable>(digits: &mut Vec<Digit>) {
 }
 
 pub(super) trait DigitsFromNonZeroValue<Source>: Sized {
-    fn digits_from_non_zero_value<const SHIFT: usize>(
+    fn digits_from_non_zero_value<const DIGIT_BITNESS: usize>(
         value: Source,
     ) -> Vec<Self>;
 }
@@ -2840,7 +2880,7 @@ impl<
 where
     OppositionOf<Source>: TryFrom<Source>,
 {
-    fn digits_from_non_zero_value<const SHIFT: usize>(
+    fn digits_from_non_zero_value<const DIGIT_BITNESS: usize>(
         value: Source,
     ) -> Vec<Self> {
         if size_of::<Source>() < size_of::<Self>()
@@ -2867,10 +2907,10 @@ where
                 unsafe { Self::try_from(value).unwrap_unchecked() }
             };
             let mut digits = Vec::<Self>::new();
-            let digit_mask = Self::digit_mask(SHIFT);
+            let digit_mask = Self::digit_mask(DIGIT_BITNESS);
             while !value.is_zero() {
                 digits.push(value & digit_mask);
-                value >>= SHIFT;
+                value >>= DIGIT_BITNESS;
             }
             digits
         } else {
@@ -2887,12 +2927,12 @@ where
                 value
             };
             let mut digits = Vec::<Self>::new();
-            let digit_mask = Source::digit_mask(SHIFT);
+            let digit_mask = Source::digit_mask(DIGIT_BITNESS);
             while !value.is_zero() {
                 digits.push(unsafe {
                     Self::try_from(value & digit_mask).unwrap_unchecked()
                 });
-                value >>= SHIFT;
+                value >>= DIGIT_BITNESS;
             }
             digits
         }

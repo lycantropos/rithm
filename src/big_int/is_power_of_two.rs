@@ -5,8 +5,8 @@ use super::types::BigInt;
 impl<
         Digit: IsPowerOfTwo + Zeroable,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > IsPowerOfTwo for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > IsPowerOfTwo for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     fn is_power_of_two(&self) -> bool {
         self.sign.is_positive()

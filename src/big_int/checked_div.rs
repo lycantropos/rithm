@@ -6,13 +6,13 @@ use super::types::BigInt;
 impl<
         Digit: CheckedDivComponents,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDiv for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > CheckedDiv for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = Option<Self>;
 
     fn checked_div(self, divisor: Self) -> Self::Output {
-        Digit::checked_div_components::<SHIFT>(
+        Digit::checked_div_components::<DIGIT_BITNESS>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -25,13 +25,13 @@ impl<
 impl<
         Digit: CheckedDivComponents,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDiv<&Self> for BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > CheckedDiv<&Self> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
     type Output = Option<Self>;
 
     fn checked_div(self, divisor: &Self) -> Self::Output {
-        Digit::checked_div_components::<SHIFT>(
+        Digit::checked_div_components::<DIGIT_BITNESS>(
             self.sign,
             &self.digits,
             divisor.sign,
@@ -44,23 +44,27 @@ impl<
 impl<
         Digit: CheckedDivComponents,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDiv<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > CheckedDiv<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn checked_div(
         self,
-        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
-        Digit::checked_div_components::<SHIFT>(
+        Digit::checked_div_components::<DIGIT_BITNESS>(
             self.sign,
             &self.digits,
             divisor.sign,
             &divisor.digits,
         )
-        .map(|(sign, digits)| BigInt::<Digit, SEPARATOR, SHIFT> {
+        .map(|(sign, digits)| BigInt::<
+            Digit,
+            SEPARATOR,
+            DIGIT_BITNESS,
+        > {
             sign,
             digits,
         })
@@ -70,19 +74,23 @@ impl<
 impl<
         Digit: CheckedDivComponents,
         const SEPARATOR: char,
-        const SHIFT: usize,
-    > CheckedDiv for &BigInt<Digit, SEPARATOR, SHIFT>
+        const DIGIT_BITNESS: usize,
+    > CheckedDiv for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 {
-    type Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>;
+    type Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>;
 
     fn checked_div(self, divisor: Self) -> Self::Output {
-        Digit::checked_div_components::<SHIFT>(
+        Digit::checked_div_components::<DIGIT_BITNESS>(
             self.sign,
             &self.digits,
             divisor.sign,
             &divisor.digits,
         )
-        .map(|(sign, digits)| BigInt::<Digit, SEPARATOR, SHIFT> {
+        .map(|(sign, digits)| BigInt::<
+            Digit,
+            SEPARATOR,
+            DIGIT_BITNESS,
+        > {
             sign,
             digits,
         })

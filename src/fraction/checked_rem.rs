@@ -6,23 +6,23 @@ use crate::big_int::BigInt;
 
 use super::types::{Fraction, NormalizeModuli};
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedRem
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> CheckedRem
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>>
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
         + Mul<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
-        > + Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        > + Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
         + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     >,
     Self: Zeroable,
 {
@@ -46,21 +46,21 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedRem<&Self>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRem<&Self> for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>>
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
         + Mul<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         > + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     Self: Zeroable,
 {
     type Output = Option<Self>;
@@ -83,29 +83,29 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedRem<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRem<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>>
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
         + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
         + Mul<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         >,
-    Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Zeroable,
+    Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>: Zeroable,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
 
     fn checked_rem(
         self,
-        divisor: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        divisor: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -116,7 +116,7 @@ where
                     .unwrap_unchecked()
             }
             .normalize_moduli(&self.denominator * divisor.denominator);
-            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })
@@ -124,21 +124,21 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize> CheckedRem
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize> CheckedRem
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>>
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
         + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Zeroable,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>: Zeroable,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
 
     fn checked_rem(self, divisor: Self) -> Self::Output {
         if divisor.is_zero() {
@@ -150,7 +150,7 @@ where
                     .unwrap_unchecked()
             }
             .normalize_moduli(&self.denominator * &divisor.denominator);
-            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })
@@ -158,19 +158,19 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedRem<BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRem<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: Mul<
-        BigInt<Digit, SEPARATOR, SHIFT>,
-        Output = BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: Mul<
+        BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+        Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     >,
-    BigInt<Digit, SEPARATOR, SHIFT>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>>
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
         + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         > + Zeroable,
 {
@@ -178,7 +178,7 @@ where
 
     fn checked_rem(
         self,
-        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -197,17 +197,17 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedRem<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRem<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    BigInt<Digit, SEPARATOR, SHIFT>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>>
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
         + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         > + Zeroable,
 {
@@ -215,7 +215,7 @@ where
 
     fn checked_rem(
         self,
-        divisor: &BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -234,30 +234,30 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedRem<BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRem<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: CheckedRem<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
         > + Mul<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = BigInt<Digit, SEPARATOR, SHIFT>,
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
         >,
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         > + Zeroable,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
 
     fn checked_rem(
         self,
-        divisor: BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -268,7 +268,7 @@ where
                     .unwrap_unchecked()
             }
             .normalize_moduli(&self.denominator);
-            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })
@@ -276,27 +276,27 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedRem<&BigInt<Digit, SEPARATOR, SHIFT>>
-    for &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRem<&BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>: CheckedRem<
-            BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
-        > + Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: NormalizeModuli<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<
+            BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+        > + Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: NormalizeModuli<
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         > + Zeroable,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
 
     fn checked_rem(
         self,
-        divisor: &BigInt<Digit, SEPARATOR, SHIFT>,
+        divisor: &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -307,7 +307,7 @@ where
                     .unwrap_unchecked()
             }
             .normalize_moduli(&self.denominator);
-            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })
@@ -315,8 +315,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedRem<Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRem<Fraction<Self>> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     for<'a> Self: CheckedRem<Output = Option<Self>>
         + Mul<&'a Self, Output = Self>
@@ -343,8 +343,8 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedRem<&Fraction<Self>> for BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRem<&Fraction<Self>> for BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
     for<'a> Self: CheckedRem<&'a Self, Output = Option<Self>>
         + Mul<&'a Self, Output = Self>
@@ -371,26 +371,26 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedRem<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRem<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    BigInt<Digit, SEPARATOR, SHIFT>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>>
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
         + NormalizeModuli<
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
-    Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Zeroable,
+    Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>: Zeroable,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
 
     fn checked_rem(
         self,
-        divisor: Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        divisor: Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -401,7 +401,7 @@ where
                     .unwrap_unchecked()
             }
             .normalize_moduli(divisor.denominator);
-            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })
@@ -409,29 +409,29 @@ where
     }
 }
 
-impl<Digit, const SEPARATOR: char, const SHIFT: usize>
-    CheckedRem<&Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>
-    for &BigInt<Digit, SEPARATOR, SHIFT>
+impl<Digit, const SEPARATOR: char, const DIGIT_BITNESS: usize>
+    CheckedRem<&Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>
+    for &BigInt<Digit, SEPARATOR, DIGIT_BITNESS>
 where
-    for<'a> &'a BigInt<Digit, SEPARATOR, SHIFT>:
-        Mul<Output = BigInt<Digit, SEPARATOR, SHIFT>>,
-    for<'a> BigInt<Digit, SEPARATOR, SHIFT>: CheckedRem<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
-            Output = Option<BigInt<Digit, SEPARATOR, SHIFT>>,
+    for<'a> &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
+    for<'a> BigInt<Digit, SEPARATOR, DIGIT_BITNESS>: CheckedRem<
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+            Output = Option<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
         > + NormalizeModuli<
-            &'a BigInt<Digit, SEPARATOR, SHIFT>,
+            &'a BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             Output = (
-                BigInt<Digit, SEPARATOR, SHIFT>,
-                BigInt<Digit, SEPARATOR, SHIFT>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
+                BigInt<Digit, SEPARATOR, DIGIT_BITNESS>,
             ),
         >,
-    Fraction<BigInt<Digit, SEPARATOR, SHIFT>>: Zeroable,
+    Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>: Zeroable,
 {
-    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, SHIFT>>>;
+    type Output = Option<Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>>;
 
     fn checked_rem(
         self,
-        divisor: &Fraction<BigInt<Digit, SEPARATOR, SHIFT>>,
+        divisor: &Fraction<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>>,
     ) -> Self::Output {
         if divisor.is_zero() {
             None
@@ -442,7 +442,7 @@ where
                     .unwrap_unchecked()
             }
             .normalize_moduli(&divisor.denominator);
-            Some(Fraction::<BigInt<Digit, SEPARATOR, SHIFT>> {
+            Some(Fraction::<BigInt<Digit, SEPARATOR, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })

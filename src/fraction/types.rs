@@ -227,31 +227,35 @@ macro_rules! unsigned_integer_normalize_sign_impl {
 unsigned_integer_normalize_sign_impl!(u8 u16 u32 u64 u128 usize);
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-pub enum FromFloatConversionError {
+pub enum FromFloatConstructionError {
     Infinity,
     NaN,
     OutOfBounds,
 }
 
-impl FromFloatConversionError {
-    fn description(&self) -> &str {
+impl FromFloatConstructionError {
+    fn description(self) -> &'static str {
         match self {
-            FromFloatConversionError::Infinity => {
-                "Conversion of infinity is undefined."
+            FromFloatConstructionError::Infinity => {
+                "Construction from infinity is undefined."
             }
-            FromFloatConversionError::NaN => "Conversion of NaN is undefined.",
-            FromFloatConversionError::OutOfBounds => "Value is out of bounds.",
+            FromFloatConstructionError::NaN => {
+                "Construction from NaN is undefined."
+            }
+            FromFloatConstructionError::OutOfBounds => {
+                "Value is out of bounds."
+            }
         }
     }
 }
 
-impl fmt::Debug for FromFloatConversionError {
+impl fmt::Debug for FromFloatConstructionError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> std::fmt::Result {
         formatter.write_str(self.description())
     }
 }
 
-impl fmt::Display for FromFloatConversionError {
+impl fmt::Display for FromFloatConstructionError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> std::fmt::Result {
         fmt::Display::fmt(&self.description(), formatter)
     }

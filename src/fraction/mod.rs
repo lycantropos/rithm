@@ -1,4 +1,4 @@
-pub use types::{Fraction, FromFloatConversionError};
+pub use types::{Fraction, FromFloatConstructionError};
 
 mod abs;
 mod add;

@@ -6,7 +6,7 @@ use crate::big_int::{BigInt, ShlError};
 use crate::contracts::is_signed;
 use crate::traits::UncheckedToInt;
 
-use super::types::{Fraction, FromFloatConversionError, NormalizeModuli};
+use super::types::{Fraction, FromFloatConstructionError, NormalizeModuli};
 
 macro_rules! big_int_fraction_try_from_float_impl {
     ($($float:ty)*) => ($(
@@ -21,13 +21,13 @@ macro_rules! big_int_fraction_try_from_float_impl {
             >,
             $float: From<Digit> + UncheckedToInt<Digit>,
         {
-            type Error = FromFloatConversionError;
+            type Error = FromFloatConstructionError;
 
             fn try_from(value: $float) -> Result<Self, Self::Error> {
                 if value.is_infinite() {
-                    Err(FromFloatConversionError::Infinity)
+                    Err(FromFloatConstructionError::Infinity)
                 } else if value.is_nan() {
-                    Err(FromFloatConversionError::NaN)
+                    Err(FromFloatConstructionError::NaN)
                 } else {
                     let (mut fraction, mut exponent) = value.fract_exp();
                     for _ in 0..300 {
@@ -47,11 +47,11 @@ macro_rules! big_int_fraction_try_from_float_impl {
                     if exponent.is_negative() {
                         denominator = denominator
                             .checked_shl((-exponent) as u32)
-                            .or(Err(FromFloatConversionError::OutOfBounds))?;
+                            .or(Err(FromFloatConstructionError::OutOfBounds))?;
                     } else {
                         numerator = numerator
                             .checked_shl(exponent as u32)
-                            .or(Err(FromFloatConversionError::OutOfBounds))?;
+                            .or(Err(FromFloatConstructionError::OutOfBounds))?;
                     }
                     Ok(Self {
                         numerator,
@@ -68,17 +68,17 @@ big_int_fraction_try_from_float_impl!(f32 f64);
 macro_rules! try_integer_fraction_from_float_impl {
     ($float:ty => $($integer:ty)*) => ($(
         impl TryFrom<$float> for Fraction<$integer> {
-            type Error = FromFloatConversionError;
+            type Error = FromFloatConstructionError;
 
             fn try_from(value: $float) -> Result<Self, Self::Error> {
                 if value.is_infinite() {
-                    Err(FromFloatConversionError::Infinity)
+                    Err(FromFloatConstructionError::Infinity)
                 } else if value.is_nan() {
-                    Err(FromFloatConversionError::NaN)
+                    Err(FromFloatConstructionError::NaN)
                 } else if value.round() < (<$integer>::MIN as $float)
                     || value.round() > (<$integer>::MAX as $float)
                 {
-                    Err(FromFloatConversionError::OutOfBounds)
+                    Err(FromFloatConstructionError::OutOfBounds)
                 } else {
                     const MAX_EXPONENT_MODULUS: u32 = <$integer>::BITS
                         - 1

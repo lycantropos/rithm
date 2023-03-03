@@ -1350,15 +1350,6 @@ fn try_py_fraction_from_value(value: Option<&PyAny>) -> PyResult<PyFraction> {
             let py = value.py();
             if let Ok(value) = value.extract::<PyFraction>() {
                 Ok(value)
-            } else if let Ok(value) = value.extract::<f64>() {
-                Fraction::try_from(value).map(PyFraction).map_err(|reason| {
-                    match reason {
-                        fraction::FromFloatConstructionError::NaN => {
-                            PyValueError::new_err(reason.to_string())
-                        }
-                        _ => PyOverflowError::new_err(reason.to_string()),
-                    }
-                })
             } else if let Ok(value) = try_big_int_from_py_any(value) {
                 Ok(PyFraction(Fraction::from(value)))
             } else if let Ok((numerator, denominator)) = value
@@ -1372,6 +1363,15 @@ fn try_py_fraction_from_value(value: Option<&PyAny>) -> PyResult<PyFraction> {
                 })
             {
                 try_truediv(numerator, denominator).map(PyFraction)
+            } else if let Ok(value) = value.extract::<f64>() {
+                Fraction::try_from(value).map(PyFraction).map_err(|reason| {
+                    match reason {
+                        fraction::FromFloatConstructionError::NaN => {
+                            PyValueError::new_err(reason.to_string())
+                        }
+                        _ => PyOverflowError::new_err(reason.to_string()),
+                    }
+                })
             } else {
                 Err(PyTypeError::new_err(
                                 format!("Value should be rational or floating point number, but found: {}",

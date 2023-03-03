@@ -64,13 +64,13 @@ we can:
   Int(9)
   >>> Int('9')
   Int(9)
-  >>> Int('0b1_001', 2)
+  >>> Int('0b1001', 2)
   Int(9)
   >>> Int('0o11', 8)
   Int(9)
   >>> Int('0x9', 16)
   Int(9)
-  >>> Int('1_001', 2)
+  >>> Int('1001', 2)
   Int(9)
   >>> Int('0o11', 8)
   Int(9)
@@ -204,18 +204,18 @@ use rithm::big_int;
 type Digit = u16;
 #[cfg(not(target_arch = "x86"))]
 type Digit = u32;
-const BINARY_SHIFT: usize = (Digit::BITS - 1) as usize;
-const _: () = assert!(big_int::is_valid_shift::<Digit, BINARY_SHIFT>());
-type BigInt = big_int::BigInt<Digit, '_', BINARY_SHIFT>;
+const DIGIT_BITNESS: usize = (Digit::BITS - 1) as usize;
+const _: () = assert!(big_int::is_valid_digit_bitness::<Digit, DIGIT_BITNESS>());
+type BigInt = big_int::BigInt<Digit, DIGIT_BITNESS>;
 /// we can:
 /// - construct
 assert_eq!(BigInt::zero(), 0);
 assert_eq!(BigInt::from(9), 9);
 assert_eq!(BigInt::try_from("9").unwrap(), 9);
-assert_eq!(BigInt::try_from("0b1_001").unwrap(), 9);
+assert_eq!(BigInt::try_from("0b1001").unwrap(), 9);
 assert_eq!(BigInt::try_from("0o11").unwrap(), 9);
 assert_eq!(BigInt::try_from("0x9").unwrap(), 9);
-assert_eq!(BigInt::from_str_radix("1_001", 2).unwrap(), 9);
+assert_eq!(BigInt::from_str_radix("1001", 2).unwrap(), 9);
 assert_eq!(BigInt::from_str_radix("11", 8).unwrap(), 9);
 assert_eq!(BigInt::from_str_radix("9", 16).unwrap(), 9);
 assert_eq!(BigInt::try_from(9.99).unwrap(), 9);

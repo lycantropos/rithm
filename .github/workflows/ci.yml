@@ -9,6 +9,10 @@ on:
     branches:
       - 'master'
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   test:
     name: Test
@@ -75,7 +79,7 @@ jobs:
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Check Rust metadata'
         run: >
-          [ "$(cargo metadata --format-version=1 --no-deps | jq '.packages[0].repository')"
+          [ $(cargo metadata --format-version=1 --no-deps | jq '.packages[0].repository')
           = '"${{ github.server_url }}/${{ github.repository }}"' ]
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Run Rust linter'

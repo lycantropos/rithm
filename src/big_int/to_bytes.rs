@@ -5,7 +5,7 @@ use traiter::numbers::{Endianness, Signed, ToBytes, Zeroable};
 use crate::traits::Oppose;
 
 use super::constants::MIDDLE_BYTE;
-use super::digits::{negate_digits, BinaryBaseFromBinaryDigits};
+use super::digits::{negate_bytes, BinaryBaseFromBinaryDigits};
 use super::types::BigInt;
 
 impl<
@@ -39,7 +39,7 @@ where
             result.push(0u8);
         }
         if self.is_negative() {
-            negate_digits(&mut result);
+            negate_bytes(&mut result);
         }
         match endianness {
             Endianness::Big => result.reverse(),

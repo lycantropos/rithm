@@ -5,7 +5,7 @@ use crate::traits::HasSignBit;
 use super::constants::MIDDLE_BYTE;
 use super::contracts::is_valid_digit_bitness;
 use super::digits::{
-    negate_digits, to_digits_sign, BinaryBaseFromBinaryDigits,
+    negate_bytes, to_digits_sign, BinaryBaseFromBinaryDigits,
 };
 use super::types::{BigInt, Sign};
 
@@ -23,7 +23,7 @@ impl<
         debug_assert!(is_valid_digit_bitness::<Digit, DIGIT_BITNESS>());
         let most_significant_byte = bytes[bytes.len() - 1];
         let sign = if most_significant_byte >= MIDDLE_BYTE {
-            negate_digits(&mut bytes);
+            negate_bytes(&mut bytes);
             -Sign::one()
         } else {
             to_digits_sign(&bytes)

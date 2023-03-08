@@ -23,7 +23,7 @@ use super::types::{CheckedDivAsFloatError, ShlError, Sign};
 pub trait BaseFromBinaryDigits<Source>: Sized {
     fn base_from_binary_digits(
         source: &[Source],
-        source_shift: usize,
+        source_bitness: usize,
         target_base: usize,
     ) -> Vec<Self>;
 }
@@ -36,19 +36,19 @@ impl<
 {
     fn base_from_binary_digits(
         source: &[Source],
-        source_shift: usize,
+        source_bitness: usize,
         target_base: usize,
     ) -> Vec<Self> {
         if target_base & (target_base - 1) == 0 {
             Self::binary_base_from_binary_digits(
                 source,
-                source_shift,
+                source_bitness,
                 floor_log2::<usize>(target_base),
             )
         } else {
             Self::non_binary_base_from_binary_digits(
                 source,
-                source_shift,
+                source_bitness,
                 target_base,
             )
         }
@@ -56,7 +56,7 @@ impl<
 }
 
 pub(super) trait BinaryBaseFromDigits<Source>: Sized {
-    fn binary_base_from_digits<const TARGET_SHIFT: usize>(
+    fn binary_base_from_digits<const TARGET_BITNESS: usize>(
         source: &[Source],
         source_base: usize,
     ) -> Vec<Self>;
@@ -69,7 +69,7 @@ impl<
             + LesserBinaryBaseFromNonBinaryDigits<Source>,
     > BinaryBaseFromDigits<Source> for Target
 {
-    fn binary_base_from_digits<const TARGET_SHIFT: usize>(
+    fn binary_base_from_digits<const TARGET_BITNESS: usize>(
         source: &[Source],
         source_base: usize,
     ) -> Vec<Self> {
@@ -77,15 +77,15 @@ impl<
             Self::binary_base_from_binary_digits(
                 source,
                 floor_log2::<usize>(source_base),
-                TARGET_SHIFT,
+                TARGET_BITNESS,
             )
-        } else if source_base < (1 << TARGET_SHIFT) {
-            Self::greater_binary_base_from_non_binary_digits::<TARGET_SHIFT>(
+        } else if source_base < (1 << TARGET_BITNESS) {
+            Self::greater_binary_base_from_non_binary_digits::<TARGET_BITNESS>(
                 source,
                 source_base,
             )
         } else {
-            Self::lesser_binary_base_from_non_binary_digits::<TARGET_SHIFT>(
+            Self::lesser_binary_base_from_non_binary_digits::<TARGET_BITNESS>(
                 source,
                 source_base,
             )
@@ -96,8 +96,8 @@ impl<
 pub(super) trait BinaryBaseFromBinaryDigits<Source>: Sized {
     fn binary_base_from_binary_digits(
         source: &[Source],
-        source_shift: usize,
-        target_shift: usize,
+        source_bitness: usize,
+        target_bitness: usize,
     ) -> Vec<Self>;
 }
 
@@ -110,10 +110,10 @@ impl<
 {
     fn binary_base_from_binary_digits(
         source: &[Source],
-        source_shift: usize,
-        target_shift: usize,
+        source_bitness: usize,
+        target_bitness: usize,
     ) -> Vec<Self> {
-        match target_shift.cmp(&source_shift) {
+        match target_bitness.cmp(&source_bitness) {
             Ordering::Equal => source
                 .iter()
                 .map(|&digit| unsafe {
@@ -122,13 +122,13 @@ impl<
                 .collect(),
             Ordering::Greater => Self::greater_binary_base_from_binary_digits(
                 source,
-                source_shift,
-                target_shift,
+                source_bitness,
+                target_bitness,
             ),
             Ordering::Less => Self::lesser_binary_base_from_binary_digits(
                 source,
-                source_shift,
-                target_shift,
+                source_bitness,
+                target_bitness,
             ),
         }
     }
@@ -137,8 +137,8 @@ impl<
 pub(super) trait NonBinaryBaseFromBinaryDigits<Source>: Sized {
     fn non_binary_base_from_binary_digits(
         source: &[Source],
-        source_shift: usize,
-        target_shift: usize,
+        source_bitness: usize,
+        target_base: usize,
     ) -> Vec<Self>;
 }
 
@@ -162,11 +162,11 @@ where
 {
     fn non_binary_base_from_binary_digits(
         source: &[Source],
-        source_shift: usize,
+        source_bitness: usize,
         target_base: usize,
     ) -> Vec<Self> {
         let result_max_digits_count: usize = 1
-            + ((((source.len() * source_shift) as f64)
+            + ((((source.len() * source_bitness) as f64)
                 / (target_base as f64).log2()) as usize);
         let mut result = Vec::<Self>::with_capacity(result_max_digits_count);
         let target_base = unsafe {
@@ -179,7 +179,7 @@ where
                 let step: DoublePrecisionOf<Self> =
                     (<DoublePrecisionOf<Self> as From<Self>>::from(
                         *result_position,
-                    ) << source_shift)
+                    ) << source_bitness)
                         | accumulator;
                 accumulator = step / target_base;
                 *result_position = unsafe {
@@ -205,8 +205,8 @@ where
 trait GreaterBinaryBaseFromBinaryDigits<Source>: Sized {
     fn greater_binary_base_from_binary_digits(
         source: &[Source],
-        source_shift: usize,
-        target_shift: usize,
+        source_bitness: usize,
+        target_bitness: usize,
     ) -> Vec<Self>;
 }
 
@@ -231,30 +231,31 @@ where
 {
     fn greater_binary_base_from_binary_digits(
         source: &[Source],
-        source_shift: usize,
-        target_shift: usize,
+        source_bitness: usize,
+        target_bitness: usize,
     ) -> Vec<Self> {
-        debug_assert!(target_shift > source_shift && source_shift > 0);
+        debug_assert!(target_bitness > source_bitness && source_bitness > 0);
         let target_digit_mask =
-            DoublePrecisionOf::<Self>::digit_mask(target_shift);
-        let result_capacity: usize =
-            (source.len() * target_shift + (target_shift - 1)) / target_shift;
+            DoublePrecisionOf::<Self>::digit_mask(target_bitness);
+        let result_capacity: usize = (source.len() * target_bitness
+            + (target_bitness - 1))
+            / target_bitness;
         let mut result = Vec::<Self>::with_capacity(result_capacity);
         let mut accumulator = DoublePrecisionOf::<Self>::zero();
         let mut accumulator_bits_count: usize = 0;
         for digit in source {
             accumulator |= DoublePrecisionOf::<Self>::from(*digit)
                 << accumulator_bits_count;
-            accumulator_bits_count += source_shift;
-            if accumulator_bits_count >= target_shift {
+            accumulator_bits_count += source_bitness;
+            if accumulator_bits_count >= target_bitness {
                 unsafe {
                     result.push(
                         Self::try_from(accumulator & target_digit_mask)
                             .unwrap_unchecked(),
                     );
                 }
-                accumulator >>= target_shift;
-                accumulator_bits_count -= target_shift;
+                accumulator >>= target_bitness;
+                accumulator_bits_count -= target_bitness;
             }
         }
         if !accumulator.is_zero() || result.is_empty() {
@@ -271,8 +272,8 @@ pub(super) trait LesserBinaryBaseFromBinaryDigits<Source>:
 {
     fn lesser_binary_base_from_binary_digits(
         source: &[Source],
-        source_shift: usize,
-        target_shift: usize,
+        source_bitness: usize,
+        target_bitness: usize,
     ) -> Vec<Self>;
 }
 
@@ -292,41 +293,41 @@ where
 {
     fn lesser_binary_base_from_binary_digits(
         source: &[Source],
-        source_shift: usize,
-        target_shift: usize,
+        source_bitness: usize,
+        target_bitness: usize,
     ) -> Vec<Self> {
-        debug_assert!(source_shift > target_shift && target_shift > 0);
+        debug_assert!(source_bitness > target_bitness && target_bitness > 0);
         let target_digit_mask =
-            DoublePrecisionOf::<Source>::digit_mask(target_shift);
-        let digits_bits_count: usize = (source.len() - 1) * source_shift
+            DoublePrecisionOf::<Source>::digit_mask(target_bitness);
+        let digits_bits_count: usize = (source.len() - 1) * source_bitness
             + source[source.len() - 1].bit_length();
         let digits_count: usize =
-            (digits_bits_count + (target_shift - 1)) / target_shift;
+            (digits_bits_count + (target_bitness - 1)) / target_bitness;
         let mut result = Vec::<Self>::with_capacity(digits_count);
         let mut accumulator = DoublePrecisionOf::<Source>::from(source[0]);
-        let mut accumulator_bits_count = source_shift;
+        let mut accumulator_bits_count = source_bitness;
         for &digit in source.iter().skip(1) {
             loop {
                 result.push(unsafe {
                     Self::try_from(accumulator & target_digit_mask)
                         .unwrap_unchecked()
                 });
-                accumulator >>= target_shift;
-                accumulator_bits_count -= target_shift;
-                if accumulator_bits_count < target_shift {
+                accumulator >>= target_bitness;
+                accumulator_bits_count -= target_bitness;
+                if accumulator_bits_count < target_bitness {
                     break;
                 }
             }
             accumulator |= DoublePrecisionOf::<Source>::from(digit)
                 << accumulator_bits_count;
-            accumulator_bits_count += source_shift;
+            accumulator_bits_count += source_bitness;
         }
         loop {
             result.push(unsafe {
                 Self::try_from(accumulator & target_digit_mask)
                     .unwrap_unchecked()
             });
-            accumulator >>= target_shift;
+            accumulator >>= target_bitness;
             if accumulator.is_zero() {
                 break;
             }
@@ -1209,12 +1210,12 @@ where
         Digit::shift_digits_left_in_place::<DIGIT_BITNESS>(
             divisor,
             shift,
-            divisor_normalized.as_mut_slice(),
+            &mut divisor_normalized,
         );
         let accumulator = Digit::shift_digits_left_in_place::<DIGIT_BITNESS>(
             dividend,
             shift,
-            dividend_normalized.as_mut_slice(),
+            &mut dividend_normalized,
         );
         let last_divisor_digit_normalized =
             divisor_normalized[divisor_normalized.len() - 1];
@@ -1229,7 +1230,7 @@ where
         let mut quotient = vec![Digit::zero(); quotient_size];
         let penult_divisor_digit_normalized =
             divisor_normalized[divisor_digits_count - 2];
-        let mut quotient_position = quotient_size;
+        let mut quotient_index = quotient_size;
         let base = Digit::one() << DIGIT_BITNESS;
         let digit_mask = Digit::digit_mask(DIGIT_BITNESS);
         for offset in (0..quotient_size).rev() {
@@ -1316,8 +1317,8 @@ where
                 }
                 quotient_digit -= Digit::one();
             }
-            quotient_position -= 1;
-            quotient[quotient_position] = quotient_digit;
+            quotient_index -= 1;
+            quotient[quotient_index] = quotient_digit;
         }
         if quotient_size.is_zero() {
             quotient = vec![Digit::zero()];
@@ -1732,7 +1733,7 @@ where
     }
 }
 
-pub(super) fn negate_digits(digits: &mut [u8]) {
+pub(super) fn negate_bytes(digits: &mut [u8]) {
     let mut carry = true;
     for digit in digits {
         *digit = !*digit;
@@ -1746,7 +1747,9 @@ pub(super) fn negate_digits(digits: &mut [u8]) {
 pub(super) trait GreaterBinaryBaseFromNonBinaryDigits<Source>:
     Sized
 {
-    fn greater_binary_base_from_non_binary_digits<const TARGET_SHIFT: usize>(
+    fn greater_binary_base_from_non_binary_digits<
+        const TARGET_BITNESS: usize,
+    >(
         source: &[Source],
         source_base: usize,
     ) -> Vec<Self>;
@@ -1769,7 +1772,7 @@ where
         + Zeroable,
 {
     fn greater_binary_base_from_non_binary_digits<
-        const TARGET_SHIFT: usize,
+        const TARGET_BITNESS: usize,
     >(
         source: &[Source],
         source_base: usize,
@@ -1778,16 +1781,16 @@ where
         static mut INFIMUM_BASES_EXPONENTS: [usize; 37] = [0; 37];
         static mut INFIMUM_BASES_POWERS: [usize; 37] = [0; 37];
         let target_digit_mask =
-            DoublePrecisionOf::<Self>::digit_mask(TARGET_SHIFT);
+            DoublePrecisionOf::<Self>::digit_mask(TARGET_BITNESS);
         if unsafe { BASES_LOGS[source_base] } == 0.0 {
             let bases_log = (source_base as f64).ln()
-                / ((1usize << TARGET_SHIFT) as f64).ln();
+                / ((1usize << TARGET_BITNESS) as f64).ln();
             unsafe { BASES_LOGS[source_base] = bases_log };
             let mut infimum_base_power = source_base;
             let mut infimum_base_exponent: usize = 1;
             loop {
                 let candidate: usize = infimum_base_power * source_base;
-                if candidate > 1usize << TARGET_SHIFT {
+                if candidate > 1usize << TARGET_BITNESS {
                     break;
                 }
                 infimum_base_power = candidate;
@@ -1837,7 +1840,7 @@ where
                     Self::try_from(accumulator & target_digit_mask)
                         .unwrap_unchecked()
                 };
-                accumulator >>= TARGET_SHIFT;
+                accumulator >>= TARGET_BITNESS;
             }
             if !accumulator.is_zero() {
                 result.push(unsafe {
@@ -1855,7 +1858,7 @@ where
 pub(super) trait LesserBinaryBaseFromNonBinaryDigits<Source>:
     Sized
 {
-    fn lesser_binary_base_from_non_binary_digits<const TARGET_SHIFT: usize>(
+    fn lesser_binary_base_from_non_binary_digits<const TARGET_BITNESS: usize>(
         source: &[Source],
         source_base: usize,
     ) -> Vec<Self>;
@@ -1876,16 +1879,18 @@ where
         + TryFrom<usize>
         + Zeroable,
 {
-    fn lesser_binary_base_from_non_binary_digits<const TARGET_SHIFT: usize>(
+    fn lesser_binary_base_from_non_binary_digits<
+        const TARGET_BITNESS: usize,
+    >(
         source: &[Source],
         source_base: usize,
     ) -> Vec<Self> {
         static mut BASES_LOGS: [f64; 37] = [0.0; 37];
         let target_digit_mask =
-            DoublePrecisionOf::<Self>::digit_mask(TARGET_SHIFT);
+            DoublePrecisionOf::<Self>::digit_mask(TARGET_BITNESS);
         if unsafe { BASES_LOGS[source_base] } == 0.0 {
             let bases_log = (source_base as f64).ln()
-                / ((1usize << TARGET_SHIFT) as f64).ln();
+                / ((1usize << TARGET_BITNESS) as f64).ln();
             unsafe { BASES_LOGS[source_base] = bases_log };
         }
         let digits_count_upper_bound =
@@ -1905,14 +1910,14 @@ where
                     Self::try_from(accumulator & target_digit_mask)
                         .unwrap_unchecked()
                 };
-                accumulator >>= TARGET_SHIFT;
+                accumulator >>= TARGET_BITNESS;
             }
             while !accumulator.is_zero() {
                 result.push(unsafe {
                     Self::try_from(accumulator & target_digit_mask)
                         .unwrap_unchecked()
                 });
-                accumulator >>= TARGET_SHIFT;
+                accumulator >>= TARGET_BITNESS;
             }
         }
         if result.is_empty() {
@@ -2349,8 +2354,8 @@ impl<Digit: SubtractDigits + SumDigits> SubtractComponents for Digit {
 
 pub(super) trait SubtractDigits: Sized {
     fn subtract_digits<const DIGIT_BITNESS: usize>(
-        first: &[Self],
-        second: &[Self],
+        minuend: &[Self],
+        subtrahend: &[Self],
         sign: Sign,
     ) -> (Sign, Vec<Self>);
 }
@@ -2368,12 +2373,12 @@ impl<
     > SubtractDigits for Digit
 {
     fn subtract_digits<const DIGIT_BITNESS: usize>(
-        first: &[Self],
-        second: &[Self],
+        minuend: &[Self],
+        subtrahend: &[Self],
         mut sign: Sign,
     ) -> (Sign, Vec<Self>) {
-        let mut longest = &first;
-        let mut shortest = &second;
+        let mut longest = &minuend;
+        let mut shortest = &subtrahend;
         let mut longest_size = longest.len();
         let mut shortest_size = shortest.len();
         match longest_size.cmp(&shortest_size) {
@@ -2595,15 +2600,15 @@ impl<
 }
 
 pub trait DigitMask {
-    fn digit_mask(shift: usize) -> Self;
+    fn digit_mask(bitness: usize) -> Self;
 }
 
 impl<Digit: Shl<usize, Output = Digit> + Sub<Output = Digit> + Unitary>
     DigitMask for Digit
 {
     #[inline]
-    fn digit_mask(shift: usize) -> Self {
-        (Self::one() << shift) - Self::one()
+    fn digit_mask(bitness: usize) -> Self {
+        (Self::one() << bitness) - Self::one()
     }
 }
 
@@ -2969,7 +2974,7 @@ where
     Source: HasSignBit + Oppose,
     OppositionOf<Source>: TryFrom<Source>,
 {
-    if crate::contracts::is_signed::<Source>()
+    if is_signed::<Source>()
         && unsafe {
             OppositionOf::<Source>::try_from(value).unwrap_unchecked()
         }

@@ -5,7 +5,7 @@ use traiter::numbers::{
     Unitary, Zeroable,
 };
 
-use super::constants::{WINDOW_BASE, WINDOW_CUTOFF, WINDOW_SHIFT};
+use super::constants::{WINDOW_BASE, WINDOW_BITNESS, WINDOW_CUTOFF};
 use super::digits::LesserBinaryBaseFromBinaryDigits;
 use super::types::{BigInt, CheckedPowRemEuclidError, WindowDigit};
 
@@ -416,11 +416,11 @@ where
                     WindowDigit::lesser_binary_base_from_binary_digits(
                         &exponent.digits,
                         DIGIT_BITNESS,
-                        WINDOW_SHIFT,
+                        WINDOW_BITNESS,
                     );
                 let mut result = Self::one();
                 for &digit in exponent_window_digits.iter().rev() {
-                    for _ in 0..WINDOW_SHIFT {
+                    for _ in 0..WINDOW_BITNESS {
                         result = unsafe {
                             (&result * &result)
                                 .checked_rem_euclid(divisor)

@@ -804,6 +804,17 @@ fn try_big_int_from_py_any(value: &PyAny) -> PyResult<BigInt> {
 
 #[inline]
 fn try_big_int_from_py_integral(value: &PyAny) -> PyResult<BigInt> {
+    try_le_bytes_from_py_integral(value).map(|bytes| {
+        if bytes.is_empty() {
+            BigInt::zero()
+        } else {
+            BigInt::from_bytes(&bytes, Endianness::Little)
+        }
+    })
+}
+
+#[inline]
+fn try_le_bytes_from_py_integral(value: &PyAny) -> PyResult<Vec<u8>> {
     let ptr = value.as_ptr();
     let py = value.py();
     unsafe {
@@ -814,26 +825,22 @@ fn try_big_int_from_py_integral(value: &PyAny) -> PyResult<BigInt> {
         let bits_count = ffi::_PyLong_NumBits(value);
         match bits_count.cmp(&0) {
             Ordering::Less => Err(PyErr::fetch(py)),
-            Ordering::Equal => Ok(BigInt::zero()),
+            Ordering::Equal => Ok(vec![0; 0]),
             Ordering::Greater => {
-                let bytes_count = bits_count / (u8::BITS as usize) + 1;
-                let mut buffer = vec![0u8; bytes_count];
+                let result_size = bits_count / (u8::BITS as usize) + 1;
+                let mut result = vec![0u8; result_size];
                 if ffi::_PyLong_AsByteArray(
-                    Py::<PyLong>::from_owned_ptr(py, value)
-                        .as_ptr()
-                        .cast::<ffi::PyLongObject>(),
-                    buffer.as_mut_ptr(),
-                    buffer.len(),
+                    Py::<PyLong>::from_owned_ptr(py, value).as_ptr()
+                        as *mut ffi::PyLongObject,
+                    result.as_mut_ptr(),
+                    result.len(),
                     1,
                     1,
                 ) < 0
                 {
                     Err(PyErr::fetch(py))
                 } else {
-                    Ok(BigInt::from_bytes(
-                        buffer.as_mut_slice(),
-                        Endianness::Little,
-                    ))
+                    Ok(result)
                 }
             }
         }

@@ -79,7 +79,8 @@ jobs:
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Check Rust metadata'
         run: >
-          [[ "${{ github.server_url }}/${{ github.repository }}" == "${{ github.server_url }}/${{ github.repository }}" ]]
+          [[ "$(cargo metadata --format-version=1 --no-deps | jq '.packages[0].repository')"
+          == '"${{ github.server_url }}/${{ github.repository }}"' ]]
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Run Rust linter'
         run: cargo fmt --check

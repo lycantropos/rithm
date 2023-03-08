@@ -15,12 +15,12 @@ impl<
     > FromBytes for BigInt<Digit, DIGIT_BITNESS>
 {
     fn from_bytes(bytes: &[u8], endianness: Endianness) -> Self {
+        debug_assert!(is_valid_digit_bitness::<Digit, DIGIT_BITNESS>());
         let mut bytes = bytes.to_vec();
         match endianness {
             Endianness::Big => bytes.reverse(),
             Endianness::Little => {}
         }
-        debug_assert!(is_valid_digit_bitness::<Digit, DIGIT_BITNESS>());
         let most_significant_byte = bytes[bytes.len() - 1];
         let sign = if most_significant_byte >= MIDDLE_BYTE {
             negate_bytes(&mut bytes);

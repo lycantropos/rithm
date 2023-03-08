@@ -73,6 +73,9 @@ jobs:
           components: rustfmt
           target: ${{ matrix.platform.rust_target }}
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Check Rust metadata'
+        run: [ $(cargo metadata --no-deps | jq '.packages[0].repository') = ${{ github.server_url }}/${{ github.repository }} ]
+        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Run Rust linter'
         run: cargo fmt --check
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}

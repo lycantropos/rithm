@@ -9,6 +9,8 @@ pub const fn is_valid_digit_bitness<
     const DIGIT_BITNESS: usize,
 >() -> bool {
     const BITS_IN_BYTE: usize = 8;
-    DIGIT_BITNESS
-        < BITS_IN_BYTE * size_of::<Digit>() - (is_signed::<Digit>() as usize)
+    0 < DIGIT_BITNESS
+        && DIGIT_BITNESS
+            < BITS_IN_BYTE * size_of::<Digit>()
+                - (is_signed::<Digit>() as usize)
 }

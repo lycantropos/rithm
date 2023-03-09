@@ -9,10 +9,6 @@ on:
     branches:
       - 'master'
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   test:
     name: Test
@@ -81,6 +77,7 @@ jobs:
         run: >
           [[ $(cargo metadata --format-version=1 --no-deps | jq '.packages[0].repository')
           == '"${{ github.server_url }}/${{ github.repository }}"' ]]
+        shell: bash
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Run Rust linter'
         run: cargo fmt --check

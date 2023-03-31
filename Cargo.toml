@@ -3,7 +3,7 @@ name = "rithm"
 description = "Arbitrary precision arithmetic."
 license = "MIT"
 repository = "https://github.com/lycantropos/rithm"
-version = "11.1.0-alpha"
+version = "11.1.0"
 edition = "2018"
 
 [lib]

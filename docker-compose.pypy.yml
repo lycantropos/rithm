@@ -9,10 +9,8 @@ services:
         - IMAGE_VERSION=${PYPY_IMAGE_VERSION}
     image: lycantropos/rithm-pypy:11.0.0
     volumes:
-      - ./pytest.ini:/opt/rithm/pytest.ini
+      - ./pyproject.toml:/opt/rithm/pyproject.toml
       - ./README.md:/opt/rithm/README.md
-      - ./requirements-setup.txt:/opt/cppbuiltins/requirements-setup.txt
-      - ./requirements-tests.txt:/opt/rithm/requirements-tests.txt
       - ./rithm:/opt/rithm/rithm
       - ./setup.py:/opt/rithm/setup.py
       - ./tests:/opt/rithm/tests

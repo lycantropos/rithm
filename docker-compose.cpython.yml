@@ -10,13 +10,11 @@ services:
     image: lycantropos/rithm-cpython:11.0.0
     volumes:
       - ./Cargo.toml:/opt/rithm/Cargo.toml
-      - ./pytest.ini:/opt/rithm/pytest.ini
+      - ./pyproject.toml:/opt/rithm/pyproject.toml
       - ./README.md:/opt/rithm/README.md
-      - ./requirements-setup.txt:/opt/cppbuiltins/requirements-setup.txt
-      - ./requirements-tests.txt:/opt/rithm/requirements-tests.txt
       - ./rithm:/opt/rithm/rithm
+      - ./rust-toolchain.toml:/opt/rithm/rust-toolchain.toml
       - ./setup.py:/opt/rithm/setup.py
       - ./src:/opt/rithm/src
       - ./tests:/opt/rithm/tests
-      - ./rust-toolchain.toml:/opt/rithm/rust-toolchain.toml
     entrypoint: pytest

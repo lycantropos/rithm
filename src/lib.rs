@@ -54,12 +54,10 @@ type Fraction = fraction::Fraction<BigInt>;
 struct PyEndianness(Endianness);
 
 #[pyclass(name = "Fraction", module = "rithm.fraction")]
-#[pyo3(text_signature = "(numerator=None, denominator=None, /)")]
 #[derive(Clone)]
 struct PyFraction(Fraction);
 
 #[pyclass(name = "Int", module = "rithm.integer")]
-#[pyo3(text_signature = "(value=None, base=None, /)")]
 #[derive(Clone)]
 struct PyInt(BigInt);
 
@@ -113,6 +111,7 @@ impl PyTieBreaking {
 #[pymethods]
 impl PyInt {
     #[new]
+    #[pyo3(signature = (_value=None, _base=None, /))]
     fn new(_value: Option<&PyAny>, _base: Option<&PyLong>) -> PyResult<Self> {
         match _value {
             None => Ok(PyInt(BigInt::zero())),
@@ -857,6 +856,7 @@ fn try_truediv(dividend: BigInt, divisor: BigInt) -> PyResult<Fraction> {
 #[pymethods]
 impl PyFraction {
     #[new]
+    #[pyo3(signature = (_numerator=None, _denominator=None, /))]
     fn new(
         _numerator: Option<&PyAny>,
         _denominator: Option<&PyAny>,

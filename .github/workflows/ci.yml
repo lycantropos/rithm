@@ -93,13 +93,17 @@ jobs:
             -Zprofile -Ccodegen-units=1 -Copt-level=0 -Coverflow-checks=off
             -Zpanic_abort_tests -Cpanic=abort
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
-      - name: 'Install in editable mode'
+      - name: 'Install in editable mode with Rust extensions'
         run: rustup run nightly python -m pip -v install -e .[tests]
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: >
             -Zprofile -Ccodegen-units=1 -Copt-level=0 -Coverflow-checks=off
             -Zpanic_abort_tests -Cpanic=abort
+        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Install in editable mode'
+        run: python -m pip -v install -e .[tests]
+        if: ${{ startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install Python type checker'
         run: python -m pip install -U mypy
         if: ${{ matrix.python_version != 'pypy-3.7' }}

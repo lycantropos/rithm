@@ -68,7 +68,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
           architecture: ${{ matrix.platform.python_architecture }}
       - name: 'Setup Rust'
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@nightly
         with:
           components: rustfmt
           target: ${{ matrix.platform.rust_target }}
@@ -83,7 +83,7 @@ jobs:
         run: cargo fmt --check
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Run Rust doctests'
-        run: rustup run nightly cargo test --doc --target=${{ matrix.platform.rust_target }}
+        run: cargo test --doc --target=${{ matrix.platform.rust_target }}
         env:
           CARGO_INCREMENTAL: 0
           RUSTDOCFLAGS: >
@@ -94,7 +94,7 @@ jobs:
             -Zpanic_abort_tests -Cpanic=abort
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install in editable mode'
-        run: rustup run nightly python -m pip -v install -e .[tests]
+        run: python -m pip -v install -e .[tests]
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: >

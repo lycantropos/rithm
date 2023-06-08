@@ -68,7 +68,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
           architecture: ${{ matrix.platform.python_architecture }}
       - name: 'Setup Rust'
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
           target: ${{ matrix.platform.rust_target }}
@@ -159,7 +159,7 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@v3
       - name: 'Setup Rust'
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@stable
       - name: 'Upload'
         run: cargo publish --no-verify
         env:
@@ -340,7 +340,7 @@ jobs:
         with:
           architecture: ${{ matrix.platform.python_architecture }}
       - name: 'Setup Rust'
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@stable
         with:
           target: ${{ matrix.platform.rust_target }}
         if: ${{ runner.os != 'Linux' }}

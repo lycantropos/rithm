@@ -80,11 +80,9 @@ impl PyEndianness {
                 PyTuple::new(
                     py,
                     [
-                        py.import(unsafe { Self::MODULE.unwrap_unchecked() })?
-                            .getattr(Self::NAME)?,
+                        Self::type_object(py).to_object(py),
                         String::from(endianness_to_field_name(self.0))
-                            .into_py(py)
-                            .as_ref(py),
+                            .into_py(py),
                     ],
                 ),
             ],
@@ -125,11 +123,9 @@ impl PyTieBreaking {
                 PyTuple::new(
                     py,
                     [
-                        py.import(unsafe { Self::MODULE.unwrap_unchecked() })?
-                            .getattr(Self::NAME)?,
+                        Self::type_object(py).to_object(py),
                         String::from(tie_breaking_to_field_name(self.0))
-                            .into_py(py)
-                            .as_ref(py),
+                            .into_py(py),
                     ],
                 ),
             ],

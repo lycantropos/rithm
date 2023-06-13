@@ -196,7 +196,7 @@ we can:
 /// With setup
 use std::convert::TryFrom;
 use traiter::numbers::{
-    Abs, DivEuclid, FromStrRadix, Pow, RemEuclid, Zeroable
+    Abs, DivEuclid, FromStrRadix, Pow, RemEuclid, Zero
 };
 use rithm::big_int;
 
@@ -249,7 +249,7 @@ assert_eq!(BigInt::from(25) - BigInt::from(16), 9);
 ```rust
 /// With setup
 use std::convert::TryFrom;
-use traiter::numbers::{Abs, DivEuclid, Pow, RemEuclid, Unitary, Zeroable};
+use traiter::numbers::{Abs, DivEuclid, One, Pow, RemEuclid, Zero};
 use rithm::fraction;
 
 type Fraction = fraction::Fraction<i8>;

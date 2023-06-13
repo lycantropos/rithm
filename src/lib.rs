@@ -112,16 +112,16 @@ impl PyTieBreaking {
 #[pymethods]
 impl PyInt {
     #[new]
-    #[pyo3(signature = (_value=None, _base=None, /))]
-    fn new(_value: Option<&PyAny>, _base: Option<&PyLong>) -> PyResult<Self> {
-        match _value {
+    #[pyo3(signature = (value=None, base=None, /))]
+    fn new(value: Option<&PyAny>, base: Option<&PyLong>) -> PyResult<Self> {
+        match value {
             None => Ok(PyInt(BigInt::zero())),
             Some(value) => {
                 let py = value.py();
-                if _base.is_some()
+                if base.is_some()
                     || value.is_instance(PyString::type_object(py))?
                 {
-                    let base = match _base {
+                    let base = match base {
                         Some(base) => {
                             base.extract::<u32>().or(Err(PyValueError::new_err(format!(
                                 "Base should be zero or in range from {} to {}, but found: {}.",
@@ -162,11 +162,13 @@ impl PyInt {
         }
     }
 
+    #[pyo3(signature = (endianness, /))]
     fn to_bytes(&self, endianness: &PyEndianness, py: Python) -> PyObject {
         PyBytes::new(py, &self.0.to_bytes(endianness.0)).to_object(py)
     }
 
     #[classmethod]
+    #[pyo3(signature = (bytes, endianness, /))]
     fn from_bytes(
         _cls: &PyType,
         mut bytes: Vec<u8>,
@@ -857,13 +859,13 @@ fn try_truediv(dividend: BigInt, divisor: BigInt) -> PyResult<Fraction> {
 #[pymethods]
 impl PyFraction {
     #[new]
-    #[pyo3(signature = (_numerator=None, _denominator=None, /))]
+    #[pyo3(signature = (numerator=None, denominator=None, /))]
     fn new(
-        _numerator: Option<&PyAny>,
-        _denominator: Option<&PyAny>,
+        numerator: Option<&PyAny>,
+        denominator: Option<&PyAny>,
     ) -> PyResult<Self> {
-        match _denominator {
-            Some(denominator) => match _numerator {
+        match denominator {
+            Some(denominator) => match numerator {
                 Some(numerator) => {
                     match Fraction::new(
                         try_big_int_from_py_any(numerator)?,
@@ -879,7 +881,7 @@ impl PyFraction {
                     "Numerator should be of type `Int` or `int`, but found `None`",
                 )),
             },
-            None => try_py_fraction_from_value(_numerator),
+            None => try_py_fraction_from_value(numerator),
         }
     }
 
@@ -893,6 +895,7 @@ impl PyFraction {
         PyInt(self.0.numerator().clone())
     }
 
+    #[pyo3(signature = (tie_breaking, /))]
     fn round(&self, tie_breaking: &PyTieBreaking) -> PyInt {
         PyInt((&self.0).round(tie_breaking.0))
     }

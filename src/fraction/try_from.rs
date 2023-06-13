@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-use traiter::numbers::{CheckedShl, FractExp, Unitary, Zeroable};
+use traiter::numbers::{CheckedShl, FractExp, One};
 
 use crate::big_int::{BigInt, ShlError};
 use crate::contracts::is_signed;
@@ -11,14 +11,14 @@ use super::types::{Fraction, FromFloatConstructionError, NormalizeModuli};
 macro_rules! big_int_fraction_try_from_float_impl {
     ($($float:ty)*) => ($(
         impl<
-                Digit: Copy + TryFrom<usize> + Unitary + Zeroable,
+                Digit: Copy + TryFrom<usize>,
                 const DIGIT_BITNESS: usize,
             > TryFrom<$float> for Fraction<BigInt<Digit, DIGIT_BITNESS>>
         where
             BigInt<Digit, DIGIT_BITNESS>: CheckedShl<
                 u32,
                 Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShlError>,
-            >,
+            > + One + TryFrom<$float>,
             $float: From<Digit> + UncheckedToInt<Digit>,
         {
             type Error = FromFloatConstructionError;

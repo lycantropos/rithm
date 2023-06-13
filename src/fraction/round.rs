@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 use std::ops::{Add, Shl};
 
 use traiter::numbers::{
-    CheckedDivRemEuclid, Parity, Round, Signed, TieBreaking, Unitary,
+    CheckedDivRemEuclid, One, Parity, Round, Signed, TieBreaking,
 };
 
 use crate::big_int::BigInt;
@@ -12,6 +12,7 @@ use super::types::Fraction;
 impl<Digit, const DIGIT_BITNESS: usize> Round
     for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Parity + Signed,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: Add<Output = BigInt<Digit, DIGIT_BITNESS>>
         + CheckedDivRemEuclid<
             &'a BigInt<Digit, DIGIT_BITNESS>,
@@ -19,11 +20,9 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
                 BigInt<Digit, DIGIT_BITNESS>,
             )>,
-        > + Ord
-        + Parity
-        + Shl<usize, Output = BigInt<Digit, DIGIT_BITNESS>>
-        + Signed
-        + Unitary,
+        > + One
+        + Ord
+        + Shl<usize, Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
     type Output = BigInt<Digit, DIGIT_BITNESS>;
 
@@ -58,17 +57,16 @@ impl<Digit, const DIGIT_BITNESS: usize> Round
     for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
     for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: CheckedDivRemEuclid<
-        Output = Option<(
-            BigInt<Digit, DIGIT_BITNESS>,
-            BigInt<Digit, DIGIT_BITNESS>,
-        )>,
-    >,
+            Output = Option<(
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+            )>,
+        > + Parity
+        + Signed,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: Add<Output = BigInt<Digit, DIGIT_BITNESS>>
+        + One
         + Ord
-        + Parity
-        + Shl<usize, Output = BigInt<Digit, DIGIT_BITNESS>>
-        + Signed
-        + Unitary,
+        + Shl<usize, Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
     type Output = BigInt<Digit, DIGIT_BITNESS>;
 

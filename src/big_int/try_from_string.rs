@@ -1,7 +1,7 @@
 use std::iter::Peekable;
 use std::str::Chars;
 
-use traiter::numbers::{Unitary, Zeroable};
+use traiter::numbers::{One, Zeroable};
 
 use crate::traits::HasSignBit;
 
@@ -37,9 +37,11 @@ const ASCII_CODES_DIGIT_VALUES: [u8; 256] = [
 ];
 
 impl<
-        Digit: BinaryBaseFromDigits<u8> + HasSignBit + Zeroable,
+        Digit: BinaryBaseFromDigits<u8> + HasSignBit,
         const DIGIT_BITNESS: usize,
     > TryFromString for BigInt<Digit, DIGIT_BITNESS>
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn try_from_string(
         string: &str,

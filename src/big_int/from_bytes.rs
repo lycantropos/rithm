@@ -1,4 +1,4 @@
-use traiter::numbers::{Endianness, FromBytes, Unitary, Zeroable};
+use traiter::numbers::{Endianness, FromBytes, One, Zeroable};
 
 use crate::traits::HasSignBit;
 

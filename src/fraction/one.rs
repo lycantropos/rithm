@@ -2,10 +2,10 @@ use traiter::numbers::One;
 
 use super::types::Fraction;
 
-impl<Component: One> From<Component> for Fraction<Component> {
-    fn from(value: Component) -> Self {
+impl<Component: One> One for Fraction<Component> {
+    fn one() -> Self {
         Self {
-            numerator: value,
+            numerator: Component::one(),
             denominator: Component::one(),
         }
     }

@@ -8,8 +8,8 @@ impl<Digit, const DIGIT_BITNESS: usize> Trunc
     for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
     Self: Ceil<Output = BigInt<Digit, DIGIT_BITNESS>>
-        + Floor<Output = BigInt<Digit, DIGIT_BITNESS>>
-        + Signed,
+        + Floor<Output = BigInt<Digit, DIGIT_BITNESS>>,
+    for<'a> &'a Self: Signed,
 {
     type Output = BigInt<Digit, DIGIT_BITNESS>;
 
@@ -25,9 +25,9 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> Trunc
     for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Signed,
     Self: Ceil<Output = BigInt<Digit, DIGIT_BITNESS>>
-        + Floor<Output = BigInt<Digit, DIGIT_BITNESS>>,
+        + Floor<Output = BigInt<Digit, DIGIT_BITNESS>>
+        + Signed,
 {
     type Output = BigInt<Digit, DIGIT_BITNESS>;
 

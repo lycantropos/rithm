@@ -4,7 +4,10 @@ use traiter::numbers::Unitary;
 
 use super::types::Fraction;
 
-impl<Component: Display + Unitary> Display for Fraction<Component> {
+impl<Component: Display> Display for Fraction<Component>
+where
+    for<'a> &'a Component: Unitary,
+{
     fn fmt(&self, formatter: &mut Formatter) -> std::fmt::Result {
         if self.denominator.is_one() {
             write!(formatter, "{}", self.numerator)

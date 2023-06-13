@@ -1,16 +1,28 @@
-use traiter::numbers::{Unitary, Zeroable};
+use crate::big_int::BigInt;
+use traiter::numbers::Zeroable;
 
 use super::types::Fraction;
 
-impl<Component: Unitary + Zeroable> Zeroable for Fraction<Component> {
-    fn zero() -> Self {
-        Self {
-            numerator: Component::zero(),
-            denominator: Component::one(),
-        }
-    }
-
-    fn is_zero(&self) -> bool {
+impl<Digit, const DIGIT_BITNESS: usize> Zeroable
+    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
+where
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Zeroable,
+{
+    fn is_zero(self) -> bool {
         self.numerator.is_zero()
     }
 }
+
+macro_rules! integer_fraction_zeroable_impl {
+    ($($integer:ty)*) => ($(
+        impl Zeroable for &Fraction<$integer> {
+            fn is_zero(self) -> bool {
+                self.numerator.is_zero()
+            }
+        }
+    )*)
+}
+
+integer_fraction_zeroable_impl!(
+    i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
+);

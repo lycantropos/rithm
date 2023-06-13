@@ -9,6 +9,7 @@ use super::types::{Fraction, NormalizeModuli, NormalizeSign};
 impl<Digit, const DIGIT_BITNESS: usize> CheckedDiv
     for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
+    for<'a> &'a Self: Zeroable,
     BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeModuli<
             Output = (
@@ -21,7 +22,6 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    Self: Zeroable,
 {
     type Output = Option<Self>;
 
@@ -91,6 +91,7 @@ where
         BigInt<Digit, DIGIT_BITNESS>,
         Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
     >,
+    for<'a> &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
     BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeSign<
             Output = (
@@ -98,7 +99,6 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
@@ -130,6 +130,7 @@ where
     for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: NormalizeModuli<
         Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
     >,
+    for<'a> &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
     BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeSign<
             Output = (
@@ -137,7 +138,6 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
@@ -164,6 +164,7 @@ impl<Digit, const DIGIT_BITNESS: usize>
     CheckedDiv<BigInt<Digit, DIGIT_BITNESS>>
     for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Zeroable,
     BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeModuli<
             Output = (
@@ -175,7 +176,7 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
-        > + Zeroable,
+        >,
 {
     type Output = Option<Self>;
 
@@ -202,6 +203,7 @@ impl<Digit, const DIGIT_BITNESS: usize>
     CheckedDiv<&BigInt<Digit, DIGIT_BITNESS>>
     for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Zeroable,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeModuli<
             &'a BigInt<Digit, DIGIT_BITNESS>,
@@ -214,7 +216,7 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
-        > + Zeroable,
+        >,
 {
     type Output = Option<Self>;
 
@@ -241,12 +243,6 @@ impl<Digit, const DIGIT_BITNESS: usize>
     CheckedDiv<BigInt<Digit, DIGIT_BITNESS>>
     for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> BigInt<Digit, DIGIT_BITNESS>: NormalizeSign<
-            Output = (
-                BigInt<Digit, DIGIT_BITNESS>,
-                BigInt<Digit, DIGIT_BITNESS>,
-            ),
-        > + Zeroable,
     for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<
             BigInt<Digit, DIGIT_BITNESS>,
             Output = BigInt<Digit, DIGIT_BITNESS>,
@@ -256,7 +252,10 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
-        >,
+        > + Zeroable,
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: NormalizeSign<
+        Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
+    >,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
@@ -283,12 +282,6 @@ impl<Digit, const DIGIT_BITNESS: usize>
     CheckedDiv<&BigInt<Digit, DIGIT_BITNESS>>
     for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    BigInt<Digit, DIGIT_BITNESS>: NormalizeSign<
-            Output = (
-                BigInt<Digit, DIGIT_BITNESS>,
-                BigInt<Digit, DIGIT_BITNESS>,
-            ),
-        > + Zeroable,
     for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<
             BigInt<Digit, DIGIT_BITNESS>,
             Output = BigInt<Digit, DIGIT_BITNESS>,
@@ -297,7 +290,10 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
-        >,
+        > + Zeroable,
+    BigInt<Digit, DIGIT_BITNESS>: NormalizeSign<
+        Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
+    >,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
@@ -323,7 +319,7 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> CheckedDiv<Fraction<Self>>
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Fraction<Self>: Zeroable,
+    for<'a> &'a Fraction<Self>: Zeroable,
     Self: Mul<Output = Self>
         + NormalizeModuli<Output = (Self, Self)>
         + NormalizeSign<Output = (Self, Self)>,
@@ -349,7 +345,7 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> CheckedDiv<&Fraction<Self>>
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Fraction<Self>: Zeroable,
+    for<'a> &'a Fraction<Self>: Zeroable,
     for<'a> Self: Mul<&'a Self, Output = Self>
         + NormalizeModuli<&'a Self, Output = (Self, Self)>
         + NormalizeSign<Output = (Self, Self)>,
@@ -376,6 +372,7 @@ impl<Digit, const DIGIT_BITNESS: usize>
     CheckedDiv<Fraction<BigInt<Digit, DIGIT_BITNESS>>>
     for &BigInt<Digit, DIGIT_BITNESS>
 where
+    for<'a> &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
     BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeSign<
             Output = (
@@ -383,7 +380,6 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
     Self: NormalizeModuli<
         BigInt<Digit, DIGIT_BITNESS>,
         Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
@@ -417,6 +413,7 @@ where
     for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: NormalizeModuli<
         Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
     >,
+    for<'a> &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: Mul<
             &'a BigInt<Digit, DIGIT_BITNESS>,
             Output = BigInt<Digit, DIGIT_BITNESS>,
@@ -426,7 +423,6 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
@@ -451,10 +447,7 @@ where
 
 macro_rules! integer_fraction_checked_div_impl {
     ($($integer:ty)*) => ($(
-        impl CheckedDiv for Fraction<$integer>
-        where
-            Self: Zeroable,
-        {
+        impl CheckedDiv for Fraction<$integer> {
             type Output = Option<Self>;
 
             fn checked_div(self, divisor: Self) -> Self::Output {
@@ -478,10 +471,7 @@ macro_rules! integer_fraction_checked_div_impl {
             }
         }
 
-        impl CheckedDiv<$integer> for Fraction<$integer>
-        where
-            Self: Zeroable,
-        {
+        impl CheckedDiv<$integer> for Fraction<$integer> {
             type Output = Option<Self>;
 
             fn checked_div(self, divisor: $integer) -> Self::Output {

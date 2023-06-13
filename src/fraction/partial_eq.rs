@@ -18,7 +18,8 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> PartialEq<BigInt<Digit, DIGIT_BITNESS>>
     for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    BigInt<Digit, DIGIT_BITNESS>: PartialEq + Unitary,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Unitary,
+    BigInt<Digit, DIGIT_BITNESS>: PartialEq,
 {
     fn eq(&self, other: &BigInt<Digit, DIGIT_BITNESS>) -> bool {
         self.denominator.is_one() && self.numerator.eq(other)
@@ -29,7 +30,8 @@ impl<Digit, const DIGIT_BITNESS: usize>
     PartialEq<Fraction<BigInt<Digit, DIGIT_BITNESS>>>
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, DIGIT_BITNESS>: PartialEq + Unitary,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Unitary,
+    BigInt<Digit, DIGIT_BITNESS>: PartialEq,
 {
     fn eq(&self, other: &Fraction<BigInt<Digit, DIGIT_BITNESS>>) -> bool {
         other.denominator.is_one() && other.numerator.eq(self)

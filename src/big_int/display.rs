@@ -34,11 +34,11 @@ impl<
             + DivAssign
             + BaseFromBinaryDigits<Digit>
             + RemEuclid<Output = Digit>
-            + TryFrom<usize>
-            + Zeroable,
+            + TryFrom<usize>,
         const DIGIT_BITNESS: usize,
     > ToBaseString for BigInt<Digit, DIGIT_BITNESS>
 where
+    for<'a> &'a Digit: Zeroable,
     usize: TryFrom<Digit>,
 {
     fn to_base_string(&self, base: usize) -> String {

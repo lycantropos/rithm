@@ -6,12 +6,12 @@ use super::types::BigInt;
 macro_rules! integer_partial_eq_big_int_impl {
     ($($integer:ty)*) => ($(
         impl<
-                Digit: DigitsFromNonZeroValue<$integer> + PartialEq + Zeroable,
+                Digit: DigitsFromNonZeroValue<$integer> + PartialEq,
                 const DIGIT_BITNESS: usize,
             > PartialEq<BigInt<Digit, DIGIT_BITNESS>> for $integer
         {
             fn eq(&self, other: &BigInt<Digit, DIGIT_BITNESS>) -> bool {
-                value_to_sign(*self) == other.sign
+                value_to_sign::<$integer>(*self) == other.sign
                     && (self.is_zero()
                         || Digit::digits_from_non_zero_value::<DIGIT_BITNESS>(*self)
                             == other.digits)
@@ -19,12 +19,14 @@ macro_rules! integer_partial_eq_big_int_impl {
         }
 
         impl<
-                Digit: DigitsFromNonZeroValue<$integer> + PartialEq + Zeroable,
+                Digit: DigitsFromNonZeroValue<$integer> + PartialEq,
                 const DIGIT_BITNESS: usize,
             > PartialEq<$integer> for BigInt<Digit, DIGIT_BITNESS>
+        where
+            for<'a> &'a Self: Zeroable,
         {
             fn eq(&self, other: &$integer) -> bool {
-                self.sign == value_to_sign(*other)
+                self.sign == value_to_sign::<$integer>(*other)
                     && (self.is_zero()
                         || self.digits
                             == Digit::digits_from_non_zero_value::<DIGIT_BITNESS>(

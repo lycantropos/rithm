@@ -1,8 +1,8 @@
 use std::ops::{BitAnd, Mul, Shl, ShlAssign, ShrAssign, Sub};
 
 use traiter::numbers::{
-    Abs, CheckedPowRemEuclid, CheckedRemEuclid, CheckedRemEuclidInv, Signed,
-    Unitary, Zeroable,
+    Abs, CheckedPowRemEuclid, CheckedRemEuclid, CheckedRemEuclidInv, One,
+    Signed, Unitary, Zero, Zeroable,
 };
 
 use super::constants::{WINDOW_BASE, WINDOW_BITNESS, WINDOW_CUTOFF};
@@ -12,7 +12,8 @@ use super::types::{BigInt, CheckedPowRemEuclidError, WindowDigit};
 impl<Digit, const DIGIT_BITNESS: usize> CheckedPowRemEuclid<Self, Self>
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: CheckedPowAbsRemEuclid + Signed + Sub<Output = Self>,
+    for<'a> &'a Self: Signed,
+    Self: CheckedPowAbsRemEuclid + Sub<Output = Self>,
 {
     type Output = Result<Self, CheckedPowRemEuclidError>;
 
@@ -41,8 +42,8 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> CheckedPowRemEuclid<Self, &Self>
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: CheckedPowAbsRemEuclid + Signed + Sub<Output = Self>,
-    for<'a> &'a Self: Abs<Output = Self>,
+    for<'a> &'a Self: Abs<Output = Self> + Signed,
+    Self: CheckedPowAbsRemEuclid + Sub<Output = Self>,
 {
     type Output = Result<Self, CheckedPowRemEuclidError>;
 
@@ -71,7 +72,8 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> CheckedPowRemEuclid<&Self, Self>
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: CheckedPowAbsRemEuclid + Signed + Sub<Output = Self>,
+    for<'a> &'a Self: Signed,
+    Self: CheckedPowAbsRemEuclid + Sub<Output = Self>,
 {
     type Output = Result<Self, CheckedPowRemEuclidError>;
 
@@ -100,8 +102,8 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> CheckedPowRemEuclid<&Self, &Self>
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: CheckedPowAbsRemEuclid + Signed + Sub<Output = Self>,
-    for<'a> &'a Self: Abs<Output = Self>,
+    for<'a> &'a Self: Abs<Output = Self> + Signed,
+    Self: CheckedPowAbsRemEuclid + Sub<Output = Self>,
 {
     type Output = Result<Self, CheckedPowRemEuclidError>;
 
@@ -133,9 +135,9 @@ impl<Digit, const DIGIT_BITNESS: usize>
         BigInt<Digit, DIGIT_BITNESS>,
     > for &BigInt<Digit, DIGIT_BITNESS>
 where
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
     BigInt<Digit, DIGIT_BITNESS>: CheckedPowAbsRemEuclid
         + Clone
-        + Signed
         + Sub<Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
     type Output =
@@ -168,9 +170,9 @@ impl<Digit, const DIGIT_BITNESS: usize>
     CheckedPowRemEuclid<BigInt<Digit, DIGIT_BITNESS>, Self>
     for &BigInt<Digit, DIGIT_BITNESS>
 where
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
     BigInt<Digit, DIGIT_BITNESS>: CheckedPowAbsRemEuclid
         + Clone
-        + Signed
         + Sub<Output = BigInt<Digit, DIGIT_BITNESS>>,
     Self: Abs<Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
@@ -204,9 +206,9 @@ impl<Digit, const DIGIT_BITNESS: usize>
     CheckedPowRemEuclid<Self, BigInt<Digit, DIGIT_BITNESS>>
     for &BigInt<Digit, DIGIT_BITNESS>
 where
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
     BigInt<Digit, DIGIT_BITNESS>: CheckedPowAbsRemEuclid
         + Clone
-        + Signed
         + Sub<Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
     type Output =
@@ -238,9 +240,9 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> CheckedPowRemEuclid<Self, Self>
     for &BigInt<Digit, DIGIT_BITNESS>
 where
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
     BigInt<Digit, DIGIT_BITNESS>: CheckedPowAbsRemEuclid
         + Clone
-        + Signed
         + Sub<Output = BigInt<Digit, DIGIT_BITNESS>>,
     Self: Abs<Output = BigInt<Digit, DIGIT_BITNESS>>,
 {
@@ -281,8 +283,9 @@ pub trait CheckedPowAbsRemEuclid: Sized {
 impl<Digit, const DIGIT_BITNESS: usize> CheckedPowAbsRemEuclid
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: CheckedPowAbsRemEuclidImpl + Signed + Unitary,
+    for<'a> &'a Self: Signed + Unitary,
     for<'a> Self: CheckedRemEuclidInv<&'a Self, Output = Option<Self>>,
+    Self: CheckedPowAbsRemEuclidImpl + Zero,
 {
     fn checked_pow_abs_rem_euclid(
         self,
@@ -316,22 +319,22 @@ impl<
         Digit: BitAnd<Output = Digit>
             + Copy
             + From<u8>
+            + One
             + PartialOrd
             + Shl<usize, Output = Digit>
             + ShlAssign<usize>
-            + ShrAssign<usize>
-            + Unitary
-            + Zeroable,
+            + ShrAssign<usize>,
         const DIGIT_BITNESS: usize,
     > CheckedPowAbsRemEuclidImpl for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: Unitary + Zeroable,
+    for<'a> &'a Self: Mul<Output = Self> + Unitary,
+    for<'a> &'a Digit: Unitary + Zeroable,
     for<'a> Self: CheckedRemEuclidInv<&'a Self, Output = Option<Self>>
         + CheckedRemEuclid<&'a Self, Output = Option<Self>>
         + Clone
         + Mul<&'a Self, Output = Self>
-        + Mul<Self, Output = Self>,
-    for<'a> &'a Self: Mul<Output = Self>,
+        + Mul<Self, Output = Self>
+        + Zero,
     WindowDigit: LesserBinaryBaseFromBinaryDigits<Digit>,
 {
     fn checked_pow_abs_rem_euclid_impl(

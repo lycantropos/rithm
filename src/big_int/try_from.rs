@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-use traiter::numbers::{FractExp, LoadExp, Unitary, Zeroable};
+use traiter::numbers::{FractExp, LoadExp, One, Zero};
 
 use crate::traits::UncheckedToInt;
 
@@ -10,10 +10,11 @@ use super::types::{BigInt, Sign, TryFromFloatError, TryFromStringError};
 macro_rules! try_from_float_impl {
     ($($float:ty)*) => ($(
         impl<
-                Digit: Copy + Zeroable,
+                Digit: Copy + Zero,
                 const DIGIT_BITNESS: usize,
             > TryFrom<$float> for BigInt<Digit, DIGIT_BITNESS>
         where
+            Self: Zero,
             $float: From<Digit> + UncheckedToInt<Digit>,
         {
             type Error = TryFromFloatError;

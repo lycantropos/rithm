@@ -1,6 +1,6 @@
 use std::ops::{BitAnd, Mul, MulAssign, Shl, ShlAssign, ShrAssign};
 
-use traiter::numbers::{CheckedPow, Signed, Unitary, Zeroable};
+use traiter::numbers::{CheckedPow, One, Signed, Unitary, Zero, Zeroable};
 
 use super::constants::{WINDOW_BASE, WINDOW_BITNESS, WINDOW_CUTOFF};
 use super::digits::LesserBinaryBaseFromBinaryDigits;
@@ -9,7 +9,8 @@ use super::types::{BigInt, WindowDigit};
 impl<Digit, const DIGIT_BITNESS: usize> CheckedPow<Self>
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: UncheckedPow + Signed,
+    for<'a> &'a Self: Signed,
+    Self: UncheckedPow,
 {
     type Output = Option<Self>;
 
@@ -25,7 +26,8 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> CheckedPow<&Self>
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: UncheckedPow + Signed,
+    for<'a> &'a Self: Signed,
+    Self: UncheckedPow,
 {
     type Output = Option<Self>;
 
@@ -41,7 +43,8 @@ where
 impl<Digit, const DIGIT_BITNESS: usize>
     CheckedPow<BigInt<Digit, DIGIT_BITNESS>> for &BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, DIGIT_BITNESS>: UncheckedPow + Signed,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
+    BigInt<Digit, DIGIT_BITNESS>: UncheckedPow,
 {
     type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
@@ -60,7 +63,8 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> CheckedPow<Self>
     for &BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, DIGIT_BITNESS>: UncheckedPow + Signed,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
+    BigInt<Digit, DIGIT_BITNESS>: UncheckedPow,
 {
     type Output = Option<BigInt<Digit, DIGIT_BITNESS>>;
 
@@ -81,17 +85,18 @@ impl<
         Digit: BitAnd<Output = Digit>
             + Copy
             + From<u8>
+            + One
             + PartialOrd
             + Shl<usize, Output = Digit>
             + ShlAssign<usize>
             + ShrAssign<usize>
-            + Unitary
-            + Zeroable,
+            + Zero,
         const DIGIT_BITNESS: usize,
     > UncheckedPow for BigInt<Digit, DIGIT_BITNESS>
 where
+    for<'a> &'a Self: Mul<Output = Self> + Zeroable,
+    for<'a> &'a Digit: Unitary + Zeroable,
     for<'a> Self: Mul<Output = Self> + MulAssign<&'a Self>,
-    for<'a> &'a Self: Mul<Output = Self>,
     WindowDigit: LesserBinaryBaseFromBinaryDigits<Digit>,
 {
     fn unchecked_pow(&self, exponent: &Self) -> Self {

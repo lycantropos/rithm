@@ -8,7 +8,8 @@ use super::types::{BigInt, Sign as BigIntSign};
 impl<Digit: Ord, const DIGIT_BITNESS: usize> PartialOrd
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: PartialEq + Signed,
+    for<'a> &'a Self: Signed,
+    Self: PartialEq,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(match self.sign.cmp(&other.sign) {
@@ -29,7 +30,8 @@ macro_rules! big_int_partial_ord_signed_integer_impl {
                 const DIGIT_BITNESS: usize,
             > PartialOrd<$integer> for BigInt<Digit, DIGIT_BITNESS>
         where
-            Self: PartialEq<$integer> + Signed,
+            for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
+            Self: PartialEq<$integer>,
         {
             fn partial_cmp(&self, other: &$integer) -> Option<Ordering> {
                 Some(match self.sign.cmp(&(other.signum() as BigIntSign)) {
@@ -64,7 +66,8 @@ macro_rules! big_int_partial_ord_unsigned_integer_impl {
                 const DIGIT_BITNESS: usize,
             > PartialOrd<$integer> for BigInt<Digit, DIGIT_BITNESS>
         where
-            Self: PartialEq<$integer> + Signed,
+            for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
+            Self: PartialEq<$integer>,
         {
             fn partial_cmp(&self, other: &$integer) -> Option<Ordering> {
                 Some(match self.sign() {
@@ -103,7 +106,7 @@ macro_rules! signed_integer_partial_ord_big_int_impl {
                 const DIGIT_BITNESS: usize,
             > PartialOrd<BigInt<Digit, DIGIT_BITNESS>> for $integer
         where
-            BigInt<Digit, DIGIT_BITNESS>: Signed,
+            for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
             Self: PartialEq<BigInt<Digit, DIGIT_BITNESS>>,
         {
             fn partial_cmp(
@@ -138,7 +141,7 @@ macro_rules! unsigned_integer_partial_ord_big_int_impl {
                 const DIGIT_BITNESS: usize,
             > PartialOrd<BigInt<Digit, DIGIT_BITNESS>> for $integer
         where
-            BigInt<Digit, DIGIT_BITNESS>: Signed,
+            for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
             Self: PartialEq<BigInt<Digit, DIGIT_BITNESS>>,
         {
             fn partial_cmp(

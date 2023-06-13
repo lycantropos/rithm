@@ -10,6 +10,8 @@ impl<Digit, const DIGIT_BITNESS: usize>
     CheckedPow<BigInt<Digit, DIGIT_BITNESS>>
     for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
+    for<'a> &'a Self: Zeroable,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedPow<
             &'a BigInt<Digit, DIGIT_BITNESS>,
             Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
@@ -22,8 +24,7 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
-        > + Signed,
-    Self: Zeroable,
+        >,
 {
     type Output = Option<Self>;
 
@@ -57,8 +58,9 @@ impl<Digit, const DIGIT_BITNESS: usize>
     CheckedPow<&BigInt<Digit, DIGIT_BITNESS>>
     for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
+    for<'a> &'a Self: Zeroable,
     for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
-        Neg<Output = BigInt<Digit, DIGIT_BITNESS>>,
+        Neg<Output = BigInt<Digit, DIGIT_BITNESS>> + Signed,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedPow<
             &'a BigInt<Digit, DIGIT_BITNESS>,
             Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
@@ -70,8 +72,7 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
-        > + Signed,
-    Self: Zeroable,
+        >,
 {
     type Output = Option<Self>;
 
@@ -111,15 +112,15 @@ where
         > + CheckedPow<
             BigInt<Digit, DIGIT_BITNESS>,
             Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
-        >,
+        > + Signed,
+    for<'a> &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: Neg<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeSign<
             Output = (
                 BigInt<Digit, DIGIT_BITNESS>,
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
-        > + Signed,
-    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
+        >,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
@@ -159,14 +160,12 @@ where
         > + CheckedPow<
             BigInt<Digit, DIGIT_BITNESS>,
             Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
-        > + Neg<Output = BigInt<Digit, DIGIT_BITNESS>>,
+        > + Neg<Output = BigInt<Digit, DIGIT_BITNESS>>
+        + Signed,
+    for<'a> &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: NormalizeSign<
-            Output = (
-                BigInt<Digit, DIGIT_BITNESS>,
-                BigInt<Digit, DIGIT_BITNESS>,
-            ),
-        > + Signed,
-    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
+        Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
+    >,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 

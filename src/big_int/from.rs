@@ -1,10 +1,12 @@
-use traiter::numbers::{Unitary, Zeroable};
+use traiter::numbers::{One, Zero, Zeroable};
 
 use super::digits::{non_zero_value_to_sign, DigitsFromNonZeroValue};
 use super::types::BigInt;
 
-impl<Digit: Unitary + Zeroable, const DIGIT_BITNESS: usize> From<bool>
+impl<Digit, const DIGIT_BITNESS: usize> From<bool>
     for BigInt<Digit, DIGIT_BITNESS>
+where
+    Self: One + Zero,
 {
     fn from(value: bool) -> Self {
         if value {
@@ -18,9 +20,10 @@ impl<Digit: Unitary + Zeroable, const DIGIT_BITNESS: usize> From<bool>
 macro_rules! from_integer_impl {
     ($($integer:ty)*) => ($(
         impl<
-                Digit: DigitsFromNonZeroValue<$integer> + Zeroable,
+                Digit: DigitsFromNonZeroValue<$integer>,
                 const DIGIT_BITNESS: usize,
             > From<$integer> for BigInt<Digit, DIGIT_BITNESS>
+        where Self: Zero
         {
             fn from(value: $integer) -> Self {
                 if value.is_zero() {

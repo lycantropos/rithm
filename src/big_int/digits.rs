@@ -8,8 +8,8 @@ use std::ops::{
 };
 
 use traiter::numbers::{
-    BitLength, CheckedShl, FloatInfo, Floor, FractExp, Gcd, LoadExp,
-    RemEuclid, Signed, Unitary, Zeroable,
+    BitLength, CheckedShl, FloatInfo, Floor, FractExp, Gcd, LoadExp, One,
+    RemEuclid, Signed, Unitary, Zero, Zeroable,
 };
 
 use crate::contracts::{is_signed, is_unsigned};
@@ -144,7 +144,7 @@ pub(super) trait NonBinaryBaseFromBinaryDigits<Source>: Sized {
 
 impl<
         Source: Copy,
-        Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
+        Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zero,
     > NonBinaryBaseFromBinaryDigits<Source> for Target
 where
     DoublePrecisionOf<Target>: BitOr<Output = DoublePrecisionOf<Target>>
@@ -220,13 +220,14 @@ where
         + BitOrAssign
         + Copy
         + From<Source>
+        + One
         + Shl<usize, Output = DoublePrecisionOf<Target>>
         + ShlAssign<usize>
         + Shr<usize, Output = DoublePrecisionOf<Target>>
         + ShrAssign<usize>
         + Sub<Output = DoublePrecisionOf<Target>>
         + SubAssign
-        + Unitary
+        + Zero
         + Zeroable,
 {
     fn greater_binary_base_from_binary_digits(
@@ -345,9 +346,10 @@ pub(super) trait BitwiseAndComponents: Sized {
     ) -> (Sign, Vec<Self>);
 }
 
-impl<
-        Digit: BitAndAssign + ComplementInPlace + Copy + DigitMask + Zeroable,
-    > BitwiseAndComponents for Digit
+impl<Digit: BitAndAssign + ComplementInPlace + Copy + DigitMask>
+    BitwiseAndComponents for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn bitwise_and_components<const DIGIT_BITNESS: usize>(
         first_sign: Sign,
@@ -394,8 +396,10 @@ pub(super) trait BitwiseOrComponents: Sized {
     ) -> (Sign, Vec<Self>);
 }
 
-impl<Digit: BitOrAssign + ComplementInPlace + Copy + DigitMask + Zeroable>
+impl<Digit: BitOrAssign + ComplementInPlace + Copy + DigitMask>
     BitwiseOrComponents for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn bitwise_or_components<const DIGIT_BITNESS: usize>(
         first_sign: Sign,
@@ -441,9 +445,10 @@ pub(super) trait BitwiseXorComponents: Sized {
     ) -> (Sign, Vec<Self>);
 }
 
-impl<
-        Digit: BitXorAssign + ComplementInPlace + Copy + DigitMask + Zeroable,
-    > BitwiseXorComponents for Digit
+impl<Digit: BitXorAssign + ComplementInPlace + Copy + DigitMask>
+    BitwiseXorComponents for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn bitwise_xor_components<const DIGIT_BITNESS: usize>(
         first_sign: Sign,
@@ -513,15 +518,17 @@ macro_rules! checked_div_digits_as_float_impl {
                     + DivRemDigitsByTwoOrMoreDigits
                     + Mul<Output = Digit>
                     + Not<Output = Digit>
+                    + One
                     + ShiftDigitsLeftInPlace
                     + ShiftDigitsRightInPlace
                     + Shl<usize, Output = Digit>
                     + Shr<usize, Output = Digit>
                     + ReduceDigitsToFloat<$float>
                     + Sub<Output = Digit>
-                    + Unitary
-                    + Zeroable,
+                    + Zero,
             > TryDivDigitsAsFloat<$float> for Digit
+        where
+            for<'a> &'a Digit: Zeroable,
         {
             type Error = CheckedDivAsFloatError;
 
@@ -715,8 +722,10 @@ impl<
             + DivRemDigitsByDigit
             + DivRemDigitsByTwoOrMoreDigits
             + PartialOrd
-            + Zeroable,
+            + Zero,
     > CheckedDivComponents for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn checked_div_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
@@ -760,11 +769,13 @@ impl<
         Digit: Copy
             + DivRemDigitsByDigit
             + DivRemDigitsByTwoOrMoreDigits
+            + One
             + PartialOrd
             + SumDigits
-            + Unitary
-            + Zeroable,
+            + Zero,
     > CheckedDivEuclidComponents for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn checked_div_euclid_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
@@ -838,8 +849,10 @@ impl<
             + DivRemDigitsByDigit
             + DivRemDigitsByTwoOrMoreDigits
             + PartialOrd
-            + Zeroable,
+            + Zero,
     > CheckedDivRemComponents for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn checked_div_rem_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
@@ -898,7 +911,7 @@ pub(super) trait CheckedDivRemEuclidComponents: Sized {
 }
 
 impl<
-        Digit: CheckedDivRemComponents + SubtractComponents + SumComponents + Unitary,
+        Digit: CheckedDivRemComponents + One + SubtractComponents + SumComponents,
     > CheckedDivRemEuclidComponents for Digit
 {
     fn checked_div_rem_euclid_components<const DIGIT_BITNESS: usize>(
@@ -952,9 +965,10 @@ impl<
         Digit: Copy
             + DivRemDigitsByDigit
             + DivRemDigitsByTwoOrMoreDigits
-            + PartialOrd
-            + Zeroable,
+            + PartialOrd,
     > CheckedRemComponents for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn checked_rem_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
@@ -999,9 +1013,10 @@ impl<
             + DivRemDigitsByDigit
             + DivRemDigitsByTwoOrMoreDigits
             + PartialOrd
-            + SubtractDigits
-            + Zeroable,
+            + SubtractDigits,
     > CheckedRemEuclidComponents for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn checked_rem_euclid_components<const DIGIT_BITNESS: usize>(
         dividend_sign: Sign,
@@ -1062,10 +1077,11 @@ impl<
             + BitXor<Output = Digit>
             + Copy
             + DigitMask
-            + ShrAssign<usize>
-            + Unitary
-            + Zeroable,
+            + One
+            + ShrAssign<usize>,
     > ComplementInPlace for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn complement_in_place<const DIGIT_BITNESS: usize>(digits: &mut [Self]) {
         let mut accumulator = Self::one();
@@ -1108,16 +1124,17 @@ pub(super) trait DivRemDigitsByDigit: Sized {
 }
 
 impl<
-        Digit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>> + Zeroable,
+        Digit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>> + Zero,
     > DivRemDigitsByDigit for Digit
 where
+    for<'a> &'a Digit: Zeroable,
     DoublePrecisionOf<Digit>: Copy
         + Mul<Output = DoublePrecisionOf<Digit>>
         + Div<Output = DoublePrecisionOf<Digit>>
         + BitOrAssign
         + ShlAssign<usize>
         + SubAssign
-        + Zeroable,
+        + Zero,
 {
     fn div_rem_digits_by_digit<const DIGIT_BITNESS: usize>(
         dividend: &[Self],
@@ -1161,6 +1178,7 @@ impl<
             + Copy
             + DigitMask
             + DoublePrecision
+            + One
             + Oppose
             + PartialOrd
             + ShiftDigitsLeftInPlace
@@ -1171,10 +1189,10 @@ impl<
             + SubAssign
             + TryFrom<DoublePrecisionOf<Digit>>
             + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-            + Unitary
-            + Zeroable,
+            + Zero,
     > DivRemDigitsByTwoOrMoreDigits for Digit
 where
+    for<'a> &'a Digit: Zeroable,
     DoublePrecisionOf<Digit>: BitOr<Output = DoublePrecisionOf<Digit>>
         + Copy
         + Div<Output = DoublePrecisionOf<Digit>>
@@ -1187,7 +1205,8 @@ where
         + Copy
         + PartialOrd
         + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + TryFrom<Digit>,
+        + TryFrom<Digit>
+        + Zero,
     OppositionOf<DoublePrecisionOf<Digit>>: Add<Output = OppositionOf<DoublePrecisionOf<Digit>>>
         + BitAnd<Output = OppositionOf<DoublePrecisionOf<Digit>>>
         + Copy
@@ -1348,16 +1367,14 @@ impl<
             + Copy
             + From<u8>
             + TryFrom<OppositionOf<Digit>>
+            + One
             + Oppose
             + ShiftDigitsLeftInPlace
             + ShiftDigitsRightInPlace
-            + Unitary
-            + Zeroable,
+            + Zero,
         Fraction: Add<Output = Fraction>
             + Div<Output = Fraction>
-            + Mul<Output = Fraction>
-            + Sub<Output = Fraction>
-            + SubAssign
+            + DivAssign
             + Copy
             + Floor<Output = Fraction>
             + FractExp<Output = (Fraction, i32)>
@@ -1367,12 +1384,15 @@ impl<
             + MantissaDigits
             + MaxExp
             + MinExp
+            + Mul<Output = Fraction>
             + PartialEq
-            + DivAssign
-            + Unitary
-            + Zeroable,
+            + One
+            + Sub<Output = Fraction>
+            + SubAssign,
     > FractExpDigits<Fraction> for Digit
 where
+    for<'a> &'a Digit: Zeroable,
+    for<'a> &'a Fraction: Unitary + Zeroable,
     OppositionOf<Digit>:
         Add<Output = OppositionOf<Digit>> + From<i8> + TryFrom<Digit>,
     usize: TryFrom<Digit>,
@@ -1484,7 +1504,7 @@ pub(super) trait InvertComponents: Sized {
     ) -> (Sign, Vec<Self>);
 }
 
-impl<Digit: SumComponents + Unitary> InvertComponents for Digit {
+impl<Digit: One + SumComponents> InvertComponents for Digit {
     fn invert_components<const DIGIT_BITNESS: usize>(
         sign: Sign,
         digits: &[Digit],
@@ -1512,8 +1532,10 @@ impl<
             + SubtractDigitsInPlace
             + SumDigits
             + SumDigitsInPlace
-            + Zeroable,
+            + Zero,
     > MultiplyDigits for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn multiply_digits<const DIGIT_BITNESS: usize>(
         first: &[Self],
@@ -1637,9 +1659,11 @@ impl<
             + Copy
             + DoublePrecision
             + TryFrom<DoublePrecisionOf<Digit>>
-            + Zeroable,
+            + Zero,
     > MultiplyDigitsPlain for Digit
 where
+    for<'a> &'a Digit: Zeroable,
+    for<'a> &'a DoublePrecisionOf<Digit>: Zeroable,
     DoublePrecisionOf<Digit>: Add<Output = DoublePrecisionOf<Digit>>
         + AddAssign
         + BitAnd<Output = DoublePrecisionOf<Digit>>
@@ -1648,7 +1672,7 @@ where
         + Mul<Output = DoublePrecisionOf<Digit>>
         + ShlAssign<usize>
         + ShrAssign<usize>
-        + Zeroable,
+        + Zero,
 {
     fn multiply_digits_plain<const DIGIT_BITNESS: usize>(
         shortest: &[Self],
@@ -1757,9 +1781,10 @@ pub(super) trait GreaterBinaryBaseFromNonBinaryDigits<Source>:
 
 impl<
         Source: Copy,
-        Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
+        Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zero,
     > GreaterBinaryBaseFromNonBinaryDigits<Source> for Target
 where
+    for<'a> &'a DoublePrecisionOf<Target>: Zeroable,
     DoublePrecisionOf<Target>: AddAssign
         + BitAnd<Output = DoublePrecisionOf<Target>>
         + Copy
@@ -1769,7 +1794,7 @@ where
         + MulAssign
         + ShrAssign<usize>
         + TryFrom<usize>
-        + Zeroable,
+        + Zero,
 {
     fn greater_binary_base_from_non_binary_digits<
         const TARGET_BITNESS: usize,
@@ -1866,9 +1891,10 @@ pub(super) trait LesserBinaryBaseFromNonBinaryDigits<Source>:
 
 impl<
         Source: Copy,
-        Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zeroable,
+        Target: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Target>> + Zero,
     > LesserBinaryBaseFromNonBinaryDigits<Source> for Target
 where
+    for<'a> &'a DoublePrecisionOf<Target>: Zeroable,
     DoublePrecisionOf<Target>: AddAssign
         + BitAnd<Output = DoublePrecisionOf<Target>>
         + Copy
@@ -1876,8 +1902,7 @@ where
         + From<Source>
         + Mul<Output = DoublePrecisionOf<Target>>
         + ShrAssign<usize>
-        + TryFrom<usize>
-        + Zeroable,
+        + TryFrom<usize>,
 {
     fn lesser_binary_base_from_non_binary_digits<
         const TARGET_BITNESS: usize,
@@ -1936,7 +1961,7 @@ impl<
         Output: BitOr<Output = Output>
             + Shl<usize, Output = Output>
             + From<Digit>
-            + Zeroable,
+            + Zero,
     > ReduceDigits<Output> for Digit
 {
     fn reduce_digits<const DIGIT_BITNESS: usize>(digits: &[Self]) -> Output {
@@ -1959,7 +1984,7 @@ impl<
         Output: CheckedShl<u32, Output = Option<Output>>
             + BitOr<Output = Output>
             + TryFrom<Digit>
-            + Zeroable,
+            + Zero,
     > MaybeReduceDigits<Output> for Digit
 {
     fn maybe_reduce_digits<const DIGIT_BITNESS: usize>(
@@ -2020,16 +2045,17 @@ pub(super) trait PrimitiveShiftDigitsLeft: Sized {
 }
 
 impl<
-        Digit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>> + Zeroable,
+        Digit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Digit>> + Zero,
     > PrimitiveShiftDigitsLeft for Digit
 where
+    for<'a> &'a Digit: Zeroable,
     DoublePrecisionOf<Digit>: BitAnd<Output = DoublePrecisionOf<Digit>>
         + BitOrAssign
         + Copy
         + DigitMask
         + Shl<Digit, Output = DoublePrecisionOf<Digit>>
         + ShrAssign<usize>
-        + Zeroable,
+        + Zero,
 {
     fn primitive_shift_digits_left<const DIGIT_BITNESS: usize>(
         digits: &[Self],
@@ -2114,17 +2140,17 @@ pub(super) trait ShiftDigitsLeftInPlace: Sized {
     ) -> Self;
 }
 
-impl<
-        Digit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + Zeroable,
-    > ShiftDigitsLeftInPlace for Digit
+impl<Digit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Self>>>
+    ShiftDigitsLeftInPlace for Digit
 where
+    for<'a> &'a Digit: Zeroable,
     DoublePrecisionOf<Digit>: BitAnd<Output = DoublePrecisionOf<Digit>>
         + BitOrAssign
         + Copy
         + DigitMask
         + Shl<usize, Output = DoublePrecisionOf<Digit>>
         + ShrAssign<usize>
-        + Zeroable,
+        + Zero,
 {
     fn shift_digits_left_in_place<const DIGIT_BITNESS: usize>(
         input: &[Self],
@@ -2153,17 +2179,17 @@ pub(super) trait ShiftDigitsRightInPlace: Sized {
     ) -> Self;
 }
 
-impl<
-        Digit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Self>> + Zeroable,
-    > ShiftDigitsRightInPlace for Digit
+impl<Digit: Copy + DoublePrecision + TryFrom<DoublePrecisionOf<Self>>>
+    ShiftDigitsRightInPlace for Digit
 where
+    for<'a> &'a Digit: Zeroable,
     DoublePrecisionOf<Digit>: BitAndAssign
         + BitOrAssign
         + Copy
         + DigitMask
         + Shr<usize, Output = DoublePrecisionOf<Digit>>
         + ShlAssign<usize>
-        + Zeroable,
+        + Zero,
 {
     fn shift_digits_right_in_place<const DIGIT_BITNESS: usize>(
         input: &[Self],
@@ -2200,9 +2226,10 @@ impl<
             + DigitMask
             + Shl<usize, Output = Digit>
             + Shr<usize, Output = Digit>
-            + Zeroable,
+            + Zero,
     > PrimitiveShiftDigitsRight for Digit
 where
+    for<'a> &'a Digit: Zeroable,
     usize: TryFrom<Digit>,
 {
     fn primitive_shift_digits_right<const DIGIT_BITNESS: usize>(
@@ -2247,11 +2274,13 @@ impl<
             + DivRemDigitsByDigit
             + InvertComponents
             + MaybeReduceDigits<usize>
+            + One
             + PrimitiveShiftDigitsRight
             + TryFrom<usize>
-            + Unitary
-            + Zeroable,
+            + Zero,
     > ShiftDigitsRight for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn shift_digits_right<const DIGIT_BITNESS: usize>(
         base_sign: Sign,
@@ -2294,12 +2323,12 @@ impl<
     }
 }
 
-fn split_digits<Digit>(
+fn split_digits<Digit: Clone>(
     digits: &[Digit],
     size: usize,
 ) -> (Vec<Digit>, Vec<Digit>)
 where
-    Digit: Clone + Zeroable,
+    for<'a> &'a Digit: Zeroable,
 {
     let (low, high) = digits.split_at(digits.len().min(size));
     let (mut low, mut high) = (low.to_vec(), high.to_vec());
@@ -2365,12 +2394,14 @@ impl<
             + BitAndAssign
             + Copy
             + DigitMask
+            + One
             + PartialOrd
             + ShrAssign<usize>
-            + Unitary
             + WrappingSub<Output = Digit>
-            + Zeroable,
+            + Zero,
     > SubtractDigits for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn subtract_digits<const DIGIT_BITNESS: usize>(
         minuend: &[Self],
@@ -2441,11 +2472,13 @@ impl<
             + BitAndAssign
             + Copy
             + DigitMask
+            + One
             + ShrAssign<usize>
-            + Unitary
             + WrappingSub<Output = Digit>
-            + Zeroable,
+            + Zero,
     > SubtractDigitsInPlace for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn subtract_digits_in_place<const DIGIT_BITNESS: usize>(
         longest: &mut [Self],
@@ -2528,8 +2561,10 @@ impl<
             + Copy
             + DigitMask
             + ShrAssign<usize>
-            + Zeroable,
+            + Zero,
     > SumDigits for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn sum_digits<const DIGIT_BITNESS: usize>(
         first: &[Self],
@@ -2573,8 +2608,10 @@ impl<
             + Copy
             + DigitMask
             + ShrAssign<usize>
-            + Zeroable,
+            + Zero,
     > SumDigitsInPlace for Digit
+where
+    for<'a> &'a Digit: Zeroable,
 {
     fn sum_digits_in_place<const DIGIT_BITNESS: usize>(
         longest: &mut [Self],
@@ -2603,8 +2640,8 @@ pub trait DigitMask {
     fn digit_mask(bitness: usize) -> Self;
 }
 
-impl<Digit: Shl<usize, Output = Digit> + Sub<Output = Digit> + Unitary>
-    DigitMask for Digit
+impl<Digit: One + Shl<usize, Output = Digit> + Sub<Output = Digit>> DigitMask
+    for Digit
 {
     #[inline]
     fn digit_mask(bitness: usize) -> Self {
@@ -2613,7 +2650,10 @@ impl<Digit: Shl<usize, Output = Digit> + Sub<Output = Digit> + Unitary>
 }
 
 #[inline]
-pub(super) fn to_digits_sign<Digit: Zeroable>(digits: &[Digit]) -> Sign {
+pub(super) fn to_digits_sign<Digit>(digits: &[Digit]) -> Sign
+where
+    for<'a> &'a Digit: Zeroable,
+{
     Sign::from(digits.len() > 1 || !digits[0].is_zero())
 }
 
@@ -2637,15 +2677,16 @@ impl<
             + Shr<usize, Output = Digit>
             + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
             + WrappingSub<Output = Digit>
-            + Zeroable,
+            + Zero,
     > GcdDigits for Digit
 where
+    for<'a> &'a Digit: Zeroable,
+    for<'a> &'a DoublePrecisionOf<Digit>: Zeroable,
     DoublePrecisionOf<Digit>: Gcd<Output = DoublePrecisionOf<Digit>>
         + HasSignBit
         + Oppose
         + RemEuclid<Output = DoublePrecisionOf<Digit>>
-        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>
-        + Zeroable,
+        + TryFrom<OppositionOf<DoublePrecisionOf<Digit>>>,
     OppositionOf<DoublePrecisionOf<Digit>>: Add<Output = OppositionOf<DoublePrecisionOf<Digit>>>
         + AddAssign
         + BitAnd<Output = OppositionOf<DoublePrecisionOf<Digit>>>
@@ -2656,6 +2697,7 @@ where
         + Div<Output = OppositionOf<DoublePrecisionOf<Digit>>>
         + From<Digit>
         + Mul<Output = OppositionOf<DoublePrecisionOf<Digit>>>
+        + One
         + PartialOrd
         + RemEuclid<Output = OppositionOf<DoublePrecisionOf<Digit>>>
         + Shl<usize, Output = OppositionOf<DoublePrecisionOf<Digit>>>
@@ -2664,8 +2706,7 @@ where
         + Sub<Output = OppositionOf<DoublePrecisionOf<Digit>>>
         + SubAssign
         + TryFrom<DoublePrecisionOf<Digit>>
-        + Unitary
-        + Zeroable,
+        + Zero,
 {
     fn gcd_digits<const DIGIT_BITNESS: usize>(
         first: Vec<Self>,
@@ -2859,7 +2900,10 @@ where
     }
 }
 
-pub(super) fn trim_leading_zeros<Digit: Zeroable>(digits: &mut Vec<Digit>) {
+pub(super) fn trim_leading_zeros<Digit>(digits: &mut Vec<Digit>)
+where
+    for<'a> &'a Digit: Zeroable,
+{
     let mut digits_count = digits.len();
     while digits_count > 1 && digits[digits_count - 1].is_zero() {
         digits_count -= 1;
@@ -2882,18 +2926,18 @@ impl<
             + HasSignBit
             + Oppose
             + ShrAssign<usize>
-            + TryFrom<Source>
-            + Zeroable,
+            + TryFrom<Source>,
         Source: BitAnd<Output = Source>
             + Copy
             + DigitMask
             + HasSignBit
             + Oppose
             + ShrAssign<usize>
-            + TryFrom<OppositionOf<Source>>
-            + Zeroable,
+            + TryFrom<OppositionOf<Source>>,
     > DigitsFromNonZeroValue<Source> for Digit
 where
+    for<'a> &'a Digit: Zeroable,
+    for<'a> &'a Source: Zeroable,
     OppositionOf<Source>: TryFrom<Source>,
 {
     fn digits_from_non_zero_value<const DIGIT_BITNESS: usize>(
@@ -2958,7 +3002,8 @@ where
 #[inline]
 pub(super) fn value_to_sign<Source>(value: Source) -> Sign
 where
-    Source: HasSignBit + Oppose + Zeroable,
+    for<'a> &'a Source: Zeroable,
+    Source: HasSignBit + Oppose,
     OppositionOf<Source>: TryFrom<Source>,
 {
     if value.is_zero() {
@@ -2987,7 +3032,10 @@ where
 }
 
 #[inline]
-fn floor_log2<T: BitLength<Output = usize> + Zeroable>(value: T) -> usize {
+fn floor_log2<T: BitLength<Output = usize>>(value: T) -> usize
+where
+    for<'a> &'a T: Zeroable,
+{
     debug_assert!(!value.is_zero());
     value.bit_length() - 1
 }

@@ -26,9 +26,10 @@ impl<Component: Clone> Clone for Fraction<Component> {
 
 impl<
         Component: NormalizeModuli<Output = (Component, Component)>
-            + NormalizeSign<Output = (Component, Component)>
-            + Zeroable,
+            + NormalizeSign<Output = (Component, Component)>,
     > Fraction<Component>
+where
+    for<'a> &'a Component: Zeroable,
 {
     pub fn new(
         mut numerator: Component,
@@ -87,9 +88,9 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> NormalizeModuli<&Self>
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    for<'a> Self: CheckedDiv<&'a Self, Output = Option<Self>>,
     for<'a> &'a Self:
         CheckedDiv<Self, Output = Option<Self>> + Gcd<Output = Self>,
+    for<'a> Self: CheckedDiv<&'a Self, Output = Option<Self>>,
 {
     type Output = (Self, Self);
 
@@ -178,7 +179,8 @@ pub trait NormalizeSign<Other = Self> {
 impl<Digit, const DIGIT_BITNESS: usize> NormalizeSign
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: Neg<Output = Self> + Signed,
+    for<'a> &'a Self: Signed,
+    Self: Neg<Output = Self>,
 {
     type Output = (Self, Self);
 

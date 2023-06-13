@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 use std::mem::size_of;
 use std::ops::Not;
 
-use traiter::numbers::{CheckedShr, DivRem, Sign, Signed, Zeroable};
+use traiter::numbers::{CheckedShr, DivRem, Sign, Signed, Zero, Zeroable};
 
 use super::digits::{
     to_digits_sign, PrimitiveShiftDigitsRight, ShiftDigitsRight,
@@ -12,7 +12,7 @@ use super::types::{BigInt, ShrError};
 impl<Digit: ShiftDigitsRight, const DIGIT_BITNESS: usize> CheckedShr
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: Signed,
+    for<'a> &'a Self: Signed,
 {
     type Output = Result<Self, ShrError>;
 
@@ -35,7 +35,7 @@ where
 impl<Digit: ShiftDigitsRight, const DIGIT_BITNESS: usize> CheckedShr<&Self>
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: Signed,
+    for<'a> &'a Self: Signed,
 {
     type Output = Result<Self, ShrError>;
 
@@ -58,7 +58,8 @@ where
 impl<Digit: ShiftDigitsRight, const DIGIT_BITNESS: usize>
     CheckedShr<BigInt<Digit, DIGIT_BITNESS>> for &BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, DIGIT_BITNESS>: Clone + Signed,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
+    BigInt<Digit, DIGIT_BITNESS>: Clone,
 {
     type Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShrError>;
 
@@ -81,7 +82,8 @@ where
 impl<Digit: ShiftDigitsRight, const DIGIT_BITNESS: usize> CheckedShr
     for &BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, DIGIT_BITNESS>: Clone + Signed,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
+    BigInt<Digit, DIGIT_BITNESS>: Clone,
 {
     type Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShrError>;
 
@@ -104,11 +106,12 @@ where
 macro_rules! checked_shr_signed_integer_impl {
     ($($integer:ty)*) => ($(
         impl<
-                Digit: PrimitiveShiftDigitsRight + TryFrom<usize> + Zeroable,
+                Digit: PrimitiveShiftDigitsRight + TryFrom<usize>,
                 const DIGIT_BITNESS: usize,
             > CheckedShr<$integer> for BigInt<Digit, DIGIT_BITNESS>
         where
-            Self: Clone + Not<Output = Self>,
+            for<'a> &'a Digit: Zeroable,
+            Self: Clone + Not<Output = Self> + Zero,
         {
             type Output = Result<Self, ShrError>;
 
@@ -169,12 +172,13 @@ macro_rules! checked_shr_signed_integer_impl {
         }
 
         impl<
-                Digit: PrimitiveShiftDigitsRight + TryFrom<usize> + Zeroable,
+                Digit: PrimitiveShiftDigitsRight + TryFrom<usize>,
                 const DIGIT_BITNESS: usize,
             > CheckedShr<$integer> for &BigInt<Digit, DIGIT_BITNESS>
         where
+            for<'a> &'a Digit: Zeroable,
             BigInt<Digit, DIGIT_BITNESS>:
-                Clone + Not<Output = BigInt<Digit, DIGIT_BITNESS>>,
+                Clone + Not<Output = BigInt<Digit, DIGIT_BITNESS>> + Zero,
             Self: Not<Output = BigInt<Digit, DIGIT_BITNESS>>,
         {
             type Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShrError>;
@@ -242,9 +246,12 @@ checked_shr_signed_integer_impl!(i8 i16 i32 i64 i128 isize);
 macro_rules! checked_shr_unsigned_integer_impl {
     ($($integer:ty)*) => ($(
         impl<
-                Digit: PrimitiveShiftDigitsRight + TryFrom<usize> + Zeroable,
+                Digit: PrimitiveShiftDigitsRight + TryFrom<usize>,
                 const DIGIT_BITNESS: usize,
             > CheckedShr<$integer> for BigInt<Digit, DIGIT_BITNESS>
+        where
+            for<'a> &'a Digit: Zeroable,
+            Self: Zero,
         {
             type Output = Result<Self, ShrError>;
 
@@ -285,11 +292,12 @@ macro_rules! checked_shr_unsigned_integer_impl {
         }
 
         impl<
-                Digit: PrimitiveShiftDigitsRight + TryFrom<usize> + Zeroable,
+                Digit: PrimitiveShiftDigitsRight + TryFrom<usize>,
                 const DIGIT_BITNESS: usize,
             > CheckedShr<$integer> for &BigInt<Digit, DIGIT_BITNESS>
         where
-            BigInt<Digit, DIGIT_BITNESS>: Clone,
+            for<'a> &'a Digit: Zeroable,
+            BigInt<Digit, DIGIT_BITNESS>: Clone + Zero,
         {
             type Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShrError>;
 

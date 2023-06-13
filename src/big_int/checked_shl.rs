@@ -9,7 +9,7 @@ use super::types::{BigInt, ShlError};
 impl<Digit: ShiftDigitsLeft, const DIGIT_BITNESS: usize> CheckedShl
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: Signed,
+    for<'a> &'a Self: Signed,
 {
     type Output = Result<Self, ShlError>;
 
@@ -31,7 +31,7 @@ where
 impl<Digit: ShiftDigitsLeft, const DIGIT_BITNESS: usize> CheckedShl<&Self>
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    Self: Signed,
+    for<'a> &'a Self: Signed,
 {
     type Output = Result<Self, ShlError>;
 
@@ -53,7 +53,8 @@ where
 impl<Digit: ShiftDigitsLeft, const DIGIT_BITNESS: usize>
     CheckedShl<BigInt<Digit, DIGIT_BITNESS>> for &BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, DIGIT_BITNESS>: Clone + Signed,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
+    BigInt<Digit, DIGIT_BITNESS>: Clone,
 {
     type Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShlError>;
 
@@ -75,7 +76,8 @@ where
 impl<Digit: ShiftDigitsLeft, const DIGIT_BITNESS: usize> CheckedShl
     for &BigInt<Digit, DIGIT_BITNESS>
 where
-    BigInt<Digit, DIGIT_BITNESS>: Clone + Signed,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
+    BigInt<Digit, DIGIT_BITNESS>: Clone,
 {
     type Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShlError>;
 
@@ -205,7 +207,7 @@ macro_rules! checked_shl_unsigned_integer_impl {
                 const DIGIT_BITNESS: usize,
             > CheckedShl<$integer> for BigInt<Digit, DIGIT_BITNESS>
         where
-            BigInt<Digit, DIGIT_BITNESS>: Zeroable,
+            for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Zeroable,
         {
             type Output = Result<Self, ShlError>;
 
@@ -251,7 +253,8 @@ macro_rules! checked_shl_unsigned_integer_impl {
                 const DIGIT_BITNESS: usize,
             > CheckedShl<$integer> for &BigInt<Digit, DIGIT_BITNESS>
         where
-            BigInt<Digit, DIGIT_BITNESS>: Clone + Zeroable,
+            for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Zeroable,
+            BigInt<Digit, DIGIT_BITNESS>: Clone,
         {
             type Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShlError>;
 

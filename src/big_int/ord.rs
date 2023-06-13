@@ -7,8 +7,6 @@ use super::types::BigInt;
 
 impl<Digit: Ord, const DIGIT_BITNESS: usize> Ord
     for BigInt<Digit, DIGIT_BITNESS>
-where
-    Self: Signed,
 {
     fn cmp(&self, other: &Self) -> Ordering {
         match self.sign.cmp(&other.sign) {

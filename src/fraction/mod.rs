@@ -38,4 +38,5 @@ mod try_from;
 mod try_into;
 mod types;
 mod unitary;
+mod zero;
 mod zeroable;

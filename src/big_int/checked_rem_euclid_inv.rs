@@ -1,7 +1,8 @@
 use std::ops::{Add, Mul, Sub};
 
 use traiter::numbers::{
-    CheckedDivRemEuclid, CheckedRemEuclidInv, Signed, Unitary, Zeroable,
+    CheckedDivRemEuclid, CheckedRemEuclidInv, One, Signed, Unitary, Zero,
+    Zeroable,
 };
 
 use super::types::BigInt;
@@ -21,13 +22,12 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> CheckedRemEuclidInv<&Self>
     for BigInt<Digit, DIGIT_BITNESS>
 where
-    for<'a> Self: Clone
-        + Mul<&'a Self, Output = Self>
-        + Signed
-        + Sub<Output = Self>
-        + Unitary,
     for<'a> &'a Self: Add<Self, Output = Self>
-        + CheckedDivRemEuclid<Output = Option<(Self, Self)>>,
+        + CheckedDivRemEuclid<Output = Option<(Self, Self)>>
+        + Signed
+        + Unitary,
+    for<'a> Self: Clone + Mul<&'a Self, Output = Self> + Sub<Output = Self>,
+    Self: One + Zero,
 {
     type Output = Option<Self>;
 

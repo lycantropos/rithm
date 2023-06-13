@@ -168,7 +168,7 @@ macro_rules! float_min_exp_impl {
 float_min_exp_impl!(f32 f64);
 
 pub trait Oppose {
-    type Result: Signed + Neg<Output = Self::Result>;
+    type Result: Copy + Neg<Output = Self::Result> + Signed;
 }
 
 impl Oppose for i8 {

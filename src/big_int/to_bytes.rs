@@ -9,19 +9,16 @@ use super::digits::{negate_bytes, BinaryBaseFromBinaryDigits};
 use super::types::BigInt;
 
 impl<
-        Digit: BinaryBaseFromBinaryDigits<Digit>
-            + Copy
-            + From<u8>
-            + Oppose
-            + Zeroable,
+        Digit: BinaryBaseFromBinaryDigits<Digit> + Copy + From<u8> + Oppose,
         const DIGIT_BITNESS: usize,
-    > ToBytes for BigInt<Digit, DIGIT_BITNESS>
+    > ToBytes for &BigInt<Digit, DIGIT_BITNESS>
 where
+    for<'a> &'a Digit: Zeroable,
     u8: TryFrom<Digit>,
 {
     type Output = Vec<u8>;
 
-    fn to_bytes(&self, endianness: Endianness) -> Self::Output {
+    fn to_bytes(self, endianness: Endianness) -> Self::Output {
         let mut result = Digit::binary_base_from_binary_digits(
             &self.digits,
             DIGIT_BITNESS,

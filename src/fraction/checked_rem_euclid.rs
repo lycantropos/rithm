@@ -9,6 +9,11 @@ use super::types::{Fraction, NormalizeModuli};
 impl<Digit, const DIGIT_BITNESS: usize> CheckedRemEuclid
     for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
+    for<'a> &'a Self: Zeroable,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<
+        BigInt<Digit, DIGIT_BITNESS>,
+        Output = BigInt<Digit, DIGIT_BITNESS>,
+    >,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedRemEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
         + Mul<
             &'a BigInt<Digit, DIGIT_BITNESS>,
@@ -20,11 +25,6 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<
-        BigInt<Digit, DIGIT_BITNESS>,
-        Output = BigInt<Digit, DIGIT_BITNESS>,
-    >,
-    Self: Zeroable,
 {
     type Output = Option<Self>;
 
@@ -49,6 +49,9 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> CheckedRemEuclid<&Self>
     for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
+    for<'a> &'a Self: Zeroable,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedRemEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
         + Mul<
             &'a BigInt<Digit, DIGIT_BITNESS>,
@@ -59,9 +62,6 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
-        Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
-    Self: Zeroable,
 {
     type Output = Option<Self>;
 
@@ -87,6 +87,12 @@ impl<Digit, const DIGIT_BITNESS: usize>
     CheckedRemEuclid<Fraction<BigInt<Digit, DIGIT_BITNESS>>>
     for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
+        + Mul<
+            BigInt<Digit, DIGIT_BITNESS>,
+            Output = BigInt<Digit, DIGIT_BITNESS>,
+        >,
+    for<'a> &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedRemEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
         + NormalizeModuli<
             Output = (
@@ -94,12 +100,6 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
-        + Mul<
-            BigInt<Digit, DIGIT_BITNESS>,
-            Output = BigInt<Digit, DIGIT_BITNESS>,
-        >,
-    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
@@ -127,6 +127,9 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> CheckedRemEuclid
     for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
+    for<'a> &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedRemEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
         + NormalizeModuli<
             Output = (
@@ -134,9 +137,6 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
-        Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
-    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
@@ -163,16 +163,16 @@ impl<Digit, const DIGIT_BITNESS: usize>
     for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
     for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<
-        BigInt<Digit, DIGIT_BITNESS>,
-        Output = BigInt<Digit, DIGIT_BITNESS>,
-    >,
+            BigInt<Digit, DIGIT_BITNESS>,
+            Output = BigInt<Digit, DIGIT_BITNESS>,
+        > + Zeroable,
     BigInt<Digit, DIGIT_BITNESS>: CheckedRemEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
         + NormalizeModuli<
             Output = (
                 BigInt<Digit, DIGIT_BITNESS>,
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
-        > + Zeroable,
+        >,
 {
     type Output = Option<Self>;
 
@@ -202,14 +202,14 @@ impl<Digit, const DIGIT_BITNESS: usize>
     for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
     for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
-        Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
+        Mul<Output = BigInt<Digit, DIGIT_BITNESS>> + Zeroable,
     BigInt<Digit, DIGIT_BITNESS>: CheckedRemEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
         + NormalizeModuli<
             Output = (
                 BigInt<Digit, DIGIT_BITNESS>,
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
-        > + Zeroable,
+        >,
 {
     type Output = Option<Self>;
 
@@ -244,14 +244,11 @@ where
         > + Mul<
             BigInt<Digit, DIGIT_BITNESS>,
             Output = BigInt<Digit, DIGIT_BITNESS>,
-        >,
-    for<'a> BigInt<Digit, DIGIT_BITNESS>: NormalizeModuli<
-            &'a BigInt<Digit, DIGIT_BITNESS>,
-            Output = (
-                BigInt<Digit, DIGIT_BITNESS>,
-                BigInt<Digit, DIGIT_BITNESS>,
-            ),
         > + Zeroable,
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: NormalizeModuli<
+        &'a BigInt<Digit, DIGIT_BITNESS>,
+        Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
+    >,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
@@ -283,14 +280,12 @@ where
     for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: CheckedRemEuclid<
             BigInt<Digit, DIGIT_BITNESS>,
             Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
-        > + Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
+        > + Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
+        + Zeroable,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: NormalizeModuli<
-            &'a BigInt<Digit, DIGIT_BITNESS>,
-            Output = (
-                BigInt<Digit, DIGIT_BITNESS>,
-                BigInt<Digit, DIGIT_BITNESS>,
-            ),
-        > + Zeroable,
+        &'a BigInt<Digit, DIGIT_BITNESS>,
+        Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
+    >,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
@@ -318,10 +313,10 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> CheckedRemEuclid<Fraction<Self>>
     for BigInt<Digit, DIGIT_BITNESS>
 where
+    for<'a> &'a Fraction<Self>: Zeroable,
     for<'a> Self: CheckedRemEuclid<Output = Option<Self>>
         + Mul<&'a Self, Output = Self>
         + NormalizeModuli<Output = (Self, Self)>,
-    Fraction<Self>: Zeroable,
 {
     type Output = Option<Fraction<Self>>;
 
@@ -346,10 +341,10 @@ where
 impl<Digit, const DIGIT_BITNESS: usize> CheckedRemEuclid<&Fraction<Self>>
     for BigInt<Digit, DIGIT_BITNESS>
 where
+    for<'a> &'a Fraction<Self>: Zeroable,
     for<'a> Self: CheckedRemEuclid<&'a Self, Output = Option<Self>>
         + Mul<&'a Self, Output = Self>
         + NormalizeModuli<&'a Self, Output = (Self, Self)>,
-    Fraction<Self>: Zeroable,
 {
     type Output = Option<Fraction<Self>>;
 
@@ -377,6 +372,7 @@ impl<Digit, const DIGIT_BITNESS: usize>
 where
     for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
         Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
+    for<'a> &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
     BigInt<Digit, DIGIT_BITNESS>: CheckedRemEuclid<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
         + NormalizeModuli<
             Output = (
@@ -384,7 +380,6 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
@@ -415,6 +410,7 @@ impl<Digit, const DIGIT_BITNESS: usize>
 where
     for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
         Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
+    for<'a> &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedRemEuclid<
             &'a BigInt<Digit, DIGIT_BITNESS>,
             Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
@@ -425,7 +421,6 @@ where
                 BigInt<Digit, DIGIT_BITNESS>,
             ),
         >,
-    Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 

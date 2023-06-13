@@ -19,8 +19,9 @@ use pyo3_ffi as ffi;
 use traiter::numbers::{
     Abs, BitLength, Ceil, CheckedDiv, CheckedDivEuclid, CheckedDivRemEuclid,
     CheckedPow, CheckedPowRemEuclid, CheckedRemEuclid, CheckedShl, CheckedShr,
-    Endianness, Floor, FromBytes, FromStrRadix, Gcd, IsPowerOfTwo, Parity,
-    Round, Signed, TieBreaking, ToBytes, Trunc, Unitary, Zeroable,
+    Endianness, Floor, FromBytes, FromStrRadix, Gcd, IsPowerOfTwo, One,
+    Parity, Round, Signed, TieBreaking, ToBytes, Trunc, Unitary, Zero,
+    Zeroable,
 };
 
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
@@ -580,9 +581,9 @@ impl PyInt {
         }
     }
 
-    fn __setstate__(&mut self, state: PyObject, py: Python) -> PyResult<()> {
+    fn __setstate__(&mut self, state: &PyAny) -> PyResult<()> {
         state
-            .extract::<&PyBytes>(py)
+            .extract::<&PyBytes>()
             .and_then(|py_bytes| py_bytes.extract::<Vec<u8>>())
             .map(|bytes| {
                 self.0 = BigInt::from_bytes(
@@ -632,10 +633,10 @@ impl PyInt {
 }
 
 #[inline]
-fn to_py_long<T: ToBytes<Output = Vec<u8>>>(
-    value: &T,
-    py: Python,
-) -> PyObject {
+fn to_py_long<'a, T>(value: &'a T, py: Python) -> PyObject
+where
+    &'a T: ToBytes<Output = Vec<u8>>,
+{
     let buffer = value.to_bytes(Endianness::Little);
     unsafe {
         PyObject::from_owned_ptr(
@@ -1285,16 +1286,12 @@ impl PyFraction {
         }
     }
 
-    fn __setstate__(
-        &mut self,
-        state: (PyObject, PyObject),
-        py: Python,
-    ) -> PyResult<()> {
+    fn __setstate__(&mut self, state: (&PyAny, &PyAny)) -> PyResult<()> {
         let (numerator_state, denominator_state) = state;
         let mut numerator = PyInt(BigInt::zero());
-        numerator.__setstate__(numerator_state, py)?;
+        numerator.__setstate__(numerator_state)?;
         let mut denominator = PyInt(BigInt::zero());
-        denominator.__setstate__(denominator_state, py)?;
+        denominator.__setstate__(denominator_state)?;
         match Fraction::new(numerator.0, denominator.0) {
             Some(fraction) => {
                 self.0 = fraction;

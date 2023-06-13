@@ -5,36 +5,36 @@ use crate::big_int::BigInt;
 use super::types::Fraction;
 
 impl<Digit, const DIGIT_BITNESS: usize> Signed
-    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    BigInt<Digit, DIGIT_BITNESS>: Signed,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Signed,
     Self: Zeroable,
 {
-    fn is_negative(&self) -> bool {
+    fn is_negative(self) -> bool {
         self.numerator.is_negative()
     }
 
-    fn is_positive(&self) -> bool {
+    fn is_positive(self) -> bool {
         self.numerator.is_positive()
     }
 
-    fn sign(&self) -> Sign {
+    fn sign(self) -> Sign {
         self.numerator.sign()
     }
 }
 
 macro_rules! signed_integer_fraction_signed_impl {
     ($($integer:ty)*) => ($(
-        impl Signed for Fraction<$integer> {
-            fn is_negative(&self) -> bool {
+        impl Signed for &Fraction<$integer> {
+            fn is_negative(self) -> bool {
                 self.numerator.is_negative()
             }
 
-            fn is_positive(&self) -> bool {
+            fn is_positive(self) -> bool {
                 self.numerator.is_positive()
             }
 
-            fn sign(&self) -> Sign {
+            fn sign(self) -> Sign {
                 self.numerator.sign()
             }
         }

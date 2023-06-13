@@ -22,6 +22,7 @@ mod hash;
 mod mul;
 mod mul_assign;
 mod neg;
+mod one;
 mod ord;
 mod partial_eq;
 mod partial_ord;

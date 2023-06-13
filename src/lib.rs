@@ -438,14 +438,8 @@ impl PyInt {
         }
     }
 
-    fn __reduce__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
-        PyTuple::new(
-            py,
-            [
-                PyInt::type_object(py).to_object(py),
-                PyTuple::new(py, [self.__int__(py)]).to_object(py),
-            ],
-        )
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
+        PyTuple::new(py, [self.__int__(py)])
     }
 
     fn __repr__(&self) -> String {
@@ -1159,20 +1153,10 @@ impl PyFraction {
         }
     }
 
-    fn __reduce__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
         PyTuple::new(
             py,
-            [
-                PyFraction::type_object(py).to_object(py),
-                PyTuple::new(
-                    py,
-                    [
-                        self.numerator().into_py(py),
-                        self.denominator().into_py(py),
-                    ],
-                )
-                .to_object(py),
-            ],
+            [self.numerator().into_py(py), self.denominator().into_py(py)],
         )
     }
 

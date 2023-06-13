@@ -156,8 +156,8 @@ class Int:
                       if isinstance(other, int)
                       else NotImplemented))
 
-    def __getstate__(self, /) -> int:
-        return self._value
+    def __reduce__(self, /) -> _t.Tuple[_t.Type[_te.Self], _t.Tuple[int]]:
+        return type(self), (self._value,)
 
     def __gt__(self, other: _t.Union[_te.Self, int], /) -> bool:
         return (self._value > other._value
@@ -331,9 +331,6 @@ class Int:
         return (Int(self._value ^ other)
                 if isinstance(other, int)
                 else NotImplemented)
-
-    def __setstate__(self, state: int, /) -> None:
-        self._value = state
 
     def __str__(self, /) -> str:
         return str(self._value)
@@ -514,9 +511,6 @@ class Fraction:
                       if isinstance(other, (Int, int))
                       else NotImplemented))
 
-    def __getstate__(self, /) -> _t.Tuple[Int, Int]:
-        return self._numerator, self._denominator
-
     def __gt__(self, other: _t.Union[_te.Self, Int, int], /) -> bool:
         return (self.numerator * other.denominator
                 > other.numerator * self.denominator
@@ -604,6 +598,9 @@ class Fraction:
                 if isinstance(dividend, (Int, int))
                 else NotImplemented)
 
+    def __reduce__(self, /) -> _t.Tuple[_t.Type[_te.Self], _t.Tuple[Int, Int]]:
+        return type(self), (self._numerator, self._denominator)
+
     def __repr__(self, /) -> str:
         return (f'{type(self).__qualname__}'
                 f'({self.numerator!r}, {self.denominator!r})')
@@ -657,9 +654,6 @@ class Fraction:
             if isinstance(subtrahend, (Int, int))
             else NotImplemented
         )
-
-    def __setstate__(self, state: _t.Tuple[Int, Int], /) -> None:
-        self._numerator, self._denominator = state
 
     def __str__(self, /) -> str:
         return (str(self.numerator)

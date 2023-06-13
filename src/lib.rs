@@ -10,7 +10,7 @@ use pyo3::prelude::{
     pyclass, pymethods, pymodule, PyModule, PyResult, Python,
 };
 use pyo3::type_object::PyTypeInfo;
-use pyo3::types::{PyBytes, PyFloat, PyLong, PyString, PyType};
+use pyo3::types::{PyBytes, PyFloat, PyLong, PyString, PyTuple, PyType};
 use pyo3::{
     intern, AsPyPointer, IntoPy, Py, PyAny, PyCell, PyClass, PyErr, PyObject,
     PyRef, ToPyObject,
@@ -45,7 +45,6 @@ const HASH_BITS: usize = 31;
 const HASH_BITS: usize = 61;
 const HASH_INF: ffi::Py_hash_t = 314_159;
 const HASH_MODULUS: usize = (1 << HASH_BITS) - 1;
-const PICKLE_SERIALIZATION_ENDIANNESS: Endianness = Endianness::Little;
 
 type BigInt = big_int::BigInt<Digit, DIGIT_BITNESS>;
 type Fraction = fraction::Fraction<BigInt>;
@@ -54,11 +53,11 @@ type Fraction = fraction::Fraction<BigInt>;
 #[derive(Clone)]
 struct PyEndianness(Endianness);
 
-#[pyclass(name = "Fraction", module = "rithm.fraction")]
+#[pyclass(name = "Fraction", module = "rithm.fraction", frozen)]
 #[derive(Clone)]
 struct PyFraction(Fraction);
 
-#[pyclass(name = "Int", module = "rithm.integer")]
+#[pyclass(name = "Int", module = "rithm.integer", frozen)]
 #[derive(Clone)]
 struct PyInt(BigInt);
 
@@ -73,14 +72,36 @@ impl PyEndianness {
     #[classattr]
     const LITTLE: PyEndianness = PyEndianness(Endianness::Little);
 
-    fn __repr__(&self) -> String {
-        format!(
-            "Endianness.{}",
-            match self.0 {
-                Endianness::Big => "BIG",
-                Endianness::Little => "LITTLE",
-            }
+    fn __reduce__(&self, py: Python) -> PyResult<PyObject> {
+        Ok(PyTuple::new(
+            py,
+            [
+                py.import("builtins")?.getattr(intern!(py, "getattr"))?,
+                PyTuple::new(
+                    py,
+                    [
+                        py.import(unsafe { Self::MODULE.unwrap_unchecked() })?
+                            .getattr(Self::NAME)?,
+                        String::from(endianness_to_field_name(self.0))
+                            .into_py(py)
+                            .as_ref(py),
+                    ],
+                ),
+            ],
         )
+        .to_object(py))
+    }
+
+    fn __repr__(&self) -> String {
+        format!("{}.{}", Self::NAME, endianness_to_field_name(self.0))
+    }
+}
+
+#[inline(always)]
+fn endianness_to_field_name(value: Endianness) -> &'static str {
+    match value {
+        Endianness::Big => "BIG",
+        Endianness::Little => "LITTLE",
     }
 }
 
@@ -96,16 +117,38 @@ impl PyTieBreaking {
     #[classattr]
     const TOWARD_ZERO: PyTieBreaking = PyTieBreaking(TieBreaking::TowardZero);
 
-    fn __repr__(&self) -> String {
-        format!(
-            "TieBreaking.{}",
-            match self.0 {
-                TieBreaking::AwayFromZero => "AWAY_FROM_ZERO",
-                TieBreaking::ToEven => "TO_EVEN",
-                TieBreaking::ToOdd => "TO_ODD",
-                TieBreaking::TowardZero => "TOWARD_ZERO",
-            }
+    fn __reduce__(&self, py: Python) -> PyResult<PyObject> {
+        Ok(PyTuple::new(
+            py,
+            [
+                py.import("builtins")?.getattr(intern!(py, "getattr"))?,
+                PyTuple::new(
+                    py,
+                    [
+                        py.import(unsafe { Self::MODULE.unwrap_unchecked() })?
+                            .getattr(Self::NAME)?,
+                        String::from(tie_breaking_to_field_name(self.0))
+                            .into_py(py)
+                            .as_ref(py),
+                    ],
+                ),
+            ],
         )
+        .to_object(py))
+    }
+
+    fn __repr__(&self) -> String {
+        format!("{}.{}", Self::NAME, tie_breaking_to_field_name(self.0))
+    }
+}
+
+#[inline(always)]
+fn tie_breaking_to_field_name(value: TieBreaking) -> &'static str {
+    match value {
+        TieBreaking::AwayFromZero => "AWAY_FROM_ZERO",
+        TieBreaking::ToEven => "TO_EVEN",
+        TieBreaking::ToOdd => "TO_ODD",
+        TieBreaking::TowardZero => "TOWARD_ZERO",
     }
 }
 
@@ -264,11 +307,6 @@ impl PyInt {
         }
     }
 
-    fn __getstate__(&self, py: Python) -> PyObject {
-        PyBytes::new(py, &self.0.to_bytes(PICKLE_SERIALIZATION_ENDIANNESS))
-            .to_object(py)
-    }
-
     fn __hash__(&self) -> ffi::Py_hash_t {
         hash(&self.0) as ffi::Py_hash_t
     }
@@ -400,8 +438,18 @@ impl PyInt {
         }
     }
 
+    fn __reduce__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
+        PyTuple::new(
+            py,
+            [
+                PyInt::type_object(py).to_object(py),
+                PyTuple::new(py, [self.__int__(py)]).to_object(py),
+            ],
+        )
+    }
+
     fn __repr__(&self) -> String {
-        format!("Int({})", self.0)
+        format!("{}({})", Self::NAME, self.0)
     }
 
     fn __rfloordiv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
@@ -581,18 +629,6 @@ impl PyInt {
         } else {
             Ok(py.NotImplemented())
         }
-    }
-
-    fn __setstate__(&mut self, state: &PyAny) -> PyResult<()> {
-        state
-            .extract::<&PyBytes>()
-            .and_then(|py_bytes| py_bytes.extract::<Vec<u8>>())
-            .map(|bytes| {
-                self.0 = BigInt::from_bytes(
-                    &bytes,
-                    PICKLE_SERIALIZATION_ENDIANNESS,
-                );
-            })
     }
 
     fn __str__(&self) -> String {
@@ -985,14 +1021,6 @@ impl PyFraction {
         }
     }
 
-    fn __getstate__(&self, py: Python) -> PyObject {
-        (
-            self.numerator().__getstate__(py),
-            self.denominator().__getstate__(py),
-        )
-            .to_object(py)
-    }
-
     fn __hash__(&self) -> ffi::Py_hash_t {
         let inverted_denominator = unsafe {
             self.0
@@ -1131,9 +1159,27 @@ impl PyFraction {
         }
     }
 
+    fn __reduce__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
+        PyTuple::new(
+            py,
+            [
+                PyFraction::type_object(py).to_object(py),
+                PyTuple::new(
+                    py,
+                    [
+                        self.numerator().into_py(py),
+                        self.denominator().into_py(py),
+                    ],
+                )
+                .to_object(py),
+            ],
+        )
+    }
+
     fn __repr__(&self) -> String {
         format!(
-            "Fraction({}, {})",
+            "{}({}, {})",
+            Self::NAME,
             self.numerator().__repr__(),
             self.denominator().__repr__()
         )
@@ -1286,23 +1332,6 @@ impl PyFraction {
                 })
         } else {
             Ok(py.NotImplemented())
-        }
-    }
-
-    fn __setstate__(&mut self, state: (&PyAny, &PyAny)) -> PyResult<()> {
-        let (numerator_state, denominator_state) = state;
-        let mut numerator = PyInt(BigInt::zero());
-        numerator.__setstate__(numerator_state)?;
-        let mut denominator = PyInt(BigInt::zero());
-        denominator.__setstate__(denominator_state)?;
-        match Fraction::new(numerator.0, denominator.0) {
-            Some(fraction) => {
-                self.0 = fraction;
-                Ok(())
-            }
-            None => Err(PyZeroDivisionError::new_err(
-                UNDEFINED_DIVISION_ERROR_MESSAGE,
-            )),
         }
     }
 

@@ -83,7 +83,7 @@ class Int:
     def __ge__(self, other: _te.Self, /) -> bool:
         ...
 
-    def __getstate__(self, /) -> int:
+    def __reduce__(self, /) -> _t.Tuple[_t.Tuple[_te.Self], _t.Tuple[int]]:
         ...
 
     def __gt__(self, other: _te.Self, /) -> bool:
@@ -180,9 +180,6 @@ class Int:
         ...
 
     def __rxor__(self, other: int, /) -> _te.Self:
-        ...
-
-    def __setstate__(self, state: int, /) -> None:
         ...
 
     def __str__(self, /) -> str:

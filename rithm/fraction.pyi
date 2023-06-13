@@ -71,9 +71,6 @@ class Fraction:
     def __ge__(self, other: _t.Union[_te.Self, Int, int], /) -> bool:
         ...
 
-    def __getstate__(self, /) -> _t.Tuple[Int, Int]:
-        ...
-
     def __gt__(self, other: _t.Union[_te.Self, Int, int], /) -> bool:
         ...
 
@@ -111,6 +108,11 @@ class Fraction:
     ) -> _t.Tuple[Int, _te.Self]:
         ...
 
+    def __reduce__(
+            self, /
+    ) -> _t.Tuple[_t.Tuple[_te.Self], _t.Tuple[Int, Int]]:
+        ...
+
     def __repr__(self, /) -> str:
         ...
 
@@ -132,9 +134,6 @@ class Fraction:
         ...
 
     def __rsub__(self, subtrahend: _t.Union[Int, int], /) -> _te.Self:
-        ...
-
-    def __setstate__(self, state: _t.Tuple[Int, Int], /) -> None:
         ...
 
     def __str__(self, /) -> str:

@@ -33,7 +33,7 @@ where
         exponent: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
         if exponent.is_negative() {
-            if self.is_zero() {
+            if (&self).is_zero() {
                 None
             } else {
                 let exponent = -exponent;
@@ -81,7 +81,7 @@ where
         exponent: &BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
         if exponent.is_negative() {
-            if self.is_zero() {
+            if (&self).is_zero() {
                 None
             } else {
                 let exponent = -exponent;

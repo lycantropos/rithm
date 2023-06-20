@@ -36,7 +36,7 @@ where
         let mut result = Self::one();
         let mut step_dividend = self;
         let mut step_divisor = divisor.clone();
-        while !step_divisor.is_zero() {
+        while !(&step_divisor).is_zero() {
             let (quotient, remainder) = unsafe {
                 step_dividend
                     .checked_div_rem_euclid(&step_divisor)

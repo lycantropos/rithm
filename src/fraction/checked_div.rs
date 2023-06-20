@@ -26,7 +26,7 @@ where
     type Output = Option<Self>;
 
     fn checked_div(self, divisor: Self) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             None
         } else {
             let (dividend_numerator, divisor_numerator) =
@@ -106,7 +106,7 @@ where
         self,
         divisor: Fraction<BigInt<Digit, DIGIT_BITNESS>>,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             None
         } else {
             let (dividend_numerator, divisor_numerator) =
@@ -184,7 +184,7 @@ where
         self,
         divisor: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             None
         } else {
             let (dividend_numerator, divisor_numerator) =
@@ -263,7 +263,7 @@ where
         self,
         divisor: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             None
         } else {
             let (dividend_numerator, divisor_numerator) =
@@ -327,7 +327,7 @@ where
     type Output = Option<Fraction<Self>>;
 
     fn checked_div(self, divisor: Fraction<Self>) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             None
         } else {
             let (dividend, divisor_numerator) =
@@ -391,7 +391,7 @@ where
         self,
         divisor: Fraction<BigInt<Digit, DIGIT_BITNESS>>,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             None
         } else {
             let (dividend, divisor_numerator) =

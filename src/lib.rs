@@ -258,7 +258,7 @@ impl PyInt {
     }
 
     fn __bool__(&self) -> bool {
-        !self.0.is_zero()
+        !(&self.0).is_zero()
     }
 
     fn __ceil__(slf: PyRef<Self>) -> PyRef<Self> {
@@ -1021,7 +1021,7 @@ impl PyFraction {
                 )
                 .unwrap_unchecked()
         };
-        let result = if inverted_denominator.is_zero() {
+        let result = if (&inverted_denominator).is_zero() {
             HASH_INF
         } else {
             unsafe {

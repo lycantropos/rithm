@@ -22,14 +22,14 @@ where
         exponent: Self,
         divisor: Self,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             Err(CheckedPowRemEuclidError::ZeroDivisor)
         } else {
             let is_negative = divisor.is_negative();
             let divisor_modulus = divisor.abs();
             self.checked_pow_abs_rem_euclid(&exponent, &divisor_modulus)
                 .map(|result| {
-                    if is_negative && !result.is_zero() {
+                    if is_negative && !(&result).is_zero() {
                         result - divisor_modulus
                     } else {
                         result
@@ -59,7 +59,7 @@ where
             let divisor_modulus = divisor.abs();
             self.checked_pow_abs_rem_euclid(&exponent, &divisor_modulus)
                 .map(|result| {
-                    if is_negative && !result.is_zero() {
+                    if is_negative && !(&result).is_zero() {
                         result - divisor_modulus
                     } else {
                         result
@@ -82,14 +82,14 @@ where
         exponent: &Self,
         divisor: Self,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             Err(CheckedPowRemEuclidError::ZeroDivisor)
         } else {
             let is_negative = divisor.is_negative();
             let divisor_modulus = divisor.abs();
             self.checked_pow_abs_rem_euclid(exponent, &divisor_modulus)
                 .map(|result| {
-                    if is_negative && !result.is_zero() {
+                    if is_negative && !(&result).is_zero() {
                         result - divisor_modulus
                     } else {
                         result
@@ -119,7 +119,7 @@ where
             let divisor_modulus = divisor.abs();
             self.checked_pow_abs_rem_euclid(exponent, &divisor_modulus)
                 .map(|result| {
-                    if is_negative && !result.is_zero() {
+                    if is_negative && !(&result).is_zero() {
                         result - divisor_modulus
                     } else {
                         result
@@ -148,7 +148,7 @@ where
         exponent: BigInt<Digit, DIGIT_BITNESS>,
         divisor: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             Err(CheckedPowRemEuclidError::ZeroDivisor)
         } else {
             let is_negative = divisor.is_negative();
@@ -156,7 +156,7 @@ where
             self.clone()
                 .checked_pow_abs_rem_euclid(&exponent, &divisor_modulus)
                 .map(|result| {
-                    if is_negative && !result.is_zero() {
+                    if is_negative && !(&result).is_zero() {
                         result - divisor_modulus
                     } else {
                         result
@@ -184,7 +184,7 @@ where
         exponent: BigInt<Digit, DIGIT_BITNESS>,
         divisor: Self,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             Err(CheckedPowRemEuclidError::ZeroDivisor)
         } else {
             let is_negative = divisor.is_negative();
@@ -192,7 +192,7 @@ where
             self.clone()
                 .checked_pow_abs_rem_euclid(&exponent, &divisor_modulus)
                 .map(|result| {
-                    if is_negative && !result.is_zero() {
+                    if is_negative && !(&result).is_zero() {
                         result - divisor_modulus
                     } else {
                         result
@@ -219,7 +219,7 @@ where
         exponent: Self,
         divisor: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             Err(CheckedPowRemEuclidError::ZeroDivisor)
         } else {
             let is_negative = divisor.is_negative();
@@ -227,7 +227,7 @@ where
             self.clone()
                 .checked_pow_abs_rem_euclid(exponent, &divisor_modulus)
                 .map(|result| {
-                    if is_negative && !result.is_zero() {
+                    if is_negative && !(&result).is_zero() {
                         result - divisor_modulus
                     } else {
                         result
@@ -262,7 +262,7 @@ where
             self.clone()
                 .checked_pow_abs_rem_euclid(exponent, &divisor_modulus)
                 .map(|result| {
-                    if is_negative && !result.is_zero() {
+                    if is_negative && !(&result).is_zero() {
                         result - divisor_modulus
                     } else {
                         result

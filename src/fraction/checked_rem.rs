@@ -29,7 +29,7 @@ where
     type Output = Option<Self>;
 
     fn checked_rem(self, divisor: Self) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             None
         } else {
             let (numerator, denominator) = unsafe {
@@ -107,7 +107,7 @@ where
         self,
         divisor: Fraction<BigInt<Digit, DIGIT_BITNESS>>,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             None
         } else {
             let (numerator, denominator) = unsafe {
@@ -180,7 +180,7 @@ where
         self,
         divisor: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             None
         } else {
             let (numerator, denominator) = unsafe {
@@ -256,7 +256,7 @@ where
         self,
         divisor: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             None
         } else {
             let (numerator, denominator) = unsafe {
@@ -321,7 +321,7 @@ where
     type Output = Option<Fraction<Self>>;
 
     fn checked_rem(self, divisor: Fraction<Self>) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             None
         } else {
             let (numerator, denominator) = unsafe {
@@ -387,7 +387,7 @@ where
         self,
         divisor: Fraction<BigInt<Digit, DIGIT_BITNESS>>,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
             None
         } else {
             let (numerator, denominator) = unsafe {

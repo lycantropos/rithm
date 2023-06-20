@@ -9,7 +9,7 @@ where
     &'a BigInt<Digit, DIGIT_BITNESS>: Zeroable,
 {
     fn is_zero(self) -> bool {
-        self.numerator.is_zero()
+        (&self.numerator).is_zero()
     }
 }
 

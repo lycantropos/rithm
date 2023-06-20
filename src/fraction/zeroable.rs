@@ -3,10 +3,20 @@ use traiter::numbers::Zeroable;
 
 use super::types::Fraction;
 
-impl<Digit, const DIGIT_BITNESS: usize> Zeroable
-    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
+impl<'a, Digit, const DIGIT_BITNESS: usize> Zeroable
+    for &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Zeroable,
+    &'a BigInt<Digit, DIGIT_BITNESS>: Zeroable,
+{
+    fn is_zero(self) -> bool {
+        self.numerator.is_zero()
+    }
+}
+
+impl<Digit, const DIGIT_BITNESS: usize> Zeroable
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
+where
+    BigInt<Digit, DIGIT_BITNESS>: Zeroable,
 {
     fn is_zero(self) -> bool {
         self.numerator.is_zero()
@@ -16,6 +26,12 @@ where
 macro_rules! integer_fraction_zeroable_impl {
     ($($integer:ty)*) => ($(
         impl Zeroable for &Fraction<$integer> {
+            fn is_zero(self) -> bool {
+                self.numerator.is_zero()
+            }
+        }
+
+        impl Zeroable for Fraction<$integer> {
             fn is_zero(self) -> bool {
                 self.numerator.is_zero()
             }

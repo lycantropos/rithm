@@ -451,7 +451,7 @@ macro_rules! integer_checked_rem_fraction_impl {
             type Output = Option<Self>;
 
             fn checked_rem(self, divisor: Self) -> Self::Output {
-                if divisor.is_zero() {
+                if (&divisor).is_zero() {
                     None
                 } else {
                     let (numerator, denominator) = unsafe {
@@ -493,7 +493,7 @@ macro_rules! integer_checked_rem_fraction_impl {
             type Output = Option<Fraction<Self>>;
 
             fn checked_rem(self, divisor: Fraction<Self>) -> Self::Output {
-                if divisor.is_zero() {
+                if (&divisor).is_zero() {
                     None
                 } else {
                     let (numerator, denominator) = unsafe {

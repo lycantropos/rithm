@@ -396,7 +396,7 @@ impl PyInt {
                     }
                 }
                 None => {
-                    if exponent.is_negative() {
+                    if (&exponent).is_negative() {
                         try_pow_negative_exponent(self.0.clone(), exponent, py)
                     } else {
                         Ok(Self(pow_non_negative_exponent(&self.0, &exponent))
@@ -561,7 +561,7 @@ impl PyInt {
                 }
             }
             None => {
-                if self.0.is_negative() {
+                if (&self.0).is_negative() {
                     try_pow_negative_exponent(base, self.0.clone(), py)
                 } else {
                     Ok(PyInt(pow_non_negative_exponent(&base, &self.0))
@@ -797,7 +797,7 @@ fn try_pow_negative_exponent(
     exponent: BigInt,
     py: Python,
 ) -> PyResult<PyObject> {
-    debug_assert!(exponent.is_negative());
+    debug_assert!((&exponent).is_negative());
     match Fraction::from(base).checked_pow(exponent) {
         Some(power) => Ok(PyFraction(power).into_py(py)),
         None => Err(PyZeroDivisionError::new_err(
@@ -1033,7 +1033,7 @@ impl PyFraction {
                 .unwrap_unchecked()
             }
         };
-        if self.0.is_negative() {
+        if (&self.0).is_negative() {
             if result.is_one() {
                 -2
             } else {
@@ -1251,7 +1251,7 @@ impl PyFraction {
         match digits {
             Some(digits) => {
                 let digits = try_big_int_from_py_integral(digits)?;
-                let is_digits_positive = digits.is_positive();
+                let is_digits_positive = (&digits).is_positive();
                 let shift = unsafe {
                     BigInt::from(10)
                         .checked_pow(digits.abs())

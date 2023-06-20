@@ -15,7 +15,7 @@ where
     type Output = Option<Self>;
 
     fn checked_pow(self, exponent: Self) -> Self::Output {
-        if exponent.is_negative() {
+        if (&exponent).is_negative() {
             None
         } else {
             Some(self.unchecked_pow(&exponent))
@@ -52,7 +52,7 @@ where
         self,
         exponent: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
-        if exponent.is_negative() {
+        if (&exponent).is_negative() {
             None
         } else {
             Some(self.unchecked_pow(&exponent))

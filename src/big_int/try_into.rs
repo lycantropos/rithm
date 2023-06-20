@@ -121,7 +121,7 @@ macro_rules! unsigned_integer_try_from_big_int_impl {
             fn try_from(
                 value: BigInt<Digit, DIGIT_BITNESS>,
             ) -> Result<Self, Self::Error> {
-                if value.is_negative() {
+                if (&value).is_negative() {
                     Err(TryIntoUnsignedIntegerError::Negative)
                 } else {
                     Digit::maybe_reduce_digits::<DIGIT_BITNESS>(&value.digits)

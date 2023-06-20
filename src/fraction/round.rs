@@ -35,10 +35,10 @@ where
         match (remainder << 1).cmp(&self.denominator) {
             Ordering::Equal => {
                 if match tie_breaking {
-                    TieBreaking::AwayFromZero => !quotient.is_negative(),
+                    TieBreaking::AwayFromZero => !(&quotient).is_negative(),
                     TieBreaking::ToEven => quotient.is_odd(),
                     TieBreaking::ToOdd => quotient.is_even(),
-                    TieBreaking::TowardZero => quotient.is_negative(),
+                    TieBreaking::TowardZero => (&quotient).is_negative(),
                 } {
                     quotient + BigInt::<Digit, DIGIT_BITNESS>::one()
                 } else {
@@ -79,10 +79,10 @@ where
         match (remainder << 1).cmp(&self.denominator) {
             Ordering::Equal => {
                 if match tie_breaking {
-                    TieBreaking::AwayFromZero => !quotient.is_negative(),
+                    TieBreaking::AwayFromZero => !(&quotient).is_negative(),
                     TieBreaking::ToEven => quotient.is_odd(),
                     TieBreaking::ToOdd => quotient.is_even(),
-                    TieBreaking::TowardZero => quotient.is_negative(),
+                    TieBreaking::TowardZero => (&quotient).is_negative(),
                 } {
                     quotient + BigInt::<Digit, DIGIT_BITNESS>::one()
                 } else {

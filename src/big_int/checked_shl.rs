@@ -14,7 +14,7 @@ where
     type Output = Result<Self, ShlError>;
 
     fn checked_shl(self, shift: Self) -> Self::Output {
-        match shift.sign() {
+        match (&shift).sign() {
             Sign::Negative => Err(ShlError::NegativeShift),
             Sign::Positive => Ok(BigInt::<Digit, DIGIT_BITNESS> {
                 sign: self.sign,
@@ -59,7 +59,7 @@ where
     type Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShlError>;
 
     fn checked_shl(self, shift: BigInt<Digit, DIGIT_BITNESS>) -> Self::Output {
-        match shift.sign() {
+        match (&shift).sign() {
             Sign::Negative => Err(ShlError::NegativeShift),
             Sign::Positive => Ok(BigInt::<Digit, DIGIT_BITNESS> {
                 sign: self.sign,

@@ -32,7 +32,7 @@ where
         self,
         exponent: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
-        if exponent.is_negative() {
+        if (&exponent).is_negative() {
             if (&self).is_zero() {
                 None
             } else {
@@ -128,7 +128,7 @@ where
         self,
         exponent: BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
-        if exponent.is_negative() {
+        if (&exponent).is_negative() {
             if self.is_zero() {
                 None
             } else {

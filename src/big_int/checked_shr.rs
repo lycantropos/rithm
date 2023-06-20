@@ -17,7 +17,7 @@ where
     type Output = Result<Self, ShrError>;
 
     fn checked_shr(self, shift: Self) -> Self::Output {
-        match shift.sign() {
+        match (&shift).sign() {
             Sign::Negative => Err(ShrError::NegativeShift),
             Sign::Positive => {
                 let (sign, digits) = Digit::shift_digits_right::<DIGIT_BITNESS>(
@@ -64,7 +64,7 @@ where
     type Output = Result<BigInt<Digit, DIGIT_BITNESS>, ShrError>;
 
     fn checked_shr(self, shift: BigInt<Digit, DIGIT_BITNESS>) -> Self::Output {
-        match shift.sign() {
+        match (&shift).sign() {
             Sign::Negative => Err(ShrError::NegativeShift),
             Sign::Positive => {
                 let (sign, digits) = Digit::shift_digits_right::<DIGIT_BITNESS>(
@@ -133,7 +133,7 @@ macro_rules! checked_shr_signed_integer_impl {
                             } >= (usize::MAX / size_of::<Digit>())
                         {
                             Ok(Self::zero())
-                        } else if self.is_negative() {
+                        } else if (&self).is_negative() {
                             let inverted = !self;
                             let digits = Digit::primitive_shift_digits_right::<
                                 DIGIT_BITNESS,

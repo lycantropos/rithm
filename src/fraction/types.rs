@@ -186,7 +186,7 @@ where
 
     #[inline]
     fn normalize_sign(self, other: Self) -> Self::Output {
-        if other.is_negative() {
+        if (&other).is_negative() {
             (-self, -other)
         } else {
             (self, other)

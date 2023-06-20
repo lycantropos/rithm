@@ -47,7 +47,7 @@ where
             (candidate, result) = (result - quotient * &candidate, candidate);
         }
         if step_dividend.is_one() {
-            Some(if result.is_negative() {
+            Some(if (&result).is_negative() {
                 divisor + result
             } else {
                 result

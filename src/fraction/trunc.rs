@@ -14,7 +14,7 @@ where
     type Output = BigInt<Digit, DIGIT_BITNESS>;
 
     fn trunc(self) -> Self::Output {
-        if self.is_negative() {
+        if (&self).is_negative() {
             self.ceil()
         } else {
             self.floor()
@@ -46,7 +46,7 @@ macro_rules! signed_integer_fraction_trunc_impl {
             type Output = $integer;
 
             fn trunc(self) -> Self::Output {
-                if self.is_negative() {
+                if (&self).is_negative() {
                     self.ceil()
                 } else {
                     self.floor()

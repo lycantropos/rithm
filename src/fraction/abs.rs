@@ -4,6 +4,23 @@ use crate::big_int::BigInt;
 
 use super::types::Fraction;
 
+impl<'a, Digit, const DIGIT_BITNESS: usize> Abs
+    for &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>
+where
+    BigInt<Digit, DIGIT_BITNESS>: Clone,
+    &'a BigInt<Digit, DIGIT_BITNESS>:
+        Abs<Output = BigInt<Digit, DIGIT_BITNESS>>,
+{
+    type Output = Fraction<BigInt<Digit, DIGIT_BITNESS>>;
+
+    fn abs(self) -> Self::Output {
+        Self::Output {
+            numerator: (&self.numerator).abs(),
+            denominator: self.denominator.clone(),
+        }
+    }
+}
+
 impl<Digit, const DIGIT_BITNESS: usize> Abs
     for Fraction<BigInt<Digit, DIGIT_BITNESS>>
 {
@@ -17,25 +34,19 @@ impl<Digit, const DIGIT_BITNESS: usize> Abs
     }
 }
 
-impl<Digit, const DIGIT_BITNESS: usize> Abs
-    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
-where
-    BigInt<Digit, DIGIT_BITNESS>: Clone,
-    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
-        Abs<Output = BigInt<Digit, DIGIT_BITNESS>>,
-{
-    type Output = Fraction<BigInt<Digit, DIGIT_BITNESS>>;
-
-    fn abs(self) -> Self::Output {
-        Self::Output {
-            numerator: (&self.numerator).abs(),
-            denominator: self.denominator.clone(),
-        }
-    }
-}
-
 macro_rules! signed_integer_fraction_abs_impl {
     ($($integer:ty)*) => ($(
+        impl Abs for &Fraction<$integer> {
+            type Output = Fraction<$integer>;
+
+            fn abs(self) -> Self::Output {
+                Self::Output {
+                    numerator: self.numerator.abs(),
+                    denominator: self.denominator,
+                }
+            }
+        }
+
         impl Abs for Fraction<$integer> {
             type Output = Self;
 

@@ -221,7 +221,7 @@ impl PyInt {
     }
 
     fn is_power_of_two(&self) -> bool {
-        self.0.is_power_of_two()
+        (&self.0).is_power_of_two()
     }
 
     #[pyo3(text_signature = "($self, other, /)")]

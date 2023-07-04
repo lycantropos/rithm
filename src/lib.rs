@@ -201,11 +201,6 @@ impl PyInt {
         }
     }
 
-    #[pyo3(signature = (endianness, /))]
-    fn to_bytes(&self, endianness: &PyEndianness, py: Python) -> PyObject {
-        PyBytes::new(py, &self.0.to_bytes(endianness.0)).to_object(py)
-    }
-
     #[classmethod]
     #[pyo3(signature = (bytes, endianness, /))]
     fn from_bytes(
@@ -214,6 +209,16 @@ impl PyInt {
         endianness: &PyEndianness,
     ) -> PyInt {
         PyInt(BigInt::from_bytes(bytes.as_mut_slice(), endianness.0))
+    }
+
+    #[getter]
+    fn denominator(_slf: PyRef<Self>) -> Self {
+        Self(BigInt::one())
+    }
+
+    #[getter]
+    fn numerator(slf: PyRef<Self>) -> PyRef<Self> {
+        slf
     }
 
     fn bit_length(&self) -> PyInt {
@@ -229,14 +234,9 @@ impl PyInt {
         Self((&self.0).gcd(&other.0))
     }
 
-    #[getter]
-    fn numerator(slf: PyRef<Self>) -> PyRef<Self> {
-        slf
-    }
-
-    #[getter]
-    fn denominator(_slf: PyRef<Self>) -> Self {
-        Self(BigInt::one())
+    #[pyo3(signature = (endianness, /))]
+    fn to_bytes(&self, endianness: &PyEndianness, py: Python) -> PyObject {
+        PyBytes::new(py, &self.0.to_bytes(endianness.0)).to_object(py)
     }
 
     fn __abs__(&self) -> PyInt {

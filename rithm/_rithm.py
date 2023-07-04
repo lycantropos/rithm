@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import typing as _t
-from enum import Enum as _Enum
 from math import gcd as _gcd
 from numbers import (Integral as _Integral,
                      Rational as _Rational)
@@ -10,24 +9,8 @@ from sys import hash_info as _hash_info
 
 import typing_extensions as _te
 
-
-class _BaseEnum(_Enum):
-    __module__ = 'rithm.enums'
-
-    def __repr__(self) -> str:
-        return f'{type(self).__qualname__}.{self.name}'
-
-
-class Endianness(_BaseEnum):
-    BIG = 'big'
-    LITTLE = 'little'
-
-
-class TieBreaking(int, _BaseEnum):
-    AWAY_FROM_ZERO = 0
-    TO_EVEN = 1
-    TO_ODD = 2
-    TOWARD_ZERO = 3
+from .enums import (Endianness as _Endianness,
+                    TieBreaking as _TieBreaking)
 
 
 @_te.final
@@ -50,13 +33,13 @@ class Int:
     def is_power_of_two(self, /) -> bool:
         return self._value > 0 and not (self._value & (self._value - 1))
 
-    def to_bytes(self, endianness: Endianness, /) -> bytes:
+    def to_bytes(self, endianness: _Endianness, /) -> bytes:
         return self._value.to_bytes(_to_bytes_count(self._value),
                                     endianness.value,
                                     signed=True)
 
     @classmethod
-    def from_bytes(cls, value: bytes, endianness: Endianness, /) -> _te.Self:
+    def from_bytes(cls, value: bytes, endianness: _Endianness, /) -> _te.Self:
         return cls(int.from_bytes(value, endianness.value,
                                   signed=True))
 
@@ -377,18 +360,18 @@ class Fraction:
     def numerator(self) -> Int:
         return self._numerator
 
-    def round(self, tie_breaking: TieBreaking, /) -> Int:
+    def round(self, tie_breaking: _TieBreaking, /) -> Int:
         quotient, remainder = divmod(self.numerator, self.denominator)
         double_remainder = remainder * 2
         if double_remainder == self.denominator:
-            if tie_breaking is TieBreaking.AWAY_FROM_ZERO:
+            if tie_breaking is _TieBreaking.AWAY_FROM_ZERO:
                 return quotient + _ONE if quotient >= 0 else quotient
-            elif tie_breaking is TieBreaking.TO_EVEN:
+            elif tie_breaking is _TieBreaking.TO_EVEN:
                 return quotient + _ONE if quotient % 2 else quotient
-            elif tie_breaking is TieBreaking.TO_ODD:
+            elif tie_breaking is _TieBreaking.TO_ODD:
                 return quotient + _ONE if not quotient % 2 else quotient
             else:
-                assert tie_breaking is TieBreaking.TOWARD_ZERO, (
+                assert tie_breaking is _TieBreaking.TOWARD_ZERO, (
                     tie_breaking
                 )
                 return quotient + _ONE if quotient < 0 else quotient
@@ -633,13 +616,13 @@ class Fraction:
             self, digits: _t.Optional[int] = None, /
     ) -> _t.Union[Int, _te.Self]:
         if digits is None:
-            return self.round(TieBreaking.TO_EVEN)
+            return self.round(_TieBreaking.TO_EVEN)
         else:
             shift = 10 ** abs(digits)
-            return (Fraction((self * shift).round(TieBreaking.TO_EVEN),
+            return (Fraction((self * shift).round(_TieBreaking.TO_EVEN),
                              shift)
                     if digits > 0
-                    else Fraction((self / shift).round(TieBreaking.TO_EVEN)
+                    else Fraction((self / shift).round(_TieBreaking.TO_EVEN)
                                   * shift))
 
     def __rsub__(self, subtrahend: _t.Union[Int, int], /) -> _te.Self:

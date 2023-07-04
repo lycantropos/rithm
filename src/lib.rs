@@ -66,41 +66,65 @@ struct PyInt(BigInt);
 #[derive(Clone)]
 struct PyTieBreaking(TieBreaking);
 
+fn to_py_endianness_values(py: Python) -> &[Py<PyEndianness>; 2] {
+    static VALUES: GILOnceCell<[Py<PyEndianness>; 2]> = GILOnceCell::new();
+    VALUES.get_or_init(py, || {
+        [
+            PyCell::new(py, PyEndianness(Endianness::Big))
+                .unwrap()
+                .into(),
+            PyCell::new(py, PyEndianness(Endianness::Little))
+                .unwrap()
+                .into(),
+        ]
+    })
+}
+
+#[allow(non_snake_case)]
 #[pymethods]
 impl PyEndianness {
     #[classattr]
-    const BIG: PyEndianness = PyEndianness(Endianness::Big);
-    #[classattr]
-    const LITTLE: PyEndianness = PyEndianness(Endianness::Little);
+    fn BIG(py: Python) -> Py<PyEndianness> {
+        to_py_endianness_values(py)[0].clone_ref(py)
+    }
 
-    fn __reduce__(&self, py: Python) -> PyResult<PyObject> {
-        Ok(PyTuple::new(
-            py,
-            [
-                py.import("builtins")?.getattr(intern!(py, "getattr"))?,
-                PyTuple::new(
-                    py,
-                    [
-                        Self::type_object(py).to_object(py),
-                        String::from(endianness_to_field_name(self.0))
-                            .into_py(py),
-                    ],
-                ),
-            ],
-        )
-        .to_object(py))
+    #[classattr]
+    fn LITTLE(py: Python) -> Py<PyEndianness> {
+        to_py_endianness_values(py)[1].clone_ref(py)
+    }
+
+    #[new]
+    #[pyo3(signature = (value, /))]
+    fn new(value: &PyAny, py: Python) -> PyResult<Py<Self>> {
+        let values = to_py_endianness_values(py);
+        match value.extract::<&str>() {
+            Ok("big") => Ok(values[0].clone_ref(py)),
+            Ok("little") => Ok(values[1].clone_ref(py)),
+            _ => Err(PyValueError::new_err(format!(
+                "{} is not a valid {}",
+                value.repr()?,
+                Self::NAME
+            ))),
+        }
+    }
+
+    #[getter]
+    fn value(&self) -> &'static str {
+        match self.0 {
+            Endianness::Big => "big",
+            Endianness::Little => "little",
+        }
+    }
+
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
+        PyTuple::new(py, [self.value()])
     }
 
     fn __repr__(&self) -> String {
-        format!("{}.{}", Self::NAME, endianness_to_field_name(self.0))
-    }
-}
-
-#[inline(always)]
-fn endianness_to_field_name(value: Endianness) -> &'static str {
-    match value {
-        Endianness::Big => "BIG",
-        Endianness::Little => "LITTLE",
+        format!("{}.{}", Self::NAME, matchself.0 {
+            Endianness::Big => "BIG",
+            Endianness::Little => "LITTLE",
+        })
     }
 }
 

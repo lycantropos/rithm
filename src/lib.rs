@@ -9,6 +9,7 @@ use pyo3::exceptions::{
 use pyo3::prelude::{
     pyclass, pymethods, pymodule, PyModule, PyResult, Python,
 };
+use pyo3::sync::GILOnceCell;
 use pyo3::type_object::PyTypeInfo;
 use pyo3::types::{PyBytes, PyFloat, PyLong, PyString, PyTuple, PyType};
 use pyo3::{
@@ -103,48 +104,90 @@ fn endianness_to_field_name(value: Endianness) -> &'static str {
     }
 }
 
+fn to_py_tie_breaking_values(py: Python) -> &[Py<PyTieBreaking>; 4] {
+    static VALUES: GILOnceCell<[Py<PyTieBreaking>; 4]> = GILOnceCell::new();
+    VALUES.get_or_init(py, || {
+        [
+            PyCell::new(py, PyTieBreaking(TieBreaking::AwayFromZero))
+                .unwrap()
+                .into(),
+            PyCell::new(py, PyTieBreaking(TieBreaking::ToEven))
+                .unwrap()
+                .into(),
+            PyCell::new(py, PyTieBreaking(TieBreaking::ToOdd))
+                .unwrap()
+                .into(),
+            PyCell::new(py, PyTieBreaking(TieBreaking::TowardZero))
+                .unwrap()
+                .into(),
+        ]
+    })
+}
+
+#[allow(non_snake_case)]
 #[pymethods]
 impl PyTieBreaking {
     #[classattr]
-    const AWAY_FROM_ZERO: PyTieBreaking =
-        PyTieBreaking(TieBreaking::AwayFromZero);
-    #[classattr]
-    const TO_EVEN: PyTieBreaking = PyTieBreaking(TieBreaking::ToEven);
-    #[classattr]
-    const TO_ODD: PyTieBreaking = PyTieBreaking(TieBreaking::ToOdd);
-    #[classattr]
-    const TOWARD_ZERO: PyTieBreaking = PyTieBreaking(TieBreaking::TowardZero);
+    fn AWAY_FROM_ZERO(py: Python) -> Py<PyTieBreaking> {
+        to_py_tie_breaking_values(py)[0].clone_ref(py)
+    }
 
-    fn __reduce__(&self, py: Python) -> PyResult<PyObject> {
-        Ok(PyTuple::new(
-            py,
-            [
-                py.import("builtins")?.getattr(intern!(py, "getattr"))?,
-                PyTuple::new(
-                    py,
-                    [
-                        Self::type_object(py).to_object(py),
-                        String::from(tie_breaking_to_field_name(self.0))
-                            .into_py(py),
-                    ],
-                ),
-            ],
-        )
-        .to_object(py))
+    #[classattr]
+    fn TO_EVEN(py: Python) -> Py<PyTieBreaking> {
+        to_py_tie_breaking_values(py)[1].clone_ref(py)
+    }
+
+    #[classattr]
+    fn TO_ODD(py: Python) -> Py<PyTieBreaking> {
+        to_py_tie_breaking_values(py)[2].clone_ref(py)
+    }
+
+    #[classattr]
+    fn TOWARD_ZERO(py: Python) -> Py<PyTieBreaking> {
+        to_py_tie_breaking_values(py)[3].clone_ref(py)
+    }
+
+    #[new]
+    #[pyo3(signature = (value, /))]
+    fn new(value: &PyAny, py: Python) -> PyResult<Py<Self>> {
+        let values = to_py_tie_breaking_values(py);
+        match value.extract::<usize>() {
+            Ok(value) if value < values.len() => {
+                Ok(values[value].clone_ref(py))
+            }
+            _ => Err(PyValueError::new_err(format!(
+                "{} is not a valid {}",
+                value.repr()?,
+                Self::NAME
+            ))),
+        }
+    }
+
+    #[getter]
+    fn value(&self) -> u8 {
+        match self.0 {
+            TieBreaking::AwayFromZero => 0,
+            TieBreaking::ToEven => 1,
+            TieBreaking::ToOdd => 2,
+            TieBreaking::TowardZero => 3,
+        }
+    }
+
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
+        PyTuple::new(py, [self.value()])
     }
 
     fn __repr__(&self) -> String {
-        format!("{}.{}", Self::NAME, tie_breaking_to_field_name(self.0))
-    }
-}
-
-#[inline(always)]
-fn tie_breaking_to_field_name(value: TieBreaking) -> &'static str {
-    match value {
-        TieBreaking::AwayFromZero => "AWAY_FROM_ZERO",
-        TieBreaking::ToEven => "TO_EVEN",
-        TieBreaking::ToOdd => "TO_ODD",
-        TieBreaking::TowardZero => "TOWARD_ZERO",
+        format!(
+            "{}.{}",
+            Self::NAME,
+            match self.0 {
+                TieBreaking::AwayFromZero => "AWAY_FROM_ZERO",
+                TieBreaking::ToEven => "TO_EVEN",
+                TieBreaking::ToOdd => "TO_ODD",
+                TieBreaking::TowardZero => "TOWARD_ZERO",
+            }
+        )
     }
 }
 

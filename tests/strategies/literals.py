@@ -1,11 +1,12 @@
 import re
 import string
 from functools import partial
+import typing as t
 
 from hypothesis import strategies
 
-compile_ = partial(re.compile,
-                   flags=re.ASCII)
+compile_ = t.cast(t.Callable[[str], t.Pattern[str]], partial(re.compile,
+                                                             flags=re.ASCII))
 _whitespaces = r'[\f\n\r\t\v ]'
 decimal_int_strings_with_leading_zeros = strategies.from_regex(
         compile_(fr'\A{_whitespaces}*[+-]?\d(\d+)*{_whitespaces}*\Z')

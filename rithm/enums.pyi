@@ -11,7 +11,6 @@ class Endianness:
     def value(self) -> str:
         ...
 
-    @property
     def __new__(cls, value: str, /) -> _te.Self:
         ...
 
@@ -29,7 +28,6 @@ class TieBreaking:
     def value(self) -> int:
         ...
 
-    @property
     def __new__(cls, value: int, /) -> _te.Self:
         ...
 

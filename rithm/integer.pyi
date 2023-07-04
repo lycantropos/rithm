@@ -64,7 +64,7 @@ class Int:
         ...
 
     @_t.overload
-    def __eq__(self, other: _te.Self, /) -> bool:
+    def __eq__(self, other: _t.Union[_te.Self, int], /) -> bool:
         ...
 
     @_t.overload
@@ -80,13 +80,13 @@ class Int:
     def __floordiv__(self, other: _t.Union[_te.Self, int], /) -> _te.Self:
         ...
 
-    def __ge__(self, other: _te.Self, /) -> bool:
+    def __ge__(self, other: _t.Union[_te.Self, int], /) -> bool:
         ...
 
     def __reduce__(self, /) -> _t.Tuple[_t.Tuple[_te.Self], _t.Tuple[int]]:
         ...
 
-    def __gt__(self, other: _te.Self, /) -> bool:
+    def __gt__(self, other: _t.Union[_te.Self, int], /) -> bool:
         ...
 
     def __hash__(self, /) -> int:
@@ -101,19 +101,19 @@ class Int:
     def __invert__(self, /) -> _te.Self:
         ...
 
-    def __le__(self, other: _te.Self, /) -> bool:
+    def __le__(self, other: _t.Union[_te.Self, int], /) -> bool:
         ...
 
     def __lshift__(self, other: _t.Union[_te.Self, int], /) -> _te.Self:
         ...
 
-    def __lt__(self, other: _te.Self, /) -> bool:
+    def __lt__(self, other: _t.Union[_te.Self, int], /) -> bool:
         ...
 
     def __mod__(self, other: _t.Union[_te.Self, int], /) -> _te.Self:
         ...
 
-    def __mul__(self, other: _te.Self, /) -> _te.Self:
+    def __mul__(self, other: _t.Union[_te.Self, int], /) -> _te.Self:
         ...
 
     def __neg__(self, /) -> _te.Self:

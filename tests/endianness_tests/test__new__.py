@@ -9,20 +9,20 @@ from . import strategies
 
 
 @given(strategies.endiannesses_values)
-def test_basic(value: str) -> None:
+def test_basic(value: int) -> None:
     result = Endianness(value)
 
     assert isinstance(result, Endianness)
 
 
 @given(strategies.endiannesses_values, strategies.endiannesses_values)
-def test_bijection(first: str, second: str) -> None:
+def test_bijection(first: int, second: int) -> None:
     assert equivalence(first == second,
                        Endianness(first) is Endianness(second))
 
 
 @given(strategies.endiannesses_values)
-def test_value_round_trip(value: str) -> None:
+def test_value_round_trip(value: int) -> None:
     result = Endianness(value)
 
     assert result is Endianness(result.value)

@@ -8,7 +8,7 @@ from . import strategies
 def test_basic(endianness: Endianness) -> None:
     result = endianness.value
 
-    assert isinstance(result, str)
+    assert isinstance(result, int)
 
 
 @given(strategies.endiannesses)

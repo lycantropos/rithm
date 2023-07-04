@@ -34,14 +34,21 @@ class Int:
         return self._value > 0 and not (self._value & (self._value - 1))
 
     def to_bytes(self, endianness: _Endianness, /) -> bytes:
-        return self._value.to_bytes(_to_bytes_count(self._value),
-                                    endianness.value,
-                                    signed=True)
+        return self._value.to_bytes(
+                _to_bytes_count(self._value),
+                'big' if endianness is _Endianness.BIG else 'little',
+                signed=True
+        )
 
     @classmethod
     def from_bytes(cls, value: bytes, endianness: _Endianness, /) -> _te.Self:
-        return cls(int.from_bytes(value, endianness.value,
-                                  signed=True))
+        return cls(
+                int.from_bytes(
+                        value,
+                        'big' if endianness is _Endianness.BIG else 'little',
+                        signed=True
+                )
+        )
 
     _value: int
 

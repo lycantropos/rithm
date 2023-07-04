@@ -18,14 +18,14 @@ def test_basic(value: int) -> None:
 @given(strategies.tie_breakings_values, strategies.tie_breakings_values)
 def test_bijection(first: int, second: int) -> None:
     assert equivalence(first == second,
-                       TieBreaking(first) == TieBreaking(second))
+                       TieBreaking(first) is TieBreaking(second))
 
 
 @given(strategies.tie_breakings_values)
 def test_value_round_trip(value: int) -> None:
     result = TieBreaking(value)
 
-    assert result == TieBreaking(result.value)
+    assert result is TieBreaking(result.value)
 
 
 @given(strategies.non_tie_breakings_values)

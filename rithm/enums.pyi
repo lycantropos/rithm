@@ -8,10 +8,10 @@ class Endianness:
     LITTLE: Endianness = ...
 
     @property
-    def value(self) -> str:
+    def value(self) -> int:
         ...
 
-    def __new__(cls, value: str, /) -> _te.Self:
+    def __new__(cls, value: int, /) -> _te.Self:
         ...
 
     def __repr__(self) -> str:

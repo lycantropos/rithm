@@ -97,9 +97,10 @@ impl PyEndianness {
     #[pyo3(signature = (value, /))]
     fn new(value: &PyAny, py: Python) -> PyResult<Py<Self>> {
         let values = to_py_endianness_values(py);
-        match value.extract::<&str>() {
-            Ok("big") => Ok(values[0].clone_ref(py)),
-            Ok("little") => Ok(values[1].clone_ref(py)),
+        match value.extract::<usize>() {
+            Ok(value) if value < values.len() => {
+                Ok(values[value].clone_ref(py))
+            }
             _ => Err(PyValueError::new_err(format!(
                 "{} is not a valid {}",
                 value.repr()?,
@@ -109,10 +110,10 @@ impl PyEndianness {
     }
 
     #[getter]
-    fn value(&self) -> &'static str {
+    fn value(&self) -> u8 {
         match self.0 {
-            Endianness::Big => "big",
-            Endianness::Little => "little",
+            Endianness::Big => 0,
+            Endianness::Little => 1,
         }
     }
 
@@ -121,10 +122,14 @@ impl PyEndianness {
     }
 
     fn __repr__(&self) -> String {
-        format!("{}.{}", Self::NAME, matchself.0 {
-            Endianness::Big => "BIG",
-            Endianness::Little => "LITTLE",
-        })
+        format!(
+            "{}.{}",
+            Self::NAME,
+            match self.0 {
+                Endianness::Big => "BIG",
+                Endianness::Little => "LITTLE",
+            }
+        )
     }
 }
 

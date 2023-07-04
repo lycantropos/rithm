@@ -7,4 +7,4 @@ from . import strategies
 
 @given(strategies.endiannesses)
 def test_round_trip(endianness: Endianness) -> None:
-    assert pickle_round_trip(endianness) == endianness
+    assert pickle_round_trip(endianness) is endianness

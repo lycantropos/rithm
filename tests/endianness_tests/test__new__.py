@@ -18,14 +18,14 @@ def test_basic(value: str) -> None:
 @given(strategies.endiannesses_values, strategies.endiannesses_values)
 def test_bijection(first: str, second: str) -> None:
     assert equivalence(first == second,
-                       Endianness(first) == Endianness(second))
+                       Endianness(first) is Endianness(second))
 
 
 @given(strategies.endiannesses_values)
 def test_value_round_trip(value: str) -> None:
     result = Endianness(value)
 
-    assert result == Endianness(result.value)
+    assert result is Endianness(result.value)
 
 
 @given(strategies.non_endiannesses_values)

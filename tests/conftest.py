@@ -32,7 +32,8 @@ if on_ci:
         item.obj = set_deadline(item.obj)
 
 
-    @pytest.fixture(scope='function', autouse=True)
+    @pytest.fixture(scope='function',
+                    autouse=True)
     def time_function_call() -> t.Iterator[None]:
         start = time.monotonic()
         try:

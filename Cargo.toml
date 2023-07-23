@@ -20,7 +20,7 @@ version = "^0.19.1"
 features = ["extension-module"]
 
 [dependencies.traiter]
-version = "^3.1.0"
+version = "^4.0.0"
 features = ["numbers", "std"]
 
 [build-dependencies]

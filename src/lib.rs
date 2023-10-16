@@ -1538,8 +1538,8 @@ fn _crithm(py: Python, module: &PyModule) -> PyResult<()> {
     module.add_class::<PyInt>()?;
     module.add_class::<PyTieBreaking>()?;
     let numbers_module = py.import("numbers")?;
-    let rational_cls = numbers_module.getattr(intern!(py, "Rational"))?;
     let integral_cls = numbers_module.getattr(intern!(py, "Integral"))?;
+    let rational_cls = numbers_module.getattr(intern!(py, "Rational"))?;
     integral_cls.call_method1("register", (PyInt::type_object(py),))?;
     rational_cls.call_method1("register", (PyFraction::type_object(py),))?;
     Ok(())

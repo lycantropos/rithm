@@ -317,14 +317,16 @@ impl PyInt {
 
     fn __add__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
-        to_py_ref::<Self>(other)
+        other
+            .extract::<PyRef<Self>>()
             .map(|other| Self(&self.0 + &other.0).into_py(py))
             .or_else(|_| self.__radd__(other))
     }
 
     fn __and__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
-        to_py_ref::<Self>(other)
+        other
+            .extract::<PyRef<Self>>()
             .map(|other| Self(&self.0 & &other.0).into_py(py))
             .or_else(|_| self.__rand__(other))
     }
@@ -339,7 +341,7 @@ impl PyInt {
 
     fn __divmod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
-        if let Ok(divisor) = to_py_ref::<Self>(divisor) {
+        if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             try_divmod(&self.0, &divisor.0).map(|(quotient, remainder)| {
                 (Self(quotient), Self(remainder)).into_py(py)
             })
@@ -364,7 +366,7 @@ impl PyInt {
 
     fn __floordiv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
-        if let Ok(divisor) = to_py_ref::<Self>(divisor) {
+        if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             try_floordiv(&self.0, &divisor.0)
                 .map(|result| Self(result).into_py(py))
         } else if let Ok(divisor) = try_big_int_from_py_integral(divisor) {
@@ -393,7 +395,7 @@ impl PyInt {
 
     fn __lshift__(&self, shift: &PyAny) -> PyResult<PyObject> {
         let py = shift.py();
-        if let Ok(shift) = to_py_ref::<Self>(shift) {
+        if let Ok(shift) = shift.extract::<PyRef<Self>>() {
             try_lshift(&self.0, &shift.0)
                 .map(|result| Self(result).into_py(py))
         } else if let Ok(shift) = try_big_int_from_py_integral(shift) {
@@ -405,7 +407,7 @@ impl PyInt {
 
     fn __mod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
-        if let Ok(divisor) = to_py_ref::<Self>(divisor) {
+        if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             try_mod(&self.0, &divisor.0).map(|result| Self(result).into_py(py))
         } else if let Ok(divisor) = try_big_int_from_py_integral(divisor) {
             try_mod(&self.0, divisor).map(|result| Self(result).into_py(py))
@@ -416,7 +418,8 @@ impl PyInt {
 
     fn __mul__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
-        to_py_ref::<Self>(other)
+        other
+            .extract::<PyRef<Self>>()
             .map(|other| Self(&self.0 * &other.0).into_py(py))
             .or_else(|_| self.__rmul__(other))
     }
@@ -447,7 +450,7 @@ impl PyInt {
         if let Ok(exponent) = try_big_int_from_py_any(exponent) {
             match divisor {
                 Some(divisor) => {
-                    if let Ok(divisor) = to_py_ref::<Self>(divisor) {
+                    if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
                         (&self.0)
                             .checked_pow_rem_euclid(exponent, &divisor.0)
                             .map(|remainder| Self(remainder).into_py(py))
@@ -526,7 +529,8 @@ impl PyInt {
 
     fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<PyObject> {
         let py = other.py();
-        to_py_ref::<Self>(other)
+        other
+            .extract::<PyRef<Self>>()
             .map(|other| compare(&self.0, &other.0, op).into_py(py))
             .or_else(|_| {
                 try_big_int_from_py_integral(other)
@@ -614,7 +618,7 @@ impl PyInt {
         };
         match divisor {
             Some(divisor) => {
-                if let Ok(divisor) = to_py_ref::<Self>(divisor) {
+                if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
                     base.checked_pow_rem_euclid(&self.0, &divisor.0)
                         .map(|remainder| PyInt(remainder).into_py(py))
                         .map_err(|reason| {
@@ -655,7 +659,7 @@ impl PyInt {
 
     fn __rshift__(&self, shift: &PyAny) -> PyResult<PyObject> {
         let py = shift.py();
-        if let Ok(shift) = to_py_ref::<Self>(shift) {
+        if let Ok(shift) = shift.extract::<PyRef<Self>>() {
             try_rshift(&self.0, &shift.0)
                 .map(|result| Self(result).into_py(py))
         } else if let Ok(shift) = try_big_int_from_py_integral(shift) {
@@ -699,7 +703,8 @@ impl PyInt {
 
     fn __sub__(&self, subtrahend: &PyAny) -> PyResult<PyObject> {
         let py = subtrahend.py();
-        to_py_ref::<Self>(subtrahend)
+        subtrahend
+            .extract::<PyRef<Self>>()
             .map(|subtrahend| Self(&self.0 - &subtrahend.0).into_py(py))
             .or_else(|_| {
                 try_big_int_from_py_integral(subtrahend)
@@ -1021,11 +1026,11 @@ impl PyFraction {
 
     fn __divmod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
-        if let Ok(divisor) = to_py_ref::<Self>(divisor) {
+        if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             try_divmod(&self.0, &divisor.0).map(|(quotient, remainder)| {
                 (PyInt(quotient), Self(remainder)).into_py(py)
             })
-        } else if let Ok(divisor) = to_py_ref::<PyInt>(divisor) {
+        } else if let Ok(divisor) = divisor.extract::<PyRef<PyInt>>() {
             try_divmod(&self.0, &divisor.0).map(|(quotient, remainder)| {
                 (PyInt(quotient), Self(remainder)).into_py(py)
             })
@@ -1051,7 +1056,7 @@ impl PyFraction {
 
     fn __floordiv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
-        if let Ok(divisor) = to_py_ref::<Self>(divisor) {
+        if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             (&self.0)
                 .checked_div_euclid(&divisor.0)
                 .map(|quotient| PyInt(quotient).into_py(py))
@@ -1060,7 +1065,7 @@ impl PyFraction {
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
                 })
-        } else if let Ok(divisor) = to_py_ref::<PyInt>(divisor) {
+        } else if let Ok(divisor) = divisor.extract::<PyRef<PyInt>>() {
             (&self.0)
                 .checked_div_euclid(&divisor.0)
                 .map(|quotient| PyInt(quotient).into_py(py))
@@ -1118,7 +1123,7 @@ impl PyFraction {
 
     fn __mod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
-        if let Ok(divisor) = to_py_ref::<Self>(divisor) {
+        if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             (&self.0)
                 .checked_rem_euclid(&divisor.0)
                 .map(|remainder| Self(remainder).into_py(py))
@@ -1127,7 +1132,7 @@ impl PyFraction {
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
                 })
-        } else if let Ok(divisor) = to_py_ref::<PyInt>(divisor) {
+        } else if let Ok(divisor) = divisor.extract::<PyRef<PyInt>>() {
             (&self.0)
                 .checked_rem_euclid(&divisor.0)
                 .map(|remainder| Self(remainder).into_py(py))
@@ -1152,7 +1157,8 @@ impl PyFraction {
 
     fn __mul__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
-        to_py_ref::<Self>(other)
+        other
+            .extract::<PyRef<Self>>()
             .map(|other| Self(&self.0 * &other.0).into_py(py))
             .or_else(|_| self.__rmul__(other))
     }
@@ -1168,7 +1174,7 @@ impl PyFraction {
     fn __pow__(&self, exponent: &PyAny, modulo: &PyAny) -> PyResult<PyObject> {
         let py = exponent.py();
         if modulo.is_none() {
-            if let Ok(exponent) = to_py_ref::<PyInt>(exponent) {
+            if let Ok(exponent) = exponent.extract::<PyRef<PyInt>>() {
                 (&self.0)
                     .checked_pow(&exponent.0)
                     .map(|power| Self(power).into_py(py))
@@ -1197,7 +1203,8 @@ impl PyFraction {
 
     fn __radd__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
-        to_py_ref::<PyInt>(other)
+        other
+            .extract::<PyRef<PyInt>>()
             .map(|other| Self(&self.0 + &other.0).into_py(py))
             .or_else(|_| {
                 try_big_int_from_py_integral(other)
@@ -1208,7 +1215,7 @@ impl PyFraction {
 
     fn __rdivmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
         let py = dividend.py();
-        if let Ok(dividend) = to_py_ref::<PyInt>(dividend) {
+        if let Ok(dividend) = dividend.extract::<PyRef<PyInt>>() {
             try_divmod(&dividend.0, &self.0).map(|(quotient, remainder)| {
                 (PyInt(quotient), Self(remainder)).into_py(py)
             })
@@ -1239,10 +1246,12 @@ impl PyFraction {
 
     fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<PyObject> {
         let py = other.py();
-        to_py_ref::<Self>(other)
+        other
+            .extract::<PyRef<Self>>()
             .map(|other| compare(&self.0, &other.0, op).into_py(py))
             .or_else(|_| {
-                to_py_ref::<PyInt>(other)
+                other
+                    .extract::<PyRef<PyInt>>()
                     .map(|other| compare(&self.0, &other.0, op).into_py(py))
                     .or_else(|_| {
                         try_big_int_from_py_integral(other)
@@ -1256,7 +1265,7 @@ impl PyFraction {
 
     fn __rfloordiv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
         let py = dividend.py();
-        if let Ok(dividend) = to_py_ref::<PyInt>(dividend) {
+        if let Ok(dividend) = dividend.extract::<PyRef<PyInt>>() {
             (&dividend.0)
                 .checked_div_euclid(&self.0)
                 .map(|quotient| PyInt(quotient).into_py(py))
@@ -1281,7 +1290,7 @@ impl PyFraction {
 
     fn __rmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
         let py = dividend.py();
-        if let Ok(dividend) = to_py_ref::<PyInt>(dividend) {
+        if let Ok(dividend) = dividend.extract::<PyRef<PyInt>>() {
             (&dividend.0)
                 .checked_rem_euclid(&self.0)
                 .map(|remainder| Self(remainder).into_py(py))
@@ -1306,7 +1315,8 @@ impl PyFraction {
 
     fn __rmul__(&self, other: &PyAny) -> PyResult<PyObject> {
         let py = other.py();
-        to_py_ref::<PyInt>(other)
+        other
+            .extract::<PyRef<PyInt>>()
             .map(|other| Self(&other.0 * &self.0).into_py(py))
             .or_else(|_| {
                 try_big_int_from_py_integral(other)
@@ -1353,7 +1363,8 @@ impl PyFraction {
 
     fn __rsub__(&self, subtrahend: &PyAny) -> PyResult<PyObject> {
         let py = subtrahend.py();
-        to_py_ref::<PyInt>(subtrahend)
+        subtrahend
+            .extract::<PyRef<PyInt>>()
             .map(|subtrahend| Self(&subtrahend.0 - &self.0).into_py(py))
             .or_else(|_| {
                 try_big_int_from_py_integral(subtrahend)
@@ -1364,7 +1375,7 @@ impl PyFraction {
 
     fn __rtruediv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
         let py = dividend.py();
-        if let Ok(dividend) = to_py_ref::<PyInt>(dividend) {
+        if let Ok(dividend) = dividend.extract::<PyRef<PyInt>>() {
             (&dividend.0)
                 .checked_div(&self.0)
                 .map(|quotient| Self(quotient).into_py(py))
@@ -1393,7 +1404,8 @@ impl PyFraction {
 
     fn __sub__(&self, minuend: &PyAny) -> PyResult<PyObject> {
         let py = minuend.py();
-        to_py_ref::<Self>(minuend)
+        minuend
+            .extract::<PyRef<Self>>()
             .map(|minuend| Self(&self.0 - &minuend.0).into_py(py))
             .or_else(|_| {
                 try_big_int_from_py_integral(minuend)
@@ -1404,7 +1416,7 @@ impl PyFraction {
 
     fn __truediv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
         let py = divisor.py();
-        if let Ok(divisor) = to_py_ref::<Self>(divisor) {
+        if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             (&self.0)
                 .checked_div(&divisor.0)
                 .map(|quotient| Self(quotient).into_py(py))
@@ -1531,10 +1543,6 @@ fn _crithm(py: Python, module: &PyModule) -> PyResult<()> {
     integral_cls.call_method1("register", (PyInt::type_object(py),))?;
     rational_cls.call_method1("register", (PyFraction::type_object(py),))?;
     Ok(())
-}
-
-fn to_py_ref<T: PyClass>(value: &PyAny) -> PyResult<PyRef<T>> {
-    value.downcast::<PyCell<T>>()?.extract()
 }
 
 #[doc = include_str!("../README.md")]

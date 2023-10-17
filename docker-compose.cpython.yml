@@ -7,7 +7,7 @@ services:
       args:
         - IMAGE_NAME=${CPYTHON_IMAGE_NAME}
         - IMAGE_VERSION=${CPYTHON_IMAGE_VERSION}
-    image: lycantropos/rithm-cpython:14.1.0-alpha
+    image: lycantropos/rithm-cpython:14.1.0
     volumes:
       - ./Cargo.toml:/opt/rithm/Cargo.toml
       - ./pyproject.toml:/opt/rithm/pyproject.toml

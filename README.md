@@ -201,6 +201,8 @@ use traiter::numbers::{
 use rithm::big_int;
 
 #[cfg(target_arch = "x86")]
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Flycantropos%2Frithm.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Flycantropos%2Frithm?ref=badge_shield)
+
 type Digit = u16;
 #[cfg(not(target_arch = "x86"))]
 type Digit = u32;
@@ -380,3 +382,7 @@ Inside `Docker` container:
   ```powershell
   .\run-tests.ps1 pypy
   ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Flycantropos%2Frithm.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Flycantropos%2Frithm?ref=badge_large)

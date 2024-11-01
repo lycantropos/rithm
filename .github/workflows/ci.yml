@@ -288,10 +288,6 @@ jobs:
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v4
-      - name: 'Setup Python'
-        uses: actions/setup-python@v5
-        with:
-          architecture: ${{ matrix.platform.python_architecture }}
       - name: 'Setup Rust'
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -303,7 +299,7 @@ jobs:
           platforms: all
         if: ${{ runner.os == 'Linux' }}
       - name: 'Build wheels'
-        uses: pypa/cibuildwheel@v2.16.2
+        uses: pypa/cibuildwheel@v2.21.3
         env:
           CIBW_ARCHS: ${{ matrix.platform.architecture }}
           CIBW_BEFORE_ALL_LINUX: |

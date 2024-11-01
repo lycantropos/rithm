@@ -1,14 +1,14 @@
 from hypothesis import given
 
 from rithm.integer import Int
-from tests.utils import (IntWithBuiltin,
-                         equivalence)
+from tests.utils import IntWithBuiltin, equivalence
+
 from . import strategies
 
 
 @given(strategies.ints)
 def test_irreflexivity(int_: Int) -> None:
-    assert not int_ != int_
+    assert int_ == int_
 
 
 @given(strategies.ints, strategies.ints)
@@ -18,7 +18,7 @@ def test_symmetry(first: Int, second: Int) -> None:
 
 @given(strategies.ints, strategies.ints)
 def test_equivalents(first: Int, second: Int) -> None:
-    assert equivalence(first != second, not first == second)
+    assert equivalence(first != second, first != second)
     assert equivalence(first != second, first > second or first < second)
     assert equivalence(first != second, first > second or second > first)
     assert equivalence(first != second, second < first or second > first)

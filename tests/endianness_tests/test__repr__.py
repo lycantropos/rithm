@@ -3,6 +3,7 @@ import sys
 from hypothesis import given
 
 from rithm.enums import Endianness
+
 from . import strategies
 
 

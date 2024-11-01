@@ -5,8 +5,7 @@ import typing as t
 from datetime import timedelta
 
 import pytest
-from hypothesis import (HealthCheck,
-                        settings)
+from hypothesis import HealthCheck, settings
 
 is_pypy = platform.python_implementation() == 'PyPy'
 on_ci = bool(os.getenv('CI', False))
@@ -25,12 +24,10 @@ hookimpl = t.cast(t.Callable[..., t.Callable[..., None]], pytest.hookimpl)
 if on_ci:
     time_left = timedelta(hours=1)
 
-
     @hookimpl(tryfirst=True)
     def pytest_runtest_call(item: pytest.Function) -> None:
         set_deadline = settings(deadline=time_left / max_examples)
         item.obj = set_deadline(item.obj)
-
 
     @pytest.fixture(scope='function',
                     autouse=True)

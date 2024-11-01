@@ -5,6 +5,7 @@ from hypothesis import given
 
 from rithm.enums import Endianness
 from tests.utils import equivalence
+
 from . import strategies
 
 

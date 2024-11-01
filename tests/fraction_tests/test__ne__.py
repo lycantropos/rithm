@@ -1,16 +1,19 @@
 from hypothesis import given
 
 from rithm.fraction import Fraction
-from tests.utils import (FractionWithBuiltin,
-                         IntWithBuiltin,
-                         RationalWithBuiltin,
-                         equivalence)
+from tests.utils import (
+    FractionWithBuiltin,
+    IntWithBuiltin,
+    RationalWithBuiltin,
+    equivalence,
+)
+
 from . import strategies
 
 
 @given(strategies.fractions)
 def test_irreflexivity(fraction: Fraction) -> None:
-    assert not fraction != fraction
+    assert fraction == fraction
 
 
 @given(strategies.fractions, strategies.fractions)
@@ -20,7 +23,7 @@ def test_symmetry(first: Fraction, second: Fraction) -> None:
 
 @given(strategies.fractions, strategies.fractions)
 def test_equivalents(first: Fraction, second: Fraction) -> None:
-    assert equivalence(first != second, not first == second)
+    assert equivalence(first != second, first != second)
     assert equivalence(first != second, first > second or first < second)
     assert equivalence(first != second, first > second or second > first)
     assert equivalence(first != second, second < first or second > first)

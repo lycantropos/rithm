@@ -1,8 +1,8 @@
 from hypothesis import given
 
 from rithm.fraction import Fraction
-from tests.utils import (FractionWithBuiltin,
-                         implication)
+from tests.utils import FractionWithBuiltin, implication
+
 from . import strategies
 
 

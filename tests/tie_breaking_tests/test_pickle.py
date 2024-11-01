@@ -2,6 +2,7 @@ from hypothesis import given
 
 from rithm.enums import TieBreaking
 from tests.utils import pickle_round_trip
+
 from . import strategies
 
 

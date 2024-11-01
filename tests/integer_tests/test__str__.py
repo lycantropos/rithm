@@ -1,6 +1,7 @@
 from hypothesis import given
 
 from tests.utils import IntWithBuiltin
+
 from . import strategies
 
 

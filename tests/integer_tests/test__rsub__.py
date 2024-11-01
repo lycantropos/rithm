@@ -2,6 +2,7 @@ from hypothesis import given
 
 from rithm.integer import Int
 from tests.utils import IntWithBuiltin
+
 from . import strategies
 
 

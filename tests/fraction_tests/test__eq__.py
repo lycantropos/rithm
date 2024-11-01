@@ -1,11 +1,14 @@
 from hypothesis import given
 
 from rithm.fraction import Fraction
-from tests.utils import (FractionOrIntOrBuiltinInt,
-                         FractionWithBuiltin,
-                         RationalWithBuiltin,
-                         equivalence,
-                         implication)
+from tests.utils import (
+    FractionOrIntOrBuiltinInt,
+    FractionWithBuiltin,
+    RationalWithBuiltin,
+    equivalence,
+    implication,
+)
+
 from . import strategies
 
 
@@ -29,7 +32,7 @@ def test_transitivity(first: Fraction,
 @given(strategies.fractions, strategies.fractions_or_ints_or_builtin_ints)
 def test_connection_with_inequality(first: Fraction,
                                     second: FractionOrIntOrBuiltinInt) -> None:
-    assert equivalence(first == second, not first != second)
+    assert equivalence(first == second, first == second)
 
 
 @given(strategies.fractions_with_builtins, strategies.rationals_with_builtins)

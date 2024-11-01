@@ -1,7 +1,7 @@
 from hypothesis import given
 
-from tests.utils import (IntWithBuiltin,
-                         equivalence)
+from tests.utils import IntWithBuiltin, equivalence
+
 from . import strategies
 
 

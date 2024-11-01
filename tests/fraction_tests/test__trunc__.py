@@ -4,8 +4,8 @@ from hypothesis import given
 
 from rithm.fraction import Fraction
 from rithm.integer import Int
-from tests.utils import (FractionWithBuiltin,
-                         is_equivalent_to_builtin_int)
+from tests.utils import FractionWithBuiltin, is_equivalent_to_builtin_int
+
 from . import strategies
 
 

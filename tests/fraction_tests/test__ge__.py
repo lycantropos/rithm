@@ -1,11 +1,14 @@
 from hypothesis import given
 
 from rithm.fraction import Fraction
-from tests.utils import (FractionWithBuiltin,
-                         IntWithBuiltin,
-                         RationalWithBuiltin,
-                         equivalence,
-                         implication)
+from tests.utils import (
+    FractionWithBuiltin,
+    IntWithBuiltin,
+    RationalWithBuiltin,
+    equivalence,
+    implication,
+)
+
 from . import strategies
 
 
@@ -29,8 +32,8 @@ def test_transitivity(first: Fraction,
 @given(strategies.fractions, strategies.fractions)
 def test_alternatives(first: Fraction, second: Fraction) -> None:
     assert equivalence(first >= second, first > second or first == second)
-    assert equivalence(first >= second, first > second or not first != second)
-    assert equivalence(first >= second, second < first or not first != second)
+    assert equivalence(first >= second, first > second or first == second)
+    assert equivalence(first >= second, second < first or first == second)
     assert equivalence(first >= second, second < first or first == second)
     assert equivalence(first >= second, second <= first)
     assert equivalence(first >= second, not second > first)

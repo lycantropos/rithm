@@ -5,9 +5,12 @@ import pytest
 from hypothesis import given
 
 from rithm.fraction import Fraction
-from tests.utils import (IntOrBuiltin,
-                         IntWithBuiltin,
-                         is_equivalent_to_builtin_fraction)
+from tests.utils import (
+    IntOrBuiltin,
+    IntWithBuiltin,
+    is_equivalent_to_builtin_fraction,
+)
+
 from . import strategies
 
 

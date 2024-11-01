@@ -1,7 +1,7 @@
 import re
 import string
-from functools import partial
 import typing as t
+from functools import partial
 
 from hypothesis import strategies
 
@@ -24,7 +24,7 @@ prefixed_hexadecimal_int_strings = strategies.from_regex(
         compile_(fr'\A{_whitespaces}*[+-]?0x([\da-f]+)+{_whitespaces}*\Z')
 )
 int_strings_with_bases = (
-    (strategies.tuples(
+    strategies.tuples(
             strategies.from_regex(compile_(
                     fr'\A{_whitespaces}*[+-]?0(0+)*{_whitespaces}*\Z'
             )),
@@ -38,21 +38,19 @@ int_strings_with_bases = (
                     strategies.from_regex(
                             compile_(r'\A{whitespaces}*[+-]?{digits}'
                                      r'({digits}+)*{whitespaces}*\Z'
-                                     .format(digits='[0-{}]'.format(max_digit),
+                                     .format(digits=f'[0-{max_digit}]',
                                              whitespaces=_whitespaces))),
                     strategies.just(max_digit + 1))
                 for max_digit in range(1, 10)
             ])
      | strategies.one_of([strategies.tuples(
                     strategies.from_regex(compile_(
-                            (r'\A{whitespaces}*[+-]?{digits}({digits}+)*'
+                            r'\A{whitespaces}*[+-]?{digits}({digits}+)*'
                              r'{whitespaces}*\Z'
-                             .format(digits
-                                     =('[0-9a-{max_lower}'
-                                       'A-{max_upper}]'
-                                       .format(max_lower=max_lower,
-                                               max_upper=max_lower.upper())),
-                                     whitespaces=_whitespaces))
+                             .format(digits=(f'[0-9a-{max_lower}'
+                                       f'A-{max_lower.upper()}]'
+                                       ),
+                                     whitespaces=_whitespaces)
                     )),
                     strategies.just(base))
                 for base, max_lower in enumerate(string.ascii_lowercase,
@@ -62,5 +60,5 @@ int_strings_with_bases = (
      | strategies.tuples(prefixed_hexadecimal_int_strings,
                          strategies.sampled_from([0, 16]))
      | strategies.tuples(prefixed_octal_int_strings,
-                         strategies.sampled_from([0, 8])))
+                         strategies.sampled_from([0, 8]))
 )

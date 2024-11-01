@@ -3,6 +3,7 @@ from hypothesis import given
 
 from rithm.fraction import Fraction
 from tests.utils import IntWithBuiltin
+
 from . import strategies
 
 

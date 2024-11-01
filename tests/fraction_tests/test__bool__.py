@@ -1,7 +1,7 @@
 from hypothesis import given
 
-from tests.utils import (FractionWithBuiltin,
-                         equivalence)
+from tests.utils import FractionWithBuiltin, equivalence
+
 from . import strategies
 
 

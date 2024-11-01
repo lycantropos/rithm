@@ -2,6 +2,7 @@ import pytest
 from hypothesis import given
 
 from tests.utils import FractionWithBuiltin
+
 from . import strategies
 
 

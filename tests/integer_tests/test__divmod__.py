@@ -2,9 +2,12 @@ import pytest
 from hypothesis import given
 
 from rithm.integer import Int
-from tests.utils import (IntOrBuiltin,
-                         IntWithBuiltin,
-                         is_equivalent_to_builtin_int)
+from tests.utils import (
+    IntOrBuiltin,
+    IntWithBuiltin,
+    is_equivalent_to_builtin_int,
+)
+
 from . import strategies
 
 

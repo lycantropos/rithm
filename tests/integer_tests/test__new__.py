@@ -5,6 +5,7 @@ from hypothesis import given
 
 from rithm.integer import Int
 from tests.utils import is_equivalent_to_builtin_int
+
 from . import strategies
 
 
@@ -17,7 +18,7 @@ def test_no_argument_determinism() -> None:
 def test_no_argument_connection_with_builtin() -> None:
     result = Int()
 
-    assert is_equivalent_to_builtin_int(result, int())
+    assert is_equivalent_to_builtin_int(result, 0)
 
 
 @given(strategies.decimal_int_strings_with_leading_zeros)

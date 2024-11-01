@@ -3,8 +3,7 @@ from hypothesis import strategies
 from rithm.enums import TieBreaking
 from rithm.fraction import Fraction
 from rithm.integer import Int
-from tests.utils import (to_fraction_with_builtin,
-                         to_int_with_builtin)
+from tests.utils import to_fraction_with_builtin, to_int_with_builtin
 
 tie_breakings = strategies.sampled_from([TieBreaking.AWAY_FROM_ZERO,
                                          TieBreaking.TO_EVEN,

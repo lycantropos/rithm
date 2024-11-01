@@ -2,8 +2,8 @@ import math
 
 from hypothesis import given
 
-from tests.utils import (IntWithBuiltin,
-                         is_equivalent_to_builtin_int)
+from tests.utils import IntWithBuiltin, is_equivalent_to_builtin_int
+
 from . import strategies
 
 

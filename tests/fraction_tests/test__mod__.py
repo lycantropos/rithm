@@ -2,14 +2,17 @@ import pytest
 from hypothesis import given
 
 from rithm.fraction import Fraction
-from tests.utils import (FractionOrIntOrBuiltinInt,
-                         FractionWithBuiltin,
-                         IntWithBuiltin,
-                         RationalWithBuiltin,
-                         equivalence,
-                         implication,
-                         is_equivalent_to_builtin_fraction,
-                         is_fraction_valid)
+from tests.utils import (
+    FractionOrIntOrBuiltinInt,
+    FractionWithBuiltin,
+    IntWithBuiltin,
+    RationalWithBuiltin,
+    equivalence,
+    implication,
+    is_equivalent_to_builtin_fraction,
+    is_fraction_valid,
+)
+
 from . import strategies
 
 

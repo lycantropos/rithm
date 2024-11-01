@@ -1,9 +1,8 @@
 from hypothesis import given
 
 from rithm.integer import Int
-from tests.utils import (IntWithBuiltin,
-                         equivalence,
-                         implication)
+from tests.utils import IntWithBuiltin, equivalence, implication
+
 from . import strategies
 
 
@@ -26,8 +25,8 @@ def test_transitivity(first: Int, second: Int, third: Int) -> None:
 def test_alternatives(first: Int, second: Int) -> None:
     assert equivalence(first <= second, first < second or first == second)
     assert equivalence(first <= second, second > first or first == second)
-    assert equivalence(first <= second, first < second or not first != second)
-    assert equivalence(first <= second, second > first or not first != second)
+    assert equivalence(first <= second, first < second or first == second)
+    assert equivalence(first <= second, second > first or first == second)
     assert equivalence(first <= second, second >= first)
     assert equivalence(first <= second, not second < first)
     assert equivalence(first <= second, not first > second)

@@ -121,9 +121,9 @@ if TYPE_CHECKING:
 
 else:
     try:
-        import _crithm as _module
-    except ImportError:
-        import _rithm as _module
+        from . import _crithm as _module
+    except ModuleNotFoundError:
+        from . import _rithm as _module
 
     Fraction = _module.Fraction
 

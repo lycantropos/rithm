@@ -31,9 +31,9 @@ if TYPE_CHECKING:
 
 else:
     try:
-        import _crithm as _module
-    except ImportError:
-        import _enums as _module
+        from . import _crithm as _module
+    except ModuleNotFoundError:
+        from . import _enums as _module
 
     Endianness = _module.Endianness
     TieBreaking = _module.TieBreaking

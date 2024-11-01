@@ -153,7 +153,7 @@ if TYPE_CHECKING:
 else:
     try:
         from . import _crithm as _module
-    except ModuleNotFoundError:
+    except ImportError:
         from . import _rithm as _module
 
     Int = _module.Int

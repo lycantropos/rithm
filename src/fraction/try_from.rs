@@ -84,7 +84,7 @@ macro_rules! try_integer_fraction_from_float_impl {
                         - 1
                         - (is_signed::<$integer>() as u32);
                     let (mut fraction, mut exponent) = value.fract_exp();
-                    if (exponent.abs() as u32) > MAX_EXPONENT_MODULUS {
+                    if (exponent.unsigned_abs() as u32) > MAX_EXPONENT_MODULUS {
                         if exponent.is_negative() {
                             fraction *= ((exponent
                                 + (MAX_EXPONENT_MODULUS as i32))

@@ -72,7 +72,7 @@ where
     }
 }
 #[inline]
-fn guess_base(characters: &mut Peekable<Chars>) -> u8 {
+fn guess_base(characters: &mut Peekable<Chars<'_>>) -> u8 {
     if characters.peek() != Some(&'0') {
         10
     } else {
@@ -87,7 +87,7 @@ fn guess_base(characters: &mut Peekable<Chars>) -> u8 {
 
 #[inline]
 fn parse_digits(
-    characters: Peekable<Chars>,
+    characters: Peekable<Chars<'_>>,
     base: u8,
 ) -> Result<Vec<u8>, TryFromStringError> {
     let mut result = {
@@ -114,7 +114,7 @@ fn parse_digits(
 }
 
 #[inline]
-fn parse_sign(characters: &mut Peekable<Chars>) -> i8 {
+fn parse_sign(characters: &mut Peekable<Chars<'_>>) -> i8 {
     if characters.peek() == Some(&'-') {
         characters.next();
         -Sign::one()
@@ -126,7 +126,7 @@ fn parse_sign(characters: &mut Peekable<Chars>) -> i8 {
     }
 }
 
-fn skip_prefix(characters: &mut Peekable<Chars>, base: u8) {
+fn skip_prefix(characters: &mut Peekable<Chars<'_>>, base: u8) {
     if characters.peek() == Some(&'0') {
         match characters.clone().nth(1) {
             Some('b' | 'B') => {

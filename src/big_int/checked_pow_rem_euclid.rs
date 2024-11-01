@@ -184,7 +184,7 @@ where
         exponent: BigInt<Digit, DIGIT_BITNESS>,
         divisor: Self,
     ) -> Self::Output {
-        if (&divisor).is_zero() {
+        if divisor.is_zero() {
             Err(CheckedPowRemEuclidError::ZeroDivisor)
         } else {
             let is_negative = divisor.is_negative();

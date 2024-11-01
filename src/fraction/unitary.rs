@@ -9,7 +9,7 @@ where
     &'a BigInt<Digit, DIGIT_BITNESS>: Unitary,
 {
     fn is_one(self) -> bool {
-        self.numerator.is_one()
+        (&self.numerator).is_one()
     }
 }
 

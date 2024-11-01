@@ -70,6 +70,7 @@ where
         Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
     >,
 {
+    #[allow(clippy::suspicious_op_assign_impl)]
     fn div_assign(&mut self, divisor: BigInt<Digit, DIGIT_BITNESS>) {
         let (numerator, divisor) = self.numerator.normalize_moduli(divisor);
         (self.numerator, self.denominator) =
@@ -94,6 +95,7 @@ where
         Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
     >,
 {
+    #[allow(clippy::suspicious_op_assign_impl)]
     fn div_assign(&mut self, divisor: &BigInt<Digit, DIGIT_BITNESS>) {
         let (numerator, divisor) = self.numerator.normalize_moduli(divisor);
         (self.numerator, self.denominator) =
@@ -116,6 +118,7 @@ macro_rules! integer_fraction_div_assign_impl {
         }
 
         impl DivAssign<$integer> for Fraction<$integer> {
+            #[allow(clippy::suspicious_op_assign_impl)]
             fn div_assign(&mut self, divisor: $integer) {
                 let (numerator, divisor) =
                     self.numerator.normalize_moduli(divisor);

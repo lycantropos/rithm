@@ -69,6 +69,7 @@ where
         Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
     >,
 {
+    #[allow(clippy::suspicious_op_assign_impl)]
     fn rem_assign(&mut self, divisor: BigInt<Digit, DIGIT_BITNESS>) {
         (self.numerator, self.denominator) = self
             .numerator
@@ -91,6 +92,7 @@ where
         Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
     >,
 {
+    #[allow(clippy::suspicious_op_assign_impl)]
     fn rem_assign(&mut self, divisor: &BigInt<Digit, DIGIT_BITNESS>) {
         (self.numerator, self.denominator) = self
             .numerator
@@ -113,6 +115,7 @@ macro_rules! integer_fraction_rem_assign_impl {
         }
 
         impl RemAssign<$integer> for Fraction<$integer> {
+            #[allow(clippy::suspicious_op_assign_impl)]
             fn rem_assign(&mut self, divisor: $integer) {
                 (self.numerator, self.denominator) = self
                     .numerator

@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
 use std::convert::TryFrom;
-use std::mem::{size_of, transmute};
 use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor,
     BitXorAssign, Div, DivAssign, Mul, MulAssign, Not, Shl, ShlAssign, Shr,
@@ -474,8 +473,8 @@ where
         }
         if shortest_sign.is_negative() {
             let digit_mask = Self::digit_mask(DIGIT_BITNESS);
-            for index in shortest.len()..result.len() {
-                result[index] ^= digit_mask;
+            for result_digit in &mut result[shortest.len()..] {
+                *result_digit ^= digit_mask;
             }
         };
         let sign_is_negative =
@@ -1086,9 +1085,9 @@ where
     fn complement_in_place<const DIGIT_BITNESS: usize>(digits: &mut [Self]) {
         let mut accumulator = Self::one();
         let digit_mask = Self::digit_mask(DIGIT_BITNESS);
-        for index in 0..digits.len() {
-            accumulator += digits[index] ^ digit_mask;
-            digits[index] = accumulator & digit_mask;
+        for digit in digits {
+            accumulator += (*digit) ^ digit_mask;
+            *digit = accumulator & digit_mask;
             accumulator >>= DIGIT_BITNESS;
         }
         debug_assert!(accumulator.is_zero());
@@ -1694,11 +1693,11 @@ where
                 result_position += 1;
                 accumulator >>= DIGIT_BITNESS;
                 digit <<= 1;
-                for next_index in index + 1..shortest.len() {
+                for &digit_of_shortest in &shortest[index + 1..] {
                     accumulator += DoublePrecisionOf::<Self>::from(
                         result[result_position],
                     ) + DoublePrecisionOf::<Self>::from(
-                        shortest[next_index],
+                        digit_of_shortest,
                     ) * digit;
                     result[result_position] = unsafe {
                         Self::try_from(accumulator & digit_mask)
@@ -1726,9 +1725,10 @@ where
                 }
             }
         } else {
-            for index in 0..shortest.len() {
+            for (index, digit_of_shortest) in shortest.iter().enumerate() {
                 let mut accumulator = DoublePrecisionOf::<Self>::zero();
-                let digit = DoublePrecisionOf::<Self>::from(shortest[index]);
+                let digit =
+                    DoublePrecisionOf::<Self>::from(*digit_of_shortest);
                 let mut result_position = index;
                 for &second_digit in longest {
                     accumulator = accumulator
@@ -2019,12 +2019,10 @@ macro_rules! reduce_digits_to_float_impl {
                     (1 << (<f32>::EXPONENT_BITS_COUNT - 1usize)) - 1;
                 debug_assert!(DIGIT_BITNESS < ((1 << f32::EXPONENT_BITS_COUNT) - 1));
                 let mut result = 0 as $float;
-                let scale = unsafe {
-                    transmute::<u32, f32>(
-                        (EXPONENT_BASE + (DIGIT_BITNESS as u32))
-                            << f32::SIGNIFICAND_BITS_COUNT,
-                    )
-                } as $float;
+                let scale = f32::from_bits(
+                    (EXPONENT_BASE + (DIGIT_BITNESS as u32))
+                        << f32::SIGNIFICAND_BITS_COUNT,
+                ) as $float;
                 for &digit in digits.iter().rev() {
                     result = result * scale + <$float>::from(digit);
                 }
@@ -2119,7 +2117,7 @@ impl<
         let shift_quotient =
             Self::maybe_reduce_digits::<DIGIT_BITNESS>(&shift_quotient_digits)
                 .ok_or(ShlError::TooLarge)?;
-        if shift_quotient >= usize::MAX / size_of::<Self>() {
+        if shift_quotient >= usize::MAX / std::mem::size_of::<Self>() {
             Err(ShlError::TooLarge)
         } else {
             Self::primitive_shift_digits_left::<DIGIT_BITNESS>(
@@ -2248,10 +2246,10 @@ where
         let high_mask = Self::digit_mask(DIGIT_BITNESS) ^ low_mask;
         let mut result = vec![Self::zero(); result_digits_count];
         let mut position = shift_quotient;
-        for index in 0..result_digits_count {
-            result[index] = (digits[position] >> shift_remainder) & low_mask;
+        for (index, result_digit) in result.iter_mut().enumerate() {
+            *result_digit = (digits[position] >> shift_remainder) & low_mask;
             if index + 1 < result_digits_count {
-                result[index] |=
+                *result_digit |=
                     (digits[position + 1] << high_shift) & high_mask;
             }
             position += 1;
@@ -2293,8 +2291,8 @@ where
             });
         let shift_quotient =
             Self::maybe_reduce_digits::<DIGIT_BITNESS>(&shift_quotient_digits)
-                .unwrap_or(usize::MAX / size_of::<Self>());
-        if shift_quotient >= usize::MAX / size_of::<Self>() {
+                .unwrap_or(usize::MAX / std::mem::size_of::<Self>());
+        if shift_quotient >= usize::MAX / std::mem::size_of::<Self>() {
             if base_sign.is_negative() {
                 (-Sign::one(), vec![Self::one(); 1])
             } else {
@@ -2494,12 +2492,12 @@ where
             accumulator >>= DIGIT_BITNESS;
             accumulator &= Self::one();
         }
-        for index in shortest.len()..longest.len() {
+        for digit_of_longest in &mut longest[shortest.len()..] {
             if accumulator.is_zero() {
                 break;
             }
-            accumulator = longest[index].wrapping_sub(accumulator);
-            longest[index] = accumulator & digit_mask;
+            accumulator = (*digit_of_longest).wrapping_sub(accumulator);
+            *digit_of_longest = accumulator & digit_mask;
             accumulator >>= DIGIT_BITNESS;
             accumulator &= Self::one();
         }
@@ -2624,12 +2622,12 @@ where
             longest[index] = accumulator & digit_mask;
             accumulator >>= DIGIT_BITNESS;
         }
-        for index in shortest.len()..longest.len() {
+        for digit_of_longest in &mut longest[shortest.len()..] {
             if accumulator.is_zero() {
                 break;
             }
-            accumulator += longest[index];
-            longest[index] = accumulator & digit_mask;
+            accumulator += *digit_of_longest;
+            *digit_of_longest = accumulator & digit_mask;
             accumulator >>= DIGIT_BITNESS;
         }
         accumulator
@@ -2720,37 +2718,37 @@ where
             };
         loop {
             let largest_digits_count = largest.len();
-            if largest_digits_count <= 2 {
+            if largest_digits_count <= 2usize {
                 break;
             }
             let smallest_digits_count = smallest.len();
-            if smallest_digits_count == 1 && smallest[0].is_zero() {
+            if smallest_digits_count == 1usize && smallest[0].is_zero() {
                 return (Sign::one(), largest);
             }
             let highest_digit_bit_length =
                 largest[largest.len() - 1].bit_length();
             let mut largest_leading_bits =
                 (OppositionOf::<DoublePrecisionOf<Self>>::from(
-                    largest[largest_digits_count - 1],
+                    largest[largest_digits_count - 1usize],
                 ) << (2 * DIGIT_BITNESS - highest_digit_bit_length))
                     | (OppositionOf::<DoublePrecisionOf<Self>>::from(
-                        largest[largest_digits_count - 2],
+                        largest[largest_digits_count - 2usize],
                     ) << (DIGIT_BITNESS - highest_digit_bit_length))
                     | OppositionOf::<DoublePrecisionOf<Self>>::from(
-                        largest[largest_digits_count - 3]
+                        largest[largest_digits_count - 3usize]
                             >> highest_digit_bit_length,
                     );
             let mut smallest_leading_bits =
-                if smallest_digits_count >= largest_digits_count - 2 {
+                if smallest_digits_count >= largest_digits_count - 2usize {
                     OppositionOf::<DoublePrecisionOf<Self>>::from(
-                        smallest[largest_digits_count - 3]
+                        smallest[largest_digits_count - 3usize]
                             >> highest_digit_bit_length,
                     )
                 } else {
                     OppositionOf::<DoublePrecisionOf<Self>>::zero()
-                } | if smallest_digits_count >= largest_digits_count - 1 {
+                } | if smallest_digits_count >= largest_digits_count - 1usize {
                     OppositionOf::<DoublePrecisionOf<Self>>::from(
-                        smallest[largest_digits_count - 2],
+                        smallest[largest_digits_count - 2usize],
                     ) << (DIGIT_BITNESS - highest_digit_bit_length)
                 } else {
                     OppositionOf::<DoublePrecisionOf<Self>>::zero()
@@ -2860,14 +2858,14 @@ where
                 next_largest_accumulator >>= DIGIT_BITNESS;
                 next_smallest_accumulator >>= DIGIT_BITNESS;
             }
-            for index in smallest_digits_count..largest_digits_count {
+            for &digit_of_largest in &largest[smallest_digits_count..] {
                 next_largest_accumulator += first_coefficient
                     * OppositionOf::<DoublePrecisionOf<Self>>::from(
-                        largest[index],
+                        digit_of_largest,
                     );
                 next_smallest_accumulator -= third_coefficient
                     * OppositionOf::<DoublePrecisionOf<Self>>::from(
-                        largest[index],
+                        digit_of_largest,
                     );
                 next_largest_digits.push(unsafe {
                     Self::try_from(next_largest_accumulator & digit_mask)
@@ -2943,8 +2941,8 @@ where
     fn digits_from_non_zero_value<const DIGIT_BITNESS: usize>(
         value: Source,
     ) -> Vec<Self> {
-        if size_of::<Source>() < size_of::<Self>()
-            || (size_of::<Source>() == size_of::<Self>()
+        if std::mem::size_of::<Source>() < std::mem::size_of::<Self>()
+            || (std::mem::size_of::<Source>() == std::mem::size_of::<Self>()
                 && is_signed::<Source>()
                 && is_unsigned::<Self>())
         {

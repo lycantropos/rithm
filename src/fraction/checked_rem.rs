@@ -7,18 +7,12 @@ use crate::big_int::BigInt;
 use super::types::{Fraction, NormalizeModuli};
 
 impl<Digit, const DIGIT_BITNESS: usize> CheckedRem
-    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
+    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a Self: Zeroable,
-    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<
-        BigInt<Digit, DIGIT_BITNESS>,
-        Output = BigInt<Digit, DIGIT_BITNESS>,
-    >,
+    Self: Zeroable,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
+        Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
     for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
-        + Mul<
-            &'a BigInt<Digit, DIGIT_BITNESS>,
-            Output = BigInt<Digit, DIGIT_BITNESS>,
-        > + Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
         + NormalizeModuli<
             Output = (
                 BigInt<Digit, DIGIT_BITNESS>,
@@ -26,19 +20,19 @@ where
             ),
         >,
 {
-    type Output = Option<Self>;
+    type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
     fn checked_rem(self, divisor: Self) -> Self::Output {
-        if (&divisor).is_zero() {
+        if divisor.is_zero() {
             None
         } else {
             let (numerator, denominator) = unsafe {
-                (self.numerator * &divisor.denominator)
-                    .checked_rem(&self.denominator * divisor.numerator)
+                (&self.numerator * &divisor.denominator)
+                    .checked_rem(&self.denominator * &divisor.numerator)
                     .unwrap_unchecked()
             }
-            .normalize_moduli(self.denominator * divisor.denominator);
-            Some(Self {
+            .normalize_moduli(&self.denominator * &divisor.denominator);
+            Some(Fraction::<BigInt<Digit, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })
@@ -84,103 +78,26 @@ where
 }
 
 impl<Digit, const DIGIT_BITNESS: usize>
-    CheckedRem<Fraction<BigInt<Digit, DIGIT_BITNESS>>>
+    CheckedRem<&BigInt<Digit, DIGIT_BITNESS>>
     for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
-        + Mul<
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: CheckedRem<
             BigInt<Digit, DIGIT_BITNESS>,
-            Output = BigInt<Digit, DIGIT_BITNESS>,
-        >,
-    for<'a> &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
-    for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
-        + NormalizeModuli<
-            Output = (
-                BigInt<Digit, DIGIT_BITNESS>,
-                BigInt<Digit, DIGIT_BITNESS>,
-            ),
-        >,
+            Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
+        > + Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
+        + Zeroable,
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: NormalizeModuli<
+        &'a BigInt<Digit, DIGIT_BITNESS>,
+        Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
+    >,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
     fn checked_rem(
         self,
-        divisor: Fraction<BigInt<Digit, DIGIT_BITNESS>>,
+        divisor: &BigInt<Digit, DIGIT_BITNESS>,
     ) -> Self::Output {
-        if (&divisor).is_zero() {
-            None
-        } else {
-            let (numerator, denominator) = unsafe {
-                (&self.numerator * &divisor.denominator)
-                    .checked_rem(&self.denominator * divisor.numerator)
-                    .unwrap_unchecked()
-            }
-            .normalize_moduli(&self.denominator * divisor.denominator);
-            Some(Fraction::<BigInt<Digit, DIGIT_BITNESS>> {
-                numerator,
-                denominator,
-            })
-        }
-    }
-}
-
-impl<Digit, const DIGIT_BITNESS: usize> CheckedRem
-    for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
-where
-    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>:
-        Mul<Output = BigInt<Digit, DIGIT_BITNESS>>,
-    for<'a> &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
-    for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
-        + NormalizeModuli<
-            Output = (
-                BigInt<Digit, DIGIT_BITNESS>,
-                BigInt<Digit, DIGIT_BITNESS>,
-            ),
-        >,
-{
-    type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
-
-    fn checked_rem(self, divisor: Self) -> Self::Output {
         if divisor.is_zero() {
-            None
-        } else {
-            let (numerator, denominator) = unsafe {
-                (&self.numerator * &divisor.denominator)
-                    .checked_rem(&self.denominator * &divisor.numerator)
-                    .unwrap_unchecked()
-            }
-            .normalize_moduli(&self.denominator * &divisor.denominator);
-            Some(Fraction::<BigInt<Digit, DIGIT_BITNESS>> {
-                numerator,
-                denominator,
-            })
-        }
-    }
-}
-
-impl<Digit, const DIGIT_BITNESS: usize>
-    CheckedRem<BigInt<Digit, DIGIT_BITNESS>>
-    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
-where
-    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<
-            BigInt<Digit, DIGIT_BITNESS>,
-            Output = BigInt<Digit, DIGIT_BITNESS>,
-        > + Zeroable,
-    BigInt<Digit, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
-        + NormalizeModuli<
-            Output = (
-                BigInt<Digit, DIGIT_BITNESS>,
-                BigInt<Digit, DIGIT_BITNESS>,
-            ),
-        >,
-{
-    type Output = Option<Self>;
-
-    fn checked_rem(
-        self,
-        divisor: BigInt<Digit, DIGIT_BITNESS>,
-    ) -> Self::Output {
-        if (&divisor).is_zero() {
             None
         } else {
             let (numerator, denominator) = unsafe {
@@ -188,8 +105,8 @@ where
                     .checked_rem(&self.denominator * divisor)
                     .unwrap_unchecked()
             }
-            .normalize_moduli(self.denominator);
-            Some(Self {
+            .normalize_moduli(&self.denominator);
+            Some(Fraction::<BigInt<Digit, DIGIT_BITNESS>> {
                 numerator,
                 denominator,
             })
@@ -274,26 +191,109 @@ where
 }
 
 impl<Digit, const DIGIT_BITNESS: usize>
-    CheckedRem<&BigInt<Digit, DIGIT_BITNESS>>
+    CheckedRem<Fraction<BigInt<Digit, DIGIT_BITNESS>>>
     for &Fraction<BigInt<Digit, DIGIT_BITNESS>>
 where
-    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: CheckedRem<
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
+        + Mul<
             BigInt<Digit, DIGIT_BITNESS>,
-            Output = Option<BigInt<Digit, DIGIT_BITNESS>>,
-        > + Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
-        + Zeroable,
-    for<'a> BigInt<Digit, DIGIT_BITNESS>: NormalizeModuli<
-        &'a BigInt<Digit, DIGIT_BITNESS>,
-        Output = (BigInt<Digit, DIGIT_BITNESS>, BigInt<Digit, DIGIT_BITNESS>),
-    >,
+            Output = BigInt<Digit, DIGIT_BITNESS>,
+        >,
+    for<'a> &'a Fraction<BigInt<Digit, DIGIT_BITNESS>>: Zeroable,
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
+        + NormalizeModuli<
+            Output = (
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+            ),
+        >,
 {
     type Output = Option<Fraction<BigInt<Digit, DIGIT_BITNESS>>>;
 
     fn checked_rem(
         self,
-        divisor: &BigInt<Digit, DIGIT_BITNESS>,
+        divisor: Fraction<BigInt<Digit, DIGIT_BITNESS>>,
     ) -> Self::Output {
-        if divisor.is_zero() {
+        if (&divisor).is_zero() {
+            None
+        } else {
+            let (numerator, denominator) = unsafe {
+                (&self.numerator * &divisor.denominator)
+                    .checked_rem(&self.denominator * divisor.numerator)
+                    .unwrap_unchecked()
+            }
+            .normalize_moduli(&self.denominator * divisor.denominator);
+            Some(Fraction::<BigInt<Digit, DIGIT_BITNESS>> {
+                numerator,
+                denominator,
+            })
+        }
+    }
+}
+
+impl<Digit, const DIGIT_BITNESS: usize> CheckedRem
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
+where
+    for<'a> &'a Self: Zeroable,
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<
+        BigInt<Digit, DIGIT_BITNESS>,
+        Output = BigInt<Digit, DIGIT_BITNESS>,
+    >,
+    for<'a> BigInt<Digit, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
+        + Mul<
+            &'a BigInt<Digit, DIGIT_BITNESS>,
+            Output = BigInt<Digit, DIGIT_BITNESS>,
+        > + Mul<Output = BigInt<Digit, DIGIT_BITNESS>>
+        + NormalizeModuli<
+            Output = (
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+            ),
+        >,
+{
+    type Output = Option<Self>;
+
+    fn checked_rem(self, divisor: Self) -> Self::Output {
+        if (&divisor).is_zero() {
+            None
+        } else {
+            let (numerator, denominator) = unsafe {
+                (self.numerator * &divisor.denominator)
+                    .checked_rem(&self.denominator * divisor.numerator)
+                    .unwrap_unchecked()
+            }
+            .normalize_moduli(self.denominator * divisor.denominator);
+            Some(Self {
+                numerator,
+                denominator,
+            })
+        }
+    }
+}
+
+impl<Digit, const DIGIT_BITNESS: usize>
+    CheckedRem<BigInt<Digit, DIGIT_BITNESS>>
+    for Fraction<BigInt<Digit, DIGIT_BITNESS>>
+where
+    for<'a> &'a BigInt<Digit, DIGIT_BITNESS>: Mul<
+            BigInt<Digit, DIGIT_BITNESS>,
+            Output = BigInt<Digit, DIGIT_BITNESS>,
+        > + Zeroable,
+    BigInt<Digit, DIGIT_BITNESS>: CheckedRem<Output = Option<BigInt<Digit, DIGIT_BITNESS>>>
+        + NormalizeModuli<
+            Output = (
+                BigInt<Digit, DIGIT_BITNESS>,
+                BigInt<Digit, DIGIT_BITNESS>,
+            ),
+        >,
+{
+    type Output = Option<Self>;
+
+    fn checked_rem(
+        self,
+        divisor: BigInt<Digit, DIGIT_BITNESS>,
+    ) -> Self::Output {
+        if (&divisor).is_zero() {
             None
         } else {
             let (numerator, denominator) = unsafe {
@@ -301,8 +301,8 @@ where
                     .checked_rem(&self.denominator * divisor)
                     .unwrap_unchecked()
             }
-            .normalize_moduli(&self.denominator);
-            Some(Fraction::<BigInt<Digit, DIGIT_BITNESS>> {
+            .normalize_moduli(self.denominator);
+            Some(Self {
                 numerator,
                 denominator,
             })
@@ -447,6 +447,69 @@ where
 
 macro_rules! integer_checked_rem_fraction_impl {
     ($($integer:ty)*) => ($(
+        impl CheckedRem for &Fraction<$integer> {
+            type Output = Option<Fraction<$integer>>;
+
+            fn checked_rem(self, divisor: Self) -> Self::Output {
+                if divisor.is_zero() {
+                    None
+                } else {
+                    let (numerator, denominator) = unsafe {
+                        (self.numerator * divisor.denominator)
+                            .checked_rem(divisor.numerator * self.denominator)
+                            .unwrap_unchecked()
+                    }
+                    .normalize_moduli(self.denominator * divisor.denominator);
+                    Some(Fraction::<$integer> {
+                        numerator,
+                        denominator,
+                    })
+                }
+            }
+        }
+
+        impl CheckedRem<Fraction<$integer>> for &Fraction<$integer> {
+            type Output = Option<Fraction<$integer>>;
+
+            fn checked_rem(self, divisor: Fraction<$integer>) -> Self::Output {
+                if (&divisor).is_zero() {
+                    None
+                } else {
+                    let (numerator, denominator) = unsafe {
+                        (self.numerator * divisor.denominator)
+                            .checked_rem(divisor.numerator * self.denominator)
+                            .unwrap_unchecked()
+                    }
+                    .normalize_moduli(self.denominator * divisor.denominator);
+                    Some(Fraction::<$integer> {
+                        numerator,
+                        denominator,
+                    })
+                }
+            }
+        }
+
+        impl CheckedRem<&Self> for Fraction<$integer> {
+            type Output = Option<Self>;
+
+            fn checked_rem(self, divisor: &Self) -> Self::Output {
+                if divisor.is_zero() {
+                    None
+                } else {
+                    let (numerator, denominator) = unsafe {
+                        (self.numerator * divisor.denominator)
+                            .checked_rem(divisor.numerator * self.denominator)
+                            .unwrap_unchecked()
+                    }
+                    .normalize_moduli(self.denominator * divisor.denominator);
+                    Some(Self {
+                        numerator,
+                        denominator,
+                    })
+                }
+            }
+        }
+
         impl CheckedRem for Fraction<$integer> {
             type Output = Option<Self>;
 

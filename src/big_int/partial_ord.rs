@@ -12,14 +12,7 @@ where
     Self: PartialEq,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(match self.sign.cmp(&other.sign) {
-            Ordering::Equal => match self.sign() {
-                Sign::Negative => compare_digits(&other.digits, &self.digits),
-                Sign::Positive => compare_digits(&self.digits, &other.digits),
-                Sign::Zero => Ordering::Equal,
-            },
-            value => value,
-        })
+        Some(self.cmp(other))
     }
 }
 

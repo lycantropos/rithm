@@ -51,10 +51,7 @@ macro_rules! integer_partial_ord_fraction_impl {
     ($($integer:ty)*) => ($(
         impl PartialOrd for Fraction<$integer> {
             fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-                (self.numerator * other.denominator)
-                    .partial_cmp(
-                        &(self.denominator * other.numerator),
-                    )
+                Some(self.cmp(other))
             }
         }
 

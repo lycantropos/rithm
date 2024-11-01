@@ -40,12 +40,6 @@ jobs:
           },
         ]
         include:
-          - python_version: '3.8'
-            platform: {
-              os: 'macos-13',
-              python_architecture: 'x64',
-              rust_target: 'x86_64-apple-darwin'
-            }
           - python_version: '3.9'
             platform: {
               os: 'macos-13',
@@ -58,18 +52,6 @@ jobs:
               python_architecture: 'x64',
               rust_target: 'x86_64-apple-darwin'
             }
-          - python_version: 'pypy-3.7'
-            platform: { os: 'macos-13', python_architecture: 'x64' }
-          - python_version: 'pypy-3.7'
-            platform: { os: 'ubuntu-latest', python_architecture: 'x64' }
-          - python_version: 'pypy-3.7'
-            platform: { os: 'windows-latest', python_architecture: 'x64' }
-          - python_version: 'pypy-3.8'
-            platform: { os: 'macos-13', python_architecture: 'x64' }
-          - python_version: 'pypy-3.8'
-            platform: { os: 'ubuntu-latest', python_architecture: 'x64' }
-          - python_version: 'pypy-3.8'
-            platform: { os: 'windows-latest', python_architecture: 'x64' }
           - python_version: 'pypy-3.9'
             platform: { os: 'macos-13', python_architecture: 'x64' }
           - python_version: 'pypy-3.9'
@@ -216,7 +198,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_tag: [ 'cp38', 'cp39', 'cp310', 'cp311', 'cp312' ]
+        python_tag: [ 'cp39', 'cp310', 'cp311', 'cp312' ]
         platform: [
           {
             architecture: 'arm64',
@@ -227,7 +209,7 @@ jobs:
           },
           {
             architecture: 'universal2',
-            os: 'macos-latest',
+            os: 'macos-13',
             python_architecture: 'x64',
             rust_target: 'aarch64-apple-darwin',
             tag: 'macosx_universal2'
@@ -347,7 +329,7 @@ jobs:
     needs: [ 'build-sdist', 'build-wheels' ]
     strategy:
       matrix:
-        python_version: [ '3.8', '3.9', '3.10', '3.11', '3.12' ]
+        python_version: [ '3.9', '3.10', '3.11', '3.12' ]
         platform: [
           {
             os: 'macos-latest',
@@ -367,18 +349,6 @@ jobs:
           },
         ]
         include:
-          - python_version: 'pypy-3.7'
-            platform: { os: 'macos-latest', python_architecture: 'x64' }
-          - python_version: 'pypy-3.7'
-            platform: { os: 'ubuntu-latest', python_architecture: 'x64' }
-          - python_version: 'pypy-3.7'
-            platform: { os: 'windows-latest', python_architecture: 'x64' }
-          - python_version: 'pypy-3.8'
-            platform: { os: 'macos-latest', python_architecture: 'x64' }
-          - python_version: 'pypy-3.8'
-            platform: { os: 'ubuntu-latest', python_architecture: 'x64' }
-          - python_version: 'pypy-3.8'
-            platform: { os: 'windows-latest', python_architecture: 'x64' }
           - python_version: 'pypy-3.9'
             platform: { os: 'macos-latest', python_architecture: 'x64' }
           - python_version: 'pypy-3.9'

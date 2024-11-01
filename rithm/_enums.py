@@ -4,7 +4,7 @@ from enum import IntEnum as _IntEnum
 
 
 class _BaseEnum(_IntEnum):
-    __module__ = 'rhythm.enums'
+    __module__ = 'rithm.enums'
 
     def __repr__(self) -> str:
         return f'{type(self).__qualname__}.{self.name}'

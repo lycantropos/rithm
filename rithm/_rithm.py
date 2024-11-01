@@ -50,7 +50,7 @@ class Int:
 
     _value: int
 
-    __module__ = 'rhythm.integer'
+    __module__ = 'rithm.integer'
     __slots__ = ('_value',)
 
     def __init_subclass__(cls, /, **_kwargs: Any) -> NoReturn:
@@ -463,7 +463,7 @@ class Fraction:
     _denominator: Int
     _numerator: Int
 
-    __module__ = 'rhythm.fraction'
+    __module__ = 'rithm.fraction'
     __slots__ = '_denominator', '_numerator'
 
     def __init_subclass__(cls, /, **_kwargs: Any) -> NoReturn:

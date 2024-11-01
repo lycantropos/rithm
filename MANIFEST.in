@@ -1,5 +1,4 @@
 include Cargo.toml
 include LICENSE
 include rithm/py.typed
-recursive-include rithm *.pyi
 recursive-include src *.rs

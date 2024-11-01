@@ -12,11 +12,11 @@ name = "rithm"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies.pyo3]
-version = "^0.20.0"
+version = "^0.22.5"
 features = ["extension-module"]
 
 [dependencies.pyo3-ffi]
-version = "^0.20.0"
+version = "^0.22.5"
 features = ["extension-module"]
 
 [dependencies.traiter]
@@ -24,4 +24,4 @@ version = "^4.0.0"
 features = ["numbers", "std"]
 
 [build-dependencies]
-pyo3-build-config = "^0.20.0"
+pyo3-build-config = "^0.22.5"

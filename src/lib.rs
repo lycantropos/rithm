@@ -10,11 +10,12 @@ use pyo3::prelude::{
     pyclass, pymethods, pymodule, PyModule, PyResult, Python,
 };
 use pyo3::sync::GILOnceCell;
-use pyo3::type_object::PyTypeInfo;
-use pyo3::types::{PyBytes, PyFloat, PyLong, PyString, PyTuple, PyType};
+use pyo3::types::{
+    PyAnyMethods, PyBytes, PyFloat, PyFloatMethods, PyLong, PyModuleMethods,
+    PyString, PyTuple, PyType,
+};
 use pyo3::{
-    intern, AsPyPointer, IntoPy, Py, PyAny, PyCell, PyClass, PyErr, PyObject,
-    PyRef, ToPyObject,
+    intern, Bound, IntoPy, Py, PyAny, PyErr, PyObject, PyRef, PyTypeInfo,
 };
 use pyo3_ffi as ffi;
 use traiter::numbers::{
@@ -70,10 +71,10 @@ fn to_py_endianness_values(py: Python) -> &[Py<PyEndianness>; 2] {
     static VALUES: GILOnceCell<[Py<PyEndianness>; 2]> = GILOnceCell::new();
     VALUES.get_or_init(py, || {
         [
-            PyCell::new(py, PyEndianness(Endianness::Big))
+            Bound::new(py, PyEndianness(Endianness::Big))
                 .unwrap()
                 .into(),
-            PyCell::new(py, PyEndianness(Endianness::Little))
+            Bound::new(py, PyEndianness(Endianness::Little))
                 .unwrap()
                 .into(),
         ]
@@ -95,7 +96,7 @@ impl PyEndianness {
 
     #[new]
     #[pyo3(signature = (value, /))]
-    fn new(value: &PyAny, py: Python) -> PyResult<Py<Self>> {
+    fn new(value: &Bound<'_, PyAny>, py: Python) -> PyResult<Py<Self>> {
         let values = to_py_endianness_values(py);
         match value.extract::<usize>() {
             Ok(value) if value < values.len() => {
@@ -117,8 +118,8 @@ impl PyEndianness {
         }
     }
 
-    fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
-        PyTuple::new(py, [self.value()])
+    fn __getnewargs__<'py>(&self, py: Python<'py>) -> Bound<'py, PyTuple> {
+        PyTuple::new_bound(py, [self.value()])
     }
 
     fn __repr__(&self) -> String {
@@ -137,16 +138,16 @@ fn to_py_tie_breaking_values(py: Python) -> &[Py<PyTieBreaking>; 4] {
     static VALUES: GILOnceCell<[Py<PyTieBreaking>; 4]> = GILOnceCell::new();
     VALUES.get_or_init(py, || {
         [
-            PyCell::new(py, PyTieBreaking(TieBreaking::AwayFromZero))
+            Bound::new(py, PyTieBreaking(TieBreaking::AwayFromZero))
                 .unwrap()
                 .into(),
-            PyCell::new(py, PyTieBreaking(TieBreaking::ToEven))
+            Bound::new(py, PyTieBreaking(TieBreaking::ToEven))
                 .unwrap()
                 .into(),
-            PyCell::new(py, PyTieBreaking(TieBreaking::ToOdd))
+            Bound::new(py, PyTieBreaking(TieBreaking::ToOdd))
                 .unwrap()
                 .into(),
-            PyCell::new(py, PyTieBreaking(TieBreaking::TowardZero))
+            Bound::new(py, PyTieBreaking(TieBreaking::TowardZero))
                 .unwrap()
                 .into(),
         ]
@@ -178,7 +179,7 @@ impl PyTieBreaking {
 
     #[new]
     #[pyo3(signature = (value, /))]
-    fn new(value: &PyAny, py: Python) -> PyResult<Py<Self>> {
+    fn new(value: &Bound<'_, PyAny>, py: Python) -> PyResult<Py<Self>> {
         let values = to_py_tie_breaking_values(py);
         match value.extract::<usize>() {
             Ok(value) if value < values.len() => {
@@ -202,8 +203,8 @@ impl PyTieBreaking {
         }
     }
 
-    fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
-        PyTuple::new(py, [self.value()])
+    fn __getnewargs__<'py>(&self, py: Python<'py>) -> Bound<'py, PyTuple> {
+        PyTuple::new_bound(py, [self.value()])
     }
 
     fn __repr__(&self) -> String {
@@ -224,13 +225,16 @@ impl PyTieBreaking {
 impl PyInt {
     #[new]
     #[pyo3(signature = (value=None, base=None, /))]
-    fn new(value: Option<&PyAny>, base: Option<&PyLong>) -> PyResult<Self> {
+    fn new(
+        value: Option<&Bound<'_, PyAny>>,
+        base: Option<&Bound<'_, PyLong>>,
+    ) -> PyResult<Self> {
         match value {
             None => Ok(PyInt(BigInt::zero())),
             Some(value) => {
                 let py = value.py();
                 if base.is_some()
-                    || value.is_instance(PyString::type_object(py))?
+                    || value.is_instance(&PyString::type_object_bound(py))?
                 {
                     let base = match base {
                         Some(base) => {
@@ -248,26 +252,28 @@ impl PyInt {
                         base,
                     ) {
                         Ok(value) => Ok(PyInt(value)),
-                        Err(reason) => {
-                            Err(PyValueError::new_err(reason.to_string()))
+                        Err(error) => {
+                            Err(PyValueError::new_err(error.to_string()))
                         }
                     }
-                } else if value.is_instance(PyFloat::type_object(py))? {
+                } else if value.is_instance(&PyFloat::type_object_bound(py))? {
                     Ok(PyInt(
-                        BigInt::try_from(value.extract::<&PyFloat>()?.value())
-                            .map_err(|reason| match reason {
+                        BigInt::try_from(
+                            value.extract::<Bound<PyFloat>>()?.value(),
+                        )
+                        .map_err(
+                            |error| match error {
                                 big_int::TryFromFloatError::Infinity => {
-                                    PyOverflowError::new_err(
-                                        reason.to_string(),
-                                    )
+                                    PyOverflowError::new_err(error.to_string())
                                 }
                                 big_int::TryFromFloatError::NaN => {
-                                    PyValueError::new_err(reason.to_string())
+                                    PyValueError::new_err(error.to_string())
                                 }
-                            })?,
+                            },
+                        )?,
                     ))
                 } else {
-                    try_big_int_from_py_any(value).map(Self)
+                    try_big_int_from_bound_py_any_ref(value).map(Self)
                 }
             }
         }
@@ -276,11 +282,11 @@ impl PyInt {
     #[classmethod]
     #[pyo3(signature = (bytes, endianness, /))]
     fn from_bytes(
-        _cls: &PyType,
-        mut bytes: Vec<u8>,
+        _cls: &Bound<'_, PyType>,
+        bytes: Vec<u8>,
         endianness: &PyEndianness,
     ) -> PyInt {
-        PyInt(BigInt::from_bytes(bytes.as_mut_slice(), endianness.0))
+        PyInt(BigInt::from_bytes(bytes.as_slice(), endianness.0))
     }
 
     #[getter]
@@ -307,15 +313,19 @@ impl PyInt {
     }
 
     #[pyo3(signature = (endianness, /))]
-    fn to_bytes(&self, endianness: &PyEndianness, py: Python) -> PyObject {
-        PyBytes::new(py, &self.0.to_bytes(endianness.0)).to_object(py)
+    fn to_bytes<'py>(
+        &self,
+        endianness: &PyEndianness,
+        py: Python<'py>,
+    ) -> Bound<'py, PyBytes> {
+        PyBytes::new_bound(py, &self.0.to_bytes(endianness.0))
     }
 
     fn __abs__(&self) -> PyInt {
         Self((&self.0).abs())
     }
 
-    fn __add__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __add__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
         other
             .extract::<PyRef<Self>>()
@@ -323,7 +333,7 @@ impl PyInt {
             .or_else(|_| self.__radd__(other))
     }
 
-    fn __and__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __and__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
         other
             .extract::<PyRef<Self>>()
@@ -339,7 +349,7 @@ impl PyInt {
         slf
     }
 
-    fn __divmod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+    fn __divmod__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             try_divmod(&self.0, &divisor.0).map(|(quotient, remainder)| {
@@ -357,14 +367,14 @@ impl PyInt {
     fn __float__(&self, py: Python) -> PyResult<PyObject> {
         f64::try_from(&self.0)
             .map(|value| value.into_py(py))
-            .map_err(|reason| PyOverflowError::new_err(reason.to_string()))
+            .map_err(|error| PyOverflowError::new_err(error.to_string()))
     }
 
     fn __floor__(slf: PyRef<Self>) -> PyRef<Self> {
         slf
     }
 
-    fn __floordiv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+    fn __floordiv__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             try_floordiv(&self.0, &divisor.0)
@@ -393,7 +403,7 @@ impl PyInt {
         Self(!&self.0)
     }
 
-    fn __lshift__(&self, shift: &PyAny) -> PyResult<PyObject> {
+    fn __lshift__(&self, shift: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = shift.py();
         if let Ok(shift) = shift.extract::<PyRef<Self>>() {
             try_lshift(&self.0, &shift.0)
@@ -405,7 +415,7 @@ impl PyInt {
         }
     }
 
-    fn __mod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+    fn __mod__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             try_mod(&self.0, &divisor.0).map(|result| Self(result).into_py(py))
@@ -416,7 +426,7 @@ impl PyInt {
         }
     }
 
-    fn __mul__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __mul__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
         other
             .extract::<PyRef<Self>>()
@@ -428,9 +438,9 @@ impl PyInt {
         Self(-&self.0)
     }
 
-    fn __or__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __or__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
-        if other.is_instance(PyInt::type_object(py))? {
+        if other.is_instance(&PyInt::type_object_bound(py))? {
             Ok(PyInt(&self.0 | other.extract::<PyInt>()?.0).into_py(py))
         } else {
             self.__ror__(other)
@@ -443,19 +453,19 @@ impl PyInt {
 
     fn __pow__(
         &self,
-        exponent: &PyAny,
-        divisor: Option<&PyAny>,
+        exponent: &Bound<'_, PyAny>,
+        divisor: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<PyObject> {
         let py = exponent.py();
-        if let Ok(exponent) = try_big_int_from_py_any(exponent) {
+        if let Ok(exponent) = try_big_int_from_bound_py_any_ref(exponent) {
             match divisor {
                 Some(divisor) => {
                     if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
                         (&self.0)
                             .checked_pow_rem_euclid(exponent, &divisor.0)
                             .map(|remainder| Self(remainder).into_py(py))
-                            .map_err(|reason| {
-                                PyValueError::new_err(reason.to_string())
+                            .map_err(|error| {
+                                PyValueError::new_err(error.to_string())
                             })
                     } else if let Ok(divisor) =
                         try_big_int_from_py_integral(divisor)
@@ -463,8 +473,8 @@ impl PyInt {
                         (&self.0)
                             .checked_pow_rem_euclid(exponent, divisor)
                             .map(|remainder| Self(remainder).into_py(py))
-                            .map_err(|reason| {
-                                PyValueError::new_err(reason.to_string())
+                            .map_err(|error| {
+                                PyValueError::new_err(error.to_string())
                             })
                     } else {
                         Ok(py.NotImplemented())
@@ -484,21 +494,21 @@ impl PyInt {
         }
     }
 
-    fn __radd__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __radd__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
         try_big_int_from_py_integral(other)
             .map(|other| Self(other + &self.0).into_py(py))
             .or_else(|_| Ok(py.NotImplemented()))
     }
 
-    fn __rand__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __rand__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
         try_big_int_from_py_integral(other)
             .map(|other| Self(other & &self.0).into_py(py))
             .or_else(|_| Ok(py.NotImplemented()))
     }
 
-    fn __rdivmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+    fn __rdivmod__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = dividend.py();
         if let Ok(dividend) = try_big_int_from_py_integral(dividend) {
             try_divmod(dividend, &self.0).map(|(quotient, remainder)| {
@@ -509,15 +519,18 @@ impl PyInt {
         }
     }
 
-    fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
-        PyTuple::new(py, [self.__int__(py)])
+    fn __getnewargs__<'py>(&self, py: Python<'py>) -> Bound<'py, PyTuple> {
+        PyTuple::new_bound(py, [self.__int__(py)])
     }
 
     fn __repr__(&self) -> String {
         format!("{}({})", Self::NAME, self.0)
     }
 
-    fn __rfloordiv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+    fn __rfloordiv__(
+        &self,
+        dividend: &Bound<'_, PyAny>,
+    ) -> PyResult<PyObject> {
         let py = dividend.py();
         if let Ok(dividend) = try_big_int_from_py_integral(dividend) {
             try_floordiv(dividend, &self.0)
@@ -527,7 +540,11 @@ impl PyInt {
         }
     }
 
-    fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<PyObject> {
+    fn __richcmp__(
+        &self,
+        other: &Bound<'_, PyAny>,
+        op: CompareOp,
+    ) -> PyResult<PyObject> {
         let py = other.py();
         other
             .extract::<PyRef<Self>>()
@@ -539,7 +556,7 @@ impl PyInt {
             })
     }
 
-    fn __rlshift__(&self, base: &PyAny) -> PyResult<PyObject> {
+    fn __rlshift__(&self, base: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = base.py();
         if let Ok(base) = try_big_int_from_py_integral(base) {
             try_lshift(base, &self.0).map(|result| Self(result).into_py(py))
@@ -548,9 +565,9 @@ impl PyInt {
         }
     }
 
-    fn __rmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+    fn __rmod__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = dividend.py();
-        if dividend.is_instance(PyLong::type_object(py))? {
+        if dividend.is_instance(&PyLong::type_object_bound(py))? {
             try_mod(try_big_int_from_py_integral(dividend)?, &self.0)
                 .map(|result| PyInt(result).into_py(py))
         } else {
@@ -558,9 +575,9 @@ impl PyInt {
         }
     }
 
-    fn __rmul__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __rmul__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
-        if other.is_instance(PyLong::type_object(py))? {
+        if other.is_instance(&PyLong::type_object_bound(py))? {
             Ok(PyInt(try_big_int_from_py_integral(other)? * &self.0)
                 .into_py(py))
         } else {
@@ -568,9 +585,9 @@ impl PyInt {
         }
     }
 
-    fn __ror__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __ror__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
-        if other.is_instance(PyLong::type_object(py))? {
+        if other.is_instance(&PyLong::type_object_bound(py))? {
             Ok(PyInt(&self.0 | try_big_int_from_py_integral(other)?)
                 .into_py(py))
         } else {
@@ -578,9 +595,10 @@ impl PyInt {
         }
     }
 
+    #[pyo3(signature = (digits=None))]
     fn __round__(
         &self,
-        digits: Option<&PyLong>,
+        digits: Option<&Bound<'_, PyLong>>,
         py: Python,
     ) -> PyResult<Self> {
         Ok(match digits {
@@ -607,11 +625,11 @@ impl PyInt {
 
     fn __rpow__(
         &self,
-        base: &PyAny,
-        divisor: Option<&PyAny>,
+        base: &Bound<'_, PyAny>,
+        divisor: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<PyObject> {
         let py = base.py();
-        let base = if base.is_instance(PyLong::type_object(py))? {
+        let base = if base.is_instance(&PyLong::type_object_bound(py))? {
             try_big_int_from_py_integral(base)?
         } else {
             return Ok(py.NotImplemented());
@@ -621,16 +639,16 @@ impl PyInt {
                 if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
                     base.checked_pow_rem_euclid(&self.0, &divisor.0)
                         .map(|remainder| PyInt(remainder).into_py(py))
-                        .map_err(|reason| {
-                            PyValueError::new_err(reason.to_string())
+                        .map_err(|error| {
+                            PyValueError::new_err(error.to_string())
                         })
                 } else if let Ok(divisor) =
                     try_big_int_from_py_integral(divisor)
                 {
                     base.checked_pow_rem_euclid(&self.0, divisor)
                         .map(|remainder| PyInt(remainder).into_py(py))
-                        .map_err(|reason| {
-                            PyValueError::new_err(reason.to_string())
+                        .map_err(|error| {
+                            PyValueError::new_err(error.to_string())
                         })
                 } else {
                     Ok(py.NotImplemented())
@@ -647,9 +665,9 @@ impl PyInt {
         }
     }
 
-    fn __rrshift__(&self, base: &PyAny) -> PyResult<PyObject> {
+    fn __rrshift__(&self, base: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = base.py();
-        if base.is_instance(PyLong::type_object(py))? {
+        if base.is_instance(&PyLong::type_object_bound(py))? {
             try_rshift(try_big_int_from_py_integral(base)?, &self.0)
                 .map(|result| PyInt(result).into_py(py))
         } else {
@@ -657,7 +675,7 @@ impl PyInt {
         }
     }
 
-    fn __rshift__(&self, shift: &PyAny) -> PyResult<PyObject> {
+    fn __rshift__(&self, shift: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = shift.py();
         if let Ok(shift) = shift.extract::<PyRef<Self>>() {
             try_rshift(&self.0, &shift.0)
@@ -669,16 +687,16 @@ impl PyInt {
         }
     }
 
-    fn __rsub__(&self, minuend: &PyAny) -> PyResult<PyObject> {
+    fn __rsub__(&self, minuend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = minuend.py();
         try_big_int_from_py_integral(minuend)
             .map(|minuend| PyInt(minuend - &self.0).into_py(py))
             .or_else(|_| Ok(py.NotImplemented()))
     }
 
-    fn __rtruediv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+    fn __rtruediv__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = dividend.py();
-        if dividend.is_instance(PyLong::type_object(py))? {
+        if dividend.is_instance(&PyLong::type_object_bound(py))? {
             let dividend = try_big_int_from_py_integral(dividend)?;
             try_truediv(dividend, self.0.clone())
                 .map(|result| PyFraction(result).into_py(py))
@@ -687,9 +705,9 @@ impl PyInt {
         }
     }
 
-    fn __rxor__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __rxor__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
-        if other.is_instance(PyLong::type_object(py))? {
+        if other.is_instance(&PyLong::type_object_bound(py))? {
             Ok(PyInt(&self.0 ^ try_big_int_from_py_integral(other)?)
                 .into_py(py))
         } else {
@@ -701,7 +719,7 @@ impl PyInt {
         self.0.to_string()
     }
 
-    fn __sub__(&self, subtrahend: &PyAny) -> PyResult<PyObject> {
+    fn __sub__(&self, subtrahend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = subtrahend.py();
         subtrahend
             .extract::<PyRef<Self>>()
@@ -713,9 +731,9 @@ impl PyInt {
             })
     }
 
-    fn __truediv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+    fn __truediv__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = divisor.py();
-        if let Ok(divisor) = try_big_int_from_py_any(divisor) {
+        if let Ok(divisor) = try_big_int_from_bound_py_any_ref(divisor) {
             try_truediv(self.0.clone(), divisor)
                 .map(|result| PyFraction(result).into_py(py))
         } else {
@@ -727,9 +745,9 @@ impl PyInt {
         slf
     }
 
-    fn __xor__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __xor__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
-        if other.is_instance(PyInt::type_object(py))? {
+        if other.is_instance(&PyInt::type_object_bound(py))? {
             Ok(Self(&self.0 ^ other.extract::<PyInt>()?.0).into_py(py))
         } else {
             self.__rxor__(other)
@@ -795,15 +813,15 @@ fn try_lshift<
     base: Base,
     shift: Shift,
 ) -> PyResult<Value> {
-    base.checked_shl(shift).map_err(|reason| match reason {
+    base.checked_shl(shift).map_err(|error| match error {
         big_int::ShlError::NegativeShift => {
-            PyValueError::new_err(reason.to_string())
+            PyValueError::new_err(error.to_string())
         }
         big_int::ShlError::OutOfMemory => {
-            PyMemoryError::new_err(reason.to_string())
+            PyMemoryError::new_err(error.to_string())
         }
         big_int::ShlError::TooLarge => {
-            PyOverflowError::new_err(reason.to_string())
+            PyOverflowError::new_err(error.to_string())
         }
     })
 }
@@ -835,15 +853,15 @@ fn try_mod_to_near(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
         )),
     }?;
     let double_remainder = (&remainder).checked_shl(BigInt::one()).map_err(
-        |reason| match reason {
+        |error| match error {
             big_int::ShlError::NegativeShift => {
-                PyValueError::new_err(reason.to_string())
+                PyValueError::new_err(error.to_string())
             }
             big_int::ShlError::OutOfMemory => {
-                PyMemoryError::new_err(reason.to_string())
+                PyMemoryError::new_err(error.to_string())
             }
             big_int::ShlError::TooLarge => {
-                PyOverflowError::new_err(reason.to_string())
+                PyOverflowError::new_err(error.to_string())
             }
         },
     )?;
@@ -892,15 +910,17 @@ fn try_rshift<
     base: Base,
     shift: Shift,
 ) -> PyResult<Value> {
-    base.checked_shr(shift).map_err(|reason| match reason {
+    base.checked_shr(shift).map_err(|error| match error {
         big_int::ShrError::NegativeShift => {
-            PyValueError::new_err(reason.to_string())
+            PyValueError::new_err(error.to_string())
         }
     })
 }
 
 #[inline]
-fn try_big_int_from_py_any(value: &PyAny) -> PyResult<BigInt> {
+fn try_big_int_from_bound_py_any_ref(
+    value: &Bound<'_, PyAny>,
+) -> PyResult<BigInt> {
     value
         .extract::<PyInt>()
         .map(|value| value.0)
@@ -908,7 +928,12 @@ fn try_big_int_from_py_any(value: &PyAny) -> PyResult<BigInt> {
 }
 
 #[inline]
-fn try_big_int_from_py_integral(value: &PyAny) -> PyResult<BigInt> {
+fn try_big_int_from_bound_py_any(value: Bound<'_, PyAny>) -> PyResult<BigInt> {
+    try_big_int_from_bound_py_any_ref(&value)
+}
+
+#[inline]
+fn try_big_int_from_py_integral(value: &Bound<'_, PyAny>) -> PyResult<BigInt> {
     try_le_bytes_from_py_integral(value).map(|bytes| {
         if bytes.is_empty() {
             BigInt::zero()
@@ -919,7 +944,9 @@ fn try_big_int_from_py_integral(value: &PyAny) -> PyResult<BigInt> {
 }
 
 #[inline]
-fn try_le_bytes_from_py_integral(value: &PyAny) -> PyResult<Vec<u8>> {
+fn try_le_bytes_from_py_integral(
+    value: &Bound<'_, PyAny>,
+) -> PyResult<Vec<u8>> {
     let ptr = value.as_ptr();
     let py = value.py();
     unsafe {
@@ -964,15 +991,15 @@ impl PyFraction {
     #[new]
     #[pyo3(signature = (numerator=None, denominator=None, /))]
     fn new(
-        numerator: Option<&PyAny>,
-        denominator: Option<&PyAny>,
+        numerator: Option<&Bound<'_, PyAny>>,
+        denominator: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Self> {
         match denominator {
             Some(denominator) => match numerator {
                 Some(numerator) => {
                     match Fraction::new(
-                        try_big_int_from_py_any(numerator)?,
-                        try_big_int_from_py_any(denominator)?,
+                        try_big_int_from_bound_py_any_ref(numerator)?,
+                        try_big_int_from_bound_py_any_ref(denominator)?,
                     ) {
                         Some(fraction) => Ok(PyFraction(fraction)),
                         None => Err(PyZeroDivisionError::new_err(
@@ -1007,9 +1034,9 @@ impl PyFraction {
         PyFraction((&self.0).abs())
     }
 
-    fn __add__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __add__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
-        if other.is_instance(PyFraction::type_object(py))? {
+        if other.is_instance(&PyFraction::type_object_bound(py))? {
             Ok(Self(&self.0 + other.extract::<PyFraction>()?.0).into_py(py))
         } else {
             self.__radd__(other)
@@ -1024,7 +1051,7 @@ impl PyFraction {
         PyInt((&self.0).ceil())
     }
 
-    fn __divmod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+    fn __divmod__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             try_divmod(&self.0, &divisor.0).map(|(quotient, remainder)| {
@@ -1046,7 +1073,7 @@ impl PyFraction {
     fn __float__(&self, py: Python) -> PyResult<PyObject> {
         match f64::try_from(&self.0) {
             Ok(float) => Ok(float.into_py(py)),
-            Err(reason) => Err(PyOverflowError::new_err(reason.to_string())),
+            Err(error) => Err(PyOverflowError::new_err(error.to_string())),
         }
     }
 
@@ -1054,7 +1081,7 @@ impl PyFraction {
         PyInt((&self.0).floor())
     }
 
-    fn __floordiv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+    fn __floordiv__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             (&self.0)
@@ -1121,7 +1148,7 @@ impl PyFraction {
         }
     }
 
-    fn __mod__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+    fn __mod__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             (&self.0)
@@ -1155,7 +1182,7 @@ impl PyFraction {
         }
     }
 
-    fn __mul__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __mul__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
         other
             .extract::<PyRef<Self>>()
@@ -1171,7 +1198,11 @@ impl PyFraction {
         slf
     }
 
-    fn __pow__(&self, exponent: &PyAny, modulo: &PyAny) -> PyResult<PyObject> {
+    fn __pow__(
+        &self,
+        exponent: &Bound<'_, PyAny>,
+        modulo: &Bound<'_, PyAny>,
+    ) -> PyResult<PyObject> {
         let py = exponent.py();
         if modulo.is_none() {
             if let Ok(exponent) = exponent.extract::<PyRef<PyInt>>() {
@@ -1201,7 +1232,7 @@ impl PyFraction {
         }
     }
 
-    fn __radd__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __radd__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
         other
             .extract::<PyRef<PyInt>>()
@@ -1213,7 +1244,7 @@ impl PyFraction {
             })
     }
 
-    fn __rdivmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+    fn __rdivmod__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = dividend.py();
         if let Ok(dividend) = dividend.extract::<PyRef<PyInt>>() {
             try_divmod(&dividend.0, &self.0).map(|(quotient, remainder)| {
@@ -1228,8 +1259,8 @@ impl PyFraction {
         }
     }
 
-    fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
-        PyTuple::new(
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> Bound<'a, PyTuple> {
+        PyTuple::new_bound(
             py,
             [self.numerator().into_py(py), self.denominator().into_py(py)],
         )
@@ -1244,7 +1275,11 @@ impl PyFraction {
         )
     }
 
-    fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<PyObject> {
+    fn __richcmp__(
+        &self,
+        other: &Bound<'_, PyAny>,
+        op: CompareOp,
+    ) -> PyResult<PyObject> {
         let py = other.py();
         other
             .extract::<PyRef<Self>>()
@@ -1263,7 +1298,10 @@ impl PyFraction {
             })
     }
 
-    fn __rfloordiv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+    fn __rfloordiv__(
+        &self,
+        dividend: &Bound<'_, PyAny>,
+    ) -> PyResult<PyObject> {
         let py = dividend.py();
         if let Ok(dividend) = dividend.extract::<PyRef<PyInt>>() {
             (&dividend.0)
@@ -1288,7 +1326,7 @@ impl PyFraction {
         }
     }
 
-    fn __rmod__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+    fn __rmod__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = dividend.py();
         if let Ok(dividend) = dividend.extract::<PyRef<PyInt>>() {
             (&dividend.0)
@@ -1313,7 +1351,7 @@ impl PyFraction {
         }
     }
 
-    fn __rmul__(&self, other: &PyAny) -> PyResult<PyObject> {
+    fn __rmul__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
         other
             .extract::<PyRef<PyInt>>()
@@ -1325,9 +1363,10 @@ impl PyFraction {
             })
     }
 
+    #[pyo3(signature = (digits=None))]
     fn __round__(
         &self,
-        digits: Option<&PyLong>,
+        digits: Option<&Bound<'_, PyLong>>,
         py: Python,
     ) -> PyResult<PyObject> {
         match digits {
@@ -1361,7 +1400,7 @@ impl PyFraction {
         }
     }
 
-    fn __rsub__(&self, subtrahend: &PyAny) -> PyResult<PyObject> {
+    fn __rsub__(&self, subtrahend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = subtrahend.py();
         subtrahend
             .extract::<PyRef<PyInt>>()
@@ -1373,7 +1412,7 @@ impl PyFraction {
             })
     }
 
-    fn __rtruediv__(&self, dividend: &PyAny) -> PyResult<PyObject> {
+    fn __rtruediv__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = dividend.py();
         if let Ok(dividend) = dividend.extract::<PyRef<PyInt>>() {
             (&dividend.0)
@@ -1402,7 +1441,7 @@ impl PyFraction {
         self.0.to_string()
     }
 
-    fn __sub__(&self, minuend: &PyAny) -> PyResult<PyObject> {
+    fn __sub__(&self, minuend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = minuend.py();
         minuend
             .extract::<PyRef<Self>>()
@@ -1414,7 +1453,7 @@ impl PyFraction {
             })
     }
 
-    fn __truediv__(&self, divisor: &PyAny) -> PyResult<PyObject> {
+    fn __truediv__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<Self>>() {
             (&self.0)
@@ -1444,32 +1483,35 @@ impl PyFraction {
     }
 }
 
-fn try_py_fraction_from_value(value: Option<&PyAny>) -> PyResult<PyFraction> {
+fn try_py_fraction_from_value(
+    value: Option<&Bound<'_, PyAny>>,
+) -> PyResult<PyFraction> {
     match value {
         Some(value) => {
             let py = value.py();
             if let Ok(value) = value.extract::<PyFraction>() {
                 Ok(value)
-            } else if let Ok(value) = try_big_int_from_py_any(value) {
+            } else if let Ok(value) = try_big_int_from_bound_py_any_ref(value)
+            {
                 Ok(PyFraction(Fraction::from(value)))
             } else if let Ok((numerator, denominator)) = value
                 .getattr(intern!(py, "numerator"))
-                .and_then(try_big_int_from_py_any)
+                .and_then(try_big_int_from_bound_py_any)
                 .and_then(|numerator| {
                     value
                         .getattr(intern!(py, "denominator"))
-                        .and_then(try_big_int_from_py_any)
+                        .and_then(try_big_int_from_bound_py_any)
                         .map(|denominator| (numerator, denominator))
                 })
             {
                 try_truediv(numerator, denominator).map(PyFraction)
             } else if let Ok(value) = value.downcast::<PyFloat>() {
                 Fraction::try_from(value.value()).map(PyFraction).map_err(
-                    |reason| match reason {
+                    |error| match error {
                         fraction::FromFloatConstructionError::NaN => {
-                            PyValueError::new_err(reason.to_string())
+                            PyValueError::new_err(error.to_string())
                         }
-                        _ => PyOverflowError::new_err(reason.to_string()),
+                        _ => PyOverflowError::new_err(error.to_string()),
                     },
                 )
             } else {
@@ -1530,18 +1572,19 @@ fn hash(value: &BigInt) -> usize {
 }
 
 #[pymodule]
-fn _crithm(py: Python, module: &PyModule) -> PyResult<()> {
+fn _crithm(py: Python, module: &Bound<PyModule>) -> PyResult<()> {
     module.setattr(intern!(py, "__doc__"), env!("CARGO_PKG_DESCRIPTION"))?;
     module.setattr(intern!(py, "__version__"), env!("CARGO_PKG_VERSION"))?;
     module.add_class::<PyEndianness>()?;
     module.add_class::<PyFraction>()?;
     module.add_class::<PyInt>()?;
     module.add_class::<PyTieBreaking>()?;
-    let numbers_module = py.import("numbers")?;
+    let numbers_module = py.import_bound("numbers")?;
     let integral_cls = numbers_module.getattr(intern!(py, "Integral"))?;
     let rational_cls = numbers_module.getattr(intern!(py, "Rational"))?;
-    integral_cls.call_method1("register", (PyInt::type_object(py),))?;
-    rational_cls.call_method1("register", (PyFraction::type_object(py),))?;
+    integral_cls.call_method1("register", (PyInt::type_object_bound(py),))?;
+    rational_cls
+        .call_method1("register", (PyFraction::type_object_bound(py),))?;
     Ok(())
 }
 

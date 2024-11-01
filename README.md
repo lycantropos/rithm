@@ -92,7 +92,7 @@ we can:
   True
   >>> Int(9) < Int(10)
   True
-  
+
   ```
 - calculate
   ```python
@@ -126,7 +126,7 @@ we can:
   Fraction(Int(9), Int(1))
   >>> Int(2) ^ Int(11)
   Int(9)
-  
+
   ```
 
 #### Exact fraction
@@ -314,7 +314,7 @@ Bump version
 bump2version --verbose $CATEGORY
 ```
 
-This will set version to `major.minor.patch-alpha`. 
+This will set version to `major.minor.patch-alpha`.
 
 #### Release
 

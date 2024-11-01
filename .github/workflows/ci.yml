@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_version: [ '3.11', '3.12', '3.13' ]
+        python_version: [ '3.9', '3.10', '3.11', '3.12', '3.13' ]
         platform: [
           {
             os: 'macos-latest',
@@ -68,6 +68,19 @@ jobs:
             rust_target: 'i686-pc-windows-msvc'
           },
         ]
+        exclude:
+          - python_version: '3.9'
+            platform: {
+              os: 'macos-latest',
+              python_architecture: 'x64',
+              rust_target: 'x86_64-apple-darwin'
+            }
+          - python_version: '3.10'
+            platform: {
+              os: 'macos-latest',
+              python_architecture: 'x64',
+              rust_target: 'x86_64-apple-darwin'
+            }
         include:
           - python_version: '3.9'
             platform: {
@@ -360,15 +373,24 @@ jobs:
             python_architecture: 'x86'
           },
         ]
+        exclude:
+          - python_version: '3.9'
+            platform: { os: 'macos-latest', python_architecture: 'x64'}
+          - python_version: '3.10'
+            platform: { os: 'macos-latest', python_architecture: 'x64'}
         include:
+          - python_version: '3.9'
+            platform: { os: 'macos-13', python_architecture: 'x64'}
+          - python_version: '3.10'
+            platform: { os: 'macos-13', python_architecture: 'x64'}
           - python_version: 'pypy-3.9'
-            platform: { os: 'macos-latest', python_architecture: 'x64' }
+            platform: { os: 'macos-13', python_architecture: 'x64' }
           - python_version: 'pypy-3.9'
             platform: { os: 'ubuntu-latest', python_architecture: 'x64' }
           - python_version: 'pypy-3.9'
             platform: { os: 'windows-latest', python_architecture: 'x64' }
           - python_version: 'pypy-3.10'
-            platform: { os: 'macos-latest', python_architecture: 'x64' }
+            platform: { os: 'macos-13', python_architecture: 'x64' }
           - python_version: 'pypy-3.10'
             platform: { os: 'ubuntu-latest', python_architecture: 'x64' }
           - python_version: 'pypy-3.10'

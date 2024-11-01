@@ -20,16 +20,17 @@ def test_value(fraction: Fraction, tie_breaking: TieBreaking) -> None:
     integer_part, fractional_part = divmod(fraction, 1)
     result = fraction.round(tie_breaking)
 
-    assert (integer_part + (2 * fractional_part > 1)
-            <= result
-            <= integer_part + 1)
+    assert (
+        integer_part + (2 * fractional_part > 1) <= result <= integer_part + 1
+    )
 
 
 @given(strategies.fractions_with_builtins)
 def test_connection_with__round__(
-        fraction_with_builtin: FractionWithBuiltin
+    fraction_with_builtin: FractionWithBuiltin,
 ) -> None:
     fraction, builtin_fraction = fraction_with_builtin
 
-    assert is_equivalent_to_builtin_int(fraction.round(TieBreaking.TO_EVEN),
-                                        round(builtin_fraction))
+    assert is_equivalent_to_builtin_int(
+        fraction.round(TieBreaking.TO_EVEN), round(builtin_fraction)
+    )

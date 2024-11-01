@@ -18,8 +18,9 @@ def test_basic(value: int) -> None:
 
 @given(strategies.tie_breakings_values, strategies.tie_breakings_values)
 def test_bijection(first: int, second: int) -> None:
-    assert equivalence(first == second,
-                       TieBreaking(first) is TieBreaking(second))
+    assert equivalence(
+        first == second, TieBreaking(first) is TieBreaking(second)
+    )
 
 
 @given(strategies.tie_breakings_values)

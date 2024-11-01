@@ -59,7 +59,7 @@ def test_float_connection_with_builtin(float_: float) -> None:
 
 @given(strategies.int_strings_with_bases)
 def test_string_with_base_determinism(
-        string_with_base: Tuple[str, int]
+    string_with_base: Tuple[str, int],
 ) -> None:
     string, base = string_with_base
 
@@ -70,7 +70,7 @@ def test_string_with_base_determinism(
 
 @given(strategies.int_strings_with_bases)
 def test_string_with_base_connection_with_builtin(
-        string_with_base: Tuple[str, int]
+    string_with_base: Tuple[str, int],
 ) -> None:
     string, base = string_with_base
 

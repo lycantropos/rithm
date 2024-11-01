@@ -15,7 +15,7 @@ decimal_int_strings_with_leading_zeros = (
 )
 int_strings_with_bases = _strategies.int_strings_with_bases
 invalid_int_strings = _st.text(
-        _st.sampled_from(_string.whitespace + _string.punctuation)
+    _st.sampled_from(_string.whitespace + _string.punctuation)
 )
 int_strings = int_strings_with_bases.map(_itemgetter(0))
 negative_integers = _st.integers(max_value=-1)
@@ -34,17 +34,20 @@ zero_ints_or_builtins = zero_ints | zero_integers
 max_one_byte_signed_builtin_int = 1 << 7
 negative_one_byte_integers = _st.integers(-max_one_byte_signed_builtin_int, -1)
 negative_one_byte_ints = negative_one_byte_integers.map(_Int)
-negative_one_byte_ints_with_builtins = _st.builds(_to_int_with_builtin,
-                                                  negative_one_byte_integers)
+negative_one_byte_ints_with_builtins = _st.builds(
+    _to_int_with_builtin, negative_one_byte_integers
+)
 non_negative_one_byte_integers = _st.integers(
-        0, max_one_byte_signed_builtin_int - 1
+    0, max_one_byte_signed_builtin_int - 1
 )
 non_negative_one_byte_ints = non_negative_one_byte_integers.map(_Int)
 non_negative_one_byte_ints_with_builtins = _st.builds(
-        _to_int_with_builtin, non_negative_one_byte_integers
+    _to_int_with_builtin, non_negative_one_byte_integers
 )
 small_integers = non_negative_one_byte_integers | negative_one_byte_integers
 small_ints = small_integers.map(_Int)
 maybe_small_integers = _st.none() | small_integers
-small_ints_with_builtins = (non_negative_one_byte_ints_with_builtins
-                            | negative_one_byte_ints_with_builtins)
+small_ints_with_builtins = (
+    non_negative_one_byte_ints_with_builtins
+    | negative_one_byte_ints_with_builtins
+)

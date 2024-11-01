@@ -100,10 +100,7 @@ if TYPE_CHECKING:
         def __pos__(self, /) -> Self: ...
 
         def __pow__(
-            self,
-            exponent: Self | int,
-            divisor: Self | None | int = ...,
-            /,
+            self, exponent: Self | int, divisor: Self | None | int = ..., /
         ) -> Fraction | Self: ...
 
         def __radd__(self, other: int, /) -> Self: ...

@@ -21,8 +21,9 @@ def test_polymorphism(base: Int, shift_with_builtin: IntWithBuiltin) -> None:
 
 
 @given(strategies.ints_with_builtins, strategies.small_ints_with_builtins)
-def test_connection_with_builtin(base_with_builtin: IntWithBuiltin,
-                                 shift_with_builtin: IntWithBuiltin) -> None:
+def test_connection_with_builtin(
+    base_with_builtin: IntWithBuiltin, shift_with_builtin: IntWithBuiltin
+) -> None:
     base, base_builtin = base_with_builtin
     shift, shift_builtin = shift_with_builtin
 
@@ -32,5 +33,6 @@ def test_connection_with_builtin(base_with_builtin: IntWithBuiltin,
         with pytest.raises(type(exception)):
             base_builtin << shift_builtin
     else:
-        assert is_equivalent_to_builtin_int(result,
-                                            base_builtin << shift_builtin)
+        assert is_equivalent_to_builtin_int(
+            result, base_builtin << shift_builtin
+        )

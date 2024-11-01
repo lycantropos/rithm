@@ -8,8 +8,9 @@ from . import strategies
 
 
 @given(strategies.ints_with_builtins, strategies.maybe_small_integers)
-def test_connection_with_builtin(int_with_builtin: IntWithBuiltin,
-                                 digits: Optional[int]) -> None:
+def test_connection_with_builtin(
+    int_with_builtin: IntWithBuiltin, digits: Optional[int]
+) -> None:
     int_, builtin_int = int_with_builtin
 
     result = round(int_, digits)

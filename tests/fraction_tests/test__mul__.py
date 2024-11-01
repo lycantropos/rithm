@@ -31,15 +31,16 @@ def test_absorbing_element(first: Fraction, second: Fraction) -> None:
 
 
 @given(strategies.fractions, strategies.fractions, strategies.fractions)
-def test_associativity(first: Fraction,
-                       second: Fraction,
-                       third: Fraction) -> None:
+def test_associativity(
+    first: Fraction, second: Fraction, third: Fraction
+) -> None:
     assert (first * second) * third == first * (second * third)
 
 
 @given(strategies.fractions, strategies.ints_with_builtins)
-def test_polymorphism(first: Fraction,
-                      second_with_builtin: IntWithBuiltin) -> None:
+def test_polymorphism(
+    first: Fraction, second_with_builtin: IntWithBuiltin
+) -> None:
     second, second_builtin = second_with_builtin
 
     assert first * second == first * second_builtin
@@ -47,11 +48,12 @@ def test_polymorphism(first: Fraction,
 
 @given(strategies.fractions_with_builtins, strategies.rationals_with_builtins)
 def test_connection_with_builtin(
-        first_with_builtin: FractionWithBuiltin,
-        second_with_builtin: RationalWithBuiltin
+    first_with_builtin: FractionWithBuiltin,
+    second_with_builtin: RationalWithBuiltin,
 ) -> None:
     first, first_builtin = first_with_builtin
     second, second_builtin = second_with_builtin
 
-    assert is_equivalent_to_builtin_fraction(first * second,
-                                             first_builtin * second_builtin)
+    assert is_equivalent_to_builtin_fraction(
+        first * second, first_builtin * second_builtin
+    )

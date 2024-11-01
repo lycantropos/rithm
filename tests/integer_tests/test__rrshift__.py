@@ -8,8 +8,9 @@ from . import strategies
 
 
 @given(strategies.ints_with_builtins, strategies.small_ints)
-def test_connection_with__rshift__(base_with_builtin: IntWithBuiltin,
-                                   shift: Int) -> None:
+def test_connection_with__rshift__(
+    base_with_builtin: IntWithBuiltin, shift: Int
+) -> None:
     base, base_builtin = base_with_builtin
 
     try:

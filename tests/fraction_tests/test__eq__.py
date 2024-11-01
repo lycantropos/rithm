@@ -23,22 +23,23 @@ def test_symmetry(first: Fraction, second: Fraction) -> None:
 
 
 @given(strategies.fractions, strategies.fractions, strategies.fractions)
-def test_transitivity(first: Fraction,
-                      second: Fraction,
-                      third: Fraction) -> None:
+def test_transitivity(
+    first: Fraction, second: Fraction, third: Fraction
+) -> None:
     assert implication(first == second and second == third, first == third)
 
 
 @given(strategies.fractions, strategies.fractions_or_ints_or_builtin_ints)
-def test_connection_with_inequality(first: Fraction,
-                                    second: FractionOrIntOrBuiltinInt) -> None:
+def test_connection_with_inequality(
+    first: Fraction, second: FractionOrIntOrBuiltinInt
+) -> None:
     assert equivalence(first == second, first == second)
 
 
 @given(strategies.fractions_with_builtins, strategies.rationals_with_builtins)
 def test_connection_with_builtin(
-        first_with_builtin: FractionWithBuiltin,
-        second_with_builtin: RationalWithBuiltin
+    first_with_builtin: FractionWithBuiltin,
+    second_with_builtin: RationalWithBuiltin,
 ) -> None:
     first, first_builtin = first_with_builtin
     second, second_builtin = second_with_builtin

@@ -29,8 +29,9 @@ def test_alternatives(dividend: Int, divisor: IntOrBuiltin) -> None:
 
 
 @given(strategies.ints, strategies.ints_with_builtins)
-def test_polymorphism(dividend: Int,
-                      divisor_with_builtin: IntWithBuiltin) -> None:
+def test_polymorphism(
+    dividend: Int, divisor_with_builtin: IntWithBuiltin
+) -> None:
     divisor, divisor_builtin = divisor_with_builtin
 
     try:
@@ -43,8 +44,9 @@ def test_polymorphism(dividend: Int,
 
 
 @given(strategies.ints_with_builtins, strategies.ints_with_builtins)
-def test_connection_with_builtin(dividend_with_builtin: IntWithBuiltin,
-                                 divisor_with_builtin: IntWithBuiltin) -> None:
+def test_connection_with_builtin(
+    dividend_with_builtin: IntWithBuiltin, divisor_with_builtin: IntWithBuiltin
+) -> None:
     dividend, dividend_builtin = dividend_with_builtin
     divisor, divisor_builtin = divisor_with_builtin
 
@@ -54,8 +56,9 @@ def test_connection_with_builtin(dividend_with_builtin: IntWithBuiltin,
         with pytest.raises(type(exception)):
             divmod(dividend_builtin, divisor_builtin)
     else:
-        builtin_quotient, builtin_remainder = divmod(dividend_builtin,
-                                                     divisor_builtin)
+        builtin_quotient, builtin_remainder = divmod(
+            dividend_builtin, divisor_builtin
+        )
 
         assert is_equivalent_to_builtin_int(quotient, builtin_quotient)
         assert is_equivalent_to_builtin_int(remainder, builtin_remainder)

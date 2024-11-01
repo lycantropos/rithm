@@ -22,16 +22,16 @@ def test_round_trip(int_: Int, endianness: Endianness) -> None:
 
 
 @given(strategies.ints_with_builtins, strategies.endianesses)
-def test_connection_with_builtin(int_with_builtin: IntWithBuiltin,
-                                 endianness: Endianness) -> None:
+def test_connection_with_builtin(
+    int_with_builtin: IntWithBuiltin, endianness: Endianness
+) -> None:
     int_, builtin_int = int_with_builtin
 
-    assert (int_.to_bytes(endianness)
-            == builtin_int.to_bytes(to_bytes_count(builtin_int),
-                                    'big'
-                                    if endianness is Endianness.BIG
-                                    else 'little',
-                                    signed=True))
+    assert int_.to_bytes(endianness) == builtin_int.to_bytes(
+        to_bytes_count(builtin_int),
+        'big' if endianness is Endianness.BIG else 'little',
+        signed=True,
+    )
 
 
 def to_bytes_count(value: int) -> int:

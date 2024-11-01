@@ -18,8 +18,9 @@ def test_basic(value: int) -> None:
 
 @given(strategies.endiannesses_values, strategies.endiannesses_values)
 def test_bijection(first: int, second: int) -> None:
-    assert equivalence(first == second,
-                       Endianness(first) is Endianness(second))
+    assert equivalence(
+        first == second, Endianness(first) is Endianness(second)
+    )
 
 
 @given(strategies.endiannesses_values)

@@ -15,8 +15,9 @@ from tests.utils import (
 from . import strategies
 
 
-@given(strategies.fractions,
-       strategies.non_zero_fractions_or_ints_or_builtin_ints)
+@given(
+    strategies.fractions, strategies.non_zero_fractions_or_ints_or_builtin_ints
+)
 def test_basic(dividend: Fraction, divisor: FractionOrIntOrBuiltinInt) -> None:
     result = divmod(dividend, divisor)
 
@@ -26,18 +27,21 @@ def test_basic(dividend: Fraction, divisor: FractionOrIntOrBuiltinInt) -> None:
     assert isinstance(result[1], Fraction)
 
 
-@given(strategies.fractions,
-       strategies.non_zero_fractions_or_ints_or_builtin_ints)
-def test_alternatives(dividend: Fraction,
-                      divisor: FractionOrIntOrBuiltinInt) -> None:
+@given(
+    strategies.fractions, strategies.non_zero_fractions_or_ints_or_builtin_ints
+)
+def test_alternatives(
+    dividend: Fraction, divisor: FractionOrIntOrBuiltinInt
+) -> None:
     result = divmod(dividend, divisor)
 
     assert result == (dividend // divisor, dividend % divisor)
 
 
 @given(strategies.fractions, strategies.ints_with_builtins)
-def test_polymorphism(dividend: Fraction,
-                      divisor_with_builtin: IntWithBuiltin) -> None:
+def test_polymorphism(
+    dividend: Fraction, divisor_with_builtin: IntWithBuiltin
+) -> None:
     divisor, divisor_builtin = divisor_with_builtin
 
     try:
@@ -51,8 +55,8 @@ def test_polymorphism(dividend: Fraction,
 
 @given(strategies.fractions_with_builtins, strategies.rationals_with_builtins)
 def test_connection_with_builtin(
-        dividend_with_builtin: FractionWithBuiltin,
-        divisor_with_builtin: RationalWithBuiltin
+    dividend_with_builtin: FractionWithBuiltin,
+    divisor_with_builtin: RationalWithBuiltin,
 ) -> None:
     dividend, dividend_builtin = dividend_with_builtin
     divisor, divisor_builtin = divisor_with_builtin
@@ -63,15 +67,17 @@ def test_connection_with_builtin(
         with pytest.raises(type(exception)):
             divmod(dividend_builtin, divisor_builtin)
     else:
-        builtin_quotient, builtin_remainder = divmod(dividend_builtin,
-                                                     divisor_builtin)
+        builtin_quotient, builtin_remainder = divmod(
+            dividend_builtin, divisor_builtin
+        )
 
         assert is_equivalent_to_builtin_int(quotient, builtin_quotient)
         assert is_equivalent_to_builtin_fraction(remainder, builtin_remainder)
 
 
 @given(strategies.fractions, strategies.zero_fractions_or_ints_or_builtin_ints)
-def test_zero_divisor(dividend: Fraction,
-                      divisor: FractionOrIntOrBuiltinInt) -> None:
+def test_zero_divisor(
+    dividend: Fraction, divisor: FractionOrIntOrBuiltinInt
+) -> None:
     with pytest.raises(ZeroDivisionError):
         divmod(dividend, divisor)

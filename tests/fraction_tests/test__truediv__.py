@@ -15,8 +15,9 @@ from tests.utils import (
 from . import strategies
 
 
-@given(strategies.fractions,
-       strategies.non_zero_fractions_or_ints_or_builtin_ints)
+@given(
+    strategies.fractions, strategies.non_zero_fractions_or_ints_or_builtin_ints
+)
 def test_basic(dividend: Fraction, divisor: FractionOrIntOrBuiltinInt) -> None:
     result = dividend / divisor
 
@@ -26,8 +27,9 @@ def test_basic(dividend: Fraction, divisor: FractionOrIntOrBuiltinInt) -> None:
 
 @given(strategies.non_zero_fractions, strategies.non_zero_fractions)
 def test_commutative_case(dividend: Fraction, divisor: Fraction) -> None:
-    assert equivalence(dividend / divisor == divisor / dividend,
-                       abs(dividend) == abs(divisor))
+    assert equivalence(
+        dividend / divisor == divisor / dividend, abs(dividend) == abs(divisor)
+    )
 
 
 @given(strategies.zero_fractions, strategies.non_zero_fractions)
@@ -36,8 +38,9 @@ def test_left_absorbing_element(dividend: Fraction, divisor: Fraction) -> None:
 
 
 @given(strategies.fractions, strategies.ints_with_builtins)
-def test_polymorphism(dividend: Fraction,
-                      divisor_with_builtin: IntWithBuiltin) -> None:
+def test_polymorphism(
+    dividend: Fraction, divisor_with_builtin: IntWithBuiltin
+) -> None:
     divisor, divisor_builtin = divisor_with_builtin
 
     try:
@@ -51,8 +54,8 @@ def test_polymorphism(dividend: Fraction,
 
 @given(strategies.fractions_with_builtins, strategies.rationals_with_builtins)
 def test_connection_with_builtin(
-        dividend_with_builtin: FractionWithBuiltin,
-        divisor_with_builtin: RationalWithBuiltin
+    dividend_with_builtin: FractionWithBuiltin,
+    divisor_with_builtin: RationalWithBuiltin,
 ) -> None:
     dividend, dividend_builtin = dividend_with_builtin
     divisor, divisor_builtin = divisor_with_builtin
@@ -64,5 +67,5 @@ def test_connection_with_builtin(
             dividend_builtin / divisor_builtin
     else:
         assert is_equivalent_to_builtin_fraction(
-                result, dividend_builtin / divisor_builtin
+            result, dividend_builtin / divisor_builtin
         )

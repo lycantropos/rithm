@@ -17,5 +17,6 @@ def test_basic(int_: Int) -> None:
 def test_connection_with_builtin(int_with_builtin: IntWithBuiltin) -> None:
     int_, builtin_int = int_with_builtin
 
-    assert is_equivalent_to_builtin_int(math.ceil(int_),
-                                        math.ceil(builtin_int))
+    assert is_equivalent_to_builtin_int(
+        math.ceil(int_), math.ceil(builtin_int)
+    )

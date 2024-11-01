@@ -65,10 +65,7 @@ class Int:
     def __new__(cls, value: str, base: int | None = ..., /) -> Self: ...
 
     def __new__(
-        cls,
-        value: Self | float | int | str = 0,
-        base: int | None = None,
-        /,
+        cls, value: Self | float | int | str = 0, base: int | None = None, /
     ) -> Self:
         self = super().__new__(cls)
         if base is None:
@@ -257,10 +254,7 @@ class Int:
     ) -> Self: ...
 
     def __pow__(
-        self,
-        exponent: Self | int,
-        divisor: None | Self | int = None,
-        /,
+        self, exponent: Self | int, divisor: None | Self | int = None, /
     ) -> Fraction | Self:
         return (
             (

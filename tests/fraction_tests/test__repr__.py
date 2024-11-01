@@ -12,6 +12,13 @@ from . import strategies
 def test_round_trip(fraction: Fraction) -> None:
     result = repr(fraction)
 
-    assert (eval(result, {**vars(sys.modules[Fraction.__module__]),
-                          **vars(sys.modules[Int.__module__])})
-            == fraction)
+    assert (
+        eval(
+            result,
+            {
+                **vars(sys.modules[Fraction.__module__]),
+                **vars(sys.modules[Int.__module__]),
+            },
+        )
+        == fraction
+    )

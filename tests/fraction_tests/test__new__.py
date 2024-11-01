@@ -21,8 +21,9 @@ def test_no_argument_connection_with_builtin() -> None:
 
 
 @given(strategies.ints_with_builtins, strategies.ints_with_builtins)
-def test_connection_with_builtin(numerators: IntWithBuiltin,
-                                 denominators: IntWithBuiltin) -> None:
+def test_connection_with_builtin(
+    numerators: IntWithBuiltin, denominators: IntWithBuiltin
+) -> None:
     numerator, builtin_numerator = numerators
     denominator, builtin_denominator = denominators
 
@@ -33,8 +34,7 @@ def test_connection_with_builtin(numerators: IntWithBuiltin,
             fractions.Fraction(builtin_numerator, builtin_denominator)
     else:
         assert is_equivalent_to_builtin_fraction(
-                result,
-                fractions.Fraction(builtin_numerator, builtin_denominator)
+            result, fractions.Fraction(builtin_numerator, builtin_denominator)
         )
 
 
@@ -46,13 +46,14 @@ def test_float_connection_with_builtin(float_: float) -> None:
         with pytest.raises(type(error)):
             fractions.Fraction(float_)
     else:
-        assert is_equivalent_to_builtin_fraction(result,
-                                                 fractions.Fraction(float_))
+        assert is_equivalent_to_builtin_fraction(
+            result, fractions.Fraction(float_)
+        )
 
 
 @given(strategies.builtin_fractions)
 def test_rational_connection_with_builtin(
-        rational: fractions.Fraction
+    rational: fractions.Fraction,
 ) -> None:
     result = Fraction(rational)
 
@@ -61,14 +62,14 @@ def test_rational_connection_with_builtin(
 
 @given(strategies.ints_with_builtins)
 def test_numerator_only_connection_with_builtin(
-        numerators: IntWithBuiltin
+    numerators: IntWithBuiltin,
 ) -> None:
     numerator, builtin_numerator = numerators
 
     result = Fraction(numerator)
 
     assert is_equivalent_to_builtin_fraction(
-            result, fractions.Fraction(builtin_numerator)
+        result, fractions.Fraction(builtin_numerator)
     )
 
 
@@ -78,15 +79,18 @@ def test_invalid_single_argument(value: Any) -> None:
         Fraction(value)
 
 
-@given(strategies.invalid_fractions_components,
-       strategies.non_zero_ints_or_builtins)
+@given(
+    strategies.invalid_fractions_components,
+    strategies.non_zero_ints_or_builtins,
+)
 def test_invalid_numerator(numerator: Any, denominator: IntOrBuiltin) -> None:
     with pytest.raises(TypeError):
         Fraction(numerator, denominator)
 
 
 @given(strategies.ints_or_builtins, strategies.invalid_fractions_components)
-def test_invalid_denominator(numerator: IntOrBuiltin,
-                             denominator: Any) -> None:
+def test_invalid_denominator(
+    numerator: IntOrBuiltin, denominator: Any
+) -> None:
     with pytest.raises(TypeError):
         Fraction(numerator, denominator)

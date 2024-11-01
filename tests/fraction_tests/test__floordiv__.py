@@ -17,8 +17,9 @@ from tests.utils import (
 from . import strategies
 
 
-@given(strategies.fractions,
-       strategies.non_zero_fractions_or_ints_or_builtin_ints)
+@given(
+    strategies.fractions, strategies.non_zero_fractions_or_ints_or_builtin_ints
+)
 def test_basic(dividend: Fraction, divisor: FractionOrIntOrBuiltinInt) -> None:
     result = dividend // divisor
 
@@ -42,8 +43,9 @@ def test_alternatives(dividend: Fraction, divisor: Fraction) -> None:
 
 
 @given(strategies.fractions, strategies.ints_with_builtins)
-def test_polymorphism(dividend: Fraction,
-                      divisor_with_builtin: IntWithBuiltin) -> None:
+def test_polymorphism(
+    dividend: Fraction, divisor_with_builtin: IntWithBuiltin
+) -> None:
     divisor, divisor_builtin = divisor_with_builtin
 
     try:
@@ -57,8 +59,8 @@ def test_polymorphism(dividend: Fraction,
 
 @given(strategies.fractions_with_builtins, strategies.rationals_with_builtins)
 def test_connection_with_builtin(
-        dividend_with_builtin: FractionWithBuiltin,
-        divisor_with_builtin: RationalWithBuiltin
+    dividend_with_builtin: FractionWithBuiltin,
+    divisor_with_builtin: RationalWithBuiltin,
 ) -> None:
     dividend, dividend_builtin = dividend_with_builtin
     divisor, divisor_builtin = divisor_with_builtin
@@ -70,12 +72,13 @@ def test_connection_with_builtin(
             dividend_builtin // divisor_builtin
     else:
         assert is_equivalent_to_builtin_int(
-                result, dividend_builtin // divisor_builtin
+            result, dividend_builtin // divisor_builtin
         )
 
 
 @given(strategies.fractions, strategies.zero_fractions_or_ints_or_builtin_ints)
-def test_zero_divisor(dividend: Fraction,
-                      divisor: FractionOrIntOrBuiltinInt) -> None:
+def test_zero_divisor(
+    dividend: Fraction, divisor: FractionOrIntOrBuiltinInt
+) -> None:
     with pytest.raises(ZeroDivisionError):
         dividend // divisor

@@ -1,5 +1,6 @@
 [project]
 name = "rithm"
+description = "Arbitrary precision arithmetic."
 authors = [{ name = "Azat Ibrakov", email = "azatibrakov@gmail.com" }]
 readme = "README.md"
 license = { file = "LICENSE" }

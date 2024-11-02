@@ -36,16 +36,16 @@ jobs:
           python-version: '3.13'
       - name: 'Check Python metadata'
         run: >
-          description=$(python -c 'import json, pathlib, tomllib; print(json.dumps(tomllib.loads(pathlib.Path("./pyproject.toml").read_text())))' | jq --raw-output '.project.description')
+          DESCRIPTION=$(python -c 'import json, pathlib, tomllib; print(json.dumps(tomllib.loads(pathlib.Path("./pyproject.toml").read_text())))' | jq --raw-output '.project.description')
 
-          docstring=$(python -c "import ${REPOSITORY_NAME//-/_} as module; assert module.__doc__ is not None; print(module.__doc__)")
+          REPOSITORY_NAME=${GITHUB_REPOSITORY#"$GITHUB_REPOSITORY_OWNER"/}
 
-          if [[ $description != "$docstring" ]]; then
-            echo "Project description should be equal to module docstring, but found \"$description\" != \"$docstring\".";
+          DOCSTRING=$(python -c "import ${REPOSITORY_NAME//-/_} as module; assert module.__doc__ is not None; print(module.__doc__)")
+
+          if [[ $DESCRIPTION != "$DOCSTRING" ]]; then
+            echo "Project description should be equal to module docstring, but found \"$DESCRIPTION\" != \"$DOCSTRING\".";
             exit 1;
           fi
-        env:
-          REPOSITORY_NAME: ${{ github.repository }}
       - name: 'Install pre-commit'
         run: python -m pip install -U pre-commit
       - name: 'Run pre-commit'

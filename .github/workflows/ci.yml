@@ -155,7 +155,7 @@ jobs:
       - name: 'Collect Python coverage'
         run: coverage xml -o coverage_python.xml
       - name: 'Install Rust coverage dependencies'
-        run: cargo install grcov
+        uses: taiki-e/install-action@grcov
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Collect Rust coverage'
         run: >
@@ -323,7 +323,7 @@ jobs:
           target: ${{ matrix.platform.rust_target }}
         if: ${{ runner.os != 'Linux' }}
       - name: 'Setup QEMU'
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
         if: ${{ runner.os == 'Linux' }}
@@ -421,7 +421,7 @@ jobs:
           name: dist
           path: dist
       - name: 'Upload'
-        uses: pypa/gh-action-pypi-publish@v1.8.6
+        uses: pypa/gh-action-pypi-publish@v1.11.0
         with:
-          packages_dir: dist
+          packages-dir: dist
           password: ${{ secrets.PYPI_API_TOKEN }}

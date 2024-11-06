@@ -137,7 +137,7 @@ jobs:
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Run Rust doctests'
         run: |
-          eval "$(rustup run nightly cargo llvm-cov show-env --doctests --export-prefix --no-cfg-coverage)"
+          source < "$(rustup run nightly cargo llvm-cov show-env --doctests --export-prefix --no-cfg-coverage)"
           export CARGO_TARGET_DIR=$CARGO_LLVM_COV_TARGET_DIR
           rustup run nightly cargo test --doc --target=${{ matrix.platform.rust_target }}
         env:
@@ -145,7 +145,7 @@ jobs:
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install in editable mode with Rust extensions'
         run: |
-          eval "$(cargo llvm-cov show-env --export-prefix --no-cfg-coverage)"
+          source < "$(cargo llvm-cov show-env --export-prefix --no-cfg-coverage)"
           export CARGO_TARGET_DIR=$CARGO_LLVM_COV_TARGET_DIR
           rustup run nightly python -m pip -v install -e '.[tests]'
         env:

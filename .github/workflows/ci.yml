@@ -129,8 +129,11 @@ jobs:
       - name: 'Setup Rust'
         uses: dtolnay/rust-toolchain@nightly
         with:
-          components: rustfmt
+          components: llvm-tools,rustfmt
           target: ${{ matrix.platform.rust_target }}
+        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Install Rust coverage dependencies'
+        uses: taiki-e/install-action@cargo-llvm-cov
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Run Rust doctests'
         run: |
@@ -163,9 +166,6 @@ jobs:
           RUST_BACKTRACE: full
       - name: 'Collect Python coverage'
         run: coverage xml -o coverage_python.xml
-      - name: 'Install Rust coverage dependencies'
-        uses: taiki-e/install-action@cargo-llvm-cov
-        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Collect Rust coverage'
         run: >
           rustup run nightly cargo llvm-cov report --cobertura --branch

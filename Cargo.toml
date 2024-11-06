@@ -14,10 +14,12 @@ crate-type = ["cdylib", "rlib"]
 [dependencies.pyo3]
 version = "^0.22.5"
 features = ["extension-module"]
+optional = true
 
 [dependencies.pyo3-ffi]
 version = "^0.22.5"
 features = ["extension-module"]
+optional = true
 
 [dependencies.traiter]
 version = "^4.0.0"
@@ -25,3 +27,6 @@ features = ["numbers", "std"]
 
 [build-dependencies]
 pyo3-build-config = "^0.22.5"
+
+[features]
+python_binding = ["dep:pyo3", "dep:pyo3-ffi"]

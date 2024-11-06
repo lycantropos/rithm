@@ -11,6 +11,7 @@ pub struct BigInt<Digit, const DIGIT_BITNESS: usize> {
     pub(super) digits: Vec<Digit>,
 }
 
+#[cfg(feature = "python_binding")]
 impl<Digit, const DIGIT_BITNESS: usize> BigInt<Digit, DIGIT_BITNESS> {
     pub(crate) fn digits(&self) -> &[Digit] {
         &self.digits

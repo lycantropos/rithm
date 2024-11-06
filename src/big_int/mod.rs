@@ -1,3 +1,4 @@
+#[cfg(feature = "python_binding")]
 pub(crate) use self::constants::{
     MAX_REPRESENTABLE_BASE, MIN_REPRESENTABLE_BASE,
 };

@@ -15,6 +15,9 @@ if platform.python_implementation() == 'CPython':
     from setuptools_rust import RustExtension
 
     parameters.update(
-        rust_extensions=[RustExtension('rithm._crithm')], zip_safe=False
+        rust_extensions=[
+            RustExtension('rithm._crithm', features=['python_binding'])
+        ],
+        zip_safe=False,
     )
 setup(**parameters)

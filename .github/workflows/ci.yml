@@ -133,23 +133,20 @@ jobs:
           target: ${{ matrix.platform.rust_target }}
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Run Rust doctests'
-        run: rustup run nightly cargo test --doc --target=${{ matrix.platform.rust_target }}
+        run: |
+          eval "$(rustup run nightly cargo llvm-cov show-env --doctests --export-prefix --no-cfg-coverage)"
+          export CARGO_TARGET_DIR=$CARGO_LLVM_COV_TARGET_DIR
+          rustup run nightly cargo test --doc --target=${{ matrix.platform.rust_target }}
         env:
-          CARGO_INCREMENTAL: 0
-          RUSTDOCFLAGS: >
-            -Zprofile -Ccodegen-units=1 -Copt-level=0 -Coverflow-checks=off
-            -Zpanic_abort_tests -Cpanic=abort
-          RUSTFLAGS: >
-            -Zprofile -Ccodegen-units=1 -Copt-level=0 -Coverflow-checks=off
-            -Zpanic_abort_tests -Cpanic=abort
+          CARGO_INCREMENTAL: 1
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install in editable mode with Rust extensions'
-        run: rustup run nightly python -m pip -v install -e '.[tests]'
+        run: |
+          eval "$(cargo llvm-cov show-env --export-prefix --no-cfg-coverage)"
+          export CARGO_TARGET_DIR=$CARGO_LLVM_COV_TARGET_DIR
+          rustup run nightly python -m pip -v install -e '.[tests]'
         env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: >
-            -Zprofile -Ccodegen-units=1 -Copt-level=0 -Coverflow-checks=off
-            -Zpanic_abort_tests -Cpanic=abort
+          CARGO_INCREMENTAL: 1
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install in editable mode'
         run: python -m pip -v install -e '.[tests]'
@@ -167,12 +164,12 @@ jobs:
       - name: 'Collect Python coverage'
         run: coverage xml -o coverage_python.xml
       - name: 'Install Rust coverage dependencies'
-        uses: taiki-e/install-action@grcov
+        uses: taiki-e/install-action@cargo-llvm-cov
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Collect Rust coverage'
         run: >
-          grcov target -s . -t cobertura --llvm --branch --ignore-not-existing
-          --ignore "/*" -o coverage_rust.xml
+          rustup run nightly cargo llvm-cov report --cobertura --branch
+          --output-path coverage.xml
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload PyPy coverage'
         uses: codecov/codecov-action@v4

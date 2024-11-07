@@ -181,6 +181,7 @@ jobs:
         with:
           fail_ci_if_error: false
           files: ./coverage_python.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ startsWith(matrix.python_version, 'pypy') }}
         continue-on-error: true
       - name: 'Upload СPython coverage'
@@ -188,6 +189,7 @@ jobs:
         with:
           fail_ci_if_error: false
           files: ./coverage_python.xml,./coverage_rust.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
         continue-on-error: true
 

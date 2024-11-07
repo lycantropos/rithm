@@ -149,7 +149,6 @@ jobs:
       - name: 'Install in editable mode with Rust extensions'
         run: |
           source <"$(cargo llvm-cov show-env --export-prefix --no-cfg-coverage)"
-          export CARGO_TARGET_DIR=$CARGO_LLVM_COV_TARGET_DIR
           rustup run nightly python -m pip -v install -e '.[tests]'
         env:
           CARGO_INCREMENTAL: 1
@@ -160,11 +159,16 @@ jobs:
       - name: 'Install Python coverage dependencies'
         run: python -m pip install --upgrade coverage[toml]
       - name: 'Run Python doctests'
-        run: >
+        run: |
+          source <"$(cargo llvm-cov show-env --export-prefix --no-cfg-coverage)"
+          export CARGO_TARGET_DIR=$CARGO_LLVM_COV_TARGET_DIR
           coverage run -m doctest README.md
-          && coverage run --append -m pytest --doctest-modules --ignore=tests
+          coverage run --append -m pytest --doctest-modules --ignore=tests
       - name: 'Run tests'
-        run: coverage run --append -m pytest
+        run: |
+          source <"$(cargo llvm-cov show-env --export-prefix --no-cfg-coverage)"
+          export CARGO_TARGET_DIR=$CARGO_LLVM_COV_TARGET_DIR
+          coverage run --append -m pytest
         env:
           RUST_BACKTRACE: full
       - name: 'Collect Python coverage'

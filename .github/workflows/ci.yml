@@ -155,9 +155,9 @@ jobs:
           CARGO_INCREMENTAL: 1
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Collect Rust coverage'
-        run: >
-          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
-          report --branch --output-path coverage_0.txt
+        run: |
+          eval "$(cargo llvm-cov show-env --export-prefix)"
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov report --branch --output-path coverage_0.txt
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload coverage'
         uses: actions/upload-artifact@v4
@@ -173,9 +173,9 @@ jobs:
         env:
           CARGO_INCREMENTAL: 1
       - name: 'Collect Rust coverage'
-        run: >
-          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
-          report --branch --output-path coverage_1.txt
+        run: |
+          eval "$(cargo llvm-cov show-env --export-prefix)"
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov report --branch --output-path coverage_1.txt
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload coverage'
         uses: actions/upload-artifact@v4
@@ -192,9 +192,9 @@ jobs:
           coverage run -m doctest README.md
           coverage run --append -m pytest --doctest-modules --ignore=tests
       - name: 'Collect Rust coverage'
-        run: >
-          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
-          report --branch --output-path coverage_2.txt
+        run: |
+          eval "$(cargo llvm-cov show-env --export-prefix)"
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov report --branch --output-path coverage_2.txt
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload coverage'
         uses: actions/upload-artifact@v4
@@ -208,9 +208,9 @@ jobs:
         env:
           RUST_BACKTRACE: full
       - name: 'Collect Rust coverage'
-        run: >
-          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
-          report --branch --output-path coverage_3.txt
+        run: |
+          eval "$(cargo llvm-cov show-env --export-prefix)"
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov report --branch --output-path coverage_3.txt
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload coverage'
         uses: actions/upload-artifact@v4
@@ -222,9 +222,9 @@ jobs:
       - name: 'Collect Python coverage'
         run: coverage xml -o coverage_python.xml
       - name: 'Collect Rust coverage'
-        run: >
-          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
-          report --cobertura --branch --output-path coverage_rust.xml
+        run: |
+          eval "$(cargo llvm-cov show-env --export-prefix)"
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov report --cobertura --branch --output-path coverage_rust.xml
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload PyPy coverage'
         uses: codecov/codecov-action@v4

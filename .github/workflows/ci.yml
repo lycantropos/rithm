@@ -145,19 +145,25 @@ jobs:
       - name: 'Install Rust coverage dependencies'
         uses: taiki-e/install-action@cargo-llvm-cov
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Show coverage data'
+        run: ls -lah **/*.profraw || true
       - name: 'Run Rust doctests'
         run: >
-          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov test --branch --doctests
-          --target=${{ matrix.platform.rust_target }}
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
+          test --branch --doctests
         env:
           CARGO_INCREMENTAL: 1
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Show coverage data'
+        run: ls -lah **/*.profraw || true
       - name: 'Install in editable mode'
         run: |
           ${{ !startsWith(matrix.python_version, 'pypy') && 'eval `cargo llvm-cov show-env --export-prefix`' || '' }}
           ${{ !startsWith(matrix.python_version, 'pypy') && 'CARGO_TARGET_DIR=$CARGO_LLVM_COV_TARGET_DIR' || '' }} python -m pip -v install -e '.[tests]'
         env:
           CARGO_INCREMENTAL: 1
+      - name: 'Show coverage data'
+        run: ls -lah **/*.profraw || true
       - name: 'Install Python coverage dependencies'
         run: python -m pip install --upgrade coverage[toml]
       - name: 'Run Python doctests'
@@ -165,10 +171,14 @@ jobs:
           ${{ !startsWith(matrix.python_version, 'pypy') && 'eval `cargo llvm-cov show-env --export-prefix`' || '' }}
           coverage run -m doctest README.md
           coverage run --append -m pytest --doctest-modules --ignore=tests
+      - name: 'Show coverage data'
+        run: ls -lah **/*.profraw || true
       - name: 'Run tests'
         run: coverage run --append -m pytest
         env:
           RUST_BACKTRACE: full
+      - name: 'Show coverage data'
+        run: ls -lah **/*.profraw || true
       - name: 'Collect Python coverage'
         run: coverage xml -o coverage_python.xml
       - name: 'Collect Rust coverage'
@@ -335,9 +345,9 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@v4
       - name: 'Setup Rust'
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@master
         with:
-          target: ${{ matrix.platform.rust_target }}
+          toolchain: stable-${{ matrix.platform.rust_target }}
         if: ${{ runner.os != 'Linux' }}
       - name: 'Setup QEMU'
         uses: docker/setup-qemu-action@v3

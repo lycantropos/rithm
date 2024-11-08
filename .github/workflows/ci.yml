@@ -157,13 +157,13 @@ jobs:
       - name: 'Collect Rust coverage'
         run: >
           rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
-          report --cobertura --branch --output-path coverage_rust.xml
+          report --branch --output-path coverage_0.txt
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload coverage'
         uses: actions/upload-artifact@v4
         with:
           name: 'coverage_0_${{ matrix.python_version }}_${{ matrix.platform.rust_target }}'
-          path: 'coverage_rust.xml'
+          path: 'coverage_0.txt'
       - name: 'Show coverage data'
         run: find . -name '*.profraw'
       - name: 'Install in editable mode'
@@ -175,13 +175,13 @@ jobs:
       - name: 'Collect Rust coverage'
         run: >
           rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
-          report --cobertura --branch --output-path coverage_rust.xml
+          report --branch --output-path coverage_1.txt
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload coverage'
         uses: actions/upload-artifact@v4
         with:
           name: 'coverage_1_${{ matrix.python_version }}_${{ matrix.platform.rust_target }}'
-          path: 'coverage_rust.xml'
+          path: 'coverage_1.txt'
       - name: 'Show coverage data'
         run: find . -name '*.profraw'
       - name: 'Install Python coverage dependencies'
@@ -194,13 +194,13 @@ jobs:
       - name: 'Collect Rust coverage'
         run: >
           rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
-          report --cobertura --branch --output-path coverage_rust.xml
+          report --branch --output-path coverage_2.txt
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload coverage'
         uses: actions/upload-artifact@v4
         with:
           name: 'coverage_2_${{ matrix.python_version }}_${{ matrix.platform.rust_target }}'
-          path: 'coverage_rust.xml'
+          path: 'coverage_2.txt'
       - name: 'Show coverage data'
         run: find . -name '*.profraw'
       - name: 'Run tests'
@@ -210,13 +210,13 @@ jobs:
       - name: 'Collect Rust coverage'
         run: >
           rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
-          report --cobertura --branch --output-path coverage_rust.xml
+          report --branch --output-path coverage_3.txt
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload coverage'
         uses: actions/upload-artifact@v4
         with:
           name: 'coverage_3_${{ matrix.python_version }}_${{ matrix.platform.rust_target }}'
-          path: 'coverage_rust.xml'
+          path: 'coverage_3.txt'
       - name: 'Show coverage data'
         run: find . -name '*.profraw'
       - name: 'Collect Python coverage'

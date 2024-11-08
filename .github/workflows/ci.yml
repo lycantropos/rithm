@@ -281,9 +281,9 @@ jobs:
       - name: 'Build sdist'
         run: python -m build --sdist
       - name: 'Upload sdist'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: dist-sdist
           path: dist
 
   build-wheels:
@@ -409,9 +409,9 @@ jobs:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT_LINUX: PATH="$HOME/.cargo/bin:$PATH"
       - name: 'Upload wheels'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: dist-wheels-${{ matrix.python_tag }}-${{ matrix.platform.tag }}
           path: wheelhouse/*.whl
 
   test-distributions:
@@ -468,10 +468,10 @@ jobs:
           python-version: ${{ matrix.python_version }}
           architecture: ${{ matrix.platform.python_architecture }}
       - name: 'Download distributions'
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: dist
-          path: dist
+          name: 'dist-*'
+          path: 'dist'
       - name: 'Install from distributions'
         run: python -m pip install --find-links=dist --no-deps ${{ github.event.repository.name }}
 
@@ -482,9 +482,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Download distributions'
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: dist-*
           path: dist
       - name: 'Upload'
         uses: pypa/gh-action-pypi-publish@v1.11.0

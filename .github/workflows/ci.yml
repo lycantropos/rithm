@@ -162,8 +162,8 @@ jobs:
       - name: 'Upload coverage'
         uses: actions/upload-artifact@v4
         with:
-          name: 'coverage_0'
-          path: 'target/**/*.profraw'
+          name: 'coverage_0_${{ matrix.python_version }}_${{ matrix.platform.rust_target }}'
+          path: 'coverage_rust.xml'
       - name: 'Show coverage data'
         run: find . -name '*.profraw'
       - name: 'Install in editable mode'
@@ -172,6 +172,16 @@ jobs:
           ${{ !startsWith(matrix.python_version, 'pypy') && 'CARGO_TARGET_DIR=$CARGO_LLVM_COV_TARGET_DIR' || '' }} python -m pip -v install -e '.[tests]'
         env:
           CARGO_INCREMENTAL: 1
+      - name: 'Collect Rust coverage'
+        run: >
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
+          report --cobertura --branch --output-path coverage_rust.xml
+        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Upload coverage'
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'coverage_1_${{ matrix.python_version }}_${{ matrix.platform.rust_target }}'
+          path: 'coverage_rust.xml'
       - name: 'Show coverage data'
         run: find . -name '*.profraw'
       - name: 'Install Python coverage dependencies'
@@ -181,12 +191,32 @@ jobs:
           ${{ !startsWith(matrix.python_version, 'pypy') && 'eval `cargo llvm-cov show-env --export-prefix`' || '' }}
           coverage run -m doctest README.md
           coverage run --append -m pytest --doctest-modules --ignore=tests
+      - name: 'Collect Rust coverage'
+        run: >
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
+          report --cobertura --branch --output-path coverage_rust.xml
+        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Upload coverage'
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'coverage_2_${{ matrix.python_version }}_${{ matrix.platform.rust_target }}'
+          path: 'coverage_rust.xml'
       - name: 'Show coverage data'
         run: find . -name '*.profraw'
       - name: 'Run tests'
         run: coverage run --append -m pytest
         env:
           RUST_BACKTRACE: full
+      - name: 'Collect Rust coverage'
+        run: >
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
+          report --cobertura --branch --output-path coverage_rust.xml
+        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Upload coverage'
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'coverage_3_${{ matrix.python_version }}_${{ matrix.platform.rust_target }}'
+          path: 'coverage_rust.xml'
       - name: 'Show coverage data'
         run: find . -name '*.profraw'
       - name: 'Collect Python coverage'

@@ -131,16 +131,16 @@ jobs:
           python-version: ${{ matrix.python_version }}
           architecture: ${{ matrix.platform.python_architecture }}
       - name: 'Setup stable Rust'
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: stable-${{ matrix.platform.rust_target }}
           components: llvm-tools,rustfmt
-          target: ${{ matrix.platform.rust_target }}
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Setup nightly Rust'
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: nightly-${{ matrix.platform.rust_target }}
           components: llvm-tools,rustfmt
-          target: ${{ matrix.platform.rust_target }}
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install Rust coverage dependencies'
         uses: taiki-e/install-action@cargo-llvm-cov

@@ -130,16 +130,16 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
           architecture: ${{ matrix.platform.python_architecture }}
-      - name: 'Setup stable Rust'
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable-${{ matrix.platform.rust_target }}
-          components: llvm-tools,rustfmt
-        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Setup nightly Rust'
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly-${{ matrix.platform.rust_target }}
+          components: llvm-tools,rustfmt
+        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Setup stable Rust'
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable-${{ matrix.platform.rust_target }}
           components: llvm-tools,rustfmt
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install Rust coverage dependencies'
@@ -147,7 +147,7 @@ jobs:
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Run Rust doctests'
         run: >
-          rustup run nightly cargo llvm-cov test --branch --doctests
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov test --branch --doctests
           --target=${{ matrix.platform.rust_target }}
         env:
           CARGO_INCREMENTAL: 1
@@ -175,7 +175,7 @@ jobs:
         run: |
           # shellcheck disable=SC2006,SC2046
           eval `cargo llvm-cov show-env --export-prefix`
-          rustup run nightly cargo llvm-cov report --cobertura --branch --output-path coverage_rust.xml
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov report --cobertura --branch --output-path coverage_rust.xml
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload PyPy coverage'
         uses: codecov/codecov-action@v4

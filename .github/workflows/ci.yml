@@ -182,10 +182,9 @@ jobs:
       - name: 'Collect Python coverage'
         run: coverage xml -o coverage_python.xml
       - name: 'Collect Rust coverage'
-        run: |
-          # shellcheck disable=SC2006,SC2046
-          eval `cargo llvm-cov show-env --export-prefix`
-          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov report --cobertura --branch --output-path coverage_rust.xml
+        run: >
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
+          report --cobertura --branch --output-path coverage_rust.xml
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload PyPy coverage'
         uses: codecov/codecov-action@v4

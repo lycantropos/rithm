@@ -148,9 +148,9 @@ jobs:
       - name: 'Show coverage data'
         run: find . -name '*.profraw'
       - name: 'Run Rust doctests'
-        run: >
-          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov
-          test --branch --doctests
+        run: |
+          eval "$(rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov show-env --export-prefix --doctests)"
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo test --doc
         env:
           CARGO_INCREMENTAL: 1
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
@@ -168,7 +168,7 @@ jobs:
         run: find . -name '*.profraw'
       - name: 'Install in editable mode'
         run: |
-          ${{ !startsWith(matrix.python_version, 'pypy') && 'eval `cargo llvm-cov show-env --export-prefix`' || '' }}
+          ${{ !startsWith(matrix.python_version, 'pypy') && 'eval "$(cargo llvm-cov show-env --export-prefix)"' || '' }}
           ${{ !startsWith(matrix.python_version, 'pypy') && 'CARGO_TARGET_DIR=$CARGO_LLVM_COV_TARGET_DIR' || '' }} python -m pip -v install -e '.[tests]'
         env:
           CARGO_INCREMENTAL: 1
@@ -188,7 +188,7 @@ jobs:
         run: python -m pip install --upgrade coverage[toml]
       - name: 'Run Python doctests'
         run: |
-          ${{ !startsWith(matrix.python_version, 'pypy') && 'eval `cargo llvm-cov show-env --export-prefix`' || '' }}
+          ${{ !startsWith(matrix.python_version, 'pypy') && 'eval "$(cargo llvm-cov show-env --export-prefix)"' || '' }}
           coverage run -m doctest README.md
           coverage run --append -m pytest --doctest-modules --ignore=tests
       - name: 'Collect Rust coverage'

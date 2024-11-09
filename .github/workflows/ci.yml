@@ -380,9 +380,7 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@v4
       - name: 'Setup Rust'
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable-${{ matrix.platform.rust_target }}
+        uses: dtolnay/rust-toolchain@stable
         if: ${{ runner.os != 'Linux' }}
       - name: 'Setup QEMU'
         uses: docker/setup-qemu-action@v3

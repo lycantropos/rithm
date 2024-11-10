@@ -1,3 +1,3 @@
 """Arbitrary precision arithmetic."""
 
-__version__ = '14.2.0'
+__version__ = '14.3.0-alpha'

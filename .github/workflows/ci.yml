@@ -367,7 +367,7 @@ jobs:
   test-distributions:
     name: 'Test distributions'
     runs-on: ${{ matrix.platform.os }}
-    needs: [ 'build-sdist', 'build-wheels' ]
+    needs: [ build-sdist, build-wheels ]
     strategy:
       matrix:
         python_version: [ '3.9', '3.10', '3.11', '3.12', '3.13' ]

@@ -132,7 +132,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly-${{ matrix.platform.rust_target }}
-          components: llvm-tools,rustfmt
+          components: llvm-tools
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Setup stable Rust'
         uses: dtolnay/rust-toolchain@master

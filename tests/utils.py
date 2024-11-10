@@ -1,15 +1,17 @@
+from __future__ import annotations
+
 import fractions
 import pickle
-import typing as t
+from typing import Any, Union
 
 from rithm.fraction import Fraction
 from rithm.integer import Int
 
-FractionOrIntOrBuiltinInt = t.Union[Fraction, Int, int]
-FractionWithBuiltin = t.Tuple[Fraction, fractions.Fraction]
-IntOrBuiltin = t.Union[Int, int]
-IntWithBuiltin = t.Tuple[Int, int]
-RationalWithBuiltin = t.Union[FractionWithBuiltin, IntWithBuiltin]
+FractionOrIntOrBuiltinInt = Union[Fraction, Int, int]
+FractionWithBuiltin = tuple[Fraction, fractions.Fraction]
+IntOrBuiltin = Union[Int, int]
+IntWithBuiltin = tuple[Int, int]
+RationalWithBuiltin = Union[FractionWithBuiltin, IntWithBuiltin]
 
 
 def equivalence(left: bool, right: bool) -> bool:
@@ -34,7 +36,7 @@ def is_equivalent_to_builtin_int(int_: Int, builtin_int: int) -> bool:
     return int_ == builtin_int
 
 
-def pickle_round_trip(value: t.Any) -> t.Any:
+def pickle_round_trip(value: Any) -> Any:
     return pickle.loads(pickle.dumps(value))
 
 
@@ -54,7 +56,7 @@ def is_fraction_valid(fraction: Fraction) -> bool:
 
 def to_fraction_with_builtin(
     numerators_pair: IntWithBuiltin,
-    denominators_pair: t.Optional[IntWithBuiltin] = None,
+    denominators_pair: IntWithBuiltin | None = None,
 ) -> FractionWithBuiltin:
     numerator, builtin_numerator = numerators_pair
     if denominators_pair is None:

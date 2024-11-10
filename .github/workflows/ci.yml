@@ -420,8 +420,8 @@ jobs:
       - name: 'Download distributions'
         uses: actions/download-artifact@v4
         with:
-          name: 'dist-*'
-          path: 'dist'
+          path: dist
+          pattern: dist-*
       - name: 'List artifacts'
         run: ls -lah dist
       - name: 'Install from distributions'
@@ -440,8 +440,8 @@ jobs:
       - name: 'Download distributions'
         uses: actions/download-artifact@v4
         with:
-          name: dist-*
           path: dist
+          pattern: dist-*
       - name: 'Upload'
         uses: pypa/gh-action-pypi-publish@v1.11.0
         with:

@@ -35,55 +35,6 @@ const _: () =
 
 pub(super) type BigInt = crate::big_int::BigInt<Digit, DIGIT_BITNESS>;
 
-#[inline]
-pub(super) fn try_big_int_from_py_integral(
-    value: &Bound<'_, PyAny>,
-) -> PyResult<BigInt> {
-    try_le_bytes_from_py_integral(value).map(|bytes| {
-        if bytes.is_empty() {
-            BigInt::zero()
-        } else {
-            BigInt::from_bytes(&bytes, Endianness::Little)
-        }
-    })
-}
-
-#[inline]
-fn try_le_bytes_from_py_integral(
-    value: &Bound<'_, PyAny>,
-) -> PyResult<Vec<u8>> {
-    let ptr = value.as_ptr();
-    let py = value.py();
-    unsafe {
-        let value = ffi::PyNumber_Index(ptr);
-        if value.is_null() {
-            return Err(PyErr::fetch(py));
-        }
-        let bits_count = ffi::_PyLong_NumBits(value);
-        match bits_count.cmp(&0) {
-            Ordering::Less => Err(PyErr::fetch(py)),
-            Ordering::Equal => Ok(vec![0; 0]),
-            Ordering::Greater => {
-                let result_size = bits_count / (u8::BITS as usize) + 1;
-                let mut result = vec![0u8; result_size];
-                if ffi::_PyLong_AsByteArray(
-                    Py::<PyLong>::from_owned_ptr(py, value).as_ptr()
-                        as *mut ffi::PyLongObject,
-                    result.as_mut_ptr(),
-                    result.len(),
-                    1i32,
-                    1i32,
-                ) < 0i32
-                {
-                    Err(PyErr::fetch(py))
-                } else {
-                    Ok(result)
-                }
-            }
-        }
-    }
-}
-
 #[pyclass(name = "Int", module = "rithm.integer", frozen)]
 #[derive(Clone)]
 pub(super) struct PyInt(pub(super) BigInt);
@@ -128,19 +79,19 @@ impl PyInt {
                         BigInt::try_from(
                             value.extract::<Bound<'_, PyFloat>>()?.value(),
                         )
-                        .map_err(
-                            |error| match error {
-                                crate::big_int::TryFromFloatError::Infinity => {
-                                    PyOverflowError::new_err(error.to_string())
-                                }
-                                crate::big_int::TryFromFloatError::NaN => {
-                                    PyValueError::new_err(error.to_string())
-                                }
-                            },
-                        )?,
+                            .map_err(
+                                |error| match error {
+                                    crate::big_int::TryFromFloatError::Infinity => {
+                                        PyOverflowError::new_err(error.to_string())
+                                    }
+                                    crate::big_int::TryFromFloatError::NaN => {
+                                        PyValueError::new_err(error.to_string())
+                                    }
+                                },
+                            )?,
                     ))
                 } else {
-                    try_big_int_from_bound_py_any_ref(value).map(Self)
+                    try_big_int_from_py_any_ref(value).map(Self)
                 }
             }
         }
@@ -327,7 +278,7 @@ impl PyInt {
         divisor: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<PyObject> {
         let py = exponent.py();
-        if let Ok(exponent) = try_big_int_from_bound_py_any_ref(exponent) {
+        if let Ok(exponent) = try_big_int_from_py_any_ref(exponent) {
             match divisor {
                 Some(divisor) => {
                     if let Ok(divisor) = divisor.extract::<PyRef<'_, Self>>() {
@@ -603,7 +554,7 @@ impl PyInt {
 
     fn __truediv__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = divisor.py();
-        if let Ok(divisor) = try_big_int_from_bound_py_any_ref(divisor) {
+        if let Ok(divisor) = try_big_int_from_py_any_ref(divisor) {
             try_truediv(self.0.clone(), divisor)
                 .map(|result| PyFraction::from(result).into_py(py))
         } else {
@@ -626,92 +577,33 @@ impl PyInt {
 }
 
 #[inline]
-fn to_py_long<'a, T>(value: &'a T, py: Python<'_>) -> PyObject
-where
-    &'a T: ToBytes<Output = Vec<u8>>,
-{
-    let buffer = value.to_bytes(Endianness::Little);
-    unsafe {
-        PyObject::from_owned_ptr(
-            py,
-            ffi::_PyLong_FromByteArray(buffer.as_ptr(), buffer.len(), 1, 1),
-        )
-    }
-}
-
-#[inline]
-fn try_mod_to_near(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
-    let (quotient, remainder) = match dividend.checked_div_rem_euclid(divisor)
-    {
-        Some((quotient, remainder)) => Ok((quotient, remainder)),
-        None => Err(PyZeroDivisionError::new_err(
-            UNDEFINED_DIVISION_ERROR_MESSAGE,
-        )),
-    }?;
-    let double_remainder = (&remainder).checked_shl(BigInt::one()).map_err(
-        |error| match error {
-            crate::big_int::ShlError::NegativeShift => {
-                PyValueError::new_err(error.to_string())
-            }
-            crate::big_int::ShlError::OutOfMemory => {
-                PyMemoryError::new_err(error.to_string())
-            }
-            crate::big_int::ShlError::TooLarge => {
-                PyOverflowError::new_err(error.to_string())
-            }
-        },
-    )?;
-    let greater_than_half = if divisor.is_positive() {
-        &double_remainder > divisor
-    } else {
-        &double_remainder < divisor
-    };
-    let exactly_half = &double_remainder == divisor;
-    Ok(
-        if greater_than_half || (exactly_half && quotient.is_odd()) {
-            remainder - divisor
+pub(super) fn try_big_int_from_py_integral(
+    value: &Bound<'_, PyAny>,
+) -> PyResult<BigInt> {
+    try_le_bytes_from_py_integral(value).map(|bytes| {
+        if bytes.is_empty() {
+            BigInt::zero()
         } else {
-            remainder
-        },
-    )
+            BigInt::from_bytes(&bytes, Endianness::Little)
+        }
+    })
 }
 
 #[inline]
-fn pow_non_negative_exponent(base: &BigInt, exponent: &BigInt) -> BigInt {
-    debug_assert!(!exponent.is_negative());
-    unsafe { base.checked_pow(exponent).unwrap_unchecked() }
+pub(super) fn try_big_int_from_py_any(
+    value: Bound<'_, PyAny>,
+) -> PyResult<BigInt> {
+    try_big_int_from_py_any_ref(&value)
 }
 
 #[inline]
-fn try_pow_negative_exponent(
-    base: BigInt,
-    exponent: BigInt,
-    py: Python<'_>,
-) -> PyResult<PyObject> {
-    debug_assert!((&exponent).is_negative());
-    match Fraction::from(base).checked_pow(exponent) {
-        Some(power) => Ok(PyFraction::from(power).into_py(py)),
-        None => Err(PyZeroDivisionError::new_err(
-            UNDEFINED_DIVISION_ERROR_MESSAGE,
-        )),
-    }
-}
-
-#[inline]
-pub(super) fn try_big_int_from_bound_py_any_ref(
+pub(super) fn try_big_int_from_py_any_ref(
     value: &Bound<'_, PyAny>,
 ) -> PyResult<BigInt> {
     value
         .extract::<PyInt>()
         .map(|value| value.0)
         .or_else(|_| try_big_int_from_py_integral(value))
-}
-
-#[inline]
-pub(super) fn try_big_int_from_bound_py_any(
-    value: Bound<'_, PyAny>,
-) -> PyResult<BigInt> {
-    try_big_int_from_bound_py_any_ref(&value)
 }
 
 #[inline]
@@ -756,5 +648,113 @@ fn hash(value: &BigInt) -> usize {
         result - 1usize
     } else {
         result
+    }
+}
+
+#[inline]
+fn pow_non_negative_exponent(base: &BigInt, exponent: &BigInt) -> BigInt {
+    debug_assert!(!exponent.is_negative());
+    unsafe { base.checked_pow(exponent).unwrap_unchecked() }
+}
+
+#[inline]
+fn to_py_long<'a, T>(value: &'a T, py: Python<'_>) -> PyObject
+where
+    &'a T: ToBytes<Output = Vec<u8>>,
+{
+    let buffer = value.to_bytes(Endianness::Little);
+    unsafe {
+        PyObject::from_owned_ptr(
+            py,
+            ffi::_PyLong_FromByteArray(buffer.as_ptr(), buffer.len(), 1, 1),
+        )
+    }
+}
+
+#[inline]
+fn try_le_bytes_from_py_integral(
+    value: &Bound<'_, PyAny>,
+) -> PyResult<Vec<u8>> {
+    let ptr = value.as_ptr();
+    let py = value.py();
+    unsafe {
+        let value = ffi::PyNumber_Index(ptr);
+        if value.is_null() {
+            return Err(PyErr::fetch(py));
+        }
+        let bits_count = ffi::_PyLong_NumBits(value);
+        match bits_count.cmp(&0) {
+            Ordering::Less => Err(PyErr::fetch(py)),
+            Ordering::Equal => Ok(vec![0; 0]),
+            Ordering::Greater => {
+                let result_size = bits_count / (u8::BITS as usize) + 1;
+                let mut result = vec![0u8; result_size];
+                if ffi::_PyLong_AsByteArray(
+                    Py::<PyLong>::from_owned_ptr(py, value).as_ptr()
+                        as *mut ffi::PyLongObject,
+                    result.as_mut_ptr(),
+                    result.len(),
+                    1i32,
+                    1i32,
+                ) < 0i32
+                {
+                    Err(PyErr::fetch(py))
+                } else {
+                    Ok(result)
+                }
+            }
+        }
+    }
+}
+
+#[inline]
+fn try_mod_to_near(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
+    let (quotient, remainder) = match dividend.checked_div_rem_euclid(divisor)
+    {
+        Some((quotient, remainder)) => Ok((quotient, remainder)),
+        None => Err(PyZeroDivisionError::new_err(
+            UNDEFINED_DIVISION_ERROR_MESSAGE,
+        )),
+    }?;
+    let double_remainder = (&remainder).checked_shl(BigInt::one()).map_err(
+        |error| match error {
+            crate::big_int::ShlError::NegativeShift => {
+                PyValueError::new_err(error.to_string())
+            }
+            crate::big_int::ShlError::OutOfMemory => {
+                PyMemoryError::new_err(error.to_string())
+            }
+            crate::big_int::ShlError::TooLarge => {
+                PyOverflowError::new_err(error.to_string())
+            }
+        },
+    )?;
+    let greater_than_half = if divisor.is_positive() {
+        &double_remainder > divisor
+    } else {
+        &double_remainder < divisor
+    };
+    let exactly_half = &double_remainder == divisor;
+    Ok(
+        if greater_than_half || (exactly_half && quotient.is_odd()) {
+            remainder - divisor
+        } else {
+            remainder
+        },
+    )
+}
+
+#[inline]
+fn try_pow_negative_exponent(
+    base: BigInt,
+    exponent: BigInt,
+    py: Python<'_>,
+) -> PyResult<PyObject> {
+    debug_assert!((&exponent).is_negative());
+    match Fraction::from(base).checked_pow(exponent) {
+        Some(power) => Ok(PyFraction::from(power).into_py(py)),
+        None => Err(PyZeroDivisionError::new_err(
+            UNDEFINED_DIVISION_ERROR_MESSAGE,
+        )),
     }
 }

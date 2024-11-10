@@ -1,5 +1,5 @@
 use super::py_int::{
-    try_big_int_from_bound_py_any, try_big_int_from_bound_py_any_ref,
+    try_big_int_from_py_any, try_big_int_from_py_any_ref,
     try_big_int_from_py_integral, try_truediv, BigInt, PyInt,
 };
 use super::py_tie_breaking::PyTieBreaking;
@@ -40,8 +40,8 @@ impl PyFraction {
             Some(denominator) => match numerator {
                 Some(numerator) => {
                     match Fraction::new(
-                        try_big_int_from_bound_py_any_ref(numerator)?,
-                        try_big_int_from_bound_py_any_ref(denominator)?,
+                        try_big_int_from_py_any_ref(numerator)?,
+                        try_big_int_from_py_any_ref(denominator)?,
                     ) {
                         Some(value) => Ok(PyFraction(value)),
                         None => Err(PyZeroDivisionError::new_err(
@@ -525,6 +525,12 @@ impl PyFraction {
     }
 }
 
+impl From<Fraction> for PyFraction {
+    fn from(value: Fraction) -> Self {
+        PyFraction(value)
+    }
+}
+
 fn try_py_fraction_from_value(
     value: Option<&Bound<'_, PyAny>>,
 ) -> PyResult<PyFraction> {
@@ -533,16 +539,15 @@ fn try_py_fraction_from_value(
             let py = value.py();
             if let Ok(value) = value.extract::<PyFraction>() {
                 Ok(value)
-            } else if let Ok(value) = try_big_int_from_bound_py_any_ref(value)
-            {
+            } else if let Ok(value) = try_big_int_from_py_any_ref(value) {
                 Ok(PyFraction(Fraction::from(value)))
             } else if let Ok((numerator, denominator)) = value
                 .getattr(intern!(py, "numerator"))
-                .and_then(try_big_int_from_bound_py_any)
+                .and_then(try_big_int_from_py_any)
                 .and_then(|numerator| {
                     value
                         .getattr(intern!(py, "denominator"))
-                        .and_then(try_big_int_from_bound_py_any)
+                        .and_then(try_big_int_from_py_any)
                         .map(|denominator| (numerator, denominator))
                 })
             {
@@ -564,11 +569,5 @@ fn try_py_fraction_from_value(
             }
         }
         None => Ok(PyFraction(Fraction::zero())),
-    }
-}
-
-impl From<Fraction> for PyFraction {
-    fn from(value: Fraction) -> Self {
-        PyFraction(value)
     }
 }

@@ -65,11 +65,14 @@ class Int:
     def __new__(cls, value: str, base: int | None = ..., /) -> Self: ...
 
     def __new__(
-        cls, value: Self | float | int | str = 0, base: int | None = None, /
+        cls,
+        value: None | Self | float | int | str = None,
+        base: int | None = None,
+        /,
     ) -> Self:
         self = super().__new__(cls)
         if base is None:
-            self._value = int(value)
+            self._value = 0 if value is None else int(value)
         elif isinstance(value, str):
             self._value = int(value, base)
         else:
@@ -467,7 +470,7 @@ class Fraction:
 
     def __new__(
         cls,
-        numerator: Int | int | float = _ZERO,
+        numerator: Int | None | float | int = None,
         denominator: Int | None | int = None,
         /,
         *,

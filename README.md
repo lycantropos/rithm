@@ -7,13 +7,14 @@ rithm
 [![](https://badge.fury.io/py/rithm.svg)](https://badge.fury.io/py/rithm "PyPI")
 [![](https://img.shields.io/crates/v/rithm.svg)](https://crates.io/crates/rithm "crates.io")
 
-In what follows `python` is an alias for `python3.8` or `pypy3.8`
-or any later version (`python3.9`, `pypy3.9` and so on).
+In what follows `python` is an alias for `python3.9` or `pypy3.9`
+or any later version (`python3.10`, `pypy3.10` and so on).
 
 Installation
 ------------
 
 Install the latest `pip` & `setuptools` packages versions
+
 ```bash
 python -m pip install --upgrade pip setuptools
 ```
@@ -21,6 +22,7 @@ python -m pip install --upgrade pip setuptools
 ### User
 
 Download and install the latest stable version from `PyPI` repository
+
 ```bash
 python -m pip install --upgrade rithm
 ```
@@ -28,17 +30,20 @@ python -m pip install --upgrade rithm
 ### Developer
 
 Download the latest version from `GitHub` repository
+
 ```bash
 git clone https://github.com/lycantropos/rithm.git
 cd rithm
 ```
 
 Install dependencies
+
 ```bash
 python -m pip install -r requirements.txt
 ```
 
 Install
+
 ```bash
 python setup.py install
 ```
@@ -51,11 +56,14 @@ Usage
 #### Arbitrary precision integer
 
 With setup
+
 ```python
->>> from rithm.integer import Int
+>> > from rithm.integer import Int
 
 ```
+
 we can:
+
 - construct
   ```python
   >>> Int()
@@ -132,11 +140,14 @@ we can:
 #### Exact fraction
 
 With setup
+
 ```python
->>> from rithm.fraction import Fraction
+>> > from rithm.fraction import Fraction
 
 ```
+
 we can:
+
 - construct
   ```python
   >>> Fraction()
@@ -302,6 +313,7 @@ Choose which version number category to bump following [semver
 specification](http://semver.org/).
 
 Test bumping version
+
 ```bash
 bump2version --dry-run --verbose $CATEGORY
 ```
@@ -310,6 +322,7 @@ where `$CATEGORY` is the target version number category name, possible
 values are `patch`/`minor`/`major`.
 
 Bump version
+
 ```bash
 bump2version --verbose $CATEGORY
 ```
@@ -319,11 +332,13 @@ This will set version to `major.minor.patch-alpha`.
 #### Release
 
 Test bumping version
+
 ```bash
 bump2version --dry-run --verbose release
 ```
 
 Bump version
+
 ```bash
 bump2version --verbose release
 ```
@@ -333,16 +348,19 @@ This will set version to `major.minor.patch`.
 ### Running tests
 
 Install dependencies
+
 ```bash
 python -m pip install -r requirements-tests.txt
 ```
 
 Plain
+
 ```bash
 pytest
 ```
 
 Inside `Docker` container:
+
 - with `CPython`
   ```bash
   docker-compose --file docker-compose.cpython.yml up
@@ -353,6 +371,7 @@ Inside `Docker` container:
   ```
 
 `Bash` script:
+
 - with `CPython`
   ```bash
   ./run-tests.sh
@@ -368,6 +387,7 @@ Inside `Docker` container:
   ```
 
 `PowerShell` script:
+
 - with `CPython`
   ```powershell
   .\run-tests.ps1

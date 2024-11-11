@@ -4,7 +4,7 @@ description = "Arbitrary precision arithmetic."
 license = "MIT"
 repository = "https://github.com/lycantropos/rithm"
 rust-version = "1.67"
-version = "14.4.0-alpha"
+version = "14.4.0"
 edition = "2018"
 
 [lib]

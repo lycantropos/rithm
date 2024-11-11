@@ -70,7 +70,7 @@ impl From<PyEndianness> for Endianness {
     }
 }
 
-fn to_py_endianness_values(py: Python<'_>) -> &[Py<PyEndianness>; 2] {
+fn to_py_endianness_values(py: Python<'_>) -> &[Py<PyEndianness>; 2usize] {
     static VALUES: GILOnceCell<[Py<PyEndianness>; 2usize]> =
         GILOnceCell::new();
     VALUES.get_or_init(py, || {

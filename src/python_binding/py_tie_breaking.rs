@@ -20,17 +20,17 @@ impl PyTieBreaking {
     }
 
     #[classattr]
-    fn TO_EVEN(py: Python<'_>) -> Py<PyTieBreaking> {
+    fn TOWARD_ZERO(py: Python<'_>) -> Py<PyTieBreaking> {
         to_py_tie_breaking_values(py)[1].clone_ref(py)
     }
 
     #[classattr]
-    fn TO_ODD(py: Python<'_>) -> Py<PyTieBreaking> {
+    fn TO_EVEN(py: Python<'_>) -> Py<PyTieBreaking> {
         to_py_tie_breaking_values(py)[2].clone_ref(py)
     }
 
     #[classattr]
-    fn TOWARD_ZERO(py: Python<'_>) -> Py<PyTieBreaking> {
+    fn TO_ODD(py: Python<'_>) -> Py<PyTieBreaking> {
         to_py_tie_breaking_values(py)[3].clone_ref(py)
     }
 
@@ -54,9 +54,9 @@ impl PyTieBreaking {
     fn value(&self) -> u8 {
         match self.0 {
             TieBreaking::AwayFromZero => 0,
-            TieBreaking::ToEven => 1,
-            TieBreaking::ToOdd => 2,
-            TieBreaking::TowardZero => 3,
+            TieBreaking::ToEven => 2,
+            TieBreaking::ToOdd => 3,
+            TieBreaking::TowardZero => 1,
         }
     }
 
@@ -92,13 +92,13 @@ fn to_py_tie_breaking_values(py: Python<'_>) -> &[Py<PyTieBreaking>; 4usize] {
             Bound::new(py, PyTieBreaking(TieBreaking::AwayFromZero))
                 .unwrap()
                 .into(),
+            Bound::new(py, PyTieBreaking(TieBreaking::TowardZero))
+                .unwrap()
+                .into(),
             Bound::new(py, PyTieBreaking(TieBreaking::ToEven))
                 .unwrap()
                 .into(),
             Bound::new(py, PyTieBreaking(TieBreaking::ToOdd))
-                .unwrap()
-                .into(),
-            Bound::new(py, PyTieBreaking(TieBreaking::TowardZero))
                 .unwrap()
                 .into(),
         ]

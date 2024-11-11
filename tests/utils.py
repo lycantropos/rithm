@@ -14,37 +14,29 @@ IntWithBuiltin = tuple[Int, int]
 RationalWithBuiltin = Union[FractionWithBuiltin, IntWithBuiltin]
 
 
-def equivalence(left: bool, right: bool) -> bool:
+def equivalence(left: bool, right: bool, /) -> bool:
     return left is right
 
 
-def implication(antecedent: bool, consequent: bool) -> bool:
+def implication(antecedent: bool, consequent: bool, /) -> bool:
     return not antecedent or consequent
 
 
 def is_equivalent_to_builtin_fraction(
-    value: Fraction, builtin: fractions.Fraction
+    value: Fraction, builtin: fractions.Fraction, /
 ) -> bool:
     return is_equivalent_to_builtin_int(
         value.numerator, builtin.numerator
     ) and is_equivalent_to_builtin_int(value.denominator, builtin.denominator)
 
 
-def is_equivalent_to_builtin_int(int_: Int, builtin_int: int) -> bool:
+def is_equivalent_to_builtin_int(int_: Int, builtin_int: int, /) -> bool:
     assert isinstance(int_, Int)
     assert isinstance(builtin_int, int)
     return int_ == builtin_int
 
 
-def pickle_round_trip(value: Any) -> Any:
-    return pickle.loads(pickle.dumps(value))
-
-
-def to_int_with_builtin(value: int) -> IntWithBuiltin:
-    return Int(value), value
-
-
-def is_fraction_valid(fraction: Fraction) -> bool:
+def is_fraction_valid(fraction: Fraction, /) -> bool:
     return (
         isinstance(fraction.numerator, Int)
         and isinstance(fraction.denominator, Int)
@@ -54,9 +46,14 @@ def is_fraction_valid(fraction: Fraction) -> bool:
     )
 
 
+def pickling_round_trip(value: Any, /) -> Any:
+    return pickle.loads(pickle.dumps(value))
+
+
 def to_fraction_with_builtin(
     numerators_pair: IntWithBuiltin,
     denominators_pair: IntWithBuiltin | None = None,
+    /,
 ) -> FractionWithBuiltin:
     numerator, builtin_numerator = numerators_pair
     if denominators_pair is None:
@@ -66,3 +63,7 @@ def to_fraction_with_builtin(
         Fraction(numerator, denominator),
         fractions.Fraction(builtin_numerator, builtin_denominator),
     )
+
+
+def to_int_with_builtin(value: int, /) -> IntWithBuiltin:
+    return Int(value), value

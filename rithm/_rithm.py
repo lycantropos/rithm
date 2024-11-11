@@ -425,19 +425,21 @@ _ZERO = Int()
 _HASH_INF = Int(hash_info.inf)
 _HASH_MODULUS = Int(hash_info.modulus)
 
+_Int = Int
+
 
 @final
 @Rational.register
 class Fraction:
     @property
-    def denominator(self) -> Int:
+    def denominator(self) -> _Int:
         return self._denominator
 
     @property
-    def numerator(self) -> Int:
+    def numerator(self) -> _Int:
         return self._numerator
 
-    def round(self, tie_breaking: _TieBreaking, /) -> Int:
+    def round(self, tie_breaking: _TieBreaking, /) -> _Int:
         quotient, remainder = divmod(self.numerator, self.denominator)
         double_remainder = remainder * 2
         if double_remainder == self.denominator:
@@ -457,8 +459,8 @@ class Fraction:
                 else quotient
             )
 
-    _denominator: Int
-    _numerator: Int
+    _denominator: _Int
+    _numerator: _Int
 
     __module__ = 'rithm.fraction'
     __slots__ = '_denominator', '_numerator'
@@ -470,8 +472,8 @@ class Fraction:
 
     def __new__(
         cls,
-        numerator: Int | None | float | int = None,
-        denominator: Int | None | int = None,
+        numerator: _Int | None | float | int = None,
+        denominator: _Int | None | int = None,
         /,
         *,
         _normalize: bool = True,
@@ -486,34 +488,34 @@ class Fraction:
             elif isinstance(numerator, float):
                 raw_numerator, raw_denominator = numerator.as_integer_ratio()
                 numerator, denominator = (
-                    Int(raw_numerator),
-                    Int(raw_denominator),
+                    _Int(raw_numerator),
+                    _Int(raw_denominator),
                 )
-            elif isinstance(numerator, (Int, int)):
-                numerator, denominator = Int(numerator), _ONE
+            elif isinstance(numerator, (_Int, int)):
+                numerator, denominator = _Int(numerator), _ONE
             elif isinstance(numerator, Rational):
                 numerator, denominator = (
-                    Int(numerator.numerator),
-                    Int(numerator.denominator),
+                    _Int(numerator.numerator),
+                    _Int(numerator.denominator),
                 )
             else:
                 raise TypeError(
                     'First argument should be of '
-                    f'type {Int}, {int} or {float}, '
+                    f'type {_Int}, {int} or {float}, '
                     f'but found: {type(numerator)}.'
                 )
-        elif isinstance(denominator, (Int, int)):
-            if not isinstance(numerator, (Int, int)):
+        elif isinstance(denominator, (_Int, int)):
+            if not isinstance(numerator, (_Int, int)):
                 raise TypeError(
                     f'Numerator should be '
-                    f'of type {Int} or {int}, '
+                    f'of type {_Int} or {int}, '
                     f'but found: {type(numerator)}.'
                 )
-            numerator, denominator = Int(numerator), Int(denominator)
+            numerator, denominator = _Int(numerator), _Int(denominator)
         else:
             raise TypeError(
                 f'Denominator should be '
-                f'of type {Int} or {int}, '
+                f'of type {_Int} or {int}, '
                 f'but found: {type(denominator)}.'
             )
         if not denominator:
@@ -530,7 +532,7 @@ class Fraction:
             abs(self.numerator), self.denominator, _normalize=False
         )
 
-    def __add__(self, other: Self | Int | int, /) -> Self:
+    def __add__(self, other: Self | _Int | int, /) -> Self:
         return (
             self._add_fraction(other)
             if isinstance(other, Fraction)
@@ -540,18 +542,18 @@ class Fraction:
     def __bool__(self, /) -> bool:
         return bool(self.numerator)
 
-    def __ceil__(self, /) -> Int:
+    def __ceil__(self, /) -> _Int:
         return -(-self.numerator // self.denominator)
 
-    def __divmod__(self, divisor: Self | Int | int, /) -> tuple[Int, Self]:
+    def __divmod__(self, divisor: Self | _Int | int, /) -> tuple[_Int, Self]:
         return (
             _divmod_rationals(self, divisor)
-            if isinstance(divisor, (Fraction, Int, int))
+            if isinstance(divisor, (Fraction, _Int, int))
             else NotImplemented
         )
 
     @overload
-    def __eq__(self, other: Int | Self | int, /) -> bool: ...
+    def __eq__(self, other: _Int | Self | int, /) -> bool: ...
 
     @overload
     def __eq__(self, other: Any, /) -> Any: ...
@@ -563,7 +565,7 @@ class Fraction:
             if isinstance(other, Fraction)
             else (
                 self.denominator == _ONE and self.numerator == other
-                if isinstance(other, (Int, int))
+                if isinstance(other, (_Int, int))
                 else NotImplemented
             )
         )
@@ -571,41 +573,41 @@ class Fraction:
     def __float__(self, /) -> float:
         return int(self.numerator) / int(self.denominator)
 
-    def __floor__(self, /) -> Int:
+    def __floor__(self, /) -> _Int:
         return self.numerator // self.denominator
 
-    def __floordiv__(self, divisor: Int | Self | int, /) -> Int:
+    def __floordiv__(self, divisor: _Int | Self | int, /) -> _Int:
         return (
             (self.numerator * divisor.denominator)
             // (self.denominator * divisor.numerator)
             if isinstance(divisor, Fraction)
             else (
                 self.numerator // (self.denominator * divisor)
-                if isinstance(divisor, (Int, int))
+                if isinstance(divisor, (_Int, int))
                 else NotImplemented
             )
         )
 
-    def __ge__(self, other: Int | Self | int, /) -> bool:
+    def __ge__(self, other: _Int | Self | int, /) -> bool:
         return (
             self.numerator * other.denominator
             >= other.numerator * self.denominator
             if isinstance(other, Fraction)
             else (
                 self.numerator >= other * self.denominator
-                if isinstance(other, (Int, int))
+                if isinstance(other, (_Int, int))
                 else NotImplemented
             )
         )
 
-    def __gt__(self, other: Self | Int | int, /) -> bool:
+    def __gt__(self, other: Self | _Int | int, /) -> bool:
         return (
             self.numerator * other.denominator
             > other.numerator * self.denominator
             if isinstance(other, Fraction)
             else (
                 self.numerator > other * self.denominator
-                if isinstance(other, (Int, int))
+                if isinstance(other, (_Int, int))
                 else NotImplemented
             )
         )
@@ -622,31 +624,31 @@ class Fraction:
         result = result if self >= 0 else -result
         return -2 if result == -1 else int(result)
 
-    def __le__(self, other: Int | Self | int, /) -> bool:
+    def __le__(self, other: _Int | Self | int, /) -> bool:
         return (
             self.numerator * other.denominator
             <= other.numerator * self.denominator
             if isinstance(other, Fraction)
             else (
                 self.numerator <= other * self.denominator
-                if isinstance(other, (Int, int))
+                if isinstance(other, (_Int, int))
                 else NotImplemented
             )
         )
 
-    def __lt__(self, other: Int | Self | int, /) -> bool:
+    def __lt__(self, other: _Int | Self | int, /) -> bool:
         return (
             self.numerator * other.denominator
             < other.numerator * self.denominator
             if isinstance(other, Fraction)
             else (
                 self.numerator < other * self.denominator
-                if isinstance(other, (Int, int))
+                if isinstance(other, (_Int, int))
                 else NotImplemented
             )
         )
 
-    def __mod__(self, divisor: Int | Self | int, /) -> Self:
+    def __mod__(self, divisor: _Int | Self | int, /) -> Self:
         return (
             Fraction(
                 (self.numerator * divisor.denominator)
@@ -659,12 +661,12 @@ class Fraction:
                     self.numerator % (self.denominator * divisor),
                     self.denominator,
                 )
-                if isinstance(divisor, (Int, int))
+                if isinstance(divisor, (_Int, int))
                 else NotImplemented
             )
         )
 
-    def __mul__(self, other: Int | Self | int, /) -> Self:
+    def __mul__(self, other: _Int | Self | int, /) -> Self:
         return (
             self._mul_by_fraction(other)
             if isinstance(other, Fraction)
@@ -677,7 +679,7 @@ class Fraction:
     def __pos__(self, /) -> Self:
         return self
 
-    def __pow__(self, exponent: Int | int, divisor: None = None, /) -> Self:
+    def __pow__(self, exponent: _Int | int, divisor: None = None, /) -> Self:
         return (
             (
                 Fraction(
@@ -693,25 +695,25 @@ class Fraction:
                     _normalize=False,
                 )
             )
-            if isinstance(exponent, (Int, int)) and divisor is None
+            if isinstance(exponent, (_Int, int)) and divisor is None
             else NotImplemented
         )
 
-    def __radd__(self, other: Int | int, /) -> Self:
+    def __radd__(self, other: _Int | int, /) -> Self:
         return (
-            self._add_int(Int(other))
-            if isinstance(other, (Int, int))
+            self._add_int(_Int(other))
+            if isinstance(other, (_Int, int))
             else NotImplemented
         )
 
-    def __rdivmod__(self, dividend: Int | int, /) -> tuple[Int, Self]:
+    def __rdivmod__(self, dividend: _Int | int, /) -> tuple[_Int, Self]:
         return (
             _divmod_rationals(dividend, self)
-            if isinstance(dividend, (Int, int))
+            if isinstance(dividend, (_Int, int))
             else NotImplemented
         )
 
-    def __reduce__(self, /) -> tuple[type[Self], tuple[Int, Int]]:
+    def __reduce__(self, /) -> tuple[type[Self], tuple[_Int, _Int]]:
         return type(self), (self._numerator, self._denominator)
 
     def __repr__(self, /) -> str:
@@ -720,37 +722,37 @@ class Fraction:
             f'({self.numerator!r}, {self.denominator!r})'
         )
 
-    def __rfloordiv__(self, dividend: Int | int, /) -> Int:
+    def __rfloordiv__(self, dividend: _Int | int, /) -> _Int:
         return (
             (dividend * self.denominator) // self.numerator
-            if isinstance(dividend, (Int, int))
+            if isinstance(dividend, (_Int, int))
             else NotImplemented
         )
 
-    def __rmod__(self, dividend: Int | int, /) -> Self:
+    def __rmod__(self, dividend: _Int | int, /) -> Self:
         return (
             Fraction(
                 (dividend * self.denominator) % self.numerator,
                 self.denominator,
             )
-            if isinstance(dividend, (Int, int))
+            if isinstance(dividend, (_Int, int))
             else NotImplemented
         )
 
-    def __rmul__(self, other: Int | int, /) -> Self:
+    def __rmul__(self, other: _Int | int, /) -> Self:
         return (
-            self._mul_by_int(Int(other))
-            if isinstance(other, (Int, int))
+            self._mul_by_int(_Int(other))
+            if isinstance(other, (_Int, int))
             else NotImplemented
         )
 
     @overload
-    def __round__(self, digits: None = ..., /) -> Int: ...
+    def __round__(self, digits: None = ..., /) -> _Int: ...
 
     @overload
     def __round__(self, digits: int, /) -> Self: ...
 
-    def __round__(self, digits: int | None = None, /) -> Int | Self:
+    def __round__(self, digits: int | None = None, /) -> _Int | Self:
         if digits is None:
             return self.round(_TieBreaking.TO_EVEN)
         else:
@@ -763,7 +765,7 @@ class Fraction:
                 )
             )
 
-    def __rsub__(self, subtrahend: Int | int, /) -> Self:
+    def __rsub__(self, subtrahend: _Int | int, /) -> Self:
         return (
             Fraction(
                 *_normalize_components_moduli(
@@ -772,7 +774,7 @@ class Fraction:
                 ),
                 _normalize=False,
             )
-            if isinstance(subtrahend, (Int, int))
+            if isinstance(subtrahend, (_Int, int))
             else NotImplemented
         )
 
@@ -783,7 +785,7 @@ class Fraction:
             else f'{self.numerator}/{self.denominator}'
         )
 
-    def __sub__(self, minuend: Int | Self | int, /) -> Self:
+    def __sub__(self, minuend: _Int | Self | int, /) -> Self:
         return (
             Fraction(
                 *_normalize_components_moduli(
@@ -802,19 +804,19 @@ class Fraction:
                     ),
                     _normalize=False,
                 )
-                if isinstance(minuend, (Int, int))
+                if isinstance(minuend, (_Int, int))
                 else NotImplemented
             )
         )
 
-    def __rtruediv__(self, dividend: Int | int, /) -> Self:
+    def __rtruediv__(self, dividend: _Int | int, /) -> Self:
         return (
-            self._rtruediv_by_int(Int(dividend))
-            if isinstance(dividend, (Int, int))
+            self._rtruediv_by_int(_Int(dividend))
+            if isinstance(dividend, (_Int, int))
             else NotImplemented
         )
 
-    def __truediv__(self, divisor: Int | Self | int, /) -> Self:
+    def __truediv__(self, divisor: _Int | Self | int, /) -> Self:
         return (
             Fraction(
                 *_normalize_components_sign(
@@ -832,13 +834,13 @@ class Fraction:
             )
             if isinstance(divisor, Fraction)
             else (
-                self._truediv_by_int(Int(divisor))
-                if isinstance(divisor, (Int, int))
+                self._truediv_by_int(_Int(divisor))
+                if isinstance(divisor, (_Int, int))
                 else NotImplemented
             )
         )
 
-    def __trunc__(self, /) -> Int:
+    def __trunc__(self, /) -> _Int:
         return self.__ceil__() if self.numerator < _ZERO else self.__floor__()
 
     def _add_fraction(self, other: Self, /) -> Self:
@@ -851,7 +853,7 @@ class Fraction:
             _normalize=False,
         )
 
-    def _add_int(self, other: Int, /) -> Self:
+    def _add_int(self, other: _Int, /) -> Self:
         return Fraction(
             *_normalize_components_moduli(
                 self.numerator + other * self.denominator, self.denominator
@@ -872,13 +874,13 @@ class Fraction:
             _normalize=False,
         )
 
-    def _mul_by_int(self, other: Int, /) -> Self:
+    def _mul_by_int(self, other: _Int, /) -> Self:
         other, denominator = _normalize_components_moduli(
             other, self.denominator
         )
         return Fraction(self.numerator * other, denominator, _normalize=False)
 
-    def _rtruediv_by_int(self, dividend: Int, /) -> Self:
+    def _rtruediv_by_int(self, dividend: _Int, /) -> Self:
         dividend, numerator = _normalize_components_moduli(
             dividend, self.numerator
         )
@@ -889,7 +891,7 @@ class Fraction:
             _normalize=False,
         )
 
-    def _truediv_by_int(self, divisor: Int, /) -> Self:
+    def _truediv_by_int(self, divisor: _Int, /) -> Self:
         numerator, divisor = _normalize_components_moduli(
             self.numerator, divisor
         )

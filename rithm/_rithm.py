@@ -480,7 +480,9 @@ class Fraction:
     ) -> Self:
         self = super().__new__(cls)
         if denominator is None:
-            if isinstance(numerator, Fraction):
+            if numerator is None:
+                numerator, denominator = _ZERO, _ONE
+            elif isinstance(numerator, Fraction):
                 numerator, denominator = (
                     numerator.numerator,
                     numerator.denominator,

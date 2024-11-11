@@ -58,7 +58,7 @@ Usage
 With setup
 
 ```python
->> > from rithm.integer import Int
+>>> from rithm.integer import Int
 
 ```
 
@@ -142,7 +142,7 @@ we can:
 With setup
 
 ```python
->> > from rithm.fraction import Fraction
+>>> from rithm.fraction import Fraction
 
 ```
 

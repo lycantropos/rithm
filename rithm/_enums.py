@@ -25,9 +25,10 @@ class Endianness:
         )
 
     def __new__(cls, value: int, /) -> Self:
-        if not isinstance(value, int):
-            raise TypeError(type(value))
-        if not (0 <= value < len(get_type_hints(cls, globals()))):
+        if not (
+            isinstance(value, int)
+            and 0 <= value < len(get_type_hints(cls, globals()))
+        ):
             raise ValueError(f'{value} is not a valid {cls.__qualname__}')
         try:
             return cls._cache[value]
@@ -36,6 +37,9 @@ class Endianness:
             self._value = value
             cls._cache[value] = self
             return self
+
+    def __getnewargs__(self) -> tuple[int]:
+        return (self._value,)
 
     def __repr__(self) -> str:
         name = next(
@@ -70,9 +74,10 @@ class TieBreaking:
         )
 
     def __new__(cls, value: int, /) -> Self:
-        if not isinstance(value, int):
-            raise TypeError(type(value))
-        if not (0 <= value < len(get_type_hints(cls, globals()))):
+        if not (
+            isinstance(value, int)
+            and 0 <= value < len(get_type_hints(cls, globals()))
+        ):
             raise ValueError(f'{value} is not a valid {cls.__qualname__}')
         try:
             return cls._cache[value]
@@ -81,6 +86,9 @@ class TieBreaking:
             self._value = value
             cls._cache[value] = self
             return self
+
+    def __getnewargs__(self) -> tuple[int]:
+        return (self._value,)
 
     def __repr__(self) -> str:
         name = next(

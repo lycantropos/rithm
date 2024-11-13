@@ -25,9 +25,9 @@ def test_transitivity(first: Int, second: Int, third: Int) -> None:
 def test_alternatives(first: Int, second: Int) -> None:
     assert equivalence(first == second, first == second)
     assert equivalence(first == second, first >= second and first <= second)
-    assert equivalence(first == second, first >= second and second >= first)
+    assert equivalence(first == second, first >= second >= first)
     assert equivalence(first == second, second <= first and second >= first)
-    assert equivalence(first == second, second <= first and first <= second)
+    assert equivalence(first == second, second <= first <= second)
 
 
 @given(strategies.ints, strategies.ints_with_builtins)

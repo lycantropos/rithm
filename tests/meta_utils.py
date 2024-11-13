@@ -146,7 +146,7 @@ def to_sorted_lists_diff(
             try:
                 while (right_element := next(right_elements)) < left_element:
                     result.append((None, right_element))
-            except StopIteration:
+            except StopIteration:  # noqa: PERF203
                 result.append((left_element, None))
                 result.extend(
                     (left_element, None) for left_element in left_elements

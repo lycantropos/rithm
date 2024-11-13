@@ -58,6 +58,8 @@ select = [
     "A",
     # flake8-annotations
     "ANN",
+    # flake8-unused-arguments
+    "ARG",
     # flake8-bugbear
     "B",
     # flake8-blind-except
@@ -72,12 +74,16 @@ select = [
     "FA",
     # flake8-boolean-trap
     "FBT",
+    # refurb
+    "FURB",
     # isort
     "I",
     # flake8-implicit-str-concat
     "ISC",
     # pep8-naming
     "N",
+    # Perflint
+    "PERF",
     # flake8-pie
     "PIE",
     # flake8-pytest-style
@@ -88,6 +94,8 @@ select = [
     "RET",
     # flake8-raise
     "RSE",
+    # Ruff-specific rules
+    "RUF",
     # flake8-simplify
     "SIM",
     # flake8-self
@@ -96,6 +104,8 @@ select = [
     "T10",
     # flake8-print
     "T20",
+    # flake8-tidy-imports
+    "TID",
     # pyupgrade
     "UP",
     # pycodestyle
@@ -118,6 +128,9 @@ combine-as-imports = true
 order-by-type = false
 relative-imports-order = "closest-to-furthest"
 split-on-trailing-comma = false
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["RUF018"]
 
 [tool.setuptools.dynamic]
 version = { attr = "rithm.__version__" }

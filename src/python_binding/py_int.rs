@@ -129,8 +129,8 @@ impl PyInt {
     }
 
     #[pyo3(text_signature = "($self, other, /)")]
-    fn gcd(&self, other: &Self) -> PyInt {
-        Self((&self.0).gcd(&other.0))
+    fn gcd(&self, other: &Bound<'_, PyAny>) -> PyResult<PyInt> {
+        Ok(Self((&self.0).gcd(&try_big_int_from_py_integral(other)?)))
     }
 
     #[pyo3(signature = (endianness, /))]

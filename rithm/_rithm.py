@@ -4,7 +4,7 @@ from math import gcd as _gcd
 from numbers import Integral, Rational
 from operator import mul
 from sys import hash_info
-from typing import Any, NoReturn, overload
+from typing import Any, NoReturn, SupportsIndex, overload
 
 from typing_extensions import Self, final
 
@@ -25,8 +25,8 @@ class Int:
     def bit_length(self, /) -> Self:
         return Int(self._value.bit_length())
 
-    def gcd(self, other: Self, /) -> Self:
-        return Int(_gcd(self._value, other._value))
+    def gcd(self, other: SupportsIndex, /) -> Self:
+        return Int(_gcd(self._value, other))
 
     def is_power_of_two(self, /) -> bool:
         return self._value > 0 and not (self._value & (self._value - 1))

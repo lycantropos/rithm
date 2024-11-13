@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 from numbers import Rational as _Rational
-from typing import TYPE_CHECKING, overload as _overload
+from typing import (
+    SupportsIndex as _SupportsIndex,
+    TYPE_CHECKING,
+    overload as _overload,
+)
 
 from typing_extensions import Any as _Any, Self as _Self, final as _final
 
@@ -130,7 +134,7 @@ if TYPE_CHECKING:
 
         def bit_length(self, /) -> _Self: ...
 
-        def gcd(self, other: _Self, /) -> _Self: ...
+        def gcd(self, other: _SupportsIndex, /) -> _Self: ...
 
         def is_power_of_two(self, /) -> bool: ...
 

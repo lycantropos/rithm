@@ -55,7 +55,7 @@ class Int:
 
     def __init_subclass__(cls, /, **_kwargs: Any) -> NoReturn:
         raise TypeError(
-            f'type {cls.__qualname__!r} ' 'is not an acceptable base type'
+            f'type {cls.__qualname__!r} is not an acceptable base type'
         )
 
     @overload
@@ -467,7 +467,7 @@ class Fraction:
 
     def __init_subclass__(cls, /, **_kwargs: Any) -> NoReturn:
         raise TypeError(
-            f'type {cls.__qualname__!r} ' 'is not an acceptable base type'
+            f'type {cls.__qualname__!r} is not an acceptable base type'
         )
 
     def __new__(

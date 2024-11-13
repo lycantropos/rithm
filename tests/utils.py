@@ -14,11 +14,19 @@ IntWithBuiltin = tuple[Int, int]
 RationalWithBuiltin = Union[FractionWithBuiltin, IntWithBuiltin]
 
 
-def equivalence(left: bool, right: bool, /) -> bool:
+def equivalence(
+    left: bool,  # noqa: FBT001
+    right: bool,  # noqa: FBT001
+    /,
+) -> bool:
     return left is right
 
 
-def implication(antecedent: bool, consequent: bool, /) -> bool:
+def implication(
+    antecedent: bool,  # noqa: FBT001
+    consequent: bool,  # noqa: FBT001
+    /,
+) -> bool:
     return not antecedent or consequent
 
 

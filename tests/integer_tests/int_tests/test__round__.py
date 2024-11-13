@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 
 from hypothesis import given
 
@@ -9,7 +9,7 @@ from . import strategies
 
 @given(strategies.ints_with_builtins, strategies.maybe_small_integers)
 def test_connection_with_builtin(
-    int_with_builtin: IntWithBuiltin, digits: Optional[int]
+    int_with_builtin: IntWithBuiltin, digits: int | None
 ) -> None:
     int_, builtin_int = int_with_builtin
 

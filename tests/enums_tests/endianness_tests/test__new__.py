@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 import pytest
@@ -32,5 +33,8 @@ def test_value_round_trip(value: int) -> None:
 
 @given(strategies.non_endiannesses_values)
 def test_invalid_value(value: Any) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match=re.compile(f'{value} is not a valid {Endianness.__qualname__}'),
+    ):
         Endianness(value)

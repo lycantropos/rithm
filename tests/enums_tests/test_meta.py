@@ -37,7 +37,7 @@ def module_namespace(module: ModuleType) -> dict[str, Any]:
     return vars(module)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def type_annotated_module(
     module: ModuleType, monkeypatch: MonkeyPatch
 ) -> ModuleType:
@@ -50,7 +50,7 @@ def type_annotated_module(
         return importlib.import_module(module_name)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def type_annotated_module_namespace(
     type_annotated_module: ModuleType,
 ) -> dict[str, Any]:

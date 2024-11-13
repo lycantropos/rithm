@@ -5,29 +5,35 @@ from functools import partial
 
 from hypothesis import strategies
 
-compile_ = t.cast(
+compile_ascii_regex = t.cast(
     t.Callable[[str], t.Pattern[str]], partial(re.compile, flags=re.ASCII)
 )
 _whitespaces = r'[\f\n\r\t\v ]'
 decimal_int_strings_with_leading_zeros = strategies.from_regex(
-    compile_(rf'\A{_whitespaces}*[+-]?\d(\d+)*{_whitespaces}*\Z')
+    compile_ascii_regex(rf'\A{_whitespaces}*[+-]?\d(\d+)*{_whitespaces}*\Z')
 )
 decimal_int_strings_without_leading_zeros = strategies.from_regex(
-    compile_(rf'\A{_whitespaces}*[+-]?(\d|[1-9](\d+)+){_whitespaces}*\Z')
+    compile_ascii_regex(
+        rf'\A{_whitespaces}*[+-]?(\d|[1-9](\d+)+){_whitespaces}*\Z'
+    )
 )
 prefixed_binary_int_strings = strategies.from_regex(
-    compile_(rf'\A{_whitespaces}*[+-]?0b([0-1]+)+{_whitespaces}*\Z')
+    compile_ascii_regex(rf'\A{_whitespaces}*[+-]?0b([0-1]+)+{_whitespaces}*\Z')
 )
 prefixed_octal_int_strings = strategies.from_regex(
-    compile_(rf'\A{_whitespaces}*[+-]?0o([0-7]+)+{_whitespaces}*\Z')
+    compile_ascii_regex(rf'\A{_whitespaces}*[+-]?0o([0-7]+)+{_whitespaces}*\Z')
 )
 prefixed_hexadecimal_int_strings = strategies.from_regex(
-    compile_(rf'\A{_whitespaces}*[+-]?0x([\da-f]+)+{_whitespaces}*\Z')
+    compile_ascii_regex(
+        rf'\A{_whitespaces}*[+-]?0x([\da-f]+)+{_whitespaces}*\Z'
+    )
 )
 int_strings_with_bases = (
     strategies.tuples(
         strategies.from_regex(
-            compile_(rf'\A{_whitespaces}*[+-]?0(0+)*{_whitespaces}*\Z')
+            compile_ascii_regex(
+                rf'\A{_whitespaces}*[+-]?0(0+)*{_whitespaces}*\Z'
+            )
         ),
         strategies.sampled_from(range(2, 37)),
     )
@@ -42,7 +48,7 @@ int_strings_with_bases = (
         [
             strategies.tuples(
                 strategies.from_regex(
-                    compile_(
+                    compile_ascii_regex(
                         r'\A{whitespaces}*[+-]?{digits}'
                         r'({digits}+)*{whitespaces}*\Z'.format(
                             digits=f'[0-{max_digit}]', whitespaces=_whitespaces
@@ -58,11 +64,11 @@ int_strings_with_bases = (
         [
             strategies.tuples(
                 strategies.from_regex(
-                    compile_(
+                    compile_ascii_regex(
                         r'\A{whitespaces}*[+-]?{digits}({digits}+)*'
                         r'{whitespaces}*\Z'.format(
                             digits=(
-                                f'[0-9a-{max_lower}' f'A-{max_lower.upper()}]'
+                                f'[0-9a-{max_lower}A-{max_lower.upper()}]'
                             ),
                             whitespaces=_whitespaces,
                         )

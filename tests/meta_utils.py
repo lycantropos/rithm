@@ -46,16 +46,8 @@ def is_private_optional_parameter(parameter: inspect.Parameter) -> bool:
     )
 
 
-def equivalence(left: bool, right: bool, /) -> bool:
-    return left is right
-
-
 def escape_if_built_in_name(name: str, /) -> str:
     return f'{name}_' if name in vars(builtins) else name
-
-
-def implication(antecedent: bool, consequent: bool, /) -> bool:
-    return not antecedent or consequent
 
 
 def is_class_final(cls: type[Any], /) -> bool:

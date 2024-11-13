@@ -8,7 +8,7 @@ import pytest
 from hypothesis import HealthCheck, settings
 
 is_pypy = platform.python_implementation() == 'PyPy'
-on_ci = bool(os.getenv('CI', False))
+on_ci = bool(os.getenv('CI'))
 max_examples = (
     -(-settings.default.max_examples // (10 if is_pypy else 2))
     if on_ci
@@ -33,7 +33,7 @@ if on_ci:
         set_deadline = settings(deadline=time_left / max_examples)
         item.obj = set_deadline(item.obj)
 
-    @pytest.fixture(scope='function', autouse=True)
+    @pytest.fixture(autouse=True)
     def time_function_call() -> t.Iterator[None]:
         start = time.monotonic()
         try:

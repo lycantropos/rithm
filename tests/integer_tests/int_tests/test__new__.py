@@ -79,11 +79,11 @@ def test_string_with_base_connection_with_builtin(
 
 @given(strategies.int_strings, strategies.out_of_range_bases)
 def test_string_with_out_of_range_base(string: str, base: int) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         Int(string, base)
 
 
 @given(strategies.invalid_int_strings, strategies.bases)
 def test_invalid_string_with_base(string: str, base: int) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         Int(string, base)

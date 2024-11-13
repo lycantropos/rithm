@@ -82,8 +82,16 @@ select = [
     "PIE",
     # flake8-pytest-style
     "PT",
+    # flake8-quotes
+    "Q",
+    # flake8-return
+    "RET",
+    # flake8-raise
+    "RSE",
     # flake8-simplify
     "SIM",
+    # flake8-self
+    "SLF",
     # flake8-debugger
     "T10",
     # flake8-print
@@ -99,6 +107,10 @@ ignore = [
     # whitespace before ':'
     "E203",
 ]
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+inline-quotes = "single"
 
 [tool.ruff.lint.isort]
 case-sensitive = true

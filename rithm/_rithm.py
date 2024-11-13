@@ -445,19 +445,17 @@ class Fraction:
         if double_remainder == self.denominator:
             if tie_breaking is _TieBreaking.AWAY_FROM_ZERO:
                 return quotient + _ONE if quotient >= 0 else quotient
-            elif tie_breaking is _TieBreaking.TO_EVEN:
+            if tie_breaking is _TieBreaking.TO_EVEN:
                 return quotient + _ONE if quotient % 2 else quotient
-            elif tie_breaking is _TieBreaking.TO_ODD:
+            if tie_breaking is _TieBreaking.TO_ODD:
                 return quotient + _ONE if not quotient % 2 else quotient
-            else:
-                assert tie_breaking is _TieBreaking.TOWARD_ZERO, tie_breaking
-                return quotient + _ONE if quotient < 0 else quotient
-        else:
-            return (
-                quotient + _ONE
-                if double_remainder > self.denominator
-                else quotient
-            )
+            assert tie_breaking is _TieBreaking.TOWARD_ZERO, tie_breaking
+            return quotient + _ONE if quotient < 0 else quotient
+        return (
+            quotient + _ONE
+            if double_remainder > self.denominator
+            else quotient
+        )
 
     _denominator: _Int
     _numerator: _Int
@@ -757,15 +755,12 @@ class Fraction:
     def __round__(self, digits: int | None = None, /) -> _Int | Self:
         if digits is None:
             return self.round(_TieBreaking.TO_EVEN)
-        else:
-            shift = 10 ** abs(digits)
-            return (
-                Fraction((self * shift).round(_TieBreaking.TO_EVEN), shift)
-                if digits > 0
-                else Fraction(
-                    (self / shift).round(_TieBreaking.TO_EVEN) * shift
-                )
-            )
+        shift = 10 ** abs(digits)
+        return (
+            Fraction((self * shift).round(_TieBreaking.TO_EVEN), shift)
+            if digits > 0
+            else Fraction((self / shift).round(_TieBreaking.TO_EVEN) * shift)
+        )
 
     def __rsub__(self, subtrahend: _Int | int, /) -> Self:
         return (

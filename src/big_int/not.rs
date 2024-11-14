@@ -1,7 +1,6 @@
 use std::ops::Not;
 
-use crate::big_int::digits::InvertComponents;
-
+use super::digits::InvertComponents;
 use super::types::BigInt;
 
 impl<Digit: InvertComponents, const DIGIT_BITNESS: usize> Not

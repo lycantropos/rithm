@@ -28,7 +28,7 @@ tests = [
 
 [build-system]
 requires = [
-    "setuptools-rust>=1.7.0,<2.0; platform_python_implementation=='CPython'",
+    "setuptools-rust>=1.10.2,<2.0; platform_python_implementation=='CPython'",
     "setuptools",
     "wheel"
 ]

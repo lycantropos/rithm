@@ -74,5 +74,5 @@ repos:
         additional_dependencies:
           - 'hypothesis>=6.118.8'
           - 'pytest>=8.3.3'
-          - 'setuptools-rust>=1.8.1'
+          - 'setuptools-rust>=1.10.2'
           - 'types-setuptools'

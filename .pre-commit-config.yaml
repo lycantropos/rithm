@@ -72,7 +72,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - 'hypothesis>=6.116.0'
+          - 'hypothesis>=6.118.8'
           - 'pytest>=8.3.3'
           - 'setuptools-rust>=1.8.1'
           - 'types-setuptools'

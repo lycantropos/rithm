@@ -7,7 +7,7 @@ services:
       args:
         - IMAGE_NAME=${PYPY_IMAGE_NAME}
         - IMAGE_VERSION=${PYPY_IMAGE_VERSION}
-    image: lycantropos/rithm-pypy:14.5.0
+    image: lycantropos/rithm-pypy:14.6.0-alpha
     volumes:
       - ./pyproject.toml:/opt/rithm/pyproject.toml
       - ./README.md:/opt/rithm/README.md

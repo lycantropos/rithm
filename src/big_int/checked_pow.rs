@@ -152,7 +152,7 @@ where
             for index in 1..WINDOW_BASE {
                 cache[index] = &cache[index - 1] * self;
             }
-            let exponent_window_digits: Vec<WindowDigit> =
+            let exponent_window_digits =
                 WindowDigit::lesser_binary_base_from_binary_digits(
                     &exponent.digits,
                     DIGIT_BITNESS,

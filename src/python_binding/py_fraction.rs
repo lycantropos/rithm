@@ -1,6 +1,6 @@
-use super::py_int::{
+use super::py_big_int::{
     try_big_int_from_py_any, try_big_int_from_py_any_ref,
-    try_big_int_from_py_integral, try_truediv, BigInt, PyInt,
+    try_big_int_from_py_integral, try_truediv, BigInt, PyBigInt,
 };
 use super::py_tie_breaking::PyTieBreaking;
 use super::utils::{compare, try_divmod, HASH_INF, HASH_MODULUS};
@@ -10,10 +10,10 @@ use pyo3::exceptions::{
     PyOverflowError, PyTypeError, PyValueError, PyZeroDivisionError,
 };
 use pyo3::prelude::{PyAnyMethods, PyFloatMethods};
-use pyo3::types::{PyFloat, PyLong, PyTuple};
+use pyo3::types::{PyFloat, PyInt, PyTuple};
 use pyo3::{
-    intern, pyclass, pymethods, Bound, IntoPy, PyAny, PyObject, PyRef,
-    PyResult, PyTypeInfo, Python,
+    intern, pyclass, pymethods, Bound, BoundObject, IntoPyObject, PyAny,
+    PyObject, PyRef, PyResult, PyTypeInfo, Python,
 };
 use std::convert::TryFrom;
 use traiter::numbers::{
@@ -58,18 +58,18 @@ impl PyFraction {
     }
 
     #[getter]
-    fn denominator(&self) -> PyInt {
-        PyInt(self.0.denominator().clone())
+    fn denominator(&self) -> PyBigInt {
+        PyBigInt(self.0.denominator().clone())
     }
 
     #[getter]
-    fn numerator(&self) -> PyInt {
-        PyInt(self.0.numerator().clone())
+    fn numerator(&self) -> PyBigInt {
+        PyBigInt(self.0.numerator().clone())
     }
 
     #[pyo3(signature = (tie_breaking, /))]
-    fn round(&self, tie_breaking: &PyTieBreaking) -> PyInt {
-        PyInt((&self.0).round(tie_breaking.clone().into()))
+    fn round(&self, tie_breaking: &PyTieBreaking) -> PyBigInt {
+        PyBigInt((&self.0).round(tie_breaking.clone().into()))
     }
 
     fn __abs__(&self) -> PyFraction {
@@ -78,8 +78,11 @@ impl PyFraction {
 
     fn __add__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
-        if other.is_instance(&PyFraction::type_object_bound(py))? {
-            Ok(Self(&self.0 + other.extract::<PyFraction>()?.0).into_py(py))
+        if other.is_instance(&PyFraction::type_object(py))? {
+            Ok(Self(&self.0 + other.extract::<PyFraction>()?.0)
+                .into_pyobject(py)?
+                .into_any()
+                .unbind())
         } else {
             self.__radd__(other)
         }
@@ -89,23 +92,36 @@ impl PyFraction {
         self.numerator().__bool__()
     }
 
-    fn __ceil__(&self) -> PyInt {
-        PyInt((&self.0).ceil())
+    fn __ceil__(&self) -> PyBigInt {
+        PyBigInt((&self.0).ceil())
     }
 
     fn __divmod__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<'_, Self>>() {
-            try_divmod(&self.0, &divisor.0).map(|(quotient, remainder)| {
-                (PyInt(quotient), Self(remainder)).into_py(py)
-            })
-        } else if let Ok(divisor) = divisor.extract::<PyRef<'_, PyInt>>() {
-            try_divmod(&self.0, &divisor.0).map(|(quotient, remainder)| {
-                (PyInt(quotient), Self(remainder)).into_py(py)
-            })
+            try_divmod(&self.0, &divisor.0).and_then(
+                |(quotient, remainder)| {
+                    Ok((PyBigInt(quotient), Self(remainder))
+                        .into_pyobject(py)?
+                        .into_any()
+                        .unbind())
+                },
+            )
+        } else if let Ok(divisor) = divisor.extract::<PyRef<'_, PyBigInt>>() {
+            try_divmod(&self.0, &divisor.0).and_then(
+                |(quotient, remainder)| {
+                    Ok((PyBigInt(quotient), Self(remainder))
+                        .into_pyobject(py)?
+                        .into_any()
+                        .unbind())
+                },
+            )
         } else if let Ok(divisor) = try_big_int_from_py_integral(divisor) {
-            try_divmod(&self.0, divisor).map(|(quotient, remainder)| {
-                (PyInt(quotient), Self(remainder)).into_py(py)
+            try_divmod(&self.0, divisor).and_then(|(quotient, remainder)| {
+                Ok((PyBigInt(quotient), Self(remainder))
+                    .into_pyobject(py)?
+                    .into_any()
+                    .unbind())
             })
         } else {
             Ok(py.NotImplemented())
@@ -114,13 +130,13 @@ impl PyFraction {
 
     fn __float__(&self, py: Python<'_>) -> PyResult<PyObject> {
         match f64::try_from(&self.0) {
-            Ok(float) => Ok(float.into_py(py)),
+            Ok(float) => Ok(float.into_pyobject(py)?.into_any().unbind()),
             Err(error) => Err(PyOverflowError::new_err(error.to_string())),
         }
     }
 
-    fn __floor__(&self) -> PyInt {
-        PyInt((&self.0).floor())
+    fn __floor__(&self) -> PyBigInt {
+        PyBigInt((&self.0).floor())
     }
 
     fn __floordiv__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
@@ -128,29 +144,44 @@ impl PyFraction {
         if let Ok(divisor) = divisor.extract::<PyRef<'_, Self>>() {
             (&self.0)
                 .checked_div_euclid(&divisor.0)
-                .map(|quotient| PyInt(quotient).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
                 })
-        } else if let Ok(divisor) = divisor.extract::<PyRef<'_, PyInt>>() {
+                .and_then(|quotient| {
+                    Ok(PyBigInt(quotient)
+                        .into_pyobject(py)?
+                        .into_any()
+                        .unbind())
+                })
+        } else if let Ok(divisor) = divisor.extract::<PyRef<'_, PyBigInt>>() {
             (&self.0)
                 .checked_div_euclid(&divisor.0)
-                .map(|quotient| PyInt(quotient).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
+                })
+                .and_then(|quotient| {
+                    Ok(PyBigInt(quotient)
+                        .into_pyobject(py)?
+                        .into_any()
+                        .unbind())
                 })
         } else if let Ok(divisor) = try_big_int_from_py_integral(divisor) {
             (&self.0)
                 .checked_div_euclid(divisor)
-                .map(|quotient| PyInt(quotient).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
+                })
+                .and_then(|quotient| {
+                    Ok(PyBigInt(quotient)
+                        .into_pyobject(py)?
+                        .into_any()
+                        .unbind())
                 })
         } else {
             Ok(py.NotImplemented())
@@ -195,29 +226,35 @@ impl PyFraction {
         if let Ok(divisor) = divisor.extract::<PyRef<'_, Self>>() {
             (&self.0)
                 .checked_rem_euclid(&divisor.0)
-                .map(|remainder| Self(remainder).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
                 })
-        } else if let Ok(divisor) = divisor.extract::<PyRef<'_, PyInt>>() {
+                .and_then(|remainder| {
+                    Ok(Self(remainder).into_pyobject(py)?.into_any().unbind())
+                })
+        } else if let Ok(divisor) = divisor.extract::<PyRef<'_, PyBigInt>>() {
             (&self.0)
                 .checked_rem_euclid(&divisor.0)
-                .map(|remainder| Self(remainder).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
+                })
+                .and_then(|remainder| {
+                    Ok(Self(remainder).into_pyobject(py)?.into_any().unbind())
                 })
         } else if let Ok(divisor) = try_big_int_from_py_integral(divisor) {
             (&self.0)
                 .checked_rem_euclid(divisor)
-                .map(|remainder| Self(remainder).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
+                })
+                .and_then(|remainder| {
+                    Ok(Self(remainder).into_pyobject(py)?.into_any().unbind())
                 })
         } else {
             Ok(py.NotImplemented())
@@ -226,10 +263,14 @@ impl PyFraction {
 
     fn __mul__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
-        other
-            .extract::<PyRef<'_, Self>>()
-            .map(|other| Self(&self.0 * &other.0).into_py(py))
-            .or_else(|_| self.__rmul__(other))
+        if let Ok(other) = other.extract::<PyRef<'_, Self>>() {
+            Ok(Self(&self.0 * &other.0)
+                .into_pyobject(py)?
+                .into_any()
+                .unbind())
+        } else {
+            self.__rmul__(other)
+        }
     }
 
     fn __neg__(&self) -> PyFraction {
@@ -247,24 +288,28 @@ impl PyFraction {
     ) -> PyResult<PyObject> {
         let py = exponent.py();
         if modulo.is_none() {
-            if let Ok(exponent) = exponent.extract::<PyRef<'_, PyInt>>() {
+            if let Ok(exponent) = exponent.extract::<PyRef<'_, PyBigInt>>() {
                 (&self.0)
                     .checked_pow(&exponent.0)
-                    .map(|power| Self(power).into_py(py))
                     .ok_or_else(|| {
                         PyZeroDivisionError::new_err(
                             UNDEFINED_DIVISION_ERROR_MESSAGE,
                         )
                     })
+                    .and_then(|power| {
+                        Ok(Self(power).into_pyobject(py)?.into_any().unbind())
+                    })
             } else if let Ok(exponent) = try_big_int_from_py_integral(exponent)
             {
                 (&self.0)
                     .checked_pow(exponent)
-                    .map(|power| Self(power).into_py(py))
                     .ok_or_else(|| {
                         PyZeroDivisionError::new_err(
                             UNDEFINED_DIVISION_ERROR_MESSAGE,
                         )
+                    })
+                    .and_then(|power| {
+                        Ok(Self(power).into_pyobject(py)?.into_any().unbind())
                     })
             } else {
                 Ok(py.NotImplemented())
@@ -276,36 +321,46 @@ impl PyFraction {
 
     fn __radd__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
-        other
-            .extract::<PyRef<'_, PyInt>>()
-            .map(|other| Self(&self.0 + &other.0).into_py(py))
-            .or_else(|_| {
-                try_big_int_from_py_integral(other)
-                    .map(|other| Self(&self.0 + other).into_py(py))
-                    .or_else(|_| Ok(py.NotImplemented()))
-            })
+        if let Ok(other) = other.extract::<PyRef<'_, PyBigInt>>() {
+            Ok(Self(&self.0 + &other.0)
+                .into_pyobject(py)?
+                .into_any()
+                .unbind())
+        } else if let Ok(other) = try_big_int_from_py_integral(other) {
+            Ok(Self(&self.0 + other).into_pyobject(py)?.into_any().unbind())
+        } else {
+            Ok(py.NotImplemented())
+        }
     }
 
     fn __rdivmod__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = dividend.py();
-        if let Ok(dividend) = dividend.extract::<PyRef<'_, PyInt>>() {
-            try_divmod(&dividend.0, &self.0).map(|(quotient, remainder)| {
-                (PyInt(quotient), Self(remainder)).into_py(py)
-            })
+        if let Ok(dividend) = dividend.extract::<PyRef<'_, PyBigInt>>() {
+            try_divmod(&dividend.0, &self.0).and_then(
+                |(quotient, remainder)| {
+                    Ok((PyBigInt(quotient), Self(remainder))
+                        .into_pyobject(py)?
+                        .into_any()
+                        .unbind())
+                },
+            )
         } else if let Ok(dividend) = try_big_int_from_py_integral(dividend) {
-            try_divmod(dividend, &self.0).map(|(quotient, remainder)| {
-                (PyInt(quotient), Self(remainder)).into_py(py)
+            try_divmod(dividend, &self.0).and_then(|(quotient, remainder)| {
+                Ok((PyBigInt(quotient), Self(remainder))
+                    .into_pyobject(py)?
+                    .into_any()
+                    .unbind())
             })
         } else {
             Ok(py.NotImplemented())
         }
     }
 
-    fn __getnewargs__<'py>(&self, py: Python<'py>) -> Bound<'py, PyTuple> {
-        PyTuple::new_bound(
-            py,
-            [self.numerator().into_py(py), self.denominator().into_py(py)],
-        )
+    fn __getnewargs__<'py>(
+        &self,
+        py: Python<'py>,
+    ) -> PyResult<Bound<'py, PyTuple>> {
+        PyTuple::new(py, [self.numerator(), self.denominator()])
     }
 
     fn __repr__(&self) -> String {
@@ -323,21 +378,24 @@ impl PyFraction {
         op: CompareOp,
     ) -> PyResult<PyObject> {
         let py = other.py();
-        other
-            .extract::<PyRef<'_, Self>>()
-            .map(|other| compare(&self.0, &other.0, op).into_py(py))
-            .or_else(|_| {
-                other
-                    .extract::<PyRef<'_, PyInt>>()
-                    .map(|other| compare(&self.0, &other.0, op).into_py(py))
-                    .or_else(|_| {
-                        try_big_int_from_py_integral(other)
-                            .map(|other| {
-                                compare(&self.0, &other, op).into_py(py)
-                            })
-                            .or_else(|_| Ok(py.NotImplemented()))
-                    })
-            })
+        if let Ok(other) = other.extract::<PyRef<'_, Self>>() {
+            Ok(compare(&self.0, &other.0, op)
+                .into_pyobject(py)?
+                .into_any()
+                .unbind())
+        } else if let Ok(other) = other.extract::<PyRef<'_, Self>>() {
+            Ok(compare(&self.0, &other.0, op)
+                .into_pyobject(py)?
+                .into_any()
+                .unbind())
+        } else if let Ok(other) = try_big_int_from_py_integral(other) {
+            Ok(compare(&self.0, &other, op)
+                .into_pyobject(py)?
+                .into_any()
+                .unbind())
+        } else {
+            Ok(py.NotImplemented())
+        }
     }
 
     fn __rfloordiv__(
@@ -345,23 +403,33 @@ impl PyFraction {
         dividend: &Bound<'_, PyAny>,
     ) -> PyResult<PyObject> {
         let py = dividend.py();
-        if let Ok(dividend) = dividend.extract::<PyRef<'_, PyInt>>() {
+        if let Ok(dividend) = dividend.extract::<PyRef<'_, PyBigInt>>() {
             (&dividend.0)
                 .checked_div_euclid(&self.0)
-                .map(|quotient| PyInt(quotient).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
                 })
+                .and_then(|quotient| {
+                    Ok(PyBigInt(quotient)
+                        .into_pyobject(py)?
+                        .into_any()
+                        .unbind())
+                })
         } else if let Ok(dividend) = try_big_int_from_py_integral(dividend) {
             dividend
                 .checked_div_euclid(&self.0)
-                .map(|quotient| PyInt(quotient).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
+                })
+                .and_then(|quotient| {
+                    Ok(PyBigInt(quotient)
+                        .into_pyobject(py)?
+                        .into_any()
+                        .unbind())
                 })
         } else {
             Ok(py.NotImplemented())
@@ -370,23 +438,27 @@ impl PyFraction {
 
     fn __rmod__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = dividend.py();
-        if let Ok(dividend) = dividend.extract::<PyRef<'_, PyInt>>() {
+        if let Ok(dividend) = dividend.extract::<PyRef<'_, PyBigInt>>() {
             (&dividend.0)
                 .checked_rem_euclid(&self.0)
-                .map(|remainder| Self(remainder).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
                 })
+                .and_then(|remainder| {
+                    Ok(Self(remainder).into_pyobject(py)?.into_any().unbind())
+                })
         } else if let Ok(dividend) = try_big_int_from_py_integral(dividend) {
             dividend
                 .checked_rem_euclid(&self.0)
-                .map(|remainder| Self(remainder).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
+                })
+                .and_then(|remainder| {
+                    Ok(Self(remainder).into_pyobject(py)?.into_any().unbind())
                 })
         } else {
             Ok(py.NotImplemented())
@@ -395,20 +467,22 @@ impl PyFraction {
 
     fn __rmul__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = other.py();
-        other
-            .extract::<PyRef<'_, PyInt>>()
-            .map(|other| Self(&other.0 * &self.0).into_py(py))
-            .or_else(|_| {
-                try_big_int_from_py_integral(other)
-                    .map(|other| Self(other * &self.0).into_py(py))
-                    .or_else(|_| Ok(py.NotImplemented()))
-            })
+        if let Ok(other) = other.extract::<PyRef<'_, PyBigInt>>() {
+            Ok(Self(&other.0 * &self.0)
+                .into_pyobject(py)?
+                .into_any()
+                .unbind())
+        } else if let Ok(other) = try_big_int_from_py_integral(other) {
+            Ok(Self(other * &self.0).into_pyobject(py)?.into_any().unbind())
+        } else {
+            Ok(py.NotImplemented())
+        }
     }
 
     #[pyo3(signature = (digits=None))]
     fn __round__(
         &self,
-        digits: Option<&Bound<'_, PyLong>>,
+        digits: Option<&Bound<'_, PyInt>>,
         py: Python<'_>,
     ) -> PyResult<PyObject> {
         match digits {
@@ -428,51 +502,66 @@ impl PyFraction {
                         )
                         .unwrap_unchecked()
                     })
-                    .into_py(py))
+                    .into_pyobject(py)?
+                    .into_any()
+                    .unbind())
                 } else {
                     Ok(Self(Fraction::from(
                         (&self.0 / &shift).round(TieBreaking::ToEven) * shift,
                     ))
-                    .into_py(py))
+                    .into_pyobject(py)?
+                    .into_any()
+                    .unbind())
                 }
             }
-            None => {
-                Ok(PyInt((&self.0).round(TieBreaking::ToEven)).into_py(py))
-            }
+            None => Ok(PyBigInt((&self.0).round(TieBreaking::ToEven))
+                .into_pyobject(py)?
+                .into_any()
+                .unbind()),
         }
     }
 
     fn __rsub__(&self, subtrahend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = subtrahend.py();
-        subtrahend
-            .extract::<PyRef<'_, PyInt>>()
-            .map(|subtrahend| Self(&subtrahend.0 - &self.0).into_py(py))
-            .or_else(|_| {
-                try_big_int_from_py_integral(subtrahend)
-                    .map(|subtrahend| Self(subtrahend - &self.0).into_py(py))
-                    .or_else(|_| Ok(py.NotImplemented()))
-            })
+        if let Ok(subtrahend) = subtrahend.extract::<PyRef<'_, PyBigInt>>() {
+            Ok(Self(&subtrahend.0 - &self.0)
+                .into_pyobject(py)?
+                .into_any()
+                .unbind())
+        } else if let Ok(subtrahend) = try_big_int_from_py_integral(subtrahend)
+        {
+            Ok(Self(subtrahend - &self.0)
+                .into_pyobject(py)?
+                .into_any()
+                .unbind())
+        } else {
+            Ok(py.NotImplemented())
+        }
     }
 
     fn __rtruediv__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = dividend.py();
-        if let Ok(dividend) = dividend.extract::<PyRef<'_, PyInt>>() {
+        if let Ok(dividend) = dividend.extract::<PyRef<'_, PyBigInt>>() {
             (&dividend.0)
                 .checked_div(&self.0)
-                .map(|quotient| Self(quotient).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
                 })
+                .and_then(|quotient| {
+                    Ok(Self(quotient).into_pyobject(py)?.into_any().unbind())
+                })
         } else if let Ok(dividend) = try_big_int_from_py_integral(dividend) {
             dividend
                 .checked_div(&self.0)
-                .map(|quotient| Self(quotient).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
+                })
+                .and_then(|quotient| {
+                    Ok(Self(quotient).into_pyobject(py)?.into_any().unbind())
                 })
         } else {
             Ok(py.NotImplemented())
@@ -485,14 +574,19 @@ impl PyFraction {
 
     fn __sub__(&self, minuend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = minuend.py();
-        minuend
-            .extract::<PyRef<'_, Self>>()
-            .map(|minuend| Self(&self.0 - &minuend.0).into_py(py))
-            .or_else(|_| {
-                try_big_int_from_py_integral(minuend)
-                    .map(|minuend| Self(&self.0 - minuend).into_py(py))
-                    .or_else(|_| Ok(py.NotImplemented()))
-            })
+        if let Ok(minuend) = minuend.extract::<PyRef<'_, Self>>() {
+            Ok(Self(&self.0 - &minuend.0)
+                .into_pyobject(py)?
+                .into_any()
+                .unbind())
+        } else if let Ok(minuend) = try_big_int_from_py_integral(minuend) {
+            Ok(Self(&self.0 - minuend)
+                .into_pyobject(py)?
+                .into_any()
+                .unbind())
+        } else {
+            Ok(py.NotImplemented())
+        }
     }
 
     fn __truediv__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
@@ -500,28 +594,32 @@ impl PyFraction {
         if let Ok(divisor) = divisor.extract::<PyRef<'_, Self>>() {
             (&self.0)
                 .checked_div(&divisor.0)
-                .map(|quotient| Self(quotient).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
                 })
+                .and_then(|quotient| {
+                    Ok(Self(quotient).into_pyobject(py)?.into_any().unbind())
+                })
         } else if let Ok(divisor) = try_big_int_from_py_integral(divisor) {
             (&self.0)
                 .checked_div(divisor)
-                .map(|quotient| Self(quotient).into_py(py))
                 .ok_or_else(|| {
                     PyZeroDivisionError::new_err(
                         UNDEFINED_DIVISION_ERROR_MESSAGE,
                     )
+                })
+                .and_then(|quotient| {
+                    Ok(Self(quotient).into_pyobject(py)?.into_any().unbind())
                 })
         } else {
             Ok(py.NotImplemented())
         }
     }
 
-    fn __trunc__(&self) -> PyInt {
-        PyInt((&self.0).trunc())
+    fn __trunc__(&self) -> PyBigInt {
+        PyBigInt((&self.0).trunc())
     }
 }
 

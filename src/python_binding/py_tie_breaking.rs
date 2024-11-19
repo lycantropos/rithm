@@ -60,8 +60,11 @@ impl PyTieBreaking {
         }
     }
 
-    fn __getnewargs__<'py>(&self, py: Python<'py>) -> Bound<'py, PyTuple> {
-        PyTuple::new_bound(py, [self.value()])
+    fn __getnewargs__<'py>(
+        &self,
+        py: Python<'py>,
+    ) -> PyResult<Bound<'py, PyTuple>> {
+        PyTuple::new(py, [self.value()])
     }
 
     fn __repr__(&self) -> String {

@@ -454,7 +454,7 @@ impl PyBigInt {
 
     fn __rmod__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
         let py = dividend.py();
-        if dividend.is_instance(&Self::type_object(py))? {
+        if dividend.is_instance(&PyInt::type_object(py))? {
             try_mod(try_big_int_from_py_integral(dividend)?, &self.0).and_then(
                 |result| {
                     Ok(Self(result).into_pyobject(py)?.into_any().unbind())

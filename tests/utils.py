@@ -2,16 +2,16 @@ from __future__ import annotations
 
 import fractions
 import pickle
-from typing import Any, Union
+from typing import Any, TypeAlias
 
 from rithm.fraction import Fraction
 from rithm.integer import Int
 
-FractionOrIntOrBuiltinInt = Union[Fraction, Int, int]
-FractionWithBuiltin = tuple[Fraction, fractions.Fraction]
-IntOrBuiltin = Union[Int, int]
-IntWithBuiltin = tuple[Int, int]
-RationalWithBuiltin = Union[FractionWithBuiltin, IntWithBuiltin]
+FractionOrIntOrBuiltinInt: TypeAlias = Fraction | Int | int
+FractionWithBuiltin: TypeAlias = tuple[Fraction, fractions.Fraction]
+IntOrBuiltin: TypeAlias = Int | int
+IntWithBuiltin: TypeAlias = tuple[Int, int]
+RationalWithBuiltin: TypeAlias = FractionWithBuiltin | IntWithBuiltin
 
 
 def equivalence(

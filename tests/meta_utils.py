@@ -6,9 +6,9 @@ import pickle
 from collections.abc import Callable
 from itertools import zip_longest
 from platform import python_implementation
-from typing import Annotated, Any, Protocol, TypeVar
+from typing import Annotated, Any, Protocol, TypeVar, get_args, get_origin
 
-from typing_extensions import Self, get_args, get_origin
+from typing_extensions import Self
 
 
 def do_signatures_have_same_api(
@@ -215,6 +215,8 @@ def to_unsorted_list_elements(
 ) -> list[tuple[_T, _T]]:
     return [
         (element, sorted_element)
-        for element, sorted_element in zip(value, sorted(value, key=key))
+        for element, sorted_element in zip(
+            value, sorted(value, key=key), strict=True
+        )
         if element != sorted_element
     ]

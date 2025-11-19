@@ -1,29 +1,33 @@
 import os
-import platform
+import sys
 import time
-import typing as t
+from collections.abc import Callable, Iterator
 from datetime import timedelta
+from typing import cast
 
 import pytest
 from hypothesis import HealthCheck, settings
 
-is_pypy = platform.python_implementation() == 'PyPy'
+is_pypy = sys.implementation.name == 'pypy'
 on_ci = bool(os.getenv('CI'))
 max_examples = (
-    -(-settings.default.max_examples // (10 if is_pypy else 2))
+    -(-settings().max_examples // (10 if is_pypy else 2))
     if on_ci
-    else settings.default.max_examples
+    else settings().max_examples
 )
 settings.register_profile(
     'default',
-    deadline=None,
+    deadline=(timedelta(hours=1) / max_examples if on_ci else None),
     max_examples=max_examples,
     suppress_health_check=[HealthCheck.too_slow],
 )
 
 # FIXME:
 #  workaround until https://github.com/pytest-dev/pluggy/issues/191 is fixed
-hookimpl = t.cast(t.Callable[..., t.Callable[..., None]], pytest.hookimpl)
+hookimpl = cast(
+    Callable[..., Callable[[Callable[..., None]], Callable[..., None]]],
+    pytest.hookimpl,
+)
 
 if on_ci:
     time_left = timedelta(hours=1)
@@ -34,7 +38,7 @@ if on_ci:
         item.obj = set_deadline(item.obj)
 
     @pytest.fixture(autouse=True)
-    def time_function_call() -> t.Iterator[None]:
+    def time_function_call() -> Iterator[None]:
         start = time.monotonic()
         try:
             yield

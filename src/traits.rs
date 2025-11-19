@@ -154,6 +154,7 @@ macro_rules! float_max_exp_impl {
 float_max_exp_impl!(f32 f64);
 
 pub trait MinExp {
+    #[allow(dead_code)]
     const MIN_EXP: i32;
 }
 

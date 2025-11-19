@@ -308,7 +308,6 @@ jobs:
         env:
           CIBW_ARCHS: ${{ matrix.platform.architecture }}
           CIBW_BEFORE_ALL_LINUX: |
-            yum install -y libatomic
             curl https://sh.rustup.rs -sSf |
             sh -s -- -y --default-toolchain=nightly &&
             # caused by https://github.com/rust-lang/cargo/issues/9167

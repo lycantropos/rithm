@@ -306,7 +306,7 @@ Development
 
 Install [bump-my-version](https://github.com/callowayproject/bump-my-version#installation).
 
-#### Pre-release
+#### Release
 
 Choose which version number category to bump following [semver
 specification](http://semver.org/).
@@ -324,22 +324,6 @@ Bump version
 
 ```bash
 bump-my-version bump --verbose $CATEGORY
-```
-
-This will set version to `major.minor.patch-alpha`.
-
-#### Release
-
-Test bumping version
-
-```bash
-bump-my-version bump --dry-run --verbose release
-```
-
-Bump version
-
-```bash
-bump-my-version bump --verbose release
 ```
 
 This will set version to `major.minor.patch`.

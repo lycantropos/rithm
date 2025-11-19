@@ -13,7 +13,7 @@ use pyo3::prelude::{PyAnyMethods, PyFloatMethods};
 use pyo3::types::{PyBytes, PyFloat, PyInt, PyString, PyTuple, PyType};
 use pyo3::{
     pyclass, pymethods, Bound, BoundObject, IntoPyObject, Py, PyAny, PyErr,
-    PyObject, PyRef, PyResult, PyTypeInfo, Python,
+    PyRef, PyResult, PyTypeInfo, Python,
 };
 use pyo3_ffi as ffi;
 use std::cmp::Ordering;
@@ -146,7 +146,7 @@ impl PyBigInt {
         Self((&self.0).abs())
     }
 
-    fn __add__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __add__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = other.py();
         if let Ok(other) = other.extract::<PyRef<'_, Self>>() {
             Ok(Self(&self.0 + &other.0)
@@ -158,7 +158,7 @@ impl PyBigInt {
         }
     }
 
-    fn __and__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __and__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = other.py();
         if let Ok(other) = other.extract::<PyRef<'_, Self>>() {
             Ok(Self(&self.0 & &other.0)
@@ -178,7 +178,7 @@ impl PyBigInt {
         slf
     }
 
-    fn __divmod__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __divmod__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<'_, Self>>() {
             try_divmod(&self.0, &divisor.0).and_then(
@@ -201,7 +201,7 @@ impl PyBigInt {
         }
     }
 
-    fn __float__(&self, py: Python<'_>) -> PyResult<PyObject> {
+    fn __float__(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
         f64::try_from(&self.0)
             .map_err(|error| PyOverflowError::new_err(error.to_string()))
             .and_then(|result| {
@@ -213,7 +213,7 @@ impl PyBigInt {
         slf
     }
 
-    fn __floordiv__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __floordiv__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<'_, Self>>() {
             try_floordiv(&self.0, &divisor.0).and_then(|result| {
@@ -232,11 +232,11 @@ impl PyBigInt {
         hash(&self.0) as isize
     }
 
-    fn __index__(&self, py: Python<'_>) -> PyObject {
+    fn __index__(&self, py: Python<'_>) -> Py<PyAny> {
         to_py_long::<BigInt>(&self.0, py)
     }
 
-    fn __int__(&self, py: Python<'_>) -> PyObject {
+    fn __int__(&self, py: Python<'_>) -> Py<PyAny> {
         to_py_long::<BigInt>(&self.0, py)
     }
 
@@ -244,7 +244,7 @@ impl PyBigInt {
         Self(!&self.0)
     }
 
-    fn __lshift__(&self, shift: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __lshift__(&self, shift: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = shift.py();
         if let Ok(shift) = shift.extract::<PyRef<'_, Self>>() {
             try_lshift(&self.0, &shift.0).and_then(|result| {
@@ -259,7 +259,7 @@ impl PyBigInt {
         }
     }
 
-    fn __mod__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __mod__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<'_, Self>>() {
             try_mod(&self.0, &divisor.0).and_then(|result| {
@@ -274,7 +274,7 @@ impl PyBigInt {
         }
     }
 
-    fn __mul__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __mul__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = other.py();
         if let Ok(other) = other.extract::<PyRef<'_, Self>>() {
             Ok(Self(&self.0 * &other.0)
@@ -290,7 +290,7 @@ impl PyBigInt {
         Self(-&self.0)
     }
 
-    fn __or__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __or__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = other.py();
         if let Ok(other) = other.extract::<PyRef<'_, Self>>() {
             Ok(Self(&self.0 | &other.0)
@@ -310,7 +310,7 @@ impl PyBigInt {
         &self,
         exponent: &Bound<'_, PyAny>,
         divisor: Option<&Bound<'_, PyAny>>,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let py = exponent.py();
         if let Ok(exponent) = try_big_int_from_py_any_ref(exponent) {
             match divisor {
@@ -361,7 +361,7 @@ impl PyBigInt {
         }
     }
 
-    fn __radd__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __radd__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = other.py();
         if let Ok(other) = try_big_int_from_py_integral(other) {
             Ok(Self(other + &self.0).into_pyobject(py)?.into_any().unbind())
@@ -370,7 +370,7 @@ impl PyBigInt {
         }
     }
 
-    fn __rand__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __rand__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = other.py();
         if let Ok(other) = try_big_int_from_py_integral(other) {
             Ok(Self(other & &self.0).into_pyobject(py)?.into_any().unbind())
@@ -379,7 +379,7 @@ impl PyBigInt {
         }
     }
 
-    fn __rdivmod__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __rdivmod__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = dividend.py();
         if let Ok(dividend) = try_big_int_from_py_integral(dividend) {
             try_divmod(dividend, &self.0).and_then(|(quotient, remainder)| {
@@ -407,7 +407,7 @@ impl PyBigInt {
     fn __rfloordiv__(
         &self,
         dividend: &Bound<'_, PyAny>,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let py = dividend.py();
         if let Ok(dividend) = try_big_int_from_py_integral(dividend) {
             try_floordiv(dividend, &self.0).and_then(|result| {
@@ -422,7 +422,7 @@ impl PyBigInt {
         &self,
         other: &Bound<'_, PyAny>,
         op: CompareOp,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let py = other.py();
         if let Ok(other) = other.extract::<PyRef<'_, Self>>() {
             Ok(compare(&self.0, &other.0, op)
@@ -441,7 +441,7 @@ impl PyBigInt {
         }
     }
 
-    fn __rlshift__(&self, base: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __rlshift__(&self, base: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = base.py();
         if let Ok(base) = try_big_int_from_py_integral(base) {
             try_lshift(base, &self.0).and_then(|result| {
@@ -452,7 +452,7 @@ impl PyBigInt {
         }
     }
 
-    fn __rmod__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __rmod__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = dividend.py();
         if dividend.is_instance(&PyInt::type_object(py))? {
             try_mod(try_big_int_from_py_integral(dividend)?, &self.0).and_then(
@@ -465,7 +465,7 @@ impl PyBigInt {
         }
     }
 
-    fn __rmul__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __rmul__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = other.py();
         if other.is_instance(&PyInt::type_object(py))? {
             Ok(Self(try_big_int_from_py_integral(other)? * &self.0)
@@ -477,7 +477,7 @@ impl PyBigInt {
         }
     }
 
-    fn __ror__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __ror__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = other.py();
         if other.is_instance(&PyInt::type_object(py))? {
             Ok(Self(&self.0 | try_big_int_from_py_integral(other)?)
@@ -521,7 +521,7 @@ impl PyBigInt {
         &self,
         base: &Bound<'_, PyAny>,
         divisor: Option<&Bound<'_, PyAny>>,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let py = base.py();
         let base = if base.is_instance(&PyInt::type_object(py))? {
             try_big_int_from_py_integral(base)?
@@ -571,7 +571,7 @@ impl PyBigInt {
         }
     }
 
-    fn __rrshift__(&self, base: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __rrshift__(&self, base: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = base.py();
         if base.is_instance(&PyInt::type_object(py))? {
             try_rshift(try_big_int_from_py_integral(base)?, &self.0).and_then(
@@ -584,7 +584,7 @@ impl PyBigInt {
         }
     }
 
-    fn __rshift__(&self, shift: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __rshift__(&self, shift: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = shift.py();
         if let Ok(shift) = shift.extract::<PyRef<'_, Self>>() {
             try_rshift(&self.0, &shift.0).and_then(|result| {
@@ -599,7 +599,7 @@ impl PyBigInt {
         }
     }
 
-    fn __rsub__(&self, minuend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __rsub__(&self, minuend: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = minuend.py();
         if let Ok(minuend) = try_big_int_from_py_integral(minuend) {
             Ok(Self(minuend - &self.0)
@@ -611,7 +611,10 @@ impl PyBigInt {
         }
     }
 
-    fn __rtruediv__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __rtruediv__(
+        &self,
+        dividend: &Bound<'_, PyAny>,
+    ) -> PyResult<Py<PyAny>> {
         let py = dividend.py();
         if dividend.is_instance(&PyInt::type_object(py))? {
             let dividend = try_big_int_from_py_integral(dividend)?;
@@ -626,7 +629,7 @@ impl PyBigInt {
         }
     }
 
-    fn __rxor__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __rxor__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = other.py();
         if other.is_instance(&PyInt::type_object(py))? {
             Ok(Self(&self.0 ^ try_big_int_from_py_integral(other)?)
@@ -642,7 +645,7 @@ impl PyBigInt {
         self.0.to_string()
     }
 
-    fn __sub__(&self, subtrahend: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __sub__(&self, subtrahend: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = subtrahend.py();
         if let Ok(subtrahend) = subtrahend.extract::<PyRef<'_, Self>>() {
             Ok(Self(&self.0 - &subtrahend.0)
@@ -660,7 +663,7 @@ impl PyBigInt {
         }
     }
 
-    fn __truediv__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __truediv__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = divisor.py();
         if let Ok(divisor) = try_big_int_from_py_any_ref(divisor) {
             try_truediv(self.0.clone(), divisor).and_then(|result| {
@@ -678,7 +681,7 @@ impl PyBigInt {
         slf
     }
 
-    fn __xor__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+    fn __xor__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
         let py = other.py();
         if other.is_instance(&Self::type_object(py))? {
             Ok(Self(&self.0 ^ other.extract::<Self>()?.0)
@@ -773,13 +776,13 @@ fn pow_non_negative_exponent(base: &BigInt, exponent: &BigInt) -> BigInt {
 }
 
 #[inline]
-fn to_py_long<'a, T>(value: &'a T, py: Python<'_>) -> PyObject
+fn to_py_long<'a, T>(value: &'a T, py: Python<'_>) -> Py<PyAny>
 where
     &'a T: ToBytes<Output = Vec<u8>>,
 {
     let buffer = value.to_bytes(Endianness::Little);
     unsafe {
-        PyObject::from_owned_ptr(
+        Py::<PyAny>::from_owned_ptr(
             py,
             ffi::_PyLong_FromByteArray(buffer.as_ptr(), buffer.len(), 1, 1),
         )
@@ -864,7 +867,7 @@ fn try_pow_negative_exponent(
     base: BigInt,
     exponent: BigInt,
     py: Python<'_>,
-) -> PyResult<PyObject> {
+) -> PyResult<Py<PyAny>> {
     debug_assert!((&exponent).is_negative());
     match Fraction::from(base).checked_pow(exponent) {
         Some(power) => Ok(PyFraction::from(power)

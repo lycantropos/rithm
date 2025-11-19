@@ -1,6 +1,6 @@
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::PyAnyMethods;
-use pyo3::sync::GILOnceCell;
+use pyo3::sync::PyOnceLock;
 use pyo3::types::PyTuple;
 use pyo3::{
     pyclass, pymethods, Bound, Py, PyAny, PyResult, PyTypeInfo, Python,
@@ -74,8 +74,7 @@ impl From<PyEndianness> for Endianness {
 }
 
 fn to_py_endianness_values(py: Python<'_>) -> &[Py<PyEndianness>; 2usize] {
-    static VALUES: GILOnceCell<[Py<PyEndianness>; 2usize]> =
-        GILOnceCell::new();
+    static VALUES: PyOnceLock<[Py<PyEndianness>; 2usize]> = PyOnceLock::new();
     VALUES.get_or_init(py, || {
         [
             Bound::new(py, PyEndianness(Endianness::Big))

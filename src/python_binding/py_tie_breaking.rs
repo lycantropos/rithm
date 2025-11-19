@@ -1,6 +1,6 @@
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::PyAnyMethods;
-use pyo3::sync::GILOnceCell;
+use pyo3::sync::PyOnceLock;
 use pyo3::types::PyTuple;
 use pyo3::{
     pyclass, pymethods, Bound, Py, PyAny, PyResult, PyTypeInfo, Python,
@@ -88,8 +88,7 @@ impl From<PyTieBreaking> for TieBreaking {
 }
 
 fn to_py_tie_breaking_values(py: Python<'_>) -> &[Py<PyTieBreaking>; 4usize] {
-    static VALUES: GILOnceCell<[Py<PyTieBreaking>; 4usize]> =
-        GILOnceCell::new();
+    static VALUES: PyOnceLock<[Py<PyTieBreaking>; 4usize]> = PyOnceLock::new();
     VALUES.get_or_init(py, || {
         [
             Bound::new(py, PyTieBreaking(TieBreaking::AwayFromZero))

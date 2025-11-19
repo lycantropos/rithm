@@ -66,7 +66,7 @@ class Int:
 
     def __new__(
         cls,
-        value: None | Self | float | int | str = None,
+        value: Self | float | int | str | None = None,
         base: int | None = None,
         /,
     ) -> Self:
@@ -257,7 +257,7 @@ class Int:
     ) -> Self: ...
 
     def __pow__(
-        self, exponent: Self | int, divisor: None | Self | int = None, /
+        self, exponent: Self | int, divisor: Self | int | None = None, /
     ) -> Fraction | Self:
         return (
             (
@@ -339,7 +339,7 @@ class Int:
         return Int(round(self._value, digits))
 
     def __rpow__(
-        self, base: int, divisor: None | Self | int = None, /
+        self, base: int, divisor: Self | int | None = None, /
     ) -> Fraction | Self:
         return (
             Int(base).__pow__(self, divisor)
@@ -470,8 +470,8 @@ class Fraction:
 
     def __new__(
         cls,
-        numerator: _Int | None | float | int = None,
-        denominator: _Int | None | int = None,
+        numerator: _Int | float | int | None = None,
+        denominator: _Int | int | None = None,
         /,
         *,
         _normalize: bool = True,

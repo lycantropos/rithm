@@ -213,7 +213,7 @@ jobs:
   build-wheels:
     name: 'Build wheels'
     runs-on: ${{ matrix.platform.os }}
-    needs: pre-deploy
+#    needs: pre-deploy
     strategy:
       fail-fast: false
       matrix:
@@ -225,13 +225,6 @@ jobs:
             python_architecture: 'x64',
             rust_target: 'aarch64-apple-darwin',
             tag: 'macosx_arm64'
-          },
-          {
-            architecture: 'universal2',
-            os: 'macos-latest',
-            python_architecture: 'x64',
-            rust_target: 'aarch64-apple-darwin',
-            tag: 'macosx_universal2'
           },
           {
             architecture: 'aarch64',
@@ -315,6 +308,7 @@ jobs:
         env:
           CIBW_ARCHS: ${{ matrix.platform.architecture }}
           CIBW_BEFORE_ALL_LINUX: |
+            apt-get install libatomic1
             curl https://sh.rustup.rs -sSf |
             sh -s -- -y --default-toolchain=nightly &&
             # caused by https://github.com/rust-lang/cargo/issues/9167

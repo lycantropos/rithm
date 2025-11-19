@@ -37,7 +37,7 @@ jobs:
       - name: 'Setup Python'
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.11'
       - name: 'Check Python metadata'
         run: |
           PROJECT_DESCRIPTION=$(python -c 'import json, pathlib, tomllib; print(json.dumps(tomllib.loads(pathlib.Path("pyproject.toml").read_text())))' | jq --raw-output '.project.description')
@@ -64,11 +64,6 @@ jobs:
           {
             os: 'macos-latest',
             python_architecture: 'x64',
-            rust_target: 'x86_64-apple-darwin'
-          },
-          {
-            os: 'macos-latest',
-            python_architecture: 'x64',
             rust_target: 'aarch64-apple-darwin'
           },
           {
@@ -92,7 +87,7 @@ jobs:
             platform: {
               os: 'macos-latest',
               python_architecture: 'x64',
-              rust_target: 'x86_64-apple-darwin'
+              rust_target: 'aarch64-apple-darwin'
             }
         include:
           - python_version: 'pypy-3.10'

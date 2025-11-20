@@ -40,7 +40,7 @@ jobs:
           python-version: '3.10'
       - name: 'Check Python metadata'
         run: |
-          PROJECT_DESCRIPTION=$(python3.10 -c "import importlib.metadata;print(importlib.metadata.metadata('${REPOSITORY_NAME//-/_}')['summary'])")
+          PROJECT_DESCRIPTION=$(python -c "import importlib.metadata;print(importlib.metadata.metadata('${REPOSITORY_NAME//-/_}')['summary'])")
           MODULE_DOCSTRING=$(python -c "import ${REPOSITORY_NAME//-/_} as module; assert module.__doc__ is not None; print(module.__doc__)")
           if [[ $PROJECT_DESCRIPTION != "$MODULE_DOCSTRING" ]]; then
             echo "Python project description should be equal to module docstring, but found \"$PROJECT_DESCRIPTION\" != \"$MODULE_DOCSTRING\".";

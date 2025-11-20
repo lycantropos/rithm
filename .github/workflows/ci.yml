@@ -40,7 +40,7 @@ jobs:
           python-version: '3.10'
       - name: 'Check Python metadata'
         run: |
-          PROJECT_DESCRIPTION=$(python -c "import importlib.metadata;print(importlib.metadata.metadata('${REPOSITORY_NAME//-/_}')['summary'])")
+          PROJECT_DESCRIPTION=$(python -c "import importlib.metadata, sys, pathlib; sys.path.insert(0, str(pathlib.Path.cwd())); print(importlib.metadata.metadata('${REPOSITORY_NAME//-/_}')['summary'])")
           MODULE_DOCSTRING=$(python -c "import ${REPOSITORY_NAME//-/_} as module; assert module.__doc__ is not None; print(module.__doc__)")
           if [[ $PROJECT_DESCRIPTION != "$MODULE_DOCSTRING" ]]; then
             echo "Python project description should be equal to module docstring, but found \"$PROJECT_DESCRIPTION\" != \"$MODULE_DOCSTRING\".";
@@ -50,7 +50,7 @@ jobs:
           REPOSITORY_NAME: ${{ github.event.repository.name }}
       - name: 'Check Rust & Python metadata'
         run: |
-          PYTHON_VERSION=$(python -c "import importlib.metadata;print(importlib.metadata.version('${REPOSITORY_NAME//-/_}'))")
+          PYTHON_VERSION=$(python -c "import importlib.metadata, sys, pathlib; sys.path.insert(0, str(pathlib.Path.cwd())); print(importlib.metadata.version('${REPOSITORY_NAME//-/_}'))")
           cargo metadata --format-version=1 --no-deps \
           | jq --compact-output --raw-output '.packages[]' \
           | while read -r package; do

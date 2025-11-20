@@ -30,22 +30,35 @@ jobs:
           | jq --compact-output --raw-output '.packages[]'
           | while read -r package; do
               if [[ $(echo "$package" | jq --raw-output ".repository") != '${{ github.server_url }}/${{ github.repository }}' ]]; then
-                echo "Package $(echo "$package" | jq '.name') has invalid repository URL $(echo "$package" | jq '.repository')";
+                echo "Rust package $(echo "$package" | jq '.name') has invalid repository URL $(echo "$package" | jq '.repository')";
                 exit 1;
               fi
             done
       - name: 'Setup Python'
         uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.10'
       - name: 'Check Python metadata'
         run: |
-          PROJECT_DESCRIPTION=$(python -c 'import json, pathlib, tomllib; print(json.dumps(tomllib.loads(pathlib.Path("pyproject.toml").read_text())))' | jq --raw-output '.project.description')
+          PROJECT_DESCRIPTION=$(python3.10 -c "import importlib.metadata;print(importlib.metadata.metadata('${REPOSITORY_NAME//-/_}')['summary'])")
           MODULE_DOCSTRING=$(python -c "import ${REPOSITORY_NAME//-/_} as module; assert module.__doc__ is not None; print(module.__doc__)")
           if [[ $PROJECT_DESCRIPTION != "$MODULE_DOCSTRING" ]]; then
-            echo "Project description should be equal to module docstring, but found \"$PROJECT_DESCRIPTION\" != \"$MODULE_DOCSTRING\".";
+            echo "Python project description should be equal to module docstring, but found \"$PROJECT_DESCRIPTION\" != \"$MODULE_DOCSTRING\".";
             exit 1;
           fi
+        env:
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+      - name: 'Check Rust & Python metadata'
+        run: |
+          PYTHON_VERSION=$(python -c "import importlib.metadata;print(importlib.metadata.version('${REPOSITORY_NAME//-/_}'))")
+          cargo metadata --format-version=1 --no-deps \
+          | jq --compact-output --raw-output '.packages[]' \
+          | while read -r package; do
+              if [[ $(echo "$package" | jq --raw-output ".version") != "${PYTHON_VERSION}" ]]; then
+                echo "Rust package $(echo "$package" | jq '.name') should have the same version as Python package, but found $(echo "$package" | jq '.version') != \"${PYTHON_VERSION}\"";
+                exit 1;
+              fi
+            done
         env:
           REPOSITORY_NAME: ${{ github.event.repository.name }}
       - name: 'Install pre-commit'

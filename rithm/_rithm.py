@@ -4,7 +4,7 @@ from math import gcd as _gcd
 from numbers import Integral, Rational
 from operator import mul
 from sys import hash_info
-from typing import Any, ClassVar, NoReturn, SupportsIndex, TypeVar, overload
+from typing import Any, NoReturn, SupportsIndex, TypeVar, overload
 
 from typing_extensions import Self, final
 
@@ -13,11 +13,9 @@ from .enums import Endianness as _Endianness, TieBreaking as _TieBreaking
 
 @final
 class Int:
-    _ONE: ClassVar[Self]
-
     @property
-    def denominator(self, /) -> Self:
-        return self._ONE
+    def denominator(self, /) -> Int:
+        return _ONE
 
     @property
     def numerator(self, /) -> Self:
@@ -424,7 +422,7 @@ def _to_bytes_count(value: int, /) -> int:
     return (8 + (value + (value < 0)).bit_length()) // 8
 
 
-Int._ONE = _ONE = Int(1)  # noqa: SLF001
+_ONE = Int(1)
 _ZERO = Int()
 _HASH_INF = Int(hash_info.inf)
 _HASH_MODULUS = Int(hash_info.modulus)

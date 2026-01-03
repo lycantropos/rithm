@@ -285,11 +285,16 @@ def test_constructible_classes(
         if (
             (
                 (
-                    type_annotated_cls := type_annotated_module_namespace.get(
-                        cls.__qualname__
+                    (
+                        type_annotated_cls
+                        := type_annotated_module_namespace.get(
+                            cls.__qualname__
+                        )
                     )
+                    is None
                 )
-                is None
+                and (descriptors := [])
+                and (parameter_names := [])
             )
             or (
                 (

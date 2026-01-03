@@ -4,7 +4,7 @@ from math import gcd as _gcd
 from numbers import Integral, Rational
 from operator import mul
 from sys import hash_info
-from typing import Any, NoReturn, SupportsIndex, overload
+from typing import Any, ClassVar, NoReturn, SupportsIndex, TypeVar, overload
 
 from typing_extensions import Self, final
 
@@ -12,21 +12,22 @@ from .enums import Endianness as _Endianness, TieBreaking as _TieBreaking
 
 
 @final
-@Integral.register
 class Int:
+    _ONE: ClassVar[Self]
+
     @property
     def denominator(self, /) -> Self:
-        return _ONE
+        return self._ONE
 
     @property
     def numerator(self, /) -> Self:
         return self
 
     def bit_length(self, /) -> Self:
-        return Int(self._value.bit_length())
+        return type(self)(self._value.bit_length())
 
     def gcd(self, other: SupportsIndex, /) -> Self:
-        return Int(_gcd(self._value, other))
+        return type(self)(_gcd(self._value, other))
 
     def is_power_of_two(self, /) -> bool:
         return self._value > 0 and not (self._value & (self._value - 1))
@@ -80,18 +81,18 @@ class Int:
         return self
 
     def __abs__(self, /) -> Self:
-        return Int(abs(self._value))
+        return type(self)(abs(self._value))
 
     def __add__(self, other: Self | int, /) -> Self:
         return (
-            Int(self._value + other._value)
+            type(self)(self._value + other._value)
             if isinstance(other, Int)
             else self.__radd__(other)
         )
 
     def __and__(self, other: Self | int, /) -> Self:
         return (
-            Int(self._value & other._value)
+            type(self)(self._value & other._value)
             if isinstance(other, Int)
             else self.__rand__(other)
         )
@@ -110,7 +111,7 @@ class Int:
             if isinstance(other, Int)
             else divmod(self._value, other)
         )
-        return Int(quotient), Int(remainder)
+        return type(self)(quotient), type(self)(remainder)
 
     @overload
     def __eq__(self, other: Self | int, /) -> bool: ...
@@ -137,10 +138,10 @@ class Int:
 
     def __floordiv__(self, other: Int | int, /) -> Self:
         return (
-            Int(self._value // other._value)
+            type(self)(self._value // other._value)
             if isinstance(other, Int)
             else (
-                Int(self._value // other)
+                type(self)(self._value // other)
                 if isinstance(other, int)
                 else NotImplemented
             )
@@ -175,7 +176,7 @@ class Int:
         return hash(self._value)
 
     def __invert__(self, /) -> Self:
-        return Int(~self._value)
+        return type(self)(~self._value)
 
     def __index__(self, /) -> int:
         return self._value
@@ -195,10 +196,10 @@ class Int:
 
     def __lshift__(self, other: Self | int, /) -> Self:
         return (
-            Int(self._value << other._value)
+            type(self)(self._value << other._value)
             if isinstance(other, Int)
             else (
-                Int(self._value << other)
+                type(self)(self._value << other)
                 if isinstance(other, int)
                 else NotImplemented
             )
@@ -217,10 +218,10 @@ class Int:
 
     def __mod__(self, other: Self | int, /) -> Self:
         return (
-            Int(self._value % other._value)
+            type(self)(self._value % other._value)
             if isinstance(other, Int)
             else (
-                Int(self._value % other)
+                type(self)(self._value % other)
                 if isinstance(other, int)
                 else NotImplemented
             )
@@ -228,17 +229,17 @@ class Int:
 
     def __mul__(self, other: Self | int, /) -> Self:
         return (
-            Int(self._value * other._value)
+            type(self)(self._value * other._value)
             if isinstance(other, Int)
             else self.__rmul__(other)
         )
 
     def __neg__(self, /) -> Self:
-        return Int(-self._value)
+        return type(self)(-self._value)
 
     def __or__(self, other: Self | int, /) -> Self:
         return (
-            Int(self._value | other._value)
+            type(self)(self._value | other._value)
             if isinstance(other, Int)
             else self.__ror__(other)
         )
@@ -262,13 +263,13 @@ class Int:
         return (
             (
                 (
-                    Int(self._value ** int(exponent))
+                    type(self)(self._value ** int(exponent))
                     if exponent >= _ZERO
                     else Fraction(_ONE, self) ** -exponent
                 )
                 if divisor is None
                 else (
-                    Int(pow(self._value, int(exponent), int(divisor)))
+                    type(self)(pow(self._value, int(exponent), int(divisor)))
                     if isinstance(divisor, (Int, int))
                     else NotImplemented
                 )
@@ -279,14 +280,14 @@ class Int:
 
     def __radd__(self, other: int, /) -> Self:
         return (
-            Int(self._value + other)
+            type(self)(self._value + other)
             if isinstance(other, int)
             else NotImplemented
         )
 
     def __rand__(self, other: int, /) -> Self:
         return (
-            Int(self._value & other)
+            type(self)(self._value & other)
             if isinstance(other, int)
             else NotImplemented
         )
@@ -295,71 +296,71 @@ class Int:
         if not isinstance(other, int):
             return NotImplemented
         quotient, remainder = divmod(other, self._value)
-        return Int(quotient), Int(remainder)
+        return type(self)(quotient), type(self)(remainder)
 
     def __repr__(self, /) -> str:
         return f'{type(self).__qualname__}({self._value})'
 
     def __rfloordiv__(self, other: int, /) -> Self:
         return (
-            Int(other // self._value)
+            type(self)(other // self._value)
             if isinstance(other, int)
             else NotImplemented
         )
 
     def __rlshift__(self, other: int, /) -> Self:
         return (
-            Int(other << self._value)
+            type(self)(other << self._value)
             if isinstance(other, int)
             else NotImplemented
         )
 
     def __rmod__(self, other: int, /) -> Self:
         return (
-            Int(other % self._value)
+            type(self)(other % self._value)
             if isinstance(other, int)
             else NotImplemented
         )
 
     def __rmul__(self, other: int, /) -> Self:
         return (
-            Int(self._value * other)
+            type(self)(self._value * other)
             if isinstance(other, int)
             else NotImplemented
         )
 
     def __ror__(self, other: int, /) -> Self:
         return (
-            Int(self._value | other)
+            type(self)(self._value | other)
             if isinstance(other, int)
             else NotImplemented
         )
 
     def __round__(self, digits: int | None = None, /) -> Self:
-        return Int(round(self._value, digits))
+        return type(self)(round(self._value, digits))
 
     def __rpow__(
         self, base: int, divisor: Self | int | None = None, /
     ) -> Fraction | Self:
         return (
-            Int(base).__pow__(self, divisor)
+            type(self)(base).__pow__(self, divisor)
             if isinstance(base, int)
             else NotImplemented
         )
 
     def __rrshift__(self, other: int, /) -> Self:
         return (
-            Int(other >> self._value)
+            type(self)(other >> self._value)
             if isinstance(other, int)
             else NotImplemented
         )
 
     def __rshift__(self, other: Self | int, /) -> Self:
         return (
-            Int(self._value >> other._value)
+            type(self)(self._value >> other._value)
             if isinstance(other, Int)
             else (
-                Int(self._value >> other)
+                type(self)(self._value >> other)
                 if isinstance(other, int)
                 else NotImplemented
             )
@@ -367,7 +368,7 @@ class Int:
 
     def __rsub__(self, other: int, /) -> Self:
         return (
-            Int(other - self._value)
+            type(self)(other - self._value)
             if isinstance(other, int)
             else NotImplemented
         )
@@ -379,7 +380,7 @@ class Int:
 
     def __rxor__(self, other: int, /) -> Self:
         return (
-            Int(self._value ^ other)
+            type(self)(self._value ^ other)
             if isinstance(other, int)
             else NotImplemented
         )
@@ -389,10 +390,10 @@ class Int:
 
     def __sub__(self, other: Self | int, /) -> Self:
         return (
-            Int(self._value - other._value)
+            type(self)(self._value - other._value)
             if isinstance(other, Int)
             else (
-                Int(self._value - other)
+                type(self)(self._value - other)
                 if isinstance(other, int)
                 else NotImplemented
             )
@@ -410,17 +411,20 @@ class Int:
 
     def __xor__(self, other: Self | int, /) -> Self:
         return (
-            Int(self._value ^ other._value)
+            type(self)(self._value ^ other._value)
             if isinstance(other, Int)
             else self.__rxor__(other)
         )
+
+
+Integral.register(Int)
 
 
 def _to_bytes_count(value: int, /) -> int:
     return (8 + (value + (value < 0)).bit_length()) // 8
 
 
-_ONE = Int(1)
+Int._ONE = _ONE = Int(1)  # noqa: SLF001
 _ZERO = Int()
 _HASH_INF = Int(hash_info.inf)
 _HASH_MODULUS = Int(hash_info.modulus)
@@ -429,7 +433,6 @@ _Int = Int
 
 
 @final
-@Rational.register
 class Fraction:
     @property
     def denominator(self) -> _Int:
@@ -528,13 +531,20 @@ class Fraction:
         return self
 
     def __abs__(self, /) -> Self:
-        return Fraction(
+        return type(self)(
             abs(self.numerator), self.denominator, _normalize=False
         )
 
     def __add__(self, other: Self | _Int | int, /) -> Self:
         return (
-            self._add_fraction(other)
+            type(self)(
+                *_normalize_components_moduli(
+                    self.numerator * other.denominator
+                    + other.numerator * self.denominator,
+                    self.denominator * other.denominator,
+                ),
+                _normalize=False,
+            )
             if isinstance(other, Fraction)
             else self.__radd__(other)
         )
@@ -547,7 +557,7 @@ class Fraction:
 
     def __divmod__(self, divisor: Self | _Int | int, /) -> tuple[_Int, Self]:
         return (
-            _divmod_rationals(self, divisor)
+            _divmod_rationals(self, divisor, fraction_cls=type(self))
             if isinstance(divisor, (Fraction, _Int, int))
             else NotImplemented
         )
@@ -650,14 +660,14 @@ class Fraction:
 
     def __mod__(self, divisor: _Int | Self | int, /) -> Self:
         return (
-            Fraction(
+            type(self)(
                 (self.numerator * divisor.denominator)
                 % (self.denominator * divisor.numerator),
                 self.denominator * divisor.denominator,
             )
             if isinstance(divisor, Fraction)
             else (
-                Fraction(
+                type(self)(
                     self.numerator % (self.denominator * divisor),
                     self.denominator,
                 )
@@ -674,7 +684,7 @@ class Fraction:
         )
 
     def __neg__(self, /) -> Self:
-        return Fraction(-self.numerator, self.denominator, _normalize=False)
+        return type(self)(-self.numerator, self.denominator, _normalize=False)
 
     def __pos__(self, /) -> Self:
         return self
@@ -682,13 +692,13 @@ class Fraction:
     def __pow__(self, exponent: _Int | int, divisor: None = None, /) -> Self:
         return (
             (
-                Fraction(
+                type(self)(
                     self.numerator**exponent,
                     self.denominator**exponent,
                     _normalize=False,
                 )
                 if exponent >= _ZERO
-                else Fraction(
+                else type(self)(
                     *_normalize_components_sign(
                         self.denominator**-exponent, self.numerator**-exponent
                     ),
@@ -701,14 +711,20 @@ class Fraction:
 
     def __radd__(self, other: _Int | int, /) -> Self:
         return (
-            self._add_int(_Int(other))
+            type(self)(
+                *_normalize_components_moduli(
+                    self.numerator + Int(other) * self.denominator,
+                    self.denominator,
+                ),
+                _normalize=False,
+            )
             if isinstance(other, (_Int, int))
             else NotImplemented
         )
 
     def __rdivmod__(self, dividend: _Int | int, /) -> tuple[_Int, Self]:
         return (
-            _divmod_rationals(dividend, self)
+            _divmod_rationals(dividend, self, fraction_cls=type(self))
             if isinstance(dividend, (_Int, int))
             else NotImplemented
         )
@@ -731,7 +747,7 @@ class Fraction:
 
     def __rmod__(self, dividend: _Int | int, /) -> Self:
         return (
-            Fraction(
+            type(self)(
                 (dividend * self.denominator) % self.numerator,
                 self.denominator,
             )
@@ -757,14 +773,14 @@ class Fraction:
             return self.round(_TieBreaking.TO_EVEN)
         shift = 10 ** abs(digits)
         return (
-            Fraction((self * shift).round(_TieBreaking.TO_EVEN), shift)
+            type(self)((self * shift).round(_TieBreaking.TO_EVEN), shift)
             if digits > 0
-            else Fraction((self / shift).round(_TieBreaking.TO_EVEN) * shift)
+            else type(self)((self / shift).round(_TieBreaking.TO_EVEN) * shift)
         )
 
     def __rsub__(self, subtrahend: _Int | int, /) -> Self:
         return (
-            Fraction(
+            type(self)(
                 *_normalize_components_moduli(
                     subtrahend * self.denominator - self.numerator,
                     self.denominator,
@@ -784,7 +800,7 @@ class Fraction:
 
     def __sub__(self, minuend: _Int | Self | int, /) -> Self:
         return (
-            Fraction(
+            type(self)(
                 *_normalize_components_moduli(
                     self.numerator * minuend.denominator
                     - minuend.numerator * self.denominator,
@@ -794,7 +810,7 @@ class Fraction:
             )
             if isinstance(minuend, Fraction)
             else (
-                Fraction(
+                type(self)(
                     *_normalize_components_moduli(
                         self.numerator - minuend * self.denominator,
                         self.denominator,
@@ -815,7 +831,7 @@ class Fraction:
 
     def __truediv__(self, divisor: _Int | Self | int, /) -> Self:
         return (
-            Fraction(
+            type(self)(
                 *_normalize_components_sign(
                     *map(
                         mul,
@@ -840,24 +856,6 @@ class Fraction:
     def __trunc__(self, /) -> _Int:
         return self.__ceil__() if self.numerator < _ZERO else self.__floor__()
 
-    def _add_fraction(self, other: Self, /) -> Self:
-        return Fraction(
-            *_normalize_components_moduli(
-                self.numerator * other.denominator
-                + other.numerator * self.denominator,
-                self.denominator * other.denominator,
-            ),
-            _normalize=False,
-        )
-
-    def _add_int(self, other: _Int, /) -> Self:
-        return Fraction(
-            *_normalize_components_moduli(
-                self.numerator + other * self.denominator, self.denominator
-            ),
-            _normalize=False,
-        )
-
     def _mul_by_fraction(self, other: Self, /) -> Self:
         numerator, other_denominator = _normalize_components_moduli(
             self.numerator, other.denominator
@@ -865,7 +863,7 @@ class Fraction:
         other_numerator, denominator = _normalize_components_moduli(
             other.numerator, self.denominator
         )
-        return Fraction(
+        return type(self)(
             numerator * other_numerator,
             denominator * other_denominator,
             _normalize=False,
@@ -875,13 +873,15 @@ class Fraction:
         other, denominator = _normalize_components_moduli(
             other, self.denominator
         )
-        return Fraction(self.numerator * other, denominator, _normalize=False)
+        return type(self)(
+            self.numerator * other, denominator, _normalize=False
+        )
 
     def _rtruediv_by_int(self, dividend: _Int, /) -> Self:
         dividend, numerator = _normalize_components_moduli(
             dividend, self.numerator
         )
-        return Fraction(
+        return type(self)(
             *_normalize_components_sign(
                 dividend * self.denominator, numerator
             ),
@@ -892,21 +892,31 @@ class Fraction:
         numerator, divisor = _normalize_components_moduli(
             self.numerator, divisor
         )
-        return Fraction(
+        return type(self)(
             *_normalize_components_sign(numerator, divisor * self.denominator),
             _normalize=False,
         )
 
 
+Rational.register(Fraction)
+
+
+_FractionT = TypeVar('_FractionT', bound=Fraction)
+
+
 def _divmod_rationals(
-    dividend: Fraction | Int | int, divisor: Fraction | Int | int, /
-) -> tuple[Int, Fraction]:
+    dividend: Fraction | Int | int,
+    divisor: Fraction | Int | int,
+    /,
+    *,
+    fraction_cls: type[_FractionT],
+) -> tuple[Int, _FractionT]:
     quotient, remainder_numerator = divmod(
         dividend.numerator * divisor.denominator,
         dividend.denominator * divisor.numerator,
     )
     assert isinstance(quotient, Int)
-    return quotient, Fraction(
+    return quotient, fraction_cls(
         remainder_numerator, dividend.denominator * divisor.denominator
     )
 

@@ -5,7 +5,7 @@ license = "MIT"
 name = "rithm"
 repository = "https://github.com/lycantropos/rithm"
 rust-version = "1.74.0"
-version = "14.7.0"
+version = "14.7.1"
 
 [lib]
 name = "rithm"

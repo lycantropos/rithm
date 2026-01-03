@@ -1,17 +1,17 @@
-rithm
-=====
+# rithm
 
-[![](https://github.com/lycantropos/rithm/workflows/CI/badge.svg)](https://github.com/lycantropos/rithm/actions/workflows/ci.yml "Github Actions")
-[![](https://codecov.io/gh/lycantropos/rithm/branch/master/graph/badge.svg)](https://codecov.io/gh/lycantropos/rithm "Codecov")
-[![](https://img.shields.io/github/license/lycantropos/rithm.svg)](https://github.com/lycantropos/rithm/blob/master/LICENSE "License")
-[![](https://badge.fury.io/py/rithm.svg)](https://badge.fury.io/py/rithm "PyPI")
-[![](https://img.shields.io/crates/v/rithm.svg)](https://crates.io/crates/rithm "crates.io")
+[![Github Actions](https://github.com/lycantropos/rithm/workflows/CI/badge.svg)](https://github.com/lycantropos/rithm/actions/workflows/ci.yml "Github Actions")
+[![Codecov](https://codecov.io/gh/lycantropos/rithm/branch/master/graph/badge.svg)](https://codecov.io/gh/lycantropos/rithm "Codecov")
+[![License](https://img.shields.io/github/license/lycantropos/rithm.svg)](https://github.com/lycantropos/rithm/blob/master/LICENSE "License")
+[![PyPI](https://badge.fury.io/py/rithm.svg)](https://badge.fury.io/py/rithm "PyPI")
+[![crates.io](https://img.shields.io/crates/v/rithm.svg)](https://crates.io/crates/rithm "crates.io")
 
-In what follows `python` is an alias for `python3.9` or `pypy3.9`
-or any later version (`python3.10`, `pypy3.10` and so on).
+In what follows `python` is an alias for `python3.10` or `pypy3.10`
+or any later version (`python3.11`, `pypy3.11` and so on).
 
-Installation
-------------
+## Installation
+
+### Prerequisites
 
 Install the latest `pip` & `setuptools` packages versions
 
@@ -36,20 +36,13 @@ git clone https://github.com/lycantropos/rithm.git
 cd rithm
 ```
 
-Install dependencies
-
-```bash
-python -m pip install -r requirements.txt
-```
-
 Install
 
 ```bash
-python setup.py install
+python -m pip install -e '.'
 ```
 
-Usage
------
+## Usage
 
 ### Python
 
@@ -65,6 +58,7 @@ With setup
 we can:
 
 - construct
+
   ```python
   >>> Int()
   Int(0)
@@ -88,7 +82,9 @@ we can:
   Int(9)
 
   ```
+
 - compare
+
   ```python
   >>> Int(9) == Int(9)
   True
@@ -102,7 +98,9 @@ we can:
   True
 
   ```
+
 - calculate
+
   ```python
   >>> abs(Int(-9))
   Int(9)
@@ -149,6 +147,7 @@ With setup
 we can:
 
 - construct
+
   ```python
   >>> Fraction()
   Fraction(Int(0), Int(1))
@@ -162,7 +161,9 @@ we can:
   Fraction(Int(1), Int(2))
 
   ```
+
 - compare
+
   ```python
   >>> Fraction(1, 2) == Fraction(1, 2)
   True
@@ -176,7 +177,9 @@ we can:
   True
 
   ```
+
 - calculate
+
   ```python
   >>> abs(Fraction(-1, 2))
   Fraction(Int(1), Int(2))
@@ -297,12 +300,11 @@ assert_eq!(Fraction::new(3, 2).unwrap() - Fraction::from(1),
            Fraction::new(1, 2).unwrap());
 ```
 
-Development
------------
+## Development
 
 ### Bumping version
 
-#### Preparation
+#### Prerequisites
 
 Install [bump-my-version](https://github.com/callowayproject/bump-my-version#installation).
 
@@ -330,56 +332,76 @@ This will set version to `major.minor.patch`.
 
 ### Running tests
 
-Install dependencies
+#### Plain
+
+Install with dependencies
 
 ```bash
-python -m pip install -r requirements-tests.txt
+python -m pip install -e '.[tests]'
 ```
 
-Plain
+Run
 
 ```bash
 pytest
 ```
 
-Inside `Docker` container:
+#### `Docker` container
+
+Run
 
 - with `CPython`
+
   ```bash
   docker-compose --file docker-compose.cpython.yml up
   ```
+
 - with `PyPy`
+
   ```bash
   docker-compose --file docker-compose.pypy.yml up
   ```
 
-`Bash` script:
+#### `Bash` script
+
+Run
 
 - with `CPython`
+
   ```bash
   ./run-tests.sh
   ```
+
   or
+
   ```bash
   ./run-tests.sh cpython
   ```
 
 - with `PyPy`
+
   ```bash
   ./run-tests.sh pypy
   ```
 
-`PowerShell` script:
+#### `PowerShell` script
+
+Run
 
 - with `CPython`
+
   ```powershell
   .\run-tests.ps1
   ```
+
   or
+
   ```powershell
   .\run-tests.ps1 cpython
   ```
+
 - with `PyPy`
+
   ```powershell
   .\run-tests.ps1 pypy
   ```

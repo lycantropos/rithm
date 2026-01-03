@@ -237,9 +237,8 @@ where
         debug_assert!(target_bitness > source_bitness && source_bitness > 0);
         let target_digit_mask =
             DoublePrecisionOf::<Self>::digit_mask(target_bitness);
-        let result_capacity: usize = (source.len() * target_bitness
-            + (target_bitness - 1))
-            / target_bitness;
+        let result_capacity: usize =
+            (source.len() * target_bitness).div_ceil(target_bitness);
         let mut result = Vec::<Self>::with_capacity(result_capacity);
         let mut accumulator = DoublePrecisionOf::<Self>::zero();
         let mut accumulator_bits_count: usize = 0;
@@ -301,8 +300,7 @@ where
             DoublePrecisionOf::<Source>::digit_mask(target_bitness);
         let digits_bits_count: usize = (source.len() - 1) * source_bitness
             + source[source.len() - 1].bit_length();
-        let digits_count: usize =
-            (digits_bits_count + (target_bitness - 1)) / target_bitness;
+        let digits_count: usize = digits_bits_count.div_ceil(target_bitness);
         let mut result = Vec::<Self>::with_capacity(digits_count);
         let mut accumulator = DoublePrecisionOf::<Source>::from(source[0]);
         let mut accumulator_bits_count = source_bitness;

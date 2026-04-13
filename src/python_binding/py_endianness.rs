@@ -1,13 +1,18 @@
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::PyAnyMethods;
 use pyo3::sync::PyOnceLock;
-use pyo3::types::PyTuple;
+use pyo3::types::{PyTuple, PyTypeMethods};
 use pyo3::{
     pyclass, pymethods, Bound, Py, PyAny, PyResult, PyTypeInfo, Python,
 };
 use traiter::numbers::Endianness;
 
-#[pyclass(name = "Endianness", module = "rithm.enums", frozen)]
+#[pyclass(
+    name = "Endianness",
+    module = "rithm.enums",
+    frozen,
+    skip_from_py_object
+)]
 #[derive(Clone)]
 pub(super) struct PyEndianness(Endianness);
 
@@ -35,7 +40,7 @@ impl PyEndianness {
             _ => Err(PyValueError::new_err(format!(
                 "{} is not a valid {}",
                 value.repr()?,
-                Self::NAME
+                Self::type_object(py).name()?
             ))),
         }
     }
@@ -55,15 +60,15 @@ impl PyEndianness {
         PyTuple::new(py, [self.value()])
     }
 
-    fn __repr__(&self) -> String {
-        format!(
+    fn __repr__<'py>(&self, py: Python<'py>) -> PyResult<String> {
+        Ok(format!(
             "{}.{}",
-            Self::NAME,
+            Self::type_object(py).name()?,
             match self.0 {
                 Endianness::Big => "BIG",
                 Endianness::Little => "LITTLE",
             }
-        )
+        ))
     }
 }
 

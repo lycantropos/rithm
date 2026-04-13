@@ -10,7 +10,7 @@ use pyo3::exceptions::{
     PyOverflowError, PyTypeError, PyValueError, PyZeroDivisionError,
 };
 use pyo3::prelude::{PyAnyMethods, PyFloatMethods};
-use pyo3::types::{PyFloat, PyInt, PyTuple};
+use pyo3::types::{PyFloat, PyInt, PyTuple, PyTypeMethods};
 use pyo3::{
     intern, pyclass, pymethods, Bound, BoundObject, IntoPyObject, Py, PyAny,
     PyRef, PyResult, PyTypeInfo, Python,
@@ -24,7 +24,12 @@ use traiter::numbers::{
 
 pub(super) type Fraction = crate::fraction::Fraction<BigInt>;
 
-#[pyclass(name = "Fraction", module = "rithm.fraction", frozen)]
+#[pyclass(
+    name = "Fraction",
+    module = "rithm.fraction",
+    from_py_object,
+    frozen
+)]
 #[derive(Clone)]
 pub(super) struct PyFraction(Fraction);
 
@@ -363,13 +368,13 @@ impl PyFraction {
         PyTuple::new(py, [self.numerator(), self.denominator()])
     }
 
-    fn __repr__(&self) -> String {
-        format!(
+    fn __repr__<'py>(&self, py: Python<'py>) -> PyResult<String> {
+        Ok(format!(
             "{}({}, {})",
-            Self::NAME,
-            self.numerator().__repr__(),
-            self.denominator().__repr__()
-        )
+            Self::type_object(py).name()?,
+            self.numerator().__repr__(py)?,
+            self.denominator().__repr__(py)?
+        ))
     }
 
     fn __richcmp__(

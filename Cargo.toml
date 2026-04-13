@@ -12,12 +12,12 @@ name = "rithm"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies.pyo3]
-version = "^0.27.2"
+version = "^0.28.3"
 features = ["extension-module"]
 optional = true
 
 [dependencies.pyo3-ffi]
-version = "^0.27.2"
+version = "^0.28.3"
 features = ["extension-module"]
 optional = true
 
@@ -26,7 +26,10 @@ version = "^4.0.0"
 features = ["numbers", "std"]
 
 [build-dependencies]
-pyo3-build-config = "^0.27.2"
+pyo3-build-config = "^0.28.3"
 
 [features]
 python_binding = ["dep:pyo3", "dep:pyo3-ffi"]
+
+[lints.rust]
+warnings = "deny"

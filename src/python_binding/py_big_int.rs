@@ -10,7 +10,9 @@ use pyo3::exceptions::{
     PyMemoryError, PyOverflowError, PyValueError, PyZeroDivisionError,
 };
 use pyo3::prelude::{PyAnyMethods, PyFloatMethods};
-use pyo3::types::{PyBytes, PyFloat, PyInt, PyString, PyTuple, PyType};
+use pyo3::types::{
+    PyBytes, PyFloat, PyInt, PyString, PyTuple, PyType, PyTypeMethods,
+};
 use pyo3::{
     pyclass, pymethods, Bound, BoundObject, IntoPyObject, Py, PyAny, PyErr,
     PyRef, PyResult, PyTypeInfo, Python,
@@ -35,7 +37,7 @@ const _: () =
 
 pub(super) type BigInt = crate::big_int::BigInt<Digit, DIGIT_BITNESS>;
 
-#[pyclass(name = "Int", module = "rithm.integer", frozen)]
+#[pyclass(name = "Int", module = "rithm.integer", from_py_object, frozen)]
 #[derive(Clone)]
 pub(super) struct PyBigInt(pub(super) BigInt);
 
@@ -232,11 +234,11 @@ impl PyBigInt {
         hash(&self.0) as isize
     }
 
-    fn __index__(&self, py: Python<'_>) -> Py<PyAny> {
+    fn __index__<'py>(&self, py: Python<'py>) -> Bound<'py, PyAny> {
         to_py_long::<BigInt>(&self.0, py)
     }
 
-    fn __int__(&self, py: Python<'_>) -> Py<PyAny> {
+    fn __int__<'py>(&self, py: Python<'py>) -> Bound<'py, PyAny> {
         to_py_long::<BigInt>(&self.0, py)
     }
 
@@ -400,8 +402,8 @@ impl PyBigInt {
         PyTuple::new(py, [self.__int__(py)])
     }
 
-    pub(super) fn __repr__(&self) -> String {
-        format!("{}({})", Self::NAME, self.0)
+    pub(super) fn __repr__<'py>(&self, py: Python<'py>) -> PyResult<String> {
+        Ok(format!("{}({})", Self::type_object(py).name()?, self.0))
     }
 
     fn __rfloordiv__(
@@ -776,13 +778,13 @@ fn pow_non_negative_exponent(base: &BigInt, exponent: &BigInt) -> BigInt {
 }
 
 #[inline]
-fn to_py_long<'a, T>(value: &'a T, py: Python<'_>) -> Py<PyAny>
+fn to_py_long<'a, 'py, T>(value: &'a T, py: Python<'py>) -> Bound<'py, PyAny>
 where
     &'a T: ToBytes<Output = Vec<u8>>,
 {
     let buffer = value.to_bytes(Endianness::Little);
     unsafe {
-        Py::<PyAny>::from_owned_ptr(
+        Bound::<'py, PyAny>::from_owned_ptr(
             py,
             ffi::_PyLong_FromByteArray(buffer.as_ptr(), buffer.len(), 1, 1),
         )
@@ -790,8 +792,8 @@ where
 }
 
 #[inline]
-fn try_le_bytes_from_py_integral(
-    value: &Bound<'_, PyAny>,
+fn try_le_bytes_from_py_integral<'py>(
+    value: &Bound<'py, PyAny>,
 ) -> PyResult<Vec<u8>> {
     let ptr = value.as_ptr();
     let py = value.py();
@@ -808,7 +810,7 @@ fn try_le_bytes_from_py_integral(
                 let result_size = bits_count / (u8::BITS as usize) + 1;
                 let mut result = vec![0u8; result_size];
                 if ffi::_PyLong_AsByteArray(
-                    Py::<PyInt>::from_owned_ptr(py, value).as_ptr()
+                    Bound::<'py, PyAny>::from_owned_ptr(py, value).as_ptr()
                         as *mut ffi::PyLongObject,
                     result.as_mut_ptr(),
                     result.len(),

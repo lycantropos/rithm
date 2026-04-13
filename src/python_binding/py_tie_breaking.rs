@@ -1,13 +1,18 @@
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::PyAnyMethods;
 use pyo3::sync::PyOnceLock;
-use pyo3::types::PyTuple;
+use pyo3::types::{PyTuple, PyTypeMethods};
 use pyo3::{
     pyclass, pymethods, Bound, Py, PyAny, PyResult, PyTypeInfo, Python,
 };
 use traiter::numbers::TieBreaking;
 
-#[pyclass(name = "TieBreaking", module = "rithm.enums", frozen)]
+#[pyclass(
+    name = "TieBreaking",
+    module = "rithm.enums",
+    frozen,
+    skip_from_py_object
+)]
 #[derive(Clone)]
 pub(super) struct PyTieBreaking(TieBreaking);
 
@@ -45,7 +50,7 @@ impl PyTieBreaking {
             _ => Err(PyValueError::new_err(format!(
                 "{} is not a valid {}",
                 value.repr()?,
-                Self::NAME
+                Self::type_object(py).name()?
             ))),
         }
     }
@@ -67,17 +72,17 @@ impl PyTieBreaking {
         PyTuple::new(py, [self.value()])
     }
 
-    fn __repr__(&self) -> String {
-        format!(
+    fn __repr__<'py>(&self, py: Python<'py>) -> PyResult<String> {
+        Ok(format!(
             "{}.{}",
-            Self::NAME,
+            Self::type_object(py).name()?,
             match self.0 {
                 TieBreaking::AwayFromZero => "AWAY_FROM_ZERO",
                 TieBreaking::ToEven => "TO_EVEN",
                 TieBreaking::ToOdd => "TO_ODD",
                 TieBreaking::TowardZero => "TOWARD_ZERO",
             }
-        )
+        ))
     }
 }
 

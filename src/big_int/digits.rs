@@ -2243,14 +2243,14 @@ where
         let low_mask = Self::digit_mask(high_shift);
         let high_mask = Self::digit_mask(DIGIT_BITNESS) ^ low_mask;
         let mut result = vec![Self::zero(); result_digits_count];
-        let mut position = shift_quotient;
-        for (index, result_digit) in result.iter_mut().enumerate() {
+        for (position, (index, result_digit)) in
+            (shift_quotient..).zip(result.iter_mut().enumerate())
+        {
             *result_digit = (digits[position] >> shift_remainder) & low_mask;
             if index + 1 < result_digits_count {
                 *result_digit |=
                     (digits[position + 1] << high_shift) & high_mask;
             }
-            position += 1;
         }
         trim_leading_zeros(&mut result);
         result

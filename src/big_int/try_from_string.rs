@@ -139,10 +139,8 @@ fn skip_prefix(characters: &mut Peekable<Chars<'_>>, base: u8) {
                     characters.nth(1);
                 }
             }
-            Some('x' | 'X') => {
-                if base == 16 {
-                    characters.nth(1);
-                }
+            Some('x' | 'X') if base == 16 => {
+                characters.nth(1);
             }
             _ => {}
         };

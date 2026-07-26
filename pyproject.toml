@@ -156,7 +156,7 @@ relative-imports-order = "closest-to-furthest"
 split-on-trailing-comma = false
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["RUF018", "RUF067", "RUF069"]
+"tests/*" = ["FBT001", "RUF018", "RUF067", "RUF069"]
 
 [tool.setuptools.dynamic]
 version = { attr = "rithm.__version__" }

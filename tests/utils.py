@@ -14,19 +14,11 @@ IntWithBuiltin: TypeAlias = tuple[Int, int]
 RationalWithBuiltin: TypeAlias = FractionWithBuiltin | IntWithBuiltin
 
 
-def equivalence(
-    left: bool,  # noqa: FBT001
-    right: bool,  # noqa: FBT001
-    /,
-) -> bool:
+def equivalence(left: bool, right: bool, /) -> bool:
     return left is right
 
 
-def implication(
-    antecedent: bool,  # noqa: FBT001
-    consequent: bool,  # noqa: FBT001
-    /,
-) -> bool:
+def implication(antecedent: bool, consequent: bool, /) -> bool:
     return not antecedent or consequent
 
 

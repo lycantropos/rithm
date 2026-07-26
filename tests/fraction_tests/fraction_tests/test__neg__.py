@@ -31,7 +31,7 @@ def test_fixed_point(fraction: Fraction) -> None:
 @given(strategies.fractions)
 def test_involution(fraction: Fraction) -> None:
     assert (
-        -(  # noqa: B002, https://github.com/astral-sh/ruff/issues/6534
+        -(  # ruff: ignore[unary-prefix-increment-decrement], https://github.com/astral-sh/ruff/issues/6534
             -fraction
         )
         == fraction

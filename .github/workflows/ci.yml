@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 'Setup Rust'
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -113,7 +113,7 @@ jobs:
             platform: { os: 'windows-latest', python_architecture: 'x64' }
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 'Setup Python'
         uses: actions/setup-python@v7
         with:
@@ -199,7 +199,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 'Setup Rust'
         uses: dtolnay/rust-toolchain@stable
       - name: 'Upload'
@@ -213,7 +213,7 @@ jobs:
     needs: pre-deploy
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 'Setup Python'
         uses: actions/setup-python@v7
         with:
@@ -310,7 +310,7 @@ jobs:
         ]
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 'Setup Rust'
         uses: dtolnay/rust-toolchain@stable
         with:

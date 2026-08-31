@@ -136,10 +136,21 @@ jobs:
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Run Rust doctests'
         run: |
+          # using nightly because of https://github.com/taiki-e/cargo-llvm-cov/issues/2
           eval "$(rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov show-env --export-prefix --doctests)"
           rustup run nightly-${{ matrix.platform.rust_target }} cargo test --doc
         env:
           CARGO_INCREMENTAL: 1
+        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Collect nightly Rust coverage'
+        run: |
+          eval "$(rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov show-env --export-prefix)"
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov report --cobertura --branch --output-path coverage_rust_nightly.xml
+        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+      - name: 'Cleanup nightly Rust coverage artifacts'
+        run: |
+          eval "$(rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov show-env --export-prefix)"
+          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov clean
         if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Install in editable mode'
         run: |
@@ -164,15 +175,15 @@ jobs:
       - name: 'Collect Rust coverage'
         run: |
           eval "$(cargo llvm-cov show-env --export-prefix)"
-          rustup run nightly-${{ matrix.platform.rust_target }} cargo llvm-cov report --cobertura --branch --output-path coverage_rust.xml
-        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
+          rustup run stable-${{ matrix.platform.rust_target }} cargo llvm-cov report --cobertura --branch --output-path coverage_rust.xml
+        if: ${{ !startsWith(matrix.python_version, 'pypy') && matrix.platform.rust_target != 'i686-pc-windows-msvc' }}
       - name: 'Upload PyPy coverage'
         uses: codecov/codecov-action@v7
         with:
           fail_ci_if_error: false
           files: ./coverage_python.xml
           token: ${{ secrets.CODECOV_TOKEN }}
-        if: ${{ startsWith(matrix.python_version, 'pypy') }}
+        if: ${{ startsWith(matrix.python_version, 'pypy') || matrix.platform.rust_target == 'i686-pc-windows-msvc' }}
         continue-on-error: true
       - name: 'Upload СPython coverage'
         uses: codecov/codecov-action@v7
@@ -327,7 +338,7 @@ jobs:
           CIBW_ARCHS: ${{ matrix.platform.architecture }}
           CIBW_BEFORE_ALL_LINUX: |
             curl https://sh.rustup.rs -sSf |
-            sh -s -- -y --default-toolchain=nightly &&
+            sh -s -- -y --default-toolchain=stable &&
             # caused by https://github.com/rust-lang/cargo/issues/9167
             cat > ~/.cargo/config.toml <<EOF
             [net]

@@ -722,7 +722,7 @@ pub(super) fn try_big_int_from_py_integral(
     let ptr = value.as_ptr();
     let py = value.py();
     let py_long = unsafe {
-        let ptr = pyo3::ffi::PyNumber_Long(ptr);
+        let ptr = pyo3::ffi::PyNumber_Index(ptr);
         if ptr.is_null() {
             return Err(pyo3::PyErr::fetch(py));
         }

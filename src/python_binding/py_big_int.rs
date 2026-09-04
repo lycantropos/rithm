@@ -5,7 +5,6 @@ use super::utils::{
     HASH_BITS, HASH_MODULUS,
 };
 use crate::constants::UNDEFINED_DIVISION_ERROR_MESSAGE;
-use pyo3::basic::CompareOp;
 use pyo3::exceptions::{
     PyMemoryError, PyOverflowError, PyValueError, PyZeroDivisionError,
 };
@@ -14,11 +13,10 @@ use pyo3::types::{
     PyBytes, PyFloat, PyInt, PyString, PyTuple, PyType, PyTypeMethods,
 };
 use pyo3::{
-    pyclass, pymethods, Bound, BoundObject, IntoPyObject, Py, PyAny, PyErr,
-    PyRef, PyResult, PyTypeInfo, Python,
+    pyclass, pymethods, Bound, BoundObject, IntoPyObject, PyAny, PyRef,
+    PyResult, PyTypeInfo, Python,
 };
 use pyo3_ffi as ffi;
-use std::cmp::Ordering;
 use std::convert::TryFrom;
 use traiter::numbers::{
     Abs, BitLength, CheckedDivRemEuclid, CheckedPow, CheckedPowRemEuclid,
@@ -148,25 +146,25 @@ impl PyBigInt {
         Self((&self.0).abs())
     }
 
-    fn __add__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __add__<'py>(
+        &self,
+        other: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = other.py();
-        if let Ok(other) = other.extract::<PyRef<'_, Self>>() {
-            Ok(Self(&self.0 + &other.0)
-                .into_pyobject(py)?
-                .into_any()
-                .unbind())
+        if let Ok(other) = other.extract::<PyRef<'py, Self>>() {
+            Ok(Self(&self.0 + &other.0).into_pyobject(py)?.into_any())
         } else {
             self.__radd__(other)
         }
     }
 
-    fn __and__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __and__<'py>(
+        &self,
+        other: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = other.py();
         if let Ok(other) = other.extract::<PyRef<'_, Self>>() {
-            Ok(Self(&self.0 & &other.0)
-                .into_pyobject(py)?
-                .into_any()
-                .unbind())
+            Ok(Self(&self.0 & &other.0).into_pyobject(py)?.into_any())
         } else {
             self.__rand__(other)
         }
@@ -176,57 +174,59 @@ impl PyBigInt {
         !(&self.0).is_zero()
     }
 
-    fn __ceil__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+    fn __ceil__<'py>(slf: PyRef<'py, Self>) -> PyRef<'py, Self> {
         slf
     }
 
-    fn __divmod__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __divmod__<'py>(
+        &self,
+        divisor: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<'_, Self>>() {
             try_divmod(&self.0, &divisor.0).and_then(
                 |(quotient, remainder)| {
                     Ok((Self(quotient), Self(remainder))
                         .into_pyobject(py)?
-                        .into_any()
-                        .unbind())
+                        .into_any())
                 },
             )
         } else if let Ok(divisor) = try_big_int_from_py_integral(divisor) {
             try_divmod(&self.0, divisor).and_then(|(quotient, remainder)| {
                 Ok((Self(quotient), Self(remainder))
                     .into_pyobject(py)?
-                    .into_any()
-                    .unbind())
+                    .into_any())
             })
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __float__(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+    fn __float__<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         f64::try_from(&self.0)
             .map_err(|error| PyOverflowError::new_err(error.to_string()))
-            .and_then(|result| {
-                Ok(result.into_pyobject(py)?.into_any().unbind())
-            })
+            .and_then(|result| Ok(result.into_pyobject(py)?.into_any()))
     }
 
     fn __floor__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
         slf
     }
 
-    fn __floordiv__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __floordiv__<'py>(
+        &self,
+        divisor: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<'_, Self>>() {
             try_floordiv(&self.0, &divisor.0).and_then(|result| {
-                Ok(Self(result).into_pyobject(py)?.into_any().unbind())
+                Ok(Self(result).into_pyobject(py)?.into_any())
             })
         } else if let Ok(divisor) = try_big_int_from_py_integral(divisor) {
             try_floordiv(&self.0, divisor).and_then(|result| {
-                Ok(Self(result).into_pyobject(py)?.into_any().unbind())
+                Ok(Self(result).into_pyobject(py)?.into_any())
             })
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
@@ -246,43 +246,49 @@ impl PyBigInt {
         Self(!&self.0)
     }
 
-    fn __lshift__(&self, shift: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __lshift__<'py>(
+        &self,
+        shift: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = shift.py();
         if let Ok(shift) = shift.extract::<PyRef<'_, Self>>() {
             try_lshift(&self.0, &shift.0).and_then(|result| {
-                Ok(Self(result).into_pyobject(py)?.into_any().unbind())
+                Ok(Self(result).into_pyobject(py)?.into_any())
             })
         } else if let Ok(shift) = try_big_int_from_py_integral(shift) {
             try_lshift(&self.0, shift).and_then(|result| {
-                Ok(Self(result).into_pyobject(py)?.into_any().unbind())
+                Ok(Self(result).into_pyobject(py)?.into_any())
             })
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __mod__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __mod__<'py>(
+        &self,
+        divisor: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = divisor.py();
         if let Ok(divisor) = divisor.extract::<PyRef<'_, Self>>() {
             try_mod(&self.0, &divisor.0).and_then(|result| {
-                Ok(Self(result).into_pyobject(py)?.into_any().unbind())
+                Ok(Self(result).into_pyobject(py)?.into_any())
             })
         } else if let Ok(divisor) = try_big_int_from_py_integral(divisor) {
             try_mod(&self.0, divisor).and_then(|result| {
-                Ok(Self(result).into_pyobject(py)?.into_any().unbind())
+                Ok(Self(result).into_pyobject(py)?.into_any())
             })
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __mul__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __mul__<'py>(
+        &self,
+        other: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = other.py();
         if let Ok(other) = other.extract::<PyRef<'_, Self>>() {
-            Ok(Self(&self.0 * &other.0)
-                .into_pyobject(py)?
-                .into_any()
-                .unbind())
+            Ok(Self(&self.0 * &other.0).into_pyobject(py)?.into_any())
         } else {
             self.__rmul__(other)
         }
@@ -292,13 +298,13 @@ impl PyBigInt {
         Self(-&self.0)
     }
 
-    fn __or__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __or__<'py>(
+        &self,
+        other: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = other.py();
         if let Ok(other) = other.extract::<PyRef<'_, Self>>() {
-            Ok(Self(&self.0 | &other.0)
-                .into_pyobject(py)?
-                .into_any()
-                .unbind())
+            Ok(Self(&self.0 | &other.0).into_pyobject(py)?.into_any())
         } else {
             self.__ror__(other)
         }
@@ -308,11 +314,11 @@ impl PyBigInt {
         slf
     }
 
-    fn __pow__(
+    fn __pow__<'py>(
         &self,
-        exponent: &Bound<'_, PyAny>,
-        divisor: Option<&Bound<'_, PyAny>>,
-    ) -> PyResult<Py<PyAny>> {
+        exponent: &Bound<'py, PyAny>,
+        divisor: Option<&Bound<'py, PyAny>>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = exponent.py();
         if let Ok(exponent) = try_big_int_from_py_any_ref(exponent) {
             match divisor {
@@ -326,8 +332,7 @@ impl PyBigInt {
                             .and_then(|remainder| {
                                 Ok(Self(remainder)
                                     .into_pyobject(py)?
-                                    .into_any()
-                                    .unbind())
+                                    .into_any())
                             })
                     } else if let Ok(divisor) =
                         try_big_int_from_py_integral(divisor)
@@ -340,11 +345,12 @@ impl PyBigInt {
                             .and_then(|remainder| {
                                 Ok(Self(remainder)
                                     .into_pyobject(py)?
-                                    .into_any()
-                                    .unbind())
+                                    .into_any())
                             })
                     } else {
-                        Ok(py.NotImplemented())
+                        Ok(pyo3::types::PyNotImplemented::get(py)
+                            .to_owned()
+                            .into_any())
                     }
                 }
                 None => {
@@ -353,45 +359,52 @@ impl PyBigInt {
                     } else {
                         Ok(Self(pow_non_negative_exponent(&self.0, &exponent))
                             .into_pyobject(py)?
-                            .into_any()
-                            .unbind())
+                            .into_any())
                     }
                 }
             }
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __radd__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __radd__<'py>(
+        &self,
+        other: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = other.py();
         if let Ok(other) = try_big_int_from_py_integral(other) {
-            Ok(Self(other + &self.0).into_pyobject(py)?.into_any().unbind())
+            Ok(Self(other + &self.0).into_pyobject(py)?.into_any())
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __rand__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __rand__<'py>(
+        &self,
+        other: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = other.py();
         if let Ok(other) = try_big_int_from_py_integral(other) {
-            Ok(Self(other & &self.0).into_pyobject(py)?.into_any().unbind())
+            Ok(Self(other & &self.0).into_pyobject(py)?.into_any())
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __rdivmod__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __rdivmod__<'py>(
+        &self,
+        dividend: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = dividend.py();
         if let Ok(dividend) = try_big_int_from_py_integral(dividend) {
             try_divmod(dividend, &self.0).and_then(|(quotient, remainder)| {
                 Ok((Self(quotient), Self(remainder))
                     .into_pyobject(py)?
-                    .into_any()
-                    .unbind())
+                    .into_any())
             })
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
@@ -406,88 +419,94 @@ impl PyBigInt {
         Ok(format!("{}({})", Self::type_object(py).name()?, self.0))
     }
 
-    fn __rfloordiv__(
+    fn __rfloordiv__<'py>(
         &self,
-        dividend: &Bound<'_, PyAny>,
-    ) -> PyResult<Py<PyAny>> {
+        dividend: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = dividend.py();
         if let Ok(dividend) = try_big_int_from_py_integral(dividend) {
             try_floordiv(dividend, &self.0).and_then(|result| {
-                Ok(Self(result).into_pyobject(py)?.into_any().unbind())
+                Ok(Self(result).into_pyobject(py)?.into_any())
             })
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __richcmp__(
+    fn __richcmp__<'py>(
         &self,
-        other: &Bound<'_, PyAny>,
-        op: CompareOp,
-    ) -> PyResult<Py<PyAny>> {
+        other: &Bound<'py, PyAny>,
+        op: pyo3::basic::CompareOp,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = other.py();
         if let Ok(other) = other.extract::<PyRef<'_, Self>>() {
             Ok(compare(&self.0, &other.0, op)
                 .into_pyobject(py)?
                 .into_bound()
-                .into_any()
-                .unbind())
+                .into_any())
         } else if let Ok(other) = try_big_int_from_py_integral(other) {
             Ok(compare(&self.0, &other, op)
                 .into_pyobject(py)?
                 .into_bound()
-                .into_any()
-                .unbind())
+                .into_any())
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __rlshift__(&self, base: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __rlshift__<'py>(
+        &self,
+        base: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = base.py();
         if let Ok(base) = try_big_int_from_py_integral(base) {
             try_lshift(base, &self.0).and_then(|result| {
-                Ok(Self(result).into_pyobject(py)?.into_any().unbind())
+                Ok(Self(result).into_pyobject(py)?.into_any())
             })
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __rmod__(&self, dividend: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __rmod__<'py>(
+        &self,
+        dividend: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = dividend.py();
         if dividend.is_instance(&PyInt::type_object(py))? {
             try_mod(try_big_int_from_py_integral(dividend)?, &self.0).and_then(
-                |result| {
-                    Ok(Self(result).into_pyobject(py)?.into_any().unbind())
-                },
+                |result| Ok(Self(result).into_pyobject(py)?.into_any()),
             )
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __rmul__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __rmul__<'py>(
+        &self,
+        other: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = other.py();
         if other.is_instance(&PyInt::type_object(py))? {
             Ok(Self(try_big_int_from_py_integral(other)? * &self.0)
                 .into_pyobject(py)?
-                .into_any()
-                .unbind())
+                .into_any())
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __ror__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __ror__<'py>(
+        &self,
+        other: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = other.py();
         if other.is_instance(&PyInt::type_object(py))? {
             Ok(Self(&self.0 | try_big_int_from_py_integral(other)?)
                 .into_pyobject(py)?
-                .into_any()
-                .unbind())
+                .into_any())
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
@@ -519,16 +538,18 @@ impl PyBigInt {
         })
     }
 
-    fn __rpow__(
+    fn __rpow__<'py>(
         &self,
-        base: &Bound<'_, PyAny>,
-        divisor: Option<&Bound<'_, PyAny>>,
-    ) -> PyResult<Py<PyAny>> {
+        base: &Bound<'py, PyAny>,
+        divisor: Option<&Bound<'py, PyAny>>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = base.py();
         let base = if base.is_instance(&PyInt::type_object(py))? {
             try_big_int_from_py_integral(base)?
         } else {
-            return Ok(py.NotImplemented());
+            return Ok(pyo3::types::PyNotImplemented::get(py)
+                .to_owned()
+                .into_any());
         };
         match divisor {
             Some(divisor) => {
@@ -538,10 +559,7 @@ impl PyBigInt {
                             PyValueError::new_err(error.to_string())
                         })
                         .and_then(|remainder| {
-                            Ok(Self(remainder)
-                                .into_pyobject(py)?
-                                .into_any()
-                                .unbind())
+                            Ok(Self(remainder).into_pyobject(py)?.into_any())
                         })
                 } else if let Ok(divisor) =
                     try_big_int_from_py_integral(divisor)
@@ -551,13 +569,12 @@ impl PyBigInt {
                             PyValueError::new_err(error.to_string())
                         })
                         .and_then(|remainder| {
-                            Ok(Self(remainder)
-                                .into_pyobject(py)?
-                                .into_any()
-                                .unbind())
+                            Ok(Self(remainder).into_pyobject(py)?.into_any())
                         })
                 } else {
-                    Ok(py.NotImplemented())
+                    Ok(pyo3::types::PyNotImplemented::get(py)
+                        .to_owned()
+                        .into_any())
                 }
             }
             None => {
@@ -566,80 +583,82 @@ impl PyBigInt {
                 } else {
                     Ok(Self(pow_non_negative_exponent(&base, &self.0))
                         .into_pyobject(py)?
-                        .into_any()
-                        .unbind())
+                        .into_any())
                 }
             }
         }
     }
 
-    fn __rrshift__(&self, base: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __rrshift__<'py>(
+        &self,
+        base: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = base.py();
         if base.is_instance(&PyInt::type_object(py))? {
             try_rshift(try_big_int_from_py_integral(base)?, &self.0).and_then(
-                |result| {
-                    Ok(Self(result).into_pyobject(py)?.into_any().unbind())
-                },
+                |result| Ok(Self(result).into_pyobject(py)?.into_any()),
             )
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __rshift__(&self, shift: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __rshift__<'py>(
+        &self,
+        shift: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = shift.py();
         if let Ok(shift) = shift.extract::<PyRef<'_, Self>>() {
             try_rshift(&self.0, &shift.0).and_then(|result| {
-                Ok(Self(result).into_pyobject(py)?.into_any().unbind())
+                Ok(Self(result).into_pyobject(py)?.into_any())
             })
         } else if let Ok(shift) = try_big_int_from_py_integral(shift) {
             try_rshift(&self.0, shift).and_then(|result| {
-                Ok(Self(result).into_pyobject(py)?.into_any().unbind())
+                Ok(Self(result).into_pyobject(py)?.into_any())
             })
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __rsub__(&self, minuend: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __rsub__<'py>(
+        &self,
+        minuend: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = minuend.py();
         if let Ok(minuend) = try_big_int_from_py_integral(minuend) {
-            Ok(Self(minuend - &self.0)
-                .into_pyobject(py)?
-                .into_any()
-                .unbind())
+            Ok(Self(minuend - &self.0).into_pyobject(py)?.into_any())
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __rtruediv__(
+    fn __rtruediv__<'py>(
         &self,
-        dividend: &Bound<'_, PyAny>,
-    ) -> PyResult<Py<PyAny>> {
+        dividend: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = dividend.py();
         if dividend.is_instance(&PyInt::type_object(py))? {
             let dividend = try_big_int_from_py_integral(dividend)?;
             try_truediv(dividend, self.0.clone()).and_then(|result| {
-                Ok(PyFraction::from(result)
-                    .into_pyobject(py)?
-                    .into_any()
-                    .unbind())
+                Ok(PyFraction::from(result).into_pyobject(py)?.into_any())
             })
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __rxor__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __rxor__<'py>(
+        &self,
+        other: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = other.py();
         if other.is_instance(&PyInt::type_object(py))? {
             Ok(Self(&self.0 ^ try_big_int_from_py_integral(other)?)
                 .into_pyobject(py)?
-                .into_any()
-                .unbind())
+                .into_any())
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
@@ -647,35 +666,32 @@ impl PyBigInt {
         self.0.to_string()
     }
 
-    fn __sub__(&self, subtrahend: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __sub__<'py>(
+        &self,
+        subtrahend: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = subtrahend.py();
         if let Ok(subtrahend) = subtrahend.extract::<PyRef<'_, Self>>() {
-            Ok(Self(&self.0 - &subtrahend.0)
-                .into_pyobject(py)?
-                .into_any()
-                .unbind())
+            Ok(Self(&self.0 - &subtrahend.0).into_pyobject(py)?.into_any())
         } else if let Ok(subtrahend) = try_big_int_from_py_integral(subtrahend)
         {
-            Ok(Self(&self.0 - subtrahend)
-                .into_pyobject(py)?
-                .into_any()
-                .unbind())
+            Ok(Self(&self.0 - subtrahend).into_pyobject(py)?.into_any())
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
-    fn __truediv__(&self, divisor: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __truediv__<'py>(
+        &self,
+        divisor: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = divisor.py();
         if let Ok(divisor) = try_big_int_from_py_any_ref(divisor) {
             try_truediv(self.0.clone(), divisor).and_then(|result| {
-                Ok(PyFraction::from(result)
-                    .into_pyobject(py)?
-                    .into_any()
-                    .unbind())
+                Ok(PyFraction::from(result).into_pyobject(py)?.into_any())
             })
         } else {
-            Ok(py.NotImplemented())
+            Ok(pyo3::types::PyNotImplemented::get(py).to_owned().into_any())
         }
     }
 
@@ -683,40 +699,69 @@ impl PyBigInt {
         slf
     }
 
-    fn __xor__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    fn __xor__<'py>(
+        &self,
+        other: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let py = other.py();
         if other.is_instance(&Self::type_object(py))? {
             Ok(Self(&self.0 ^ other.extract::<Self>()?.0)
                 .into_pyobject(py)?
-                .into_any()
-                .unbind())
+                .into_any())
         } else {
             self.__rxor__(other)
         }
     }
 }
 
-#[inline]
 pub(super) fn try_big_int_from_py_integral(
-    value: &Bound<'_, PyAny>,
-) -> PyResult<BigInt> {
-    try_le_bytes_from_py_integral(value).map(|bytes| {
-        if bytes.is_empty() {
-            BigInt::zero()
-        } else {
-            BigInt::from_bytes(&bytes, Endianness::Little)
+    value: &pyo3::Bound<'_, pyo3::PyAny>,
+) -> pyo3::PyResult<BigInt> {
+    use pyo3::types::PyAnyMethods;
+
+    let ptr = value.as_ptr();
+    let py = value.py();
+    let py_long = unsafe {
+        let ptr = pyo3::ffi::PyNumber_Long(ptr);
+        if ptr.is_null() {
+            return Err(pyo3::PyErr::fetch(py));
         }
-    })
+        pyo3::Bound::from_owned_ptr(py, ptr)
+    };
+    let bits_count = py_long
+        .call_method0(pyo3::intern!(py, "bit_length"))
+        .and_then(|any| any.extract::<usize>())?;
+    if bits_count == 0 {
+        Ok(BigInt::zero())
+    } else {
+        let bytes_count = bits_count / (u8::BITS as usize) + 1;
+        let mut buffer = vec![0u8; bytes_count];
+        if unsafe {
+            pyo3::ffi::_PyLong_AsByteArray(
+                py_long.as_ptr().cast::<pyo3::ffi::PyLongObject>(),
+                buffer.as_mut_ptr(),
+                buffer.len(),
+                1,
+                1,
+            )
+        } < 0
+        {
+            Err(pyo3::PyErr::fetch(py))
+        } else {
+            Ok(BigInt::from_bytes(
+                buffer.as_mut_slice(),
+                Endianness::Little,
+            ))
+        }
+    }
 }
 
-#[inline]
-pub(super) fn try_big_int_from_py_any(
+pub(super) fn try_py_any_to_big_int(
     value: Bound<'_, PyAny>,
 ) -> PyResult<BigInt> {
     try_big_int_from_py_any_ref(&value)
 }
 
-#[inline]
 pub(super) fn try_big_int_from_py_any_ref(
     value: &Bound<'_, PyAny>,
 ) -> PyResult<BigInt> {
@@ -726,7 +771,6 @@ pub(super) fn try_big_int_from_py_any_ref(
         .or_else(|_| try_big_int_from_py_integral(value))
 }
 
-#[inline]
 pub(super) fn try_truediv(
     dividend: BigInt,
     divisor: BigInt,
@@ -771,13 +815,11 @@ fn hash(value: &BigInt) -> usize {
     }
 }
 
-#[inline]
 fn pow_non_negative_exponent(base: &BigInt, exponent: &BigInt) -> BigInt {
     debug_assert!(!exponent.is_negative());
     unsafe { base.checked_pow(exponent).unwrap_unchecked() }
 }
 
-#[inline]
 fn to_py_long<'a, 'py, T>(value: &'a T, py: Python<'py>) -> Bound<'py, PyAny>
 where
     &'a T: ToBytes<Output = Vec<u8>>,
@@ -791,43 +833,6 @@ where
     }
 }
 
-#[inline]
-fn try_le_bytes_from_py_integral<'py>(
-    value: &Bound<'py, PyAny>,
-) -> PyResult<Vec<u8>> {
-    let ptr = value.as_ptr();
-    let py = value.py();
-    unsafe {
-        let value = ffi::PyNumber_Index(ptr);
-        if value.is_null() {
-            return Err(PyErr::fetch(py));
-        }
-        let bits_count = ffi::_PyLong_NumBits(value);
-        match bits_count.cmp(&0) {
-            Ordering::Less => Err(PyErr::fetch(py)),
-            Ordering::Equal => Ok(vec![0; 0]),
-            Ordering::Greater => {
-                let result_size = bits_count / (u8::BITS as usize) + 1;
-                let mut result = vec![0u8; result_size];
-                if ffi::_PyLong_AsByteArray(
-                    Bound::<'py, PyAny>::from_owned_ptr(py, value).as_ptr()
-                        as *mut ffi::PyLongObject,
-                    result.as_mut_ptr(),
-                    result.len(),
-                    1i32,
-                    1i32,
-                ) < 0i32
-                {
-                    Err(PyErr::fetch(py))
-                } else {
-                    Ok(result)
-                }
-            }
-        }
-    }
-}
-
-#[inline]
 fn try_mod_to_near(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
     let (quotient, remainder) = match dividend.checked_div_rem_euclid(divisor)
     {
@@ -864,18 +869,16 @@ fn try_mod_to_near(dividend: &BigInt, divisor: &BigInt) -> PyResult<BigInt> {
     )
 }
 
-#[inline]
 fn try_pow_negative_exponent(
     base: BigInt,
     exponent: BigInt,
     py: Python<'_>,
-) -> PyResult<Py<PyAny>> {
+) -> PyResult<Bound<'_, PyAny>> {
     debug_assert!((&exponent).is_negative());
     match Fraction::from(base).checked_pow(exponent) {
-        Some(power) => Ok(PyFraction::from(power)
-            .into_pyobject(py)?
-            .into_any()
-            .unbind()),
+        Some(power) => {
+            Ok(PyFraction::from(power).into_pyobject(py)?.into_any())
+        }
         None => Err(PyZeroDivisionError::new_err(
             UNDEFINED_DIVISION_ERROR_MESSAGE,
         )),

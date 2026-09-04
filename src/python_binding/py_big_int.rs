@@ -737,21 +737,30 @@ pub(super) fn try_big_int_from_py_integral(
         let bytes_count = bits_count / (u8::BITS as usize) + 1;
         let mut buffer = vec![0u8; bytes_count];
         if unsafe {
-            pyo3::ffi::_PyLong_AsByteArray(
-                py_long.as_ptr().cast::<pyo3::ffi::PyLongObject>(),
-                buffer.as_mut_ptr(),
-                buffer.len(),
-                1,
-                1,
-            )
+            cfg_select! {
+                any(Py_3_14, all(Py_3_13, not(Py_LIMITED_API))) => {
+                    pyo3::ffi::PyLong_AsNativeBytes(
+                        py_long.as_ptr().cast(),
+                        buffer.as_mut_ptr().cast(),
+                        bytes_count as isize,
+                        pyo3::ffi::Py_ASNATIVEBYTES_LITTLE_ENDIAN,
+                    )
+                }
+                _ => {
+                    pyo3::ffi::_PyLong_AsByteArray(
+                        py_long.as_ptr().cast::<pyo3::ffi::PyLongObject>(),
+                        buffer.as_mut_ptr(),
+                        buffer.len(),
+                        1,
+                        1,
+                    )
+                }
+            }
         } < 0
         {
-            Err(pyo3::PyErr::fetch(py))
+            Err(pyo3::PyErr::fetch(py_long.py()))
         } else {
-            Ok(BigInt::from_bytes(
-                buffer.as_mut_slice(),
-                Endianness::Little,
-            ))
+            Ok(BigInt::from_bytes(&buffer, Endianness::Little))
         }
     }
 }
@@ -828,7 +837,14 @@ where
     unsafe {
         Bound::<'py, PyAny>::from_owned_ptr(
             py,
-            ffi::_PyLong_FromByteArray(buffer.as_ptr(), buffer.len(), 1, 1),
+            cfg_select! {
+                any(Py_3_14, all(Py_3_13, not(Py_LIMITED_API))) => {
+                    ffi::PyLong_FromNativeBytes(buffer.as_ptr().cast(), buffer.len(), pyo3::ffi::Py_ASNATIVEBYTES_LITTLE_ENDIAN)
+                }
+                _ => {
+                    ffi::_PyLong_FromByteArray(buffer.as_ptr(), buffer.len(), 1, 1)
+                }
+            },
         )
     }
 }

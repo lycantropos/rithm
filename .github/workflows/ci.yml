@@ -91,11 +91,6 @@ jobs:
             python_architecture: 'x64',
             rust_target: 'x86_64-pc-windows-msvc'
           },
-          {
-            os: 'windows-latest',
-            python_architecture: 'x86',
-            rust_target: 'i686-pc-windows-msvc'
-          },
         ]
         exclude:
           - python_version: '3.10'
@@ -105,8 +100,6 @@ jobs:
               rust_target: 'aarch64-apple-darwin'
             }
         include:
-          - python_version: 'pypy-3.11'
-            platform: { os: 'macos-latest', python_architecture: 'x64' }
           - python_version: 'pypy-3.11'
             platform: { os: 'ubuntu-latest', python_architecture: 'x64' }
           - python_version: 'pypy-3.11'
@@ -176,14 +169,14 @@ jobs:
         run: |
           eval "$(cargo llvm-cov show-env --export-prefix)"
           rustup run stable-${{ matrix.platform.rust_target }} cargo llvm-cov report --cobertura --branch --output-path coverage_rust.xml
-        if: ${{ !startsWith(matrix.python_version, 'pypy') && matrix.platform.rust_target != 'i686-pc-windows-msvc' }}
+        if: ${{ !startsWith(matrix.python_version, 'pypy') }}
       - name: 'Upload PyPy coverage'
         uses: codecov/codecov-action@v7
         with:
           fail_ci_if_error: false
           files: ./coverage_python.xml
           token: ${{ secrets.CODECOV_TOKEN }}
-        if: ${{ startsWith(matrix.python_version, 'pypy') || matrix.platform.rust_target == 'i686-pc-windows-msvc' }}
+        if: ${{ startsWith(matrix.python_version, 'pypy') }}
         continue-on-error: true
       - name: 'Upload СPython coverage'
         uses: codecov/codecov-action@v7
@@ -311,13 +304,6 @@ jobs:
             rust_target: 'x86_64-pc-windows-msvc',
             tag: 'win_amd64'
           },
-          {
-            architecture: 'x86',
-            os: 'windows-latest',
-            python_architecture: 'x86',
-            rust_target: 'i686-pc-windows-msvc',
-            tag: 'win32'
-          },
         ]
     steps:
       - name: 'Checkout'
@@ -382,8 +368,6 @@ jobs:
           - python_version: '3.10'
             platform: { os: 'macos-latest', python_architecture: 'x64' }
         include:
-          - python_version: 'pypy-3.11'
-            platform: { os: 'macos-latest', python_architecture: 'x64' }
           - python_version: 'pypy-3.11'
             platform: { os: 'ubuntu-latest', python_architecture: 'x64' }
           - python_version: 'pypy-3.11'
